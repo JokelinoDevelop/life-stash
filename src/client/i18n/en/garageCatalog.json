@@ -1,0 +1,37 @@
+{
+  "title": "Items & packages",
+  "description": "Items are the parts and jobs you log on services. Packages bundle items you usually do together, like an oil service.",
+  "items": {
+    "title": "Items",
+    "add": "Add item",
+    "name": "Item name",
+    "namePlaceholder": "e.g. Spark plugs",
+    "rename": "Rename",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archived": "Archived",
+    "showArchived": "Show archived",
+    "empty": "No items yet.",
+    "created": "Item added",
+    "renamed": "Item renamed",
+    "archivedToast": "Item archived",
+    "restoredToast": "Item restored",
+    "editTitle": "Rename item"
+  },
+  "packages": {
+    "title": "Packages",
+    "add": "Add package",
+    "createTitle": "New package",
+    "editTitle": "Edit package",
+    "name": "Package name",
+    "namePlaceholder": "e.g. Big service",
+    "items": "Items in this package",
+    "itemCount_one": "{{count}} item",
+    "itemCount_other": "{{count}} items",
+    "empty": "No packages yet.",
+    "created": "Package added",
+    "updated": "Package updated",
+    "deleted": "Package deleted",
+    "noItems": "Add items to the catalog first."
+  }
+}

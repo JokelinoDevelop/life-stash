@@ -1,0 +1,84 @@
+{
+  "appName": "LifeStash",
+  "nav": {
+    "garage": "Garage",
+    "settings": "Settings"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "back": "Back",
+    "close": "Close",
+    "confirm": "Confirm",
+    "remove": "Remove",
+    "retry": "Try again",
+    "done": "Done"
+  },
+  "status": {
+    "overdue": "Overdue",
+    "due-soon": "Due soon",
+    "upcoming": "Upcoming"
+  },
+  "fields": {
+    "optional": "optional",
+    "notes": "Notes",
+    "date": "Date",
+    "odometer": "Odometer",
+    "amount": "Amount",
+    "currency": "Currency"
+  },
+  "date": {
+    "precision": {
+      "day": "Exact date",
+      "month": "Month",
+      "year": "Year only"
+    },
+    "day": "Day",
+    "month": "Month",
+    "year": "Year",
+    "today": "Today"
+  },
+  "validation": {
+    "required": "Required",
+    "number": "Enter a valid number",
+    "positive": "Must be zero or more",
+    "date": "Enter a valid date",
+    "year": "Enter a valid year",
+    "tooLong": "Too long"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "You're offline or the server can't be reached.",
+    "notFound": "Not found.",
+    "unauthorized": "Please sign in again.",
+    "notConfigured": "This feature isn't configured yet.",
+    "validation": "Some fields are invalid."
+  },
+  "confirmDelete": {
+    "title": "Delete this?",
+    "description": "This can't be undone."
+  },
+  "empty": "Nothing here yet.",
+  "loading": "Loading…",
+  "units": {
+    "km": "km",
+    "mi": "mi"
+  },
+  "relative": {
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "today": "today",
+    "inDistance": "in {{distance}}",
+    "overDistance": "{{distance}} over"
+  },
+  "update": {
+    "available": "A new version of LifeStash is available.",
+    "reload": "Reload"
+  }
+}

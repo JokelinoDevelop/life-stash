@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lifestash",
+  "main": "src/worker/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "lifestash",
+      // Replace with the id printed by `pnpm wrangler d1 create lifestash` before deploying.
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "triggers": {
+    // Daily reminder sweep at 06:00 UTC (07:00/08:00 in Skopje).
+    "crons": ["0 6 * * *"],
+  },
+  "observability": { "enabled": true },
+}

@@ -1,0 +1,84 @@
+{
+  "appName": "LifeStash",
+  "nav": {
+    "garage": "Гаража",
+    "settings": "Поставки"
+  },
+  "actions": {
+    "save": "Зачувај",
+    "saving": "Се зачувува…",
+    "cancel": "Откажи",
+    "delete": "Избриши",
+    "edit": "Уреди",
+    "add": "Додај",
+    "back": "Назад",
+    "close": "Затвори",
+    "confirm": "Потврди",
+    "remove": "Отстрани",
+    "retry": "Обиди се повторно",
+    "done": "Готово"
+  },
+  "status": {
+    "overdue": "Задоцнето",
+    "due-soon": "Наскоро",
+    "upcoming": "Претстои"
+  },
+  "fields": {
+    "optional": "опционално",
+    "notes": "Белешки",
+    "date": "Датум",
+    "odometer": "Километража",
+    "amount": "Износ",
+    "currency": "Валута"
+  },
+  "date": {
+    "precision": {
+      "day": "Точен датум",
+      "month": "Месец",
+      "year": "Само година"
+    },
+    "day": "Ден",
+    "month": "Месец",
+    "year": "Година",
+    "today": "Денес"
+  },
+  "validation": {
+    "required": "Задолжително",
+    "number": "Внеси валиден број",
+    "positive": "Мора да е нула или повеќе",
+    "date": "Внеси валиден датум",
+    "year": "Внеси валидна година",
+    "tooLong": "Предолго"
+  },
+  "errors": {
+    "generic": "Нешто тргна наопаку. Обиди се повторно.",
+    "network": "Немаш интернет или серверот не е достапен.",
+    "notFound": "Не е пронајдено.",
+    "unauthorized": "Најави се повторно.",
+    "notConfigured": "Оваа функција уште не е поставена.",
+    "validation": "Некои полиња не се валидни."
+  },
+  "confirmDelete": {
+    "title": "Да се избрише?",
+    "description": "Ова не може да се врати."
+  },
+  "empty": "Сè уште нема ништо.",
+  "loading": "Се вчитува…",
+  "units": {
+    "km": "км",
+    "mi": "ми"
+  },
+  "relative": {
+    "inDays_one": "за {{count}} ден",
+    "inDays_other": "за {{count}} дена",
+    "daysAgo_one": "пред {{count}} ден",
+    "daysAgo_other": "пред {{count}} дена",
+    "today": "денес",
+    "inDistance": "за {{distance}}",
+    "overDistance": "{{distance}} преку"
+  },
+  "update": {
+    "available": "Достапна е нова верзија на LifeStash.",
+    "reload": "Освежи"
+  }
+}

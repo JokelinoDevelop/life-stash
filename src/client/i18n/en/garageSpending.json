@@ -1,0 +1,20 @@
+{
+  "title": "Spending",
+  "empty": "No costs recorded yet. Service visits and expenses with amounts show up here.",
+  "chartTitle": "Costs per year ({{currency}})",
+  "otherCurrencies": "Some records use other currencies ({{currencies}}). They are listed in the table but not in the chart — amounts are never converted.",
+  "previousOwnerNote": "Work done by previous owners is excluded.",
+  "columns": {
+    "year": "Year",
+    "maintenance": "Maintenance",
+    "repair": "Repairs",
+    "other": "Other costs",
+    "total": "Total"
+  },
+  "household": {
+    "title": "Spent this year",
+    "empty": "Nothing spent this year yet.",
+    "maintenance": "Maintenance",
+    "other": "Other"
+  }
+}

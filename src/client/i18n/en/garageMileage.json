@@ -1,0 +1,36 @@
+{
+  "log": "Log odometer",
+  "logTitle": "Log odometer reading",
+  "editTitle": "Edit reading",
+  "logDescription": "Enter what the odometer shows now. Mileage reminders are checked right away.",
+  "odometer": "Odometer",
+  "date": "Date",
+  "saved": "Reading saved",
+  "deleted": "Reading deleted",
+  "belowLatest": "This is lower than the latest reading ({{distance}}). Save anyway if you're correcting a mistake.",
+  "stats": {
+    "latest": "Latest odometer",
+    "total": "Tracked distance",
+    "thisYear": "This year",
+    "perMonth": "Average per month",
+    "none": "—"
+  },
+  "charts": {
+    "perMonth": "Distance per month",
+    "perYear": "Distance per year",
+    "distance": "Distance"
+  },
+  "list": {
+    "title": "Readings",
+    "empty": "No odometer readings yet. Log one to start tracking how much you drive.",
+    "sinceLast": "+{{distance}} in {{days}}",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days"
+  },
+  "sources": {
+    "reading": "Reading",
+    "service": "Service",
+    "expense": "Expense",
+    "purchase": "Purchase"
+  }
+}

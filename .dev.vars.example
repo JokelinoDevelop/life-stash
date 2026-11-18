@@ -1,0 +1,10 @@
+# Copy to .dev.vars for local development. Never commit .dev.vars.
+B2_ENDPOINT=https://s3.eu-central-003.backblazeb2.com
+B2_REGION=eu-central-003
+B2_BUCKET=
+B2_KEY_ID=
+B2_APP_KEY=
+# Generate with: pnpm vapid
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_JWK=
+VAPID_SUBJECT=mailto:you@example.com

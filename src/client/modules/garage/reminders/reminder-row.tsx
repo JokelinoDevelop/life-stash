@@ -1,0 +1,177 @@
+import { Link } from "@tanstack/react-router";
+import { CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
+
+import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { ResponsiveDialog } from "@/components/app/responsive-dialog";
+import { StatusBadge } from "@/components/app/status-badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { api, unwrap } from "@/lib/api";
+import { useErrorMessage } from "@/lib/errors";
+import { useFormat } from "@/lib/format";
+import { todayIso } from "@/lib/partial-date";
+
+import { useInvalidateGarage } from "../cars/cars.queries";
+import { describeDue } from "../cars/describe-due";
+import { CompleteReminderButton } from "./complete-reminder-button";
+import { skipFormDefaults, skipFormToRequest } from "./forms/skip-form/mapper";
+import { SkipForm } from "./forms/skip-form/skip-form";
+import type { ActiveReminder } from "./reminders.queries";
+
+const useIntervalText = (reminder: ActiveReminder): string | null => {
+  const { t } = useTranslation("garageReminders");
+  const format = useFormat();
+
+  const parts = [
+    reminder.intervalMonths === null
+      ? null
+      : t("tab.months", { count: reminder.intervalMonths }),
+    reminder.intervalKm === null ? null : format.distance(reminder.intervalKm),
+  ].filter((part) => part !== null);
+
+  return parts.length === 0
+    ? null
+    : t("tab.every", { interval: parts.join(" / ") });
+};
+
+const ReminderMenu = ({
+  carId,
+  reminder,
+}: {
+  carId: string;
+  reminder: ActiveReminder;
+}) => {
+  const { t } = useTranslation("garageReminders");
+  const { t: tc } = useTranslation();
+  const invalidate = useInvalidateGarage();
+  const errorMessage = useErrorMessage();
+  const { unit } = useFormat();
+  const [skipping, setSkipping] = useState(false);
+
+  return (
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button aria-label={tc("actions.edit")} size="icon" variant="ghost">
+            <MoreHorizontal />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <Link
+              params={{ carId, reminderId: reminder.id }}
+              to="/garage/cars/$carId/reminders/$reminderId/edit"
+            >
+              <Pencil />
+              {tc("actions.edit")}
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              setSkipping(true);
+            }}
+          >
+            <CheckCheck />
+            {t("tab.skip")}
+          </DropdownMenuItem>
+          <ConfirmDialog
+            onConfirm={async () => {
+              try {
+                await unwrap(
+                  api.garage.reminders[":reminderId"].$delete({
+                    param: { reminderId: reminder.id },
+                  })
+                );
+                await invalidate();
+                toast.success(t("tab.deleted"));
+              } catch (error) {
+                toast.error(errorMessage(error));
+              }
+            }}
+            trigger={
+              <DropdownMenuItem
+                onSelect={(event) => {
+                  event.preventDefault();
+                }}
+                variant="destructive"
+              >
+                <Trash2 />
+                {tc("actions.delete")}
+              </DropdownMenuItem>
+            }
+          />
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ResponsiveDialog
+        description={t("skip.description")}
+        onOpenChange={setSkipping}
+        open={skipping}
+        title={t("skip.title")}
+      >
+        <SkipForm
+          defaultValues={skipFormDefaults(todayIso())}
+          onSubmit={async (values) => {
+            try {
+              await unwrap(
+                api.garage.reminders[":reminderId"].skip.$post({
+                  json: skipFormToRequest(values, unit),
+                  param: { reminderId: reminder.id },
+                })
+              );
+              await invalidate();
+              toast.success(t("tab.skipped"));
+              setSkipping(false);
+            } catch (error) {
+              toast.error(errorMessage(error));
+            }
+          }}
+        />
+      </ResponsiveDialog>
+    </>
+  );
+};
+
+export const ReminderRow = ({
+  carId,
+  reminder,
+  readOnly,
+}: {
+  carId: string;
+  reminder: ActiveReminder;
+  readOnly: boolean;
+}) => {
+  const { t } = useTranslation("garageReminders");
+  const { t: tc } = useTranslation();
+  const format = useFormat();
+  const interval = useIntervalText(reminder);
+
+  return (
+    <li className="flex flex-wrap items-center gap-3 py-3">
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{reminder.title}</p>
+        <p className="text-muted-foreground text-sm">
+          {[
+            t(`kinds.${reminder.kind}`),
+            describeDue(reminder, format, tc),
+            interval,
+          ]
+            .filter((part) => part !== null && part !== "")
+            .join(" · ")}
+        </p>
+      </div>
+      <StatusBadge status={reminder.status} />
+      {!readOnly && (
+        <CompleteReminderButton carId={carId} reminder={reminder} />
+      )}
+      {!readOnly && <ReminderMenu carId={carId} reminder={reminder} />}
+    </li>
+  );
+};

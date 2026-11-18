@@ -1,0 +1,72 @@
+{
+  "title": "Settings",
+  "preferences": {
+    "title": "Preferences",
+    "displayName": "Name",
+    "language": "Language",
+    "distanceUnit": "Distance unit",
+    "currency": "Default currency",
+    "timeZone": "Time zone",
+    "nudge": "Odometer reminder",
+    "nudgeHelp": "Ask me to log the odometer if I haven't for this many weeks. 0 turns it off.",
+    "weeks": "weeks",
+    "saved": "Preferences saved",
+    "theme": "Theme",
+    "themes": {
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "mk": "Македонски"
+  },
+  "units": {
+    "km": "Kilometres",
+    "mi": "Miles"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "description": "Get one heads-up per reminder: a week before date-based service, and when a logged odometer reading gets close to a mileage target.",
+    "enable": "Enable on this device",
+    "disable": "Turn off on this device",
+    "enabled": "Notifications are on for this device.",
+    "test": "Send test notification",
+    "testSent": "Test notification sent",
+    "denied": "Notifications are blocked in your browser settings.",
+    "unsupported": "This browser doesn't support push notifications. On iPhone, add LifeStash to your Home Screen first.",
+    "notConfigured": "Push notifications aren't configured on the server yet."
+  },
+  "security": {
+    "title": "Passkeys & recovery",
+    "passkeys": "Passkeys",
+    "addPasskey": "Add passkey",
+    "added": "Passkey added",
+    "removed": "Passkey removed",
+    "lastUsed": "Last used {{date}}",
+    "neverUsed": "Never used",
+    "created": "Added {{date}}",
+    "recoveryCodes": "Recovery codes",
+    "remaining_one": "{{count}} unused code",
+    "remaining_other": "{{count}} unused codes",
+    "regenerate": "Generate new codes",
+    "regenerateConfirm": "Your old codes will stop working.",
+    "lowCodes": "You're running low on recovery codes. Generate new ones."
+  },
+  "export": {
+    "title": "Backup & export",
+    "description": "Download everything as JSON, or individual tables as CSV for spreadsheets.",
+    "json": "Full backup (JSON)",
+    "datasets": {
+      "service-history": "Service history (CSV)",
+      "mileage": "Mileage log (CSV)",
+      "expenses": "Expenses (CSV)",
+      "reminders": "Reminders (CSV)"
+    }
+  },
+  "about": {
+    "title": "About",
+    "version": "Version {{version}}"
+  }
+}

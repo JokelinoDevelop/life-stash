@@ -1,0 +1,63 @@
+{
+  "history": {
+    "add": "Add service",
+    "empty": "No service history yet. Add past services from old receipts or log the next one.",
+    "lastDone": "Last done",
+    "lastDoneEmpty": "Items appear here once you log services.",
+    "times_one": "{{count}}×",
+    "times_other": "{{count}}×",
+    "previousOwner": "Previous owner",
+    "photos_one": "{{count}} photo",
+    "photos_other": "{{count}} photos"
+  },
+  "kinds": {
+    "maintenance": "Maintenance",
+    "repair": "Repair"
+  },
+  "form": {
+    "createTitle": "Add service",
+    "editTitle": "Edit service",
+    "date": "Date",
+    "odometer": "Odometer",
+    "kind": "Type",
+    "byPreviousOwner": "Done by a previous owner",
+    "byPreviousOwnerHelp": "Shown in the history but not counted in your spending.",
+    "shop": "Shop / mechanic",
+    "total": "Invoice total",
+    "totalHelp": "Leave blank to use the sum of item costs.",
+    "items": "Work done",
+    "itemCost": "Cost",
+    "addFromPackage": "Add package",
+    "addItem": "Add item",
+    "addCustom": "Custom",
+    "customLabel": "What was done",
+    "search": "Search items…",
+    "noResults": "No matching items",
+    "noItemsYet": "Add at least one item.",
+    "photosHint": "You can attach receipt photos after saving.",
+    "completing": "Completing reminder: {{title}}",
+    "created": "Service saved",
+    "updated": "Service updated",
+    "nextScheduled": "Reminder done — the next one is scheduled.",
+    "reminderDone": "Reminder marked as done."
+  },
+  "detail": {
+    "title": "Service",
+    "items": "Work done",
+    "total": "Total",
+    "noTotal": "No cost recorded",
+    "shop": "Shop",
+    "deleteTitle": "Delete this service?",
+    "deleted": "Service deleted"
+  },
+  "photos": {
+    "title": "Receipts & photos",
+    "add": "Add photos",
+    "uploading": "Uploading…",
+    "uploaded": "Photo added",
+    "deleted": "Photo deleted",
+    "empty": "No photos yet.",
+    "disabled": "Photo storage isn't configured yet.",
+    "failed": "Couldn't upload {{name}}."
+  }
+}

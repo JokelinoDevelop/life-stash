@@ -1,0 +1,31 @@
+{
+  "add": "Add expense",
+  "createTitle": "Add expense",
+  "editTitle": "Edit expense",
+  "created": "Expense added",
+  "updated": "Expense updated",
+  "deleted": "Expense deleted",
+  "empty": "No expenses yet. Log fuel, insurance, registration, tolls or parking here.",
+  "thisYear": "This year by category",
+  "noneThisYear": "Nothing logged this year.",
+  "completing": "Completing reminder: {{title}}",
+  "completingGeneric": "Saving this expense completes the selected reminder.",
+  "fields": {
+    "category": "Category",
+    "date": "Date",
+    "amount": "Amount",
+    "currency": "Currency",
+    "odometer": "Odometer",
+    "quantity": "Litres",
+    "notes": "Notes"
+  },
+  "categories": {
+    "fuel": "Fuel",
+    "insurance": "Insurance",
+    "registration": "Registration",
+    "tolls": "Tolls",
+    "parking": "Parking",
+    "other": "Other"
+  },
+  "litres": "{{value}} L"
+}

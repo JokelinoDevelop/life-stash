@@ -1,0 +1,51 @@
+{
+  "tab": {
+    "add": "Add reminder",
+    "empty": "Nothing scheduled. Add reminders for services, insurance or registration.",
+    "completed": "Recently completed",
+    "completedOn": "Done {{date}}",
+    "skip": "Mark done without entry",
+    "every": "Every {{interval}}",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "deleted": "Reminder deleted",
+    "skipped": "Reminder marked as done"
+  },
+  "groups": {
+    "overdue": "Overdue",
+    "due-soon": "Due soon",
+    "upcoming": "Upcoming"
+  },
+  "kinds": {
+    "service": "Service",
+    "insurance": "Insurance",
+    "registration": "Registration",
+    "other": "Other"
+  },
+  "form": {
+    "createTitle": "Add reminder",
+    "editTitle": "Edit reminder",
+    "kind": "Type",
+    "target": "Package or item",
+    "targetNone": "None",
+    "packages": "Packages",
+    "items": "Items",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Oil service",
+    "due": "When is it due?",
+    "dueHelp": "Set a date, an odometer reading or both — whichever comes first.",
+    "dueDate": "Due date",
+    "dueOdometer": "Due at odometer",
+    "recurring": "Repeat after completion",
+    "intervalMonths": "Every (months)",
+    "intervalKm": "Every (distance)",
+    "created": "Reminder added",
+    "updated": "Reminder updated"
+  },
+  "skip": {
+    "title": "Mark done without an entry",
+    "description": "Use this when there's nothing to log. If the reminder repeats, the next one is scheduled from this date.",
+    "date": "Done on",
+    "odometer": "Odometer"
+  }
+}

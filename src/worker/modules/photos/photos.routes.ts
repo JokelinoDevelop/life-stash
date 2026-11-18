@@ -1,0 +1,119 @@
+import { and, asc, eq } from "drizzle-orm";
+import { Hono } from "hono";
+
+import type { AppEnv } from "../../core/app-env";
+import { ApiError, badRequest } from "../../core/errors";
+import { photoStorageFor } from "../../core/photo-storage";
+import type { PhotoStorage } from "../../core/photo-storage";
+import { validate } from "../../core/validate";
+import { photos } from "../../db/schema/core";
+import { createPhotoRequest } from "./dto/create-photo.request";
+import type { CreatePhotoResponse } from "./dto/create-photo.response";
+import { deletePhotoParams } from "./dto/delete-photo.request";
+import type { DeletePhotoResponse } from "./dto/delete-photo.response";
+import { listPhotosQuery } from "./dto/list-photos.request";
+import type { ListPhotosResponse } from "./dto/list-photos.response";
+import { uploadUrlRequest } from "./dto/upload-url.request";
+import type { UploadUrlResponse } from "./dto/upload-url.response";
+import { assertPhotoOwner, deletePhoto } from "./photos.service";
+
+const UPLOAD_URL_TTL = 600;
+const VIEW_URL_TTL = 3600;
+
+const EXTENSIONS = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+} as const;
+
+const requireStorage = (storage: PhotoStorage | null): PhotoStorage => {
+  if (!storage) {
+    throw new ApiError(
+      503,
+      "not_configured",
+      "Photo storage is not configured"
+    );
+  }
+
+  return storage;
+};
+
+export const photoRoutes = new Hono<AppEnv>()
+  .post("/upload-url", validate("json", uploadUrlRequest), async (c) => {
+    const storage = requireStorage(photoStorageFor(c.env));
+    const input = c.req.valid("json");
+    const { householdId } = c.var.auth;
+    await assertPhotoOwner(c.var.db, householdId, input);
+    const objectKey = `${householdId}/${input.ownerType}/${input.ownerId}/${crypto.randomUUID()}.${EXTENSIONS[input.contentType]}`;
+
+    const body: UploadUrlResponse = {
+      objectKey,
+      uploadUrl: await storage.signedUrl("PUT", objectKey, UPLOAD_URL_TTL),
+    };
+
+    return c.json(body);
+  })
+  .post("/", validate("json", createPhotoRequest), async (c) => {
+    const input = c.req.valid("json");
+    const { householdId } = c.var.auth;
+    const expectedPrefix = `${householdId}/${input.ownerType}/${input.ownerId}/`;
+
+    if (!input.objectKey.startsWith(expectedPrefix)) {
+      throw badRequest("Invalid object key");
+    }
+
+    await assertPhotoOwner(c.var.db, householdId, input);
+
+    const [row] = await c.var.db
+      .insert(photos)
+      .values({ ...input, householdId })
+      .returning({ id: photos.id });
+
+    const body: CreatePhotoResponse = { id: row?.id ?? "" };
+
+    return c.json(body, 201);
+  })
+  .get("/", validate("query", listPhotosQuery), async (c) => {
+    const query = c.req.valid("query");
+    const storage = photoStorageFor(c.env);
+
+    const rows = storage
+      ? await c.var.db
+          .select()
+          .from(photos)
+          .where(
+            and(
+              eq(photos.householdId, c.var.auth.householdId),
+              eq(photos.ownerType, query.ownerType),
+              eq(photos.ownerId, query.ownerId)
+            )
+          )
+          .orderBy(asc(photos.createdAt))
+      : [];
+
+    const body: ListPhotosResponse = {
+      photos: await Promise.all(
+        rows.map(async (row) => ({
+          contentType: row.contentType,
+          createdAt: row.createdAt,
+          id: row.id,
+          url:
+            (await storage?.signedUrl("GET", row.objectKey, VIEW_URL_TTL)) ??
+            "",
+        }))
+      ),
+    };
+
+    return c.json(body);
+  })
+  .delete("/:photoId", validate("param", deletePhotoParams), async (c) => {
+    await deletePhoto(
+      c.env,
+      c.var.db,
+      c.var.auth.householdId,
+      c.req.valid("param").photoId
+    );
+    const body: DeletePhotoResponse = { ok: true };
+
+    return c.json(body);
+  });

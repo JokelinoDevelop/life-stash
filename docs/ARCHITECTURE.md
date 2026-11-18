@@ -1,0 +1,101 @@
+# LifeStash — Architecture
+
+LifeStash is a private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module; future modules live alongside it.
+
+## Goals
+
+Open the app and quickly answer, per car:
+
+- What has been done to this car?
+- What is due next?
+- How much have I driven?
+- What have I spent?
+
+## Stack (runs at €0/month)
+
+| Layer | Choice |
+| --- | --- |
+| Frontend | React 19, TypeScript, Vite, `vite-plugin-pwa` |
+| Routing / data | TanStack Router (file-based), TanStack Query |
+| Forms | TanStack Form, one Zod schema per form |
+| UI | Tailwind CSS v4, shadcn/ui (+ registries when useful), lucide icons |
+| i18n | i18next + react-i18next (English, Macedonian) |
+| API | Hono on a single Cloudflare Worker |
+| Database | Cloudflare D1 (SQLite) + Drizzle ORM |
+| Auth | Passkeys (SimpleWebAuthn) + one-time recovery codes, DB-backed sessions |
+| Photos | Backblaze B2 (private bucket, presigned URLs via `aws4fetch`) |
+| Reminders | Worker cron trigger (daily) + Web Push (`@pushforge/builder`, VAPID) |
+| Hosting | Worker static assets on `*.workers.dev` |
+| Tooling | pnpm, oxlint + oxfmt via Ultracite, Vitest, TypeScript strict |
+
+### Why passkeys without a framework
+
+Login is passkey-only with recovery codes. Implementing it directly on SimpleWebAuthn keeps CPU per request low (the free plan allows 10 ms) and avoids password hashing entirely. Sessions are random 256-bit tokens in an `HttpOnly; Secure; SameSite=Lax` cookie; only their SHA-256 hash is stored. Recovery codes are high-entropy and stored as SHA-256 hashes.
+
+Sign-up is only possible while no user exists (first-run setup). Additional household members can be added later through invites.
+
+## One project, one deploy
+
+The Cloudflare Vite plugin runs the SPA and the Worker together in dev and builds them into one Worker that serves static assets and `/api/*`.
+
+```
+src/
+├─ client/                 React SPA
+│  ├─ app/                 shell, providers, i18n setup
+│  ├─ routes/              TanStack file routes (thin: compose module components)
+│  ├─ modules/garage/      Garage UI: components, forms (schema + mapper per form), queries
+│  ├─ modules/settings/
+│  ├─ components/ui/       shadcn components
+│  ├─ i18n/                en/*.json, mk/*.json
+│  └─ lib/                 api client, auth, push, photos, formatting
+├─ worker/                 Cloudflare Worker
+│  ├─ index.ts             exports { fetch: hono, scheduled: cron }
+│  ├─ core/                auth, sessions, household context, B2, web push, errors
+│  ├─ modules/garage/      <feature>/dto/<endpoint>.{request,response}.ts, routes, service
+│  ├─ modules/settings/
+│  └─ db/schema/           Drizzle tables per module
+└─ shared/domain/          pure logic only (units, partial dates, money, reminder math)
+```
+
+### Rules
+
+- **Modules** own a folder on both sides, their own `/api/<module>/*` routes and their own tables.
+- **Each endpoint has its own request DTO and response DTO** (one file each). DTOs are never shared between endpoints, and DB rows never leave the API without a response mapper.
+- **Each form has its own schema** (`schema.ts`) and a `mapper.ts` that converts form values to the API request and API responses to form defaults. Client and server never share a schema.
+- **Type safety across the boundary** comes from Hono RPC (`hc<AppType>`): the client infers request/response types from the backend DTOs, so a DTO change breaks the mapper at compile time.
+- **`shared/domain`** holds only pure, tested functions used by both sides. No schemas.
+- **Every query is scoped by `householdId`**, which middleware attaches after authenticating.
+- **Storage units**: distance always in km, money as integer minor units plus an ISO currency. Conversion happens only at the UI edge.
+
+## Reminders and notifications
+
+- A reminder is due by date, by odometer, or by whichever comes first; it may recur by months and/or km.
+- Status: `overdue` (past date or odometer reached), `due-soon` (within 7 days or 1,000 km), `upcoming`.
+- **One heads-up per reminder** (`notified_at`): the daily cron notifies date reminders 7 days ahead; logging an odometer reading checks km reminders immediately.
+- **Odometer nudge**: if no reading has been logged for N weeks (setting, default 4, 0 = off), the cron sends one nudge per car per period.
+- Completing a service reminder opens a prefilled service visit; saving it completes the reminder and schedules the next one when an interval is set. Insurance/registration reminders open a prefilled expense instead.
+
+## Photos
+
+The Worker signs short-lived S3 URLs for Backblaze B2. The browser compresses photos (max 1600 px, WebP/JPEG ~0.8) and uploads directly. Views use 1-hour presigned GET URLs. If B2 is not configured, photo features are hidden.
+
+## Configuration
+
+`wrangler.jsonc` holds bindings (D1, assets, cron). Secrets (`wrangler secret put`):
+
+| Secret              | Purpose                                          |
+| ------------------- | ------------------------------------------------ |
+| `B2_ENDPOINT`       | e.g. `https://s3.eu-central-003.backblazeb2.com` |
+| `B2_REGION`         | e.g. `eu-central-003`                            |
+| `B2_BUCKET`         | bucket name                                      |
+| `B2_KEY_ID`         | application key id (bucket-scoped)               |
+| `B2_APP_KEY`        | application key                                  |
+| `VAPID_PUBLIC_KEY`  | Web Push public key                              |
+| `VAPID_PRIVATE_JWK` | Web Push private key (JWK JSON)                  |
+| `VAPID_SUBJECT`     | `mailto:` contact for push services              |
+
+For local dev put them in `.dev.vars` (git-ignored). See `README.md` for setup steps.
+
+## Not in v1
+
+Offline mode, family sharing UI, OCR, mileage-based due-date prediction.
