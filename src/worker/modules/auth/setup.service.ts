@@ -54,6 +54,43 @@ export const startSetup = async (
   return { challengeId, options };
 };
 
+interface NewAccount {
+  userId: string;
+  displayName: string;
+  timeZone: string;
+  email?: string;
+  passwordHash?: string;
+  passkey?: ReturnType<typeof passkeyRow>;
+}
+
+/** Creates the household, first user, preferences, starter catalog and recovery codes. */
+const createAccount = async (
+  db: Db,
+  account: NewAccount
+): Promise<string[]> => {
+  const householdId = crypto.randomUUID();
+  const { userId } = account;
+  await db.batch([
+    db.insert(households).values({ id: householdId, name: "Home" }),
+    db.insert(users).values({
+      displayName: account.displayName,
+      email: account.email ?? null,
+      id: userId,
+      passwordHash: account.passwordHash ?? null,
+      householdId,
+    }),
+    db.insert(userPreferences).values({ timeZone: account.timeZone, userId }),
+  ]);
+
+  if (account.passkey) {
+    await db.insert(passkeys).values(account.passkey);
+  }
+
+  await seedGarageCatalog(db, householdId);
+
+  return await issueRecoveryCodes(db, userId);
+};
+
 export interface FinishSetupInput {
   challengeId: string;
   displayName: string;
@@ -81,20 +118,33 @@ export const finishSetup = async (
     stored.challenge
   );
 
-  const householdId = crypto.randomUUID();
   const { userId } = stored;
-  await db.batch([
-    db.insert(households).values({ id: householdId, name: "Home" }),
-    db
-      .insert(users)
-      .values({ displayName: input.displayName, id: userId, householdId }),
-    db.insert(userPreferences).values({ timeZone: input.timeZone, userId }),
-    db
-      .insert(passkeys)
-      .values(passkeyRow(credential, { deviceName: input.deviceName, userId })),
-  ]);
-  await seedGarageCatalog(db, householdId);
-  const recoveryCodes = await issueRecoveryCodes(db, userId);
+
+  const recoveryCodes = await createAccount(db, {
+    displayName: input.displayName,
+    passkey: passkeyRow(credential, { deviceName: input.deviceName, userId }),
+    timeZone: input.timeZone,
+    userId,
+  });
+
+  return { recoveryCodes, userId };
+};
+
+export interface FinishPasswordSetupInput {
+  displayName: string;
+  email: string;
+  passwordHash: string;
+  timeZone: string;
+}
+
+/** First-run setup with email and password (for devices without passkeys). */
+export const finishPasswordSetup = async (
+  db: Db,
+  input: FinishPasswordSetupInput
+): Promise<{ userId: string; recoveryCodes: string[] }> => {
+  await assertSetupAllowed(db);
+  const userId = crypto.randomUUID();
+  const recoveryCodes = await createAccount(db, { ...input, userId });
 
   return { recoveryCodes, userId };
 };

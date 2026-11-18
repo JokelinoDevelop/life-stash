@@ -11,7 +11,8 @@ type MessageKey =
   | "errors.notFound"
   | "errors.unauthorized"
   | "errors.notConfigured"
-  | "errors.validation";
+  | "errors.validation"
+  | "errors.rateLimited";
 
 const MESSAGE_FOR_CODE: Record<ApiErrorCode, MessageKey | "server"> = {
   bad_request: "server",
@@ -21,6 +22,7 @@ const MESSAGE_FOR_CODE: Record<ApiErrorCode, MessageKey | "server"> = {
   network: "errors.network",
   not_configured: "errors.notConfigured",
   not_found: "errors.notFound",
+  rate_limited: "errors.rateLimited",
   unauthorized: "errors.unauthorized",
   validation: "errors.validation",
 };

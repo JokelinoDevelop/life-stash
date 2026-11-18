@@ -222,13 +222,19 @@ export const accountRoutes = new Hono<AppEnv>()
       const { passkeyId } = c.req.valid("param");
       const { userId } = c.var.auth;
 
-      const others = await c.var.db
-        .select({ id: passkeys.id })
-        .from(passkeys)
-        .where(and(eq(passkeys.userId, userId), ne(passkeys.id, passkeyId)));
+      const [others, [user]] = await Promise.all([
+        c.var.db
+          .select({ id: passkeys.id })
+          .from(passkeys)
+          .where(and(eq(passkeys.userId, userId), ne(passkeys.id, passkeyId))),
+        c.var.db
+          .select({ passwordHash: users.passwordHash })
+          .from(users)
+          .where(eq(users.id, userId)),
+      ]);
 
-      if (others.length === 0) {
-        throw badRequest("You cannot remove your last passkey");
+      if (others.length === 0 && (user?.passwordHash ?? null) === null) {
+        throw badRequest("Set a password before removing your last passkey");
       }
 
       const deleted = await c.var.db

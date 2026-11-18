@@ -22,8 +22,14 @@ export const PasskeysSection = () => {
     queryKey: queryKeys.passkeys,
   });
 
+  const credentials = useQuery({
+    queryFn: async () => await unwrap(api.account.credentials.$get()),
+    queryKey: queryKeys.credentials,
+  });
+
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.passkeys });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.credentials });
   };
 
   const add = useMutation({
@@ -69,7 +75,7 @@ export const PasskeysSection = () => {
                     })}
               </p>
             </div>
-            {list.length > 1 && (
+            {(list.length > 1 || credentials.data?.hasPassword === true) && (
               <ConfirmDialog
                 onConfirm={async () => {
                   await remove(passkey.id);

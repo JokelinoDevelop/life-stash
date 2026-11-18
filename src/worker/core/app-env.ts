@@ -4,6 +4,8 @@ import type { Bindings } from "./env";
 export interface AuthContext {
   userId: string;
   householdId: string;
+  /** When this session was created; recent sign-ins may change credentials without re-entry. */
+  sessionCreatedAt: string;
 }
 
 export interface PublicEnv {

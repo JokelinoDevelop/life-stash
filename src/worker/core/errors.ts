@@ -9,6 +9,7 @@ export type ApiErrorCode =
   | "forbidden"
   | "not_found"
   | "not_configured"
+  | "rate_limited"
   | "unauthorized"
   | "validation";
 

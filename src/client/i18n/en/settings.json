@@ -39,7 +39,7 @@
     "notConfigured": "Push notifications aren't configured on the server yet."
   },
   "security": {
-    "title": "Passkeys & recovery",
+    "title": "Sign-in & security",
     "passkeys": "Passkeys",
     "addPasskey": "Add passkey",
     "added": "Passkey added",
@@ -52,7 +52,17 @@
     "remaining_other": "{{count}} unused codes",
     "regenerate": "Generate new codes",
     "regenerateConfirm": "Your old codes will stop working.",
-    "lowCodes": "You're running low on recovery codes. Generate new ones."
+    "lowCodes": "You're running low on recovery codes. Generate new ones.",
+    "credentials": "Email & password",
+    "credentialsHelp": "Use these to sign in on devices without passkeys, like your PC.",
+    "noPassword": "No password set yet — you can only sign in with a passkey.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "newPasswordKeep": "New password (leave empty to keep the current one)",
+    "confirmPassword": "Confirm new password",
+    "saveCredentials": "Save",
+    "credentialsSaved": "Sign-in details saved",
+    "email": "Email"
   },
   "export": {
     "title": "Backup & export",

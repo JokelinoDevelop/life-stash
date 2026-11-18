@@ -48,7 +48,10 @@
     "positive": "Must be zero or more",
     "date": "Enter a valid date",
     "year": "Enter a valid year",
-    "tooLong": "Too long"
+    "tooLong": "Too long",
+    "email": "Enter a valid email",
+    "passwordLength": "Use at least 10 characters",
+    "passwordMatch": "Passwords don't match"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -56,7 +59,8 @@
     "notFound": "Not found.",
     "unauthorized": "Please sign in again.",
     "notConfigured": "This feature isn't configured yet.",
-    "validation": "Some fields are invalid."
+    "validation": "Some fields are invalid.",
+    "rateLimited": "Too many attempts. Wait a few minutes and try again."
   },
   "confirmDelete": {
     "title": "Delete this?",

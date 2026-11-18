@@ -39,7 +39,7 @@
     "notConfigured": "Известувањата уште не се поставени на серверот."
   },
   "security": {
-    "title": "Passkeys и обновување",
+    "title": "Најава и безбедност",
     "passkeys": "Passkeys",
     "addPasskey": "Додај passkey",
     "added": "Passkey-от е додаден",
@@ -52,7 +52,17 @@
     "remaining_other": "{{count}} неискористени кодови",
     "regenerate": "Генерирај нови кодови",
     "regenerateConfirm": "Старите кодови ќе престанат да работат.",
-    "lowCodes": "Ти снемуваат кодови за обновување. Генерирај нови."
+    "lowCodes": "Ти снемуваат кодови за обновување. Генерирај нови.",
+    "credentials": "Е-пошта и лозинка",
+    "credentialsHelp": "Користи ги за најава на уреди без passkey, како твојот компјутер.",
+    "noPassword": "Сè уште нема лозинка — можеш да се најавиш само со passkey.",
+    "currentPassword": "Тековна лозинка",
+    "newPassword": "Нова лозинка",
+    "newPasswordKeep": "Нова лозинка (остави празно за да ја задржиш тековната)",
+    "confirmPassword": "Потврди нова лозинка",
+    "saveCredentials": "Зачувај",
+    "credentialsSaved": "Податоците за најава се зачувани",
+    "email": "Е-пошта"
   },
   "export": {
     "title": "Резервна копија и извоз",

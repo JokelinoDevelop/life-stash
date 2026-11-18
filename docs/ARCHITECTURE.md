@@ -22,15 +22,15 @@ Open the app and quickly answer, per car:
 | i18n | i18next + react-i18next (English, Macedonian) |
 | API | Hono on a single Cloudflare Worker |
 | Database | Cloudflare D1 (SQLite) + Drizzle ORM |
-| Auth | Passkeys (SimpleWebAuthn) + one-time recovery codes, DB-backed sessions |
+| Auth | Email + password (PBKDF2) and/or passkeys (SimpleWebAuthn), recovery codes, DB-backed sessions |
 | Photos | Backblaze B2 (private bucket, presigned URLs via `aws4fetch`) |
 | Reminders | Worker cron trigger (daily) + Web Push (`@pushforge/builder`, VAPID) |
 | Hosting | Worker static assets on `*.workers.dev` |
 | Tooling | pnpm, oxlint + oxfmt via Ultracite, Vitest, TypeScript strict |
 
-### Why passkeys without a framework
+### Sign-in without an auth framework
 
-Login is passkey-only with recovery codes. Implementing it directly on SimpleWebAuthn keeps CPU per request low (the free plan allows 10 ms) and avoids password hashing entirely. Sessions are random 256-bit tokens in an `HttpOnly; Secure; SameSite=Lax` cookie; only their SHA-256 hash is stored. Recovery codes are high-entropy and stored as SHA-256 hashes.
+Users sign in with email + password (works on any device, e.g. Linux PCs without passkeys) and/or passkeys, with one-time recovery codes as a fallback. Passwords are hashed with PBKDF2-SHA256 (100,000 iterations, the Workers maximum) via Web Crypto; five failed attempts lock password sign-in for 15 minutes. Hashing may occasionally exceed the free plan's 10 ms CPU budget, which only affects the rare sign-in request. Changing credentials needs the current password unless the session is less than 15 minutes old. Sessions are random 256-bit tokens in an `HttpOnly; Secure; SameSite=Lax` cookie; only their SHA-256 hash is stored. Recovery codes are high-entropy and stored as SHA-256 hashes.
 
 Sign-up is only possible while no user exists (first-run setup). Additional household members can be added later through invites.
 

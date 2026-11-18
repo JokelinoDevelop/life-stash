@@ -9,6 +9,9 @@ const VALIDATION_KEYS = [
   "validation.date",
   "validation.year",
   "validation.tooLong",
+  "validation.email",
+  "validation.passwordLength",
+  "validation.passwordMatch",
 ] as const;
 
 type ValidationKey = (typeof VALIDATION_KEYS)[number];

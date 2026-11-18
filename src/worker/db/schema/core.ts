@@ -19,10 +19,16 @@ export const households = sqliteTable("households", {
 export const users = sqliteTable("users", {
   createdAt: createdAt(),
   displayName: text("display_name").notNull(),
+  /** Lower-cased sign-in email; null for passkey-only accounts. */
+  email: text("email").unique(),
+  failedLoginCount: integer("failed_login_count").notNull().default(0),
   householdId: text("household_id")
     .notNull()
     .references(() => households.id, { onDelete: "cascade" }),
   id: id(),
+  loginLockedUntil: text("login_locked_until"),
+  /** `pbkdf2-sha256$<iterations>$<salt>$<hash>`; null when no password is set. */
+  passwordHash: text("password_hash"),
 });
 
 export const userPreferences = sqliteTable("user_preferences", {

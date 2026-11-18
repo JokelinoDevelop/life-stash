@@ -53,6 +53,7 @@ export const readSession = async (
 
   const [row] = await db
     .select({
+      createdAt: sessions.createdAt,
       expiresAt: sessions.expiresAt,
       householdId: users.householdId,
       userId: users.id,
@@ -76,7 +77,11 @@ export const readSession = async (
     setCookie(c, SESSION_COOKIE, token, cookieOptions(c));
   }
 
-  return { householdId: row.householdId, userId: row.userId };
+  return {
+    householdId: row.householdId,
+    sessionCreatedAt: row.createdAt,
+    userId: row.userId,
+  };
 };
 
 export const destroySession = async (c: Context, db: Db): Promise<void> => {

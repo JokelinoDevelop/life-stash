@@ -5,6 +5,10 @@ import { secureHeaders } from "hono/secure-headers";
 import type { AppEnv, PublicEnv } from "./core/app-env";
 import { handleError } from "./core/errors";
 import { requireAuth, withDb } from "./core/middleware";
+import {
+  accountPasswordRoutes,
+  publicPasswordRoutes,
+} from "./modules/auth/password.routes";
 import { accountRoutes, publicAuthRoutes } from "./modules/auth/routes";
 import { garageRoutes } from "./modules/garage/garage.routes";
 import { photoRoutes } from "./modules/photos/photos.routes";
@@ -25,7 +29,9 @@ export const app = new Hono<PublicEnv>()
   .use(csrf())
   .use(withDb)
   .route("/auth", publicAuthRoutes)
+  .route("/auth", publicPasswordRoutes)
   .route("/account", accountRoutes)
+  .route("/account", accountPasswordRoutes)
   .route("/config", configRoutes)
   .route("/", privateRoutes);
 

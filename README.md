@@ -14,11 +14,9 @@ pnpm db:migrate:local
 pnpm dev
 ```
 
-Open <http://localhost:5173>. The first visit asks you to create your account with a passkey (fingerprint, face or device PIN) and shows one-time recovery codes — save them.
+Open <http://localhost:5173>. The first visit sets up your account: choose **Email & password** (works on any device, including Linux PCs) or **Passkey** (fingerprint, face or device PIN). You get one-time recovery codes — save them. You can add the other sign-in method later in **Settings → Sign-in & security**.
 
 Optional local secrets (photos and push) go in `.dev.vars`; copy `.dev.vars.example`.
-
-> If your browser can't create passkeys (some embedded browsers can't), run `node scripts/dev-login.mjs` and paste the printed line into the browser console. It only touches the local database.
 
 Useful scripts:
 

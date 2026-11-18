@@ -87,3 +87,15 @@ export const emptyToNull = (value: string): string | null => {
 
   return trimmed === "" ? null : trimmed;
 };
+
+export const MIN_PASSWORD_LENGTH = 10;
+
+export const emailField = z
+  .string()
+  .trim()
+  .pipe(z.email("validation.email").max(254, TOO_LONG));
+
+export const newPasswordField = z
+  .string()
+  .min(MIN_PASSWORD_LENGTH, "validation.passwordLength")
+  .max(128, TOO_LONG);

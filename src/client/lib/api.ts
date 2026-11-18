@@ -16,6 +16,7 @@ export type ApiErrorCode =
   | "network"
   | "not_configured"
   | "not_found"
+  | "rate_limited"
   | "unauthorized"
   | "validation";
 
@@ -38,6 +39,7 @@ const ERROR_CODES: readonly ApiErrorCode[] = [
   "internal",
   "not_configured",
   "not_found",
+  "rate_limited",
   "unauthorized",
   "validation",
 ];

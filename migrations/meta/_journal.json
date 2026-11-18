@@ -8,6 +8,13 @@
       "when": 1795032300375,
       "tag": "0000_overconfident_chronomancer",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1795042168448,
+      "tag": "0001_third_hedge_knight",
+      "breakpoints": true
     }
   ]
 }
