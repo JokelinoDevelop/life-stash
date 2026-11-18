@@ -1,6 +1,6 @@
 # LifeStash — notes for coding agents
 
-Read `docs/ARCHITECTURE.md` and `docs/DATA-MODEL.md` first. Code standards are in `AGENTS.md`.
+Read `docs/ARCHITECTURE.md` and `docs/DATA-MODEL.md` first. Code standards are in `AGENTS.md`. Planned rework (phases, scope, UX rules): `docs/IMPLEMENTATION-PLAN.md`.
 
 ## Non-negotiable rules
 
