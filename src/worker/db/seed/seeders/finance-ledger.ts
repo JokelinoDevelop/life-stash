@@ -14,7 +14,8 @@ import type { LedgerHabit } from "../fixtures/finances";
 import { insertRows } from "../insert-rows";
 import type { Seeder } from "../seeder";
 
-const MONTHS = 13;
+/** This year so far and all of last year, so "vs last year" has something to compare. */
+const MONTHS = 24;
 const DAYS_PER_MONTH = 28;
 
 type TransactionRow = typeof financeTransactions.$inferInsert;

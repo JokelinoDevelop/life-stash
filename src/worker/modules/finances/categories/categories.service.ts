@@ -95,6 +95,18 @@ export class CategoriesService {
     }));
   }
 
+  /** The system "Invoices" income category (created with the defaults if needed). */
+  async invoicesCategory(): Promise<CategoryRow> {
+    await this.ensureDefaults();
+    const row = await this.#repo.findBySystemKey("invoices");
+
+    if (!row) {
+      throw new Error("The Invoices category is missing");
+    }
+
+    return row;
+  }
+
   async get(categoryId: string): Promise<CategoryRow> {
     const row = await this.#repo.find(categoryId);
 

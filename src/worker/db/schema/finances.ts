@@ -1,5 +1,11 @@
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 import { households } from "./core";
 
@@ -47,6 +53,77 @@ export const financeCategories = sqliteTable(
   ]
 );
 
+export const financeClients = sqliteTable(
+  "finance_clients",
+  {
+    ...timestamps,
+    archivedAt: text("archived_at"),
+    currency: currency("currency").notNull(),
+    email: text("email"),
+    householdId: householdId(),
+    id: id(),
+    kind: text("kind", { enum: ["client", "employer"] }).notNull(),
+    name: text("name").notNull(),
+    notes: text("notes"),
+    paymentTermsDays: integer("payment_terms_days").notNull().default(30),
+  },
+  (table) => [index("finance_clients_household_idx").on(table.householdId)]
+);
+
+export const financeInvoices = sqliteTable(
+  "finance_invoices",
+  {
+    ...timestamps,
+    amountMinor: integer("amount_minor").notNull(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => financeClients.id),
+    currency: currency("currency").notNull(),
+    /** Soft delete for Undo; purged by the daily cron after 7 days. */
+    deletedAt: text("deleted_at"),
+    description: text("description"),
+    dueDate: text("due_date").notNull(),
+    householdId: householdId(),
+    id: id(),
+    issueDate: text("issue_date").notNull(),
+    notes: text("notes"),
+    number: text("number").notNull(),
+    /** The day the money arrived (YYYY-MM-DD), set by "mark paid". */
+    paidAt: text("paid_at"),
+    periodEnd: text("period_end"),
+    periodStart: text("period_start"),
+    /** The day it was marked sent (YYYY-MM-DD). */
+    sentAt: text("sent_at"),
+    status: text("status", { enum: ["draft", "sent", "paid", "void"] })
+      .notNull()
+      .default("draft"),
+  },
+  (table) => [
+    uniqueIndex("finance_invoices_number_idx")
+      .on(table.householdId, table.number)
+      .where(sql`${table.deletedAt} IS NULL`),
+    index("finance_invoices_client_idx").on(table.householdId, table.clientId),
+  ]
+);
+
+export const financeSettings = sqliteTable("finance_settings", {
+  defaultPaymentTermsDays: integer("default_payment_terms_days")
+    .notNull()
+    .default(30),
+  householdId: text("household_id")
+    .primaryKey()
+    .references(() => households.id, { onDelete: "cascade" }),
+  invoiceNumberFormat: text("invoice_number_format", {
+    enum: ["YYYY-NNN", "YYYY/NNN", "NNN"],
+  })
+    .notNull()
+    .default("YYYY-NNN"),
+  overdueReminders: integer("overdue_reminders", { mode: "boolean" })
+    .notNull()
+    .default(true),
+  updatedAt: text("updated_at").notNull().$defaultFn(now).$onUpdateFn(now),
+});
+
 export const financeTransactions = sqliteTable(
   "finance_transactions",
   {
@@ -56,6 +133,8 @@ export const financeTransactions = sqliteTable(
     categoryId: text("category_id")
       .notNull()
       .references(() => financeCategories.id),
+    /** Who paid (income only). */
+    clientId: text("client_id").references(() => financeClients.id),
     currency: currency("currency").notNull(),
     date: text("date").notNull(),
     /** Soft delete, so a delete can be undone; the daily cron purges rows after 7 days. */
@@ -63,10 +142,15 @@ export const financeTransactions = sqliteTable(
     description: text("description").notNull(),
     householdId: householdId(),
     id: id(),
+    /** Set when "mark paid" created this income; at most one per invoice. */
+    invoiceId: text("invoice_id").references(() => financeInvoices.id),
     kind: transactionKind(),
     notes: text("notes"),
   },
   (table) => [
+    uniqueIndex("finance_transactions_invoice_idx")
+      .on(table.invoiceId)
+      .where(sql`${table.invoiceId} IS NOT NULL`),
     index("finance_transactions_date_idx").on(table.householdId, table.date),
     index("finance_transactions_category_idx").on(
       table.householdId,

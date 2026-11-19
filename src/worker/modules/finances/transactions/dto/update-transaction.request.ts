@@ -13,6 +13,7 @@ export const updateTransactionParams = z.object({ transactionId: z.uuid() });
 export const updateTransactionRequest = z.object({
   amountMinor: z.number().int().min(1).max(100_000_000_000).optional(),
   categoryId: z.uuid().optional(),
+  clientId: z.uuid().nullable().optional(),
   currency: currency.optional(),
   date: isoDate.optional(),
   description: shortText(120).optional(),

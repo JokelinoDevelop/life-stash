@@ -11,6 +11,8 @@ import {
 export const createTransactionRequest = z.object({
   amountMinor: z.number().int().min(1).max(100_000_000_000),
   categoryId: z.uuid(),
+  /** Who paid (income); ignored on expenses. */
+  clientId: z.uuid().nullable().default(null),
   currency: currencyCode,
   date: isoDate,
   description: shortText(120),

@@ -11,6 +11,8 @@ export interface GetTransactionResponse {
     amountMinor: number;
     currency: Currency;
     categoryId: string;
+    clientId: string | null;
+    invoiceId: string | null;
     description: string;
     notes: string | null;
     createdAt: string;
@@ -23,11 +25,13 @@ export const toGetTransactionResponse = (
   transaction: {
     amountMinor: row.amountMinor,
     categoryId: row.categoryId,
+    clientId: row.clientId,
     createdAt: row.createdAt,
     currency: row.currency,
     date: row.date,
     description: row.description,
     id: row.id,
+    invoiceId: row.invoiceId,
     kind: row.kind,
     notes: row.notes,
   },

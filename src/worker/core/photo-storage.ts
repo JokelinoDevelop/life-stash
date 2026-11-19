@@ -6,7 +6,9 @@ export interface PhotoStorage {
   signedUrl: (
     method: "GET" | "PUT",
     key: string,
-    expiresInSeconds: number
+    expiresInSeconds: number,
+    /** Extra signed query parameters, e.g. `response-content-disposition`. */
+    params?: Record<string, string>
   ) => Promise<string>;
   remove: (key: string) => Promise<void>;
 }
@@ -63,9 +65,13 @@ export const photoStorageFor = (env: Bindings): PhotoStorage | null => {
         throw new Error(`B2 delete failed with ${response.status}`);
       }
     },
-    signedUrl: async (method, key, expiresInSeconds) => {
+    signedUrl: async (method, key, expiresInSeconds, params = {}) => {
       const url = new URL(objectUrl(key));
       url.searchParams.set("X-Amz-Expires", String(expiresInSeconds));
+
+      for (const [name, value] of Object.entries(params)) {
+        url.searchParams.set(name, value);
+      }
 
       const signed = await client.sign(url.toString(), {
         aws: { signQuery: true },

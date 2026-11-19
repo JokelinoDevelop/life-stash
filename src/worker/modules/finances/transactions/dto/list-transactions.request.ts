@@ -16,6 +16,10 @@ export const listTransactionsQuery = z.object({
     .uuid()
     .optional()
     .transform((value) => value ?? null),
+  clientId: z
+    .uuid()
+    .optional()
+    .transform((value) => value ?? null),
   cursor: z
     .string()
     .max(200)

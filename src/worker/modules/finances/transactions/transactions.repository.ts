@@ -19,6 +19,8 @@ import type { SQL } from "drizzle-orm";
 import type { Db } from "../../../core/db";
 import {
   financeCategories,
+  financeClients,
+  financeInvoices,
   financeTransactions,
 } from "../../../db/schema/finances";
 
@@ -36,6 +38,7 @@ export interface TransactionFilter {
   to: string | null;
   kind: TransactionKind | null;
   categoryId: string | null;
+  clientId: string | null;
   q: string | null;
 }
 
@@ -53,6 +56,8 @@ export interface TransactionListRow extends TransactionRow {
     icon: string | null;
     systemKey: "invoices" | null;
   };
+  client: { id: string; name: string } | null;
+  invoice: { id: string; number: string } | null;
 }
 
 export interface MonthTotalRow {
@@ -94,6 +99,10 @@ export class TransactionsRepository {
 
     if (filter.categoryId !== null) {
       filters.push(eq(financeTransactions.categoryId, filter.categoryId));
+    }
+
+    if (filter.clientId !== null) {
+      filters.push(eq(financeTransactions.clientId, filter.clientId));
     }
 
     if (filter.q !== null) {
@@ -146,12 +155,22 @@ export class TransactionsRepository {
           name: financeCategories.name,
           systemKey: financeCategories.systemKey,
         },
+        clientName: financeClients.name,
+        invoiceNumber: financeInvoices.number,
         transaction: financeTransactions,
       })
       .from(financeTransactions)
       .innerJoin(
         financeCategories,
         eq(financeCategories.id, financeTransactions.categoryId)
+      )
+      .leftJoin(
+        financeClients,
+        eq(financeClients.id, financeTransactions.clientId)
+      )
+      .leftJoin(
+        financeInvoices,
+        eq(financeInvoices.id, financeTransactions.invoiceId)
       )
       .where(and(...filters))
       .orderBy(
@@ -161,16 +180,18 @@ export class TransactionsRepository {
       )
       .limit(limit);
 
-    return rows.map((row) => ({ ...row.transaction, category: row.category }));
-  }
-
-  async count(filter: TransactionFilter): Promise<number> {
-    const [row] = await this.#db
-      .select({ entries: count() })
-      .from(financeTransactions)
-      .where(and(...this.#filters(filter)));
-
-    return row?.entries ?? 0;
+    return rows.map((row) => ({
+      ...row.transaction,
+      category: row.category,
+      client:
+        row.transaction.clientId === null || row.clientName === null
+          ? null
+          : { id: row.transaction.clientId, name: row.clientName },
+      invoice:
+        row.transaction.invoiceId === null || row.invoiceNumber === null
+          ? null
+          : { id: row.transaction.invoiceId, number: row.invoiceNumber },
+    }));
   }
 
   /** Totals per month, kind and currency for the whole filtered set (not just one page). */
@@ -222,6 +243,22 @@ export class TransactionsRepository {
       .limit(1);
 
     return row;
+  }
+
+  /** The newest live entries, for the overview. */
+  async recent(limit: number): Promise<TransactionListRow[]> {
+    return await this.page(
+      {
+        categoryId: null,
+        clientId: null,
+        from: null,
+        kind: null,
+        q: null,
+        to: null,
+      },
+      null,
+      limit
+    );
   }
 
   async insert(values: NewTransaction): Promise<TransactionRow> {
@@ -294,10 +331,10 @@ export class TransactionsRepository {
 export type TransactionsRepositoryPort = Pick<
   TransactionsRepository,
   | "page"
-  | "count"
   | "monthTotals"
   | "inRange"
   | "findById"
+  | "recent"
   | "insert"
   | "update"
   | "setDeleted"

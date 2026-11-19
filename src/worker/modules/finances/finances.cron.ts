@@ -3,28 +3,49 @@ import { isNotNull } from "drizzle-orm";
 import { Container } from "../../core/container";
 import { createDb } from "../../core/db";
 import type { Bindings } from "../../core/env";
-import { financeTransactions } from "../../db/schema/finances";
+import { financeInvoices, financeTransactions } from "../../db/schema/finances";
+import { UNDO_WINDOW_DAYS } from "./transactions/transactions.service";
 
-/** Daily: purges soft-deleted finance records whose undo window has passed. */
+const MS_PER_DAY = 86_400_000;
+
+/** Daily: purges soft-deleted finance records (and their files) once the undo window passed. */
 export const runFinancesSweep = async (env: Bindings): Promise<void> => {
   const db = createDb(env.DB);
 
-  const households = await db
-    .selectDistinct({ householdId: financeTransactions.householdId })
-    .from(financeTransactions)
-    .where(isNotNull(financeTransactions.deletedAt));
+  const cutoff = new Date(
+    Date.now() - UNDO_WINDOW_DAYS * MS_PER_DAY
+  ).toISOString();
+
+  const [fromTransactions, fromInvoices] = await Promise.all([
+    db
+      .selectDistinct({ householdId: financeTransactions.householdId })
+      .from(financeTransactions)
+      .where(isNotNull(financeTransactions.deletedAt)),
+    db
+      .selectDistinct({ householdId: financeInvoices.householdId })
+      .from(financeInvoices)
+      .where(isNotNull(financeInvoices.deletedAt)),
+  ]);
+
+  const households = new Set(
+    [...fromTransactions, ...fromInvoices].map((row) => row.householdId)
+  );
 
   await Promise.all(
-    households.map(async ({ householdId }) => {
+    [...households].map(async (householdId) => {
       const pending: Promise<unknown>[] = [];
 
       const defer = (work: Promise<unknown>) => {
         pending.push(work);
       };
 
-      const container = new Container({ db, defer, env, householdId });
-
-      await container.finances.transactions.purgeExpired();
+      const { finances } = new Container({ db, defer, env, householdId });
+      // Entries first: an invoice's ledger entry references it.
+      const transactionIds = await finances.transactions.purgeExpired();
+      // oxlint-disable-next-line react-doctor/server-sequential-independent-await -- must run after the entries are gone (foreign key)
+      const invoiceIds = await finances.invoices.purgeExpired(cutoff);
+      await finances.deleteFiles("finance_transaction", transactionIds);
+      await finances.deleteFiles("finance_invoice", invoiceIds);
       await Promise.allSettled(pending);
     })
   );

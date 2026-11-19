@@ -1,8 +1,10 @@
 import type { TransactionKind } from "@shared/domain/finances/kinds";
 import type { Currency } from "@shared/domain/money";
 
-import { notFound } from "../../../core/errors";
+import { domainError, notFound } from "../../../core/errors";
+import type { AttachmentsRepositoryPort } from "../attachments/attachments.repository";
 import type { CategoriesService } from "../categories/categories.service";
+import type { ClientsService } from "../clients/clients.service";
 import type {
   MonthTotalRow,
   TransactionCursor,
@@ -24,12 +26,18 @@ export interface TransactionInput {
   amountMinor: number;
   currency: Currency;
   categoryId: string;
+  /** Who paid; only kept on income. */
+  clientId: string | null;
   description: string;
   notes: string | null;
 }
 
+export interface TransactionPageRow extends TransactionListRow {
+  attachments: number;
+}
+
 export interface TransactionPage {
-  rows: TransactionListRow[];
+  rows: TransactionPageRow[];
   nextCursor: TransactionCursor | null;
   total: number;
   months: MonthTotalRow[];
@@ -40,16 +48,22 @@ const MS_PER_DAY = 86_400_000;
 export class TransactionsService {
   readonly #repo: TransactionsRepositoryPort;
   readonly #categories: Pick<CategoriesService, "requireForEntry">;
+  readonly #clients: Pick<ClientsService, "requireForEntry">;
+  readonly #attachments: Pick<AttachmentsRepositoryPort, "countByOwner">;
   readonly #now: () => Date;
 
-  constructor(
-    repo: TransactionsRepositoryPort,
-    categories: Pick<CategoriesService, "requireForEntry">,
-    now: () => Date = () => new Date()
-  ) {
-    this.#repo = repo;
-    this.#categories = categories;
-    this.#now = now;
+  constructor(deps: {
+    repo: TransactionsRepositoryPort;
+    categories: Pick<CategoriesService, "requireForEntry">;
+    clients: Pick<ClientsService, "requireForEntry">;
+    attachments: Pick<AttachmentsRepositoryPort, "countByOwner">;
+    now?: () => Date;
+  }) {
+    this.#repo = deps.repo;
+    this.#categories = deps.categories;
+    this.#clients = deps.clients;
+    this.#attachments = deps.attachments;
+    this.#now = deps.now ?? (() => new Date());
   }
 
   async list(
@@ -58,14 +72,23 @@ export class TransactionsService {
     limit = TRANSACTIONS_PAGE_SIZE
   ): Promise<TransactionPage> {
     // One extra row tells whether another page follows.
-    const [rows, count, monthRows] = await Promise.all([
+    const [rows, monthRows] = await Promise.all([
       this.#repo.page(filter, cursor, limit + 1),
-      cursor === null ? this.#repo.count(filter) : Promise.resolve(-1),
       cursor === null ? this.#repo.monthTotals(filter) : Promise.resolve([]),
     ]);
 
+    const count =
+      cursor === null
+        ? monthRows.reduce((total, row) => total + row.entries, 0)
+        : -1;
+
     const pageRows = rows.slice(0, limit);
     const last = pageRows.at(-1);
+
+    const counts = await this.#attachments.countByOwner(
+      "finance_transaction",
+      pageRows.map((row) => row.id)
+    );
 
     return {
       months: monthRows,
@@ -73,7 +96,10 @@ export class TransactionsService {
         rows.length > limit && last !== undefined
           ? { createdAt: last.createdAt, date: last.date, id: last.id }
           : null,
-      rows: pageRows,
+      rows: pageRows.map((row) => ({
+        ...row,
+        attachments: counts.get(row.id) ?? 0,
+      })),
       total: count,
     };
   }
@@ -90,8 +116,20 @@ export class TransactionsService {
 
   async create(input: TransactionInput): Promise<TransactionRow> {
     await this.#categories.requireForEntry(input.categoryId, input.kind);
+    const clientId = input.kind === "income" ? input.clientId : null;
 
-    return await this.#repo.insert(input);
+    if (clientId !== null) {
+      await this.#clients.requireForEntry(clientId);
+    }
+
+    return await this.#repo.insert({ ...input, clientId });
+  }
+
+  /** Entries created by "mark paid" belong to their invoice; change the invoice instead. */
+  static #assertNotLinked(row: TransactionRow): void {
+    if (row.invoiceId !== null) {
+      throw domainError("finances.transaction_linked");
+    }
   }
 
   async update(
@@ -99,6 +137,7 @@ export class TransactionsService {
     changes: Partial<TransactionInput>
   ): Promise<void> {
     const current = await this.get(transactionId);
+    TransactionsService.#assertNotLinked(current);
     const kind = changes.kind ?? current.kind;
     const categoryId = changes.categoryId ?? current.categoryId;
 
@@ -111,12 +150,19 @@ export class TransactionsService {
     }
 
     const patch: TransactionPatch = { ...changes };
+
+    if (kind === "expense") {
+      patch.clientId = null;
+    } else if (changes.clientId !== undefined && changes.clientId !== null) {
+      await this.#clients.requireForEntry(changes.clientId, current.clientId);
+    }
+
     await this.#repo.update(transactionId, patch);
   }
 
   /** Soft delete; `restore` undoes it within the undo window. */
   async delete(transactionId: string): Promise<void> {
-    await this.get(transactionId);
+    TransactionsService.#assertNotLinked(await this.get(transactionId));
     await this.#repo.setDeleted(transactionId, this.#now().toISOString());
   }
 

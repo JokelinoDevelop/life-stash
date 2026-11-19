@@ -14,6 +14,8 @@ const row = (overrides: Partial<TransactionRow> = {}): TransactionListRow => ({
   amountMinor: 100,
   category: { icon: null, id: "c1", name: "Rent", systemKey: null },
   categoryId: "c1",
+  client: null,
+  clientId: null,
   createdAt: "2026-11-01T00:00:00Z",
   currency: "EUR",
   date: "2026-11-01",
@@ -21,6 +23,8 @@ const row = (overrides: Partial<TransactionRow> = {}): TransactionListRow => ({
   description: "x",
   householdId: "h1",
   id: crypto.randomUUID(),
+  invoice: null,
+  invoiceId: null,
   kind: "expense",
   notes: null,
   updatedAt: "2026-11-01T00:00:00Z",
@@ -44,7 +48,7 @@ const fakeTransactions = (
 
   return {
     all: () => rows,
-    count: async () => await Promise.resolve(live().length),
+    recent: async (limit) => await Promise.resolve(live().slice(0, limit)),
     deletedBefore: async (cutoff) =>
       await Promise.resolve(
         rows
@@ -59,12 +63,27 @@ const fakeTransactions = (
       ),
     inRange: async () => await Promise.resolve(live()),
     insert: async (values) => {
-      const created = row({ ...values, notes: values.notes ?? null });
+      const created = row({
+        ...values,
+        clientId: values.clientId ?? null,
+        invoiceId: values.invoiceId ?? null,
+        notes: values.notes ?? null,
+      });
+
       rows.push(created);
 
       return await Promise.resolve(created);
     },
-    monthTotals: async () => await Promise.resolve([]),
+    monthTotals: async () =>
+      await Promise.resolve([
+        {
+          amountMinor: 0,
+          currency: "EUR" as const,
+          entries: live().length,
+          kind: "expense" as const,
+          month: "2026-11",
+        },
+      ]),
     page: async (_filter, _cursor, limit) =>
       await Promise.resolve(live().slice(0, limit)),
     purge: async (ids) => {
@@ -93,6 +112,29 @@ const CATEGORY: CategoryRow = {
   systemKey: null,
 };
 
+const clients = {
+  requireForEntry: async () =>
+    await Promise.reject(new Error("no clients in this test")),
+};
+
+const attachments = {
+  countByOwner: async () => await Promise.resolve(new Map<string, number>()),
+};
+
+const makeService = (
+  repo: TransactionsRepositoryPort,
+  cats: ReturnType<typeof categories>,
+  now: () => Date = () => NOW
+) =>
+  // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
+  new TransactionsService({
+    attachments,
+    categories: cats,
+    clients,
+    now,
+    repo,
+  });
+
 const categories = () => {
   const calls: (string | null)[][] = [];
 
@@ -112,11 +154,19 @@ const categories = () => {
   };
 };
 
-const FILTER = { categoryId: null, from: null, kind: null, q: null, to: null };
+const FILTER = {
+  categoryId: null,
+  clientId: null,
+  from: null,
+  kind: null,
+  q: null,
+  to: null,
+};
 
 const INPUT = {
   amountMinor: 500,
   categoryId: "c1",
+  clientId: null,
   currency: "EUR",
   date: "2026-11-19",
   description: "Tinex",
@@ -132,7 +182,7 @@ describe(TransactionsService, () => {
       row({ date: "2026-11-01" }),
     ]);
 
-    const service = new TransactionsService(repo, categories(), () => NOW);
+    const service = makeService(repo, categories(), () => NOW);
 
     const page = await service.list(FILTER, null, 2);
     const all = await service.list(FILTER, null, 3);
@@ -146,11 +196,7 @@ describe(TransactionsService, () => {
   it("checks the category on create and when kind or category change", async () => {
     const cats = categories();
 
-    const service = new TransactionsService(
-      fakeTransactions(),
-      cats,
-      () => NOW
-    );
+    const service = makeService(fakeTransactions(), cats, () => NOW);
 
     const created = await service.create(INPUT);
     await service.update(created.id, { description: "Vero" });
@@ -165,7 +211,7 @@ describe(TransactionsService, () => {
   it("soft deletes and restores", async () => {
     const target = row();
     const repo = fakeTransactions([target]);
-    const service = new TransactionsService(repo, categories(), () => NOW);
+    const service = makeService(repo, categories(), () => NOW);
 
     await service.delete(target.id);
 
@@ -180,7 +226,7 @@ describe(TransactionsService, () => {
     const target = row();
     const repo = fakeTransactions([target]);
     let now = NOW;
-    const service = new TransactionsService(repo, categories(), () => now);
+    const service = makeService(repo, categories(), () => now);
     await service.delete(target.id);
 
     await expect(service.purgeExpired()).resolves.toStrictEqual([]);

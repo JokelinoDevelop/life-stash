@@ -20,6 +20,10 @@ export interface ListTransactionsResponse {
       icon: string | null;
       systemKey: "invoices" | null;
     };
+    client: { id: string; name: string } | null;
+    /** Set when "mark paid" created the entry; edit the invoice instead. */
+    invoice: { id: string; number: string } | null;
+    attachments: number;
   }[];
   nextCursor: string | null;
   /** Rows matching the filter; only on the first page (null when paging on). */
@@ -62,11 +66,14 @@ export const toListTransactionsResponse = (
   total: page.total < 0 ? null : page.total,
   transactions: page.rows.map((row) => ({
     amountMinor: row.amountMinor,
+    attachments: row.attachments,
     category: row.category,
+    client: row.client,
     currency: row.currency,
     date: row.date,
     description: row.description,
     id: row.id,
+    invoice: row.invoice,
     kind: row.kind,
     notes: row.notes,
   })),

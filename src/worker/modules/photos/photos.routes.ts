@@ -21,10 +21,22 @@ const UPLOAD_URL_TTL = 600;
 const VIEW_URL_TTL = 3600;
 
 const EXTENSIONS = {
+  "application/pdf": "pdf",
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
 } as const;
+
+/** PDFs open inline in a new tab under their original name. */
+const viewParams = (row: {
+  contentType: string;
+  fileName: string | null;
+}): Record<string, string> =>
+  row.contentType === "application/pdf"
+    ? {
+        "response-content-disposition": `inline; filename*=UTF-8''${encodeURIComponent(row.fileName ?? "document.pdf")}`,
+      }
+    : {};
 
 const requireStorage = (storage: PhotoStorage | null): PhotoStorage => {
   if (!storage) {
@@ -66,7 +78,7 @@ export const photoRoutes = new Hono<AppEnv>()
 
     const [row] = await c.var.db
       .insert(photos)
-      .values({ ...input, householdId })
+      .values({ ...input, fileName: input.fileName ?? null, householdId })
       .returning({ id: photos.id });
 
     const body: CreatePhotoResponse = { id: row?.id ?? "" };
@@ -96,10 +108,16 @@ export const photoRoutes = new Hono<AppEnv>()
         rows.map(async (row) => ({
           contentType: row.contentType,
           createdAt: row.createdAt,
+          fileName: row.fileName,
           id: row.id,
+          sizeBytes: row.sizeBytes,
           url:
-            (await storage?.signedUrl("GET", row.objectKey, VIEW_URL_TTL)) ??
-            "",
+            (await storage?.signedUrl(
+              "GET",
+              row.objectKey,
+              VIEW_URL_TTL,
+              viewParams(row)
+            )) ?? "",
         }))
       ),
     };
