@@ -38,7 +38,7 @@ export const ExpenseList = ({
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 md:gap-0" data-bleed="">
       {groupByMonth(expenses).map((group) => (
         <ListSection
           action={

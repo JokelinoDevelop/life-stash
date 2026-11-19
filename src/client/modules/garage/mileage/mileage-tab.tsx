@@ -65,7 +65,12 @@ export const MileageTab = ({
   }
 
   const { points } = mileage.data;
-  const latestKm = latestOdometer(points)?.odometerKm ?? null;
+  const latestPoint = latestOdometer(points);
+
+  const latest =
+    latestPoint === null
+      ? null
+      : { date: latestPoint.date, km: latestPoint.odometerKm };
 
   const logButton = readOnly ? null : (
     <Button
@@ -107,7 +112,7 @@ export const MileageTab = ({
       )}
       <ReadingDialog
         carId={carId}
-        latestKm={latestKm}
+        latest={latest}
         onOpenChange={(open) => {
           setDialog((current) => ({ ...current, open }));
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 
-const isEditable = (target: EventTarget | null): boolean => {
+/** True while typing in a field, so plain-key shortcuts stay out of the way. */
+export const isEditable = (target: EventTarget | null): boolean => {
   if (!(target instanceof HTMLElement)) {
     return false;
   }
@@ -10,6 +11,10 @@ const isEditable = (target: EventTarget | null): boolean => {
     target.closest("input, textarea, select, [contenteditable='true']") !== null
   );
 };
+
+/** True while a dialog or alert dialog is open. */
+export const isDialogOpen = (): boolean =>
+  document.querySelector("[role='dialog'], [role='alertdialog']") !== null;
 
 interface HotkeyOptions {
   /** Require ⌘ (macOS) or Ctrl (elsewhere). */

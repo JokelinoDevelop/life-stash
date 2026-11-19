@@ -20,51 +20,21 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
-  CommandShortcut,
 } from "@/components/ui/command";
-import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { ADD_CAR_SHORTCUT, CAR_SHORTCUTS } from "@/lib/shortcuts";
 import type { CarShortcutAction } from "@/lib/shortcuts";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { useCarJump } from "@/modules/garage/cars/use-car-jump";
 
 import { CommandMenuContext } from "./command-menu-context";
 import type { CommandMenuControls } from "./command-menu-context";
+import { Hints, Item } from "./command-menu-parts";
 
 /** Closes the menu, then starts the given navigation. */
 type Run = (start: () => Promise<void>) => void;
-
-const Item = ({
-  icon: Icon,
-  keywords,
-  label,
-  meta,
-  onSelect,
-  shortcut,
-}: {
-  icon: LucideIcon;
-  keywords?: string[];
-  label: string;
-  meta?: string;
-  onSelect: () => void;
-  shortcut?: string;
-}) => (
-  <CommandItem keywords={keywords} onSelect={onSelect} value={label}>
-    <Icon />
-    <span className="truncate">{label}</span>
-    {meta !== undefined && (
-      <span className="text-muted-foreground truncate">{meta}</span>
-    )}
-    {shortcut !== undefined && (
-      <CommandShortcut>
-        <Kbd>{shortcut.toUpperCase()}</Kbd>
-      </CommandShortcut>
-    )}
-  </CommandItem>
-);
 
 const CAR_ACTION_ICONS: Record<CarShortcutAction, LucideIcon> = {
   addExpense: Fuel,
@@ -147,6 +117,9 @@ const ActionsGroup = ({
   );
 };
 
+/** Cars reachable with G then 1–9, in list order. */
+const MAX_JUMP = 9;
+
 const CarsGroup = ({ cars, run }: { cars: CarListItem[]; run: Run }) => {
   const { t } = useTranslation("command");
   const navigate = useNavigate();
@@ -157,9 +130,10 @@ const CarsGroup = ({ cars, run }: { cars: CarListItem[]; run: Run }) => {
 
   return (
     <CommandGroup heading={t("groups.cars")}>
-      {cars.map((car) => (
+      {cars.map((car, index) => (
         <Item
           icon={CarFront}
+          jump={index < MAX_JUMP ? String(index + 1) : undefined}
           key={car.id}
           keywords={[car.plate, car.make, car.model].filter(
             (part): part is string => part !== null
@@ -217,28 +191,6 @@ const PagesGroup = ({ run }: { run: Run }) => {
   );
 };
 
-const Hints = () => {
-  const { t } = useTranslation("command");
-
-  return (
-    <div className="text-muted-foreground bg-background hidden items-center gap-4 border-t px-3 py-2 text-xs md:flex">
-      <span className="flex items-center gap-1.5">
-        <Kbd>↑</Kbd>
-        <Kbd>↓</Kbd>
-        {t("hint.move")}
-      </span>
-      <span className="flex items-center gap-1.5">
-        <Kbd>↵</Kbd>
-        {t("hint.open")}
-      </span>
-      <span className="flex items-center gap-1.5">
-        <Kbd>esc</Kbd>
-        {t("hint.close")}
-      </span>
-    </div>
-  );
-};
-
 const CommandMenuDialog = ({
   onOpenChange,
   open,
@@ -252,6 +204,7 @@ const CommandMenuDialog = ({
   // otherwise the first highlighted row jumps when it arrives.
   const cars = useQuery(carsQuery(false));
   const list = cars.data?.cars ?? [];
+  const current = list.find((car) => car.id === carId);
 
   const run: Run = (start) => {
     onOpenChange(false);
@@ -266,13 +219,22 @@ const CommandMenuDialog = ({
       open={open}
       title={t("title")}
     >
-      <CommandInput placeholder={t("placeholder")} />
+      <CommandInput
+        placeholder={t("placeholder")}
+        trailing={
+          current === undefined ? undefined : (
+            <span className="text-muted-foreground hidden shrink-0 items-center gap-1.5 text-xs sm:flex">
+              {t("in")}
+              <span className="bg-muted text-subtle-foreground rounded-sm border px-1.5 py-0.5 font-medium">
+                {current.name}
+              </span>
+            </span>
+          )
+        }
+      />
       <CommandList>
         <CommandEmpty>{t("empty")}</CommandEmpty>
-        <ActionsGroup
-          current={list.find((car) => car.id === carId)}
-          run={run}
-        />
+        <ActionsGroup current={current} run={run} />
         <CarsGroup cars={list} run={run} />
         <PagesGroup run={run} />
       </CommandList>
@@ -284,6 +246,7 @@ const CommandMenuDialog = ({
 /** Provides the ⌘K menu to the whole app and binds ⌘K / Ctrl+K and "/". */
 export const CommandMenuProvider = ({ children }: { children: ReactNode }) => {
   const [open, setOpen] = useState(false);
+  useCarJump();
 
   useHotkey(
     "k",
