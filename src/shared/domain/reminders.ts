@@ -135,3 +135,49 @@ export const nextRecurrence = (
 
   return { dueDate, dueOdometerKm };
 };
+
+/** Average month length, used only to turn an interval in months into days. */
+const DAYS_PER_MONTH = 30.44;
+
+/** Fallback fill for reminders without an interval (one-off targets). */
+const FALLBACK_PROGRESS: Record<ReminderStatus, number> = {
+  "due-soon": 0.9,
+  overdue: 1,
+  upcoming: 0.25,
+};
+
+export interface ReminderProgressInput extends ReminderEvaluation {
+  intervalMonths: number | null;
+  intervalKm: number | null;
+}
+
+const usedShare = (left: number | null, interval: number | null) =>
+  left === null || interval === null || interval <= 0
+    ? null
+    : 1 - left / interval;
+
+/**
+ * How much of the interval has been used, 0–1, for the status ring.
+ * With both a date and a km interval, the one further along wins.
+ */
+export const reminderProgress = (input: ReminderProgressInput): number => {
+  if (input.status === "overdue") {
+    return 1;
+  }
+
+  const shares = [
+    usedShare(
+      input.daysLeft,
+      input.intervalMonths === null
+        ? null
+        : input.intervalMonths * DAYS_PER_MONTH
+    ),
+    usedShare(input.kmLeft, input.intervalKm),
+  ].filter((share): share is number => share !== null);
+
+  if (shares.length === 0) {
+    return FALLBACK_PROGRESS[input.status];
+  }
+
+  return Math.min(1, Math.max(0, ...shares));
+};

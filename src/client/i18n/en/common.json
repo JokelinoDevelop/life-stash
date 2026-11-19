@@ -21,7 +21,8 @@
   "status": {
     "overdue": "Overdue",
     "due-soon": "Due soon",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "done": "Done"
   },
   "fields": {
     "optional": "optional",

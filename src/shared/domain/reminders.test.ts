@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { evaluateReminder, needsHeadsUp, nextRecurrence } from "./reminders";
+import {
+  evaluateReminder,
+  needsHeadsUp,
+  nextRecurrence,
+  reminderProgress,
+} from "./reminders";
 
 const today = "2026-11-18";
 
@@ -75,5 +80,54 @@ describe(nextRecurrence, () => {
         previous: { dueDate: today, dueOdometerKm: null },
       })
     ).toBeNull();
+  });
+});
+
+describe(reminderProgress, () => {
+  const base = {
+    daysLeft: null,
+    intervalKm: null,
+    intervalMonths: null,
+    kmLeft: null,
+  };
+
+  it("is full when overdue", () => {
+    expect(reminderProgress({ ...base, status: "overdue" })).toBe(1);
+  });
+
+  it("uses the share of the km interval already driven", () => {
+    expect(
+      reminderProgress({
+        ...base,
+        intervalKm: 15_000,
+        kmLeft: 1500,
+        status: "due-soon",
+      })
+    ).toBeCloseTo(0.9);
+  });
+
+  it("takes whichever interval is further along", () => {
+    expect(
+      reminderProgress({
+        daysLeft: 365,
+        intervalKm: 10_000,
+        intervalMonths: 24,
+        kmLeft: 8000,
+        status: "upcoming",
+      })
+    ).toBeCloseTo(0.5, 1);
+  });
+
+  it("clamps to 0–1 and falls back by status without an interval", () => {
+    expect(
+      reminderProgress({
+        ...base,
+        intervalKm: 1000,
+        kmLeft: 5000,
+        status: "upcoming",
+      })
+    ).toBe(0);
+    expect(reminderProgress({ ...base, status: "upcoming" })).toBe(0.25);
+    expect(reminderProgress({ ...base, status: "due-soon" })).toBe(0.9);
   });
 });

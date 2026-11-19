@@ -21,7 +21,8 @@
   "status": {
     "overdue": "Задоцнето",
     "due-soon": "Наскоро",
-    "upcoming": "Претстои"
+    "upcoming": "Претстои",
+    "done": "Завршено"
   },
   "fields": {
     "optional": "опционално",
