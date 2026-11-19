@@ -1,6 +1,6 @@
 # LifeStash — Implementation plan (post-v1 rework)
 
-Status: **planned, not started** · Written 2026-11-19
+Status: **planned, not started** · Written 2026-11-19 · Visual design language v0.3 and the command menu shipped separately on 2026-11-19 (see `docs/DESIGN-LANGUAGE.md`)
 
 This plan turns the working v1 Garage module into a cleaner codebase with a calmer, more premium UX. It is written so each phase can be picked up later, by a person or a coding agent, without the conversation that produced it.
 
@@ -17,8 +17,8 @@ Read `docs/ARCHITECTURE.md`, `docs/DATA-MODEL.md`, `AGENTS.md` and `CLAUDE.md` f
 
 **Deferred (do not start without asking)**
 
-- Visual polish pass (typography, palette, empty/loading states, motion) and the full accessibility audit. The user will do this in a later iteration. Phases 2–3 still build their _new_ components accessibly (see "Accessibility baseline").
-- CI/deploy pipeline, staging environment, D1 → R2 backups, offline/persisted query cache, command palette.
+- Remaining visual polish (empty/loading states, the auth screens) and the full accessibility audit. Typography, palette, motion and the main screens are done (design language v0.3). New components follow `docs/DESIGN-LANGUAGE.md` and are built accessibly (see "Accessibility baseline").
+- CI/deploy pipeline, staging environment, D1 → R2 backups, offline/persisted query cache. (The ⌘K command menu is done.)
 
 ## UX rules this plan implements
 
