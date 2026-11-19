@@ -1,4 +1,5 @@
 import type { ContainerDeps } from "../../core/container";
+import { sendPushToHousehold } from "../../core/push";
 import { deletePhotosOfOwners } from "../photos/photos.service";
 import { AttachmentsRepository } from "./attachments/attachments.repository";
 import type { AttachmentOwnerType } from "./attachments/attachments.repository";
@@ -6,12 +7,18 @@ import { CategoriesRepository } from "./categories/categories.repository";
 import { CategoriesService } from "./categories/categories.service";
 import { ClientsRepository } from "./clients/clients.repository";
 import { ClientsService } from "./clients/clients.service";
+import { FinanceExportService } from "./export/export.service";
 import { FinanceClock } from "./household/clock";
 import { HouseholdRepository } from "./household/household.repository";
 import { InvoicesRepository } from "./invoices/invoices.repository";
 import { InvoicesService } from "./invoices/invoices.service";
+import { OverdueRemindersService } from "./notifications/overdue-reminders.service";
 import { GarageCostsReader } from "./overview/garage-costs";
 import { OverviewService } from "./overview/overview.service";
+import { ProjectsRepository } from "./projects/projects.repository";
+import { ProjectsService } from "./projects/projects.service";
+import { RecurringRepository } from "./recurring/recurring.repository";
+import { RecurringService } from "./recurring/recurring.service";
 import { FinanceSettingsRepository } from "./settings/settings.repository";
 import { FinanceSettingsService } from "./settings/settings.service";
 import { LedgerLinksRepository } from "./transactions/ledger-links.repository";
@@ -23,6 +30,10 @@ export interface FinancesModule {
   clients: ClientsService;
   invoices: InvoicesService;
   overview: OverviewService;
+  projects: ProjectsService;
+  recurring: RecurringService;
+  exports: FinanceExportService;
+  overdueReminders: OverdueRemindersService;
   settings: FinanceSettingsService;
   transactions: TransactionsService;
   /** Removes stored files of purged records (B2 objects and `photos` rows). */
@@ -57,8 +68,10 @@ export const createFinancesModule = ({
     household
   );
 
+  const clientsRepo = new ClientsRepository(db, householdId);
+
   const clients = new ClientsService(
-    new ClientsRepository(db, householdId),
+    clientsRepo,
     invoicesRepo,
     ledgerLinks,
     clock
@@ -71,11 +84,26 @@ export const createFinancesModule = ({
     repo: transactionsRepo,
   });
 
+  const projects = new ProjectsService({
+    clients,
+    invoices: invoicesRepo,
+    repo: new ProjectsRepository(db, householdId),
+  });
+
+  const recurring = new RecurringService({
+    categories,
+    clients,
+    clock,
+    repo: new RecurringRepository(db, householdId),
+    transactions: transactionsRepo,
+  });
+
   const invoices = new InvoicesService({
     attachments,
     categories,
     clients,
     clock,
+    projects,
     repo: invoicesRepo,
     settings,
     transactions: ledgerLinks,
@@ -86,12 +114,35 @@ export const createFinancesModule = ({
     clock,
     garage: new GarageCostsReader(db, householdId),
     invoices,
+    recurring,
     transactions: transactionsRepo,
+  });
+
+  const exports = new FinanceExportService({
+    categories,
+    clients: clientsRepo,
+    clock,
+    invoices: invoicesRepo,
+    transactions: transactionsRepo,
+  });
+
+  const overdueReminders = new OverdueRemindersService({
+    clock,
+    household,
+    invoices: invoicesRepo,
+    send: async (message) => {
+      await sendPushToHousehold(env, db, householdId, message);
+    },
+    settings,
   });
 
   return {
     categories,
     clients,
+    exports,
+    overdueReminders,
+    projects,
+    recurring,
     deleteFiles: async (ownerType, ownerIds) => {
       await deletePhotosOfOwners(env, db, householdId, { ownerIds, ownerType });
     },

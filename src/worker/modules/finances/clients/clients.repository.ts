@@ -4,6 +4,8 @@ import type { Db } from "../../../core/db";
 import {
   financeClients,
   financeInvoices,
+  financeProjects,
+  financeRecurring,
   financeTransactions,
 } from "../../../db/schema/finances";
 
@@ -39,6 +41,16 @@ export class ClientsRepository {
       .from(financeClients)
       .where(eq(financeClients.householdId, this.#householdId))
       .orderBy(asc(financeClients.name));
+  }
+
+  /** Client names by id (for exports). */
+  async names(): Promise<Map<string, string>> {
+    const rows = await this.#db
+      .select({ id: financeClients.id, name: financeClients.name })
+      .from(financeClients)
+      .where(eq(financeClients.householdId, this.#householdId));
+
+    return new Map(rows.map((row) => [row.id, row.name]));
   }
 
   async findById(clientId: string): Promise<ClientRow | undefined> {
@@ -91,30 +103,52 @@ export class ClientsRepository {
     await this.#db.delete(financeClients).where(this.#byId(clientId));
   }
 
-  /** Invoices and transactions referencing the client (including soft-deleted ones). */
+  /** Invoices, entries, projects and templates referencing the client (incl. soft-deleted). */
   async usage(clientId: string): Promise<number> {
-    const [[invoices], [transactions]] = await Promise.all([
-      this.#db
-        .select({ rows: count() })
-        .from(financeInvoices)
-        .where(
-          and(
-            eq(financeInvoices.householdId, this.#householdId),
-            eq(financeInvoices.clientId, clientId)
-          )
-        ),
-      this.#db
-        .select({ rows: count() })
-        .from(financeTransactions)
-        .where(
-          and(
-            eq(financeTransactions.householdId, this.#householdId),
-            eq(financeTransactions.clientId, clientId)
-          )
-        ),
-    ]);
+    const [[invoices], [transactions], [projects], [templates]] =
+      await Promise.all([
+        this.#db
+          .select({ rows: count() })
+          .from(financeInvoices)
+          .where(
+            and(
+              eq(financeInvoices.householdId, this.#householdId),
+              eq(financeInvoices.clientId, clientId)
+            )
+          ),
+        this.#db
+          .select({ rows: count() })
+          .from(financeTransactions)
+          .where(
+            and(
+              eq(financeTransactions.householdId, this.#householdId),
+              eq(financeTransactions.clientId, clientId)
+            )
+          ),
+        this.#db
+          .select({ rows: count() })
+          .from(financeProjects)
+          .where(
+            and(
+              eq(financeProjects.householdId, this.#householdId),
+              eq(financeProjects.clientId, clientId)
+            )
+          ),
+        this.#db
+          .select({ rows: count() })
+          .from(financeRecurring)
+          .where(
+            and(
+              eq(financeRecurring.householdId, this.#householdId),
+              eq(financeRecurring.clientId, clientId)
+            )
+          ),
+      ]);
 
-    return (invoices?.rows ?? 0) + (transactions?.rows ?? 0);
+    return [invoices, transactions, projects, templates].reduce(
+      (total, row) => total + (row?.rows ?? 0),
+      0
+    );
   }
 
   /** First income date per client, for "Client since". */
@@ -167,6 +201,7 @@ export class ClientsRepository {
 export type ClientsRepositoryPort = Pick<
   ClientsRepository,
   | "list"
+  | "names"
   | "findById"
   | "findByName"
   | "insert"

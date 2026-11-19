@@ -13,6 +13,10 @@ import type {
   InvoicesService,
 } from "../invoices/invoices.service";
 import type {
+  PendingRecurring,
+  RecurringService,
+} from "../recurring/recurring.service";
+import type {
   TransactionListRow,
   TransactionsRepositoryPort,
 } from "../transactions/transactions.repository";
@@ -30,6 +34,8 @@ export interface FinanceOverview {
   /** Months of `year` counted for the monthly average (12 for past years). */
   monthsElapsed: number;
   receivables: Receivables;
+  /** Recurring entries to confirm or skip this month (current year only). */
+  toConfirm: PendingRecurring[];
   waiting: InvoiceListRow[];
   cashflow: CurrencyCashflow[];
   categories: (CategoryShare & {
@@ -56,9 +62,11 @@ export class OverviewService {
   readonly #invoices: Pick<InvoicesService, "waiting">;
   readonly #categories: Pick<CategoriesService, "list">;
   readonly #garage: GarageCostsPort;
+  readonly #recurring: Pick<RecurringService, "pending">;
   readonly #clock: ClockPort;
 
   constructor(deps: {
+    recurring: Pick<RecurringService, "pending">;
     transactions: Pick<TransactionsRepositoryPort, "inRange" | "recent">;
     invoices: Pick<InvoicesService, "waiting">;
     categories: Pick<CategoriesService, "list">;
@@ -69,11 +77,12 @@ export class OverviewService {
     this.#invoices = deps.invoices;
     this.#categories = deps.categories;
     this.#garage = deps.garage;
+    this.#recurring = deps.recurring;
     this.#clock = deps.clock;
   }
 
   async get(year: number): Promise<FinanceOverview> {
-    const [today, entries, recent, waiting, categories, carCosts] =
+    const [today, entries, recent, waiting, categories, carCosts, pending] =
       await Promise.all([
         this.#clock.today(),
         this.#transactions.inRange(`${year - 1}-01-01`, `${year}-12-31`),
@@ -81,6 +90,7 @@ export class OverviewService {
         this.#invoices.waiting(),
         this.#categories.list(),
         this.#garage.forYear(year),
+        this.#recurring.pending(),
       ]);
 
     const thisYear = entries.filter((entry) =>
@@ -146,6 +156,7 @@ export class OverviewService {
       receivables: waiting.receivables,
       recent,
       spent: sumByCurrency(expenses),
+      toConfirm: year === currentYear ? pending : [],
       today,
       waiting: waiting.rows,
       year,

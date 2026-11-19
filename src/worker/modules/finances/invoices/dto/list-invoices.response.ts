@@ -10,6 +10,8 @@ export interface ListInvoicesResponse {
     number: string;
     clientId: string;
     clientName: string;
+    projectId: string | null;
+    projectName: string | null;
     issueDate: string;
     dueDate: string;
     sentAt: string | null;
@@ -53,6 +55,8 @@ export const toListInvoicesResponse = (
     paidAt: row.paidAt,
     periodEnd: row.periodEnd,
     periodStart: row.periodStart,
+    projectId: row.projectId,
+    projectName: row.projectName,
     sentAt: row.sentAt,
     status: row.displayStatus,
   })),

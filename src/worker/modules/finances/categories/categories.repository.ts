@@ -4,6 +4,7 @@ import { and, asc, count, eq, isNull, sql } from "drizzle-orm";
 import type { Db } from "../../../core/db";
 import {
   financeCategories,
+  financeRecurring,
   financeTransactions,
 } from "../../../db/schema/finances";
 
@@ -123,18 +124,28 @@ export class CategoriesRepository {
       );
   }
 
-  /** Entries per category, including soft-deleted ones (they still reference it). */
+  /** Entries per category (soft-deleted ones still reference it), plus recurring templates. */
   async usage(): Promise<Map<string, number>> {
-    const rows = await this.#db
-      .select({
-        categoryId: financeTransactions.categoryId,
-        entries: count(),
-      })
-      .from(financeTransactions)
-      .where(eq(financeTransactions.householdId, this.#householdId))
-      .groupBy(financeTransactions.categoryId);
+    const [entries, templates] = await Promise.all([
+      this.#db
+        .select({ categoryId: financeTransactions.categoryId, rows: count() })
+        .from(financeTransactions)
+        .where(eq(financeTransactions.householdId, this.#householdId))
+        .groupBy(financeTransactions.categoryId),
+      this.#db
+        .select({ categoryId: financeRecurring.categoryId, rows: count() })
+        .from(financeRecurring)
+        .where(eq(financeRecurring.householdId, this.#householdId))
+        .groupBy(financeRecurring.categoryId),
+    ]);
 
-    return new Map(rows.map((row) => [row.categoryId, row.entries]));
+    const usage = new Map<string, number>();
+
+    for (const row of [...entries, ...templates]) {
+      usage.set(row.categoryId, (usage.get(row.categoryId) ?? 0) + row.rows);
+    }
+
+    return usage;
   }
 
   /** Live entries in the last `days`, per category, to rank "Frequent" shortcuts. */

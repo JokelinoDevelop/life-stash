@@ -20,6 +20,17 @@ export interface FinanceOverviewResponse {
     unpaidCount: number;
     overdueCount: number;
   };
+  toConfirm: {
+    id: string;
+    kind: TransactionKind;
+    description: string;
+    clientName: string | null;
+    dayOfMonth: number;
+    dueDate: string;
+    amountMinor: number;
+    currency: Currency;
+    categoryIcon: string | null;
+  }[];
   waiting: {
     id: string;
     number: string;
@@ -99,6 +110,17 @@ export const toFinanceOverviewResponse = (
     kind: row.kind,
   })),
   spent: overview.spent,
+  toConfirm: overview.toConfirm.map((item) => ({
+    amountMinor: item.amountMinor,
+    categoryIcon: item.categoryIcon,
+    clientName: item.clientName,
+    currency: item.currency,
+    dayOfMonth: item.dayOfMonth,
+    description: item.description,
+    dueDate: item.dueDate,
+    id: item.id,
+    kind: item.kind,
+  })),
   today: overview.today,
   waiting: overview.waiting.map((invoice) => ({
     amountMinor: invoice.amountMinor,

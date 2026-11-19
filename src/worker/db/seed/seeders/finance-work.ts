@@ -219,6 +219,13 @@ export const financeWorkSeeder: Seeder = {
 
     const lastYear = Number(ctx.today.slice(0, 4)) - 1;
 
+    ctx.finance.clientIds = new Map([
+      ["ACME d.o.o.", ids.acme],
+      ["Brightside Studio", ids.brightside],
+      ["Northwind Labs", ids.northwind],
+      ["Polaris Agency", ids.polaris],
+    ]);
+
     await seedClients(ctx, ids, lastYear);
 
     const planned = planInvoices(ctx, ids, lastYear);

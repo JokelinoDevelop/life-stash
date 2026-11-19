@@ -9,6 +9,8 @@ export interface GetInvoiceResponse {
     number: string;
     clientId: string;
     clientName: string;
+    projectId: string | null;
+    projectName: string | null;
     issueDate: string;
     dueDate: string;
     periodStart: string | null;
@@ -55,6 +57,8 @@ export const toGetInvoiceResponse = (
     paidAt: detail.paidAt,
     periodEnd: detail.periodEnd,
     periodStart: detail.periodStart,
+    projectId: detail.projectId,
+    projectName: detail.projectName,
     sentAt: detail.sentAt,
     status: detail.displayStatus,
     transaction:

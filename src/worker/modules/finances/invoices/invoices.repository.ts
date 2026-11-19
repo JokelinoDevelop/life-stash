@@ -1,7 +1,11 @@
 import { and, desc, eq, inArray, isNotNull, isNull, lt, ne } from "drizzle-orm";
 
 import type { Db } from "../../../core/db";
-import { financeClients, financeInvoices } from "../../../db/schema/finances";
+import {
+  financeClients,
+  financeInvoices,
+  financeProjects,
+} from "../../../db/schema/finances";
 
 export type InvoiceRow = typeof financeInvoices.$inferSelect;
 
@@ -14,6 +18,7 @@ export type InvoicePatch = Partial<NewInvoice>;
 
 export interface InvoiceWithClient extends InvoiceRow {
   clientName: string;
+  projectName: string | null;
 }
 
 /** Household-scoped access to `finance_invoices` (soft-deleted rows hidden unless asked). */
@@ -36,11 +41,19 @@ export class InvoicesRepository {
   /** Every live invoice with its client's name, newest issue first. */
   async list(filter: { clientId?: string } = {}): Promise<InvoiceWithClient[]> {
     const rows = await this.#db
-      .select({ clientName: financeClients.name, invoice: financeInvoices })
+      .select({
+        clientName: financeClients.name,
+        invoice: financeInvoices,
+        projectName: financeProjects.name,
+      })
       .from(financeInvoices)
       .innerJoin(
         financeClients,
         eq(financeClients.id, financeInvoices.clientId)
+      )
+      .leftJoin(
+        financeProjects,
+        eq(financeProjects.id, financeInvoices.projectId)
       )
       .where(
         filter.clientId === undefined
@@ -49,7 +62,11 @@ export class InvoicesRepository {
       )
       .orderBy(desc(financeInvoices.issueDate), desc(financeInvoices.number));
 
-    return rows.map((row) => ({ ...row.invoice, clientName: row.clientName }));
+    return rows.map((row) => ({
+      ...row.invoice,
+      clientName: row.clientName,
+      projectName: row.projectName,
+    }));
   }
 
   async findById(
@@ -61,18 +78,30 @@ export class InvoicesRepository {
       : this.#live();
 
     const [row] = await this.#db
-      .select({ clientName: financeClients.name, invoice: financeInvoices })
+      .select({
+        clientName: financeClients.name,
+        invoice: financeInvoices,
+        projectName: financeProjects.name,
+      })
       .from(financeInvoices)
       .innerJoin(
         financeClients,
         eq(financeClients.id, financeInvoices.clientId)
+      )
+      .leftJoin(
+        financeProjects,
+        eq(financeProjects.id, financeInvoices.projectId)
       )
       .where(and(eq(financeInvoices.id, invoiceId), scope))
       .limit(1);
 
     return row === undefined
       ? undefined
-      : { ...row.invoice, clientName: row.clientName };
+      : {
+          ...row.invoice,
+          clientName: row.clientName,
+          projectName: row.projectName,
+        };
   }
 
   async numbers(): Promise<string[]> {
@@ -119,6 +148,23 @@ export class InvoicesRepository {
       .update(financeInvoices)
       .set(patch)
       .where(and(eq(financeInvoices.id, invoiceId), this.#live()));
+  }
+
+  /** Records the overdue heads-up (the cron sends one per invoice). */
+  async markNotified(invoiceIds: readonly string[], at: string): Promise<void> {
+    if (invoiceIds.length === 0) {
+      return;
+    }
+
+    await this.#db
+      .update(financeInvoices)
+      .set({ overdueNotifiedAt: at })
+      .where(
+        and(
+          eq(financeInvoices.householdId, this.#householdId),
+          inArray(financeInvoices.id, [...invoiceIds])
+        )
+      );
   }
 
   async setDeleted(invoiceId: string, deletedAt: string | null): Promise<void> {
@@ -173,6 +219,7 @@ export type InvoicesRepositoryPort = Pick<
   | "insert"
   | "update"
   | "setDeleted"
+  | "markNotified"
   | "deletedBefore"
   | "purge"
 >;

@@ -2,15 +2,50 @@ import { isNotNull } from "drizzle-orm";
 
 import { Container } from "../../core/container";
 import { createDb } from "../../core/db";
+import type { Db } from "../../core/db";
 import type { Bindings } from "../../core/env";
 import { financeInvoices, financeTransactions } from "../../db/schema/finances";
 import { UNDO_WINDOW_DAYS } from "./transactions/transactions.service";
 
 const MS_PER_DAY = 86_400_000;
 
-/** Daily: purges soft-deleted finance records (and their files) once the undo window passed. */
+/** One overdue heads-up per newly overdue invoice, for every household that wants them. */
+const sendOverdueReminders = async (env: Bindings, db: Db): Promise<void> => {
+  const rows = await db
+    .selectDistinct({ householdId: financeInvoices.householdId })
+    .from(financeInvoices);
+
+  await Promise.all(
+    rows.map(async ({ householdId }) => {
+      const pending: Promise<unknown>[] = [];
+
+      const defer = (work: Promise<unknown>) => {
+        pending.push(work);
+      };
+
+      try {
+        await new Container({
+          db,
+          defer,
+          env,
+          householdId,
+        }).finances.overdueReminders.run();
+      } catch (error) {
+        console.error("Overdue reminders failed", householdId, error);
+      }
+
+      await Promise.allSettled(pending);
+    })
+  );
+};
+
+/**
+ * Daily: overdue-invoice heads-ups, then purges soft-deleted finance records (and their files)
+ * once the undo window has passed.
+ */
 export const runFinancesSweep = async (env: Bindings): Promise<void> => {
   const db = createDb(env.DB);
+  await sendOverdueReminders(env, db);
 
   const cutoff = new Date(
     Date.now() - UNDO_WINDOW_DAYS * MS_PER_DAY

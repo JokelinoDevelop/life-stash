@@ -4,22 +4,25 @@ import {
   previousInvoiceNumber,
   receivables,
 } from "@shared/domain/finances/invoices";
-import type {
-  InvoiceStatus,
-  Receivables,
-} from "@shared/domain/finances/invoices";
-import type { Currency } from "@shared/domain/money";
+import type { Receivables } from "@shared/domain/finances/invoices";
 
 import { domainError, notFound } from "../../../core/errors";
 import type { AttachmentsRepositoryPort } from "../attachments/attachments.repository";
 import type { CategoriesService } from "../categories/categories.service";
 import type { ClientsService } from "../clients/clients.service";
 import type { ClockPort } from "../household/clock";
+import type { ProjectsService } from "../projects/projects.service";
 import type { FinanceSettingsService } from "../settings/settings.service";
-import type { LedgerLinksPort } from "../transactions/ledger-links.repository";
 import type { TransactionRow } from "../transactions/transactions.repository";
 import { selectInvoices } from "./invoice-selection";
-import type { InvoiceStats, InvoiceStatusFilter } from "./invoice-selection";
+import type { InvoiceStatusFilter } from "./invoice-selection";
+import type {
+  InvoiceDetail,
+  InvoiceInput,
+  InvoiceList,
+  InvoiceListRow,
+  InvoiceTransactionsPort,
+} from "./invoice-types";
 import type {
   InvoicePatch,
   InvoicesRepositoryPort,
@@ -28,45 +31,15 @@ import type {
 
 const ALREADY_PAID = "finances.invoice_already_paid";
 
+export type {
+  InvoiceDetail,
+  InvoiceInput,
+  InvoiceList,
+  InvoiceListRow,
+  InvoiceTransactionsPort,
+} from "./invoice-types";
+
 export type { InvoiceStatusFilter } from "./invoice-selection";
-
-export interface InvoiceInput {
-  clientId: string;
-  number: string;
-  issueDate: string;
-  dueDate: string;
-  periodStart: string | null;
-  periodEnd: string | null;
-  description: string | null;
-  amountMinor: number;
-  currency: Currency;
-  notes: string | null;
-}
-
-export interface InvoiceListRow extends InvoiceWithClient {
-  displayStatus: InvoiceStatus;
-  daysOverdue: number;
-  attachments: number;
-}
-
-export interface InvoiceList {
-  rows: InvoiceListRow[];
-  stats: InvoiceStats;
-}
-
-export interface InvoiceDetail extends InvoiceListRow {
-  transaction: TransactionRow | null;
-  firstAttachedAt: string | null;
-}
-
-/** What invoices need from the ledger: the linked entry, created and removed with the invoice. */
-export type InvoiceTransactionsPort = Pick<
-  LedgerLinksPort,
-  | "findByInvoice"
-  | "insertForInvoice"
-  | "deleteByInvoice"
-  | "setDeletedByInvoice"
->;
 
 export class InvoicesService {
   readonly #repo: InvoicesRepositoryPort;
@@ -74,6 +47,7 @@ export class InvoicesService {
   readonly #categories: Pick<CategoriesService, "invoicesCategory">;
   readonly #clients: Pick<ClientsService, "requireForEntry">;
   readonly #settings: Pick<FinanceSettingsService, "get">;
+  readonly #projects: Pick<ProjectsService, "requireForInvoice">;
   readonly #attachments: AttachmentsRepositoryPort;
   readonly #clock: ClockPort;
 
@@ -83,6 +57,7 @@ export class InvoicesService {
     categories: Pick<CategoriesService, "invoicesCategory">;
     clients: Pick<ClientsService, "requireForEntry">;
     settings: Pick<FinanceSettingsService, "get">;
+    projects: Pick<ProjectsService, "requireForInvoice">;
     attachments: AttachmentsRepositoryPort;
     clock: ClockPort;
   }) {
@@ -91,6 +66,7 @@ export class InvoicesService {
     this.#categories = deps.categories;
     this.#clients = deps.clients;
     this.#settings = deps.settings;
+    this.#projects = deps.projects;
     this.#attachments = deps.attachments;
     this.#clock = deps.clock;
   }
@@ -218,6 +194,11 @@ export class InvoicesService {
 
   async create(input: InvoiceInput, markSent: boolean): Promise<string> {
     await this.#clients.requireForEntry(input.clientId);
+
+    if (input.projectId !== null) {
+      await this.#projects.requireForInvoice(input.projectId, input.clientId);
+    }
+
     await this.#assertNumberFree(input.number, null);
     const today = await this.#clock.today();
 
@@ -248,7 +229,23 @@ export class InvoicesService {
       await this.#assertNumberFree(changes.number, invoiceId);
     }
 
+    const projectId =
+      changes.projectId === undefined ? invoice.projectId : changes.projectId;
+
+    if (projectId !== null) {
+      await this.#projects.requireForInvoice(
+        projectId,
+        changes.clientId ?? invoice.clientId
+      );
+    }
+
     const patch: InvoicePatch = { ...changes };
+
+    // A new due date earns a fresh overdue heads-up.
+    if (changes.dueDate !== undefined && changes.dueDate !== invoice.dueDate) {
+      patch.overdueNotifiedAt = null;
+    }
+
     await this.#repo.update(invoiceId, patch);
   }
 

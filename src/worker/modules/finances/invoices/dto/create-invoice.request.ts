@@ -20,4 +20,5 @@ export const createInvoiceRequest = z.object({
   number: shortText(40),
   periodEnd: isoDate.nullable(),
   periodStart: isoDate.nullable(),
+  projectId: z.uuid().nullable().default(null),
 });

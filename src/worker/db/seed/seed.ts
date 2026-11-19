@@ -60,7 +60,7 @@ const seed = async (db: Db) => {
     catalog: new CatalogRefs(),
     householdId: await createDemoAccount(db),
     random: createRandom(Number(args.seed)),
-    finance: { categoryIds: new Map() },
+    finance: { categoryIds: new Map(), clientIds: new Map() },
     db,
     today,
   };

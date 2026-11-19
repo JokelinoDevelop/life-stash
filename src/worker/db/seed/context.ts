@@ -66,6 +66,6 @@ export interface SeedContext {
   random: Random;
   catalog: CatalogRefs;
   cars: SeededCar[];
-  /** Filled by the finance seeders: category ids by (English) name. */
-  finance: { categoryIds: Map<string, string> };
+  /** Filled by the finance seeders: category and client ids by (English) name. */
+  finance: { categoryIds: Map<string, string>; clientIds: Map<string, string> };
 }

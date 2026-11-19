@@ -23,4 +23,5 @@ export const updateInvoiceRequest = z.object({
   number: shortText(40).optional(),
   periodEnd: isoDate.nullable().optional(),
   periodStart: isoDate.nullable().optional(),
+  projectId: z.uuid().nullable().optional(),
 });

@@ -27,6 +27,7 @@ const row = (overrides: Partial<TransactionRow> = {}): TransactionListRow => ({
   invoiceId: null,
   kind: "expense",
   notes: null,
+  recurringId: null,
   updatedAt: "2026-11-01T00:00:00Z",
   ...overrides,
 });
@@ -68,6 +69,7 @@ const fakeTransactions = (
         clientId: values.clientId ?? null,
         invoiceId: values.invoiceId ?? null,
         notes: values.notes ?? null,
+        recurringId: values.recurringId ?? null,
       });
 
       rows.push(created);
