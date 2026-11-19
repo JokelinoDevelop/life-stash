@@ -27,6 +27,7 @@ const FINANCE_MESSAGES = {
   "finances.invoice_void": "errors.invoiceVoid",
   "finances.project_client_mismatch": "errors.projectClientMismatch",
   "finances.project_in_use": "errors.projectInUse",
+  "finances.recurring_already_handled": "errors.recurringAlreadyHandled",
   "finances.transaction_linked": "errors.transactionLinked",
 } as const satisfies Record<FinanceErrorCode, string>;
 

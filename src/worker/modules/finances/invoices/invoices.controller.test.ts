@@ -185,6 +185,29 @@ describe("invoices controller", () => {
     ).resolves.toStrictEqual({ transactions: [] });
   });
 
+  it("books one entry when Mark paid is sent twice at once", async () => {
+    const { invoiceId } = await setup();
+    const payment = { amountMinor: 480_000, paidDate: "2020-02-03" };
+
+    await Promise.all([
+      request(alice, "POST", `/invoices/${invoiceId}/mark-paid`, payment),
+      request(alice, "POST", `/invoices/${invoiceId}/mark-paid`, payment),
+    ]);
+
+    const ledger = await read(
+      await request(alice, "GET", "/transactions"),
+      ledgerBody
+    );
+
+    const invoice = await read(
+      await request(alice, "GET", `/invoices/${invoiceId}`),
+      invoiceBody
+    );
+
+    expect(ledger.transactions).toHaveLength(1);
+    expect(invoice.invoice).toMatchObject({ status: "paid" });
+  });
+
   it("locks paid invoices and their ledger entry", async () => {
     const { invoiceId } = await setup();
     await request(alice, "POST", `/invoices/${invoiceId}/mark-paid`, {

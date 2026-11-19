@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 
 import type { Db } from "../../../core/db";
 import {
@@ -101,6 +101,31 @@ export class RecurringRepository {
       .where(this.#byId(recurringId));
   }
 
+  /**
+   * Marks `month` handled only if nobody did since `previous` was read; false when another
+   * request got there first.
+   */
+  async claimMonth(
+    recurringId: string,
+    month: string,
+    previous: string | null
+  ): Promise<boolean> {
+    const rows = await this.#db
+      .update(financeRecurring)
+      .set({ lastHandledMonth: month })
+      .where(
+        and(
+          this.#byId(recurringId),
+          previous === null
+            ? isNull(financeRecurring.lastHandledMonth)
+            : eq(financeRecurring.lastHandledMonth, previous)
+        )
+      )
+      .returning({ id: financeRecurring.id });
+
+    return rows.length > 0;
+  }
+
   async delete(recurringId: string): Promise<void> {
     await this.#db.delete(financeRecurring).where(this.#byId(recurringId));
   }
@@ -108,5 +133,5 @@ export class RecurringRepository {
 
 export type RecurringRepositoryPort = Pick<
   RecurringRepository,
-  "list" | "findById" | "insert" | "update" | "delete"
+  "list" | "findById" | "insert" | "update" | "claimMonth" | "delete"
 >;

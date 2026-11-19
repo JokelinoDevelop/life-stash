@@ -1,5 +1,6 @@
 import { formatShortDate } from "@shared/domain/dates";
 import { invoicesToRemind } from "@shared/domain/finances/reminders";
+import { toMajor } from "@shared/domain/money";
 import type { Currency } from "@shared/domain/money";
 
 import type { PushMessage } from "../../../core/push";
@@ -13,7 +14,7 @@ const money = (amountMinor: number, currency: Currency, locale: "en" | "mk") =>
     currency,
     maximumFractionDigits: currency === "MKD" ? 0 : 2,
     style: "currency",
-  }).format(amountMinor / 100);
+  }).format(toMajor(amountMinor));
 
 const TEXT = {
   en: {
@@ -70,7 +71,8 @@ export class OverdueRemindersService {
     const due = invoicesToRemind(invoices, today);
     const text = TEXT[prefs.locale];
 
-    await Promise.all(
+    // Mark only what was sent, so one failed push doesn't re-send the rest tomorrow.
+    const results = await Promise.allSettled(
       due.map(async (invoice) => {
         await this.#send({
           body: text.body(
@@ -86,7 +88,14 @@ export class OverdueRemindersService {
       })
     );
 
-    const ids = due.map((invoice) => invoice.id);
+    const ids: string[] = [];
+
+    for (const [index, invoice] of due.entries()) {
+      if (results[index]?.status === "fulfilled") {
+        ids.push(invoice.id);
+      }
+    }
+
     await this.#invoices.markNotified(ids, this.#clock.now().toISOString());
 
     return ids;

@@ -103,6 +103,7 @@ export const createFinancesModule = ({
     categories,
     clients,
     clock,
+    household,
     projects,
     repo: invoicesRepo,
     settings,

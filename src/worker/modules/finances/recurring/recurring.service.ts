@@ -5,7 +5,7 @@ import {
 } from "@shared/domain/finances/recurring";
 import type { Currency } from "@shared/domain/money";
 
-import { notFound } from "../../../core/errors";
+import { domainError, notFound } from "../../../core/errors";
 import type { CategoriesService } from "../categories/categories.service";
 import type { ClientsService } from "../clients/clients.service";
 import type { ClockPort } from "../household/clock";
@@ -127,44 +127,66 @@ export class RecurringService {
     await this.#repo.delete(recurringId);
   }
 
-  /** Books this month's entry and marks the month handled. */
-  async confirm(recurringId: string): Promise<TransactionRow> {
+  /** This month's pending entry for a template; refuses one already confirmed or skipped. */
+  async #pending(recurringId: string) {
     const [template, today] = await Promise.all([
       this.#get(recurringId),
       this.#clock.today(),
     ]);
 
     const [pending] = pendingRecurring([template], today);
-    const month = today.slice(0, 7);
-    const date = confirmDate(pending?.dueDate ?? today, today);
 
-    // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
-    const transaction = await this.#transactions.insert({
-      amountMinor: template.amountMinor,
-      categoryId: template.categoryId,
-      clientId: template.kind === "income" ? template.clientId : null,
-      currency: template.currency,
-      date,
-      description: template.description,
-      kind: template.kind,
-      notes: null,
+    if (pending === undefined) {
+      throw domainError("finances.recurring_already_handled");
+    }
+
+    return { month: today.slice(0, 7), pending, template, today };
+  }
+
+  /** Books this month's entry and marks the month handled (once per month). */
+  async confirm(recurringId: string): Promise<TransactionRow> {
+    const { month, pending, template, today } =
+      await this.#pending(recurringId);
+
+    // Claim the month first, so a double click can't book it twice.
+    const claimed = await this.#repo.claimMonth(
       recurringId,
-    });
+      month,
+      template.lastHandledMonth
+    );
 
-    await this.#repo.update(recurringId, { lastHandledMonth: month });
+    if (!claimed) {
+      throw domainError("finances.recurring_already_handled");
+    }
 
-    return transaction;
+    const date = confirmDate(pending.dueDate, today);
+
+    try {
+      // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
+      return await this.#transactions.insert({
+        amountMinor: template.amountMinor,
+        categoryId: template.categoryId,
+        clientId: template.kind === "income" ? template.clientId : null,
+        currency: template.currency,
+        date,
+        description: template.description,
+        kind: template.kind,
+        notes: null,
+        recurringId,
+      });
+    } catch (error) {
+      // Nothing was booked: give the month back so Confirm can be retried.
+      await this.#repo.update(recurringId, {
+        lastHandledMonth: template.lastHandledMonth,
+      });
+
+      throw error;
+    }
   }
 
   /** Marks this month handled without booking anything. */
   async skip(recurringId: string): Promise<void> {
-    const [, today] = await Promise.all([
-      this.#get(recurringId),
-      this.#clock.today(),
-    ]);
-
-    await this.#repo.update(recurringId, {
-      lastHandledMonth: today.slice(0, 7),
-    });
+    const { month } = await this.#pending(recurringId);
+    await this.#repo.update(recurringId, { lastHandledMonth: month });
   }
 }

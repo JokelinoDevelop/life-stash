@@ -113,6 +113,28 @@ describe("recurring, projects and export", () => {
     expect(ledger.total).toBe(1);
   });
 
+  it("books a month only once, even when Confirm is sent twice", async () => {
+    const { id } = await salaryTemplate();
+
+    const [first, second] = await Promise.all([
+      request(alice, "POST", `/recurring/${id}/confirm`),
+      request(alice, "POST", `/recurring/${id}/confirm`),
+    ]);
+
+    const again = await request(alice, "POST", `/recurring/${id}/confirm`);
+
+    const ledger = await read(
+      await request(alice, "GET", "/transactions"),
+      ledgerBody
+    );
+
+    expect(
+      [first.status, second.status].toSorted((a, b) => a - b)
+    ).toStrictEqual([200, 409]);
+    expect(again.status).toBe(409);
+    expect(ledger.total).toBe(1);
+  });
+
   it("skips without booking, and keeps templates per household", async () => {
     const { id } = await salaryTemplate();
     const bobConfirm = await request(bob, "POST", `/recurring/${id}/confirm`);

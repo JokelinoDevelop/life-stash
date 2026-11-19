@@ -25,6 +25,7 @@ export type FinanceErrorCode =
   | "finances.invoice_void"
   | "finances.project_client_mismatch"
   | "finances.project_in_use"
+  | "finances.recurring_already_handled"
   | "finances.invoice_already_paid"
   | "finances.invoice_not_paid"
   | "finances.invoice_number_taken"

@@ -11,9 +11,11 @@ import type { AttachmentsRepositoryPort } from "../attachments/attachments.repos
 import type { CategoriesService } from "../categories/categories.service";
 import type { ClientsService } from "../clients/clients.service";
 import type { ClockPort } from "../household/clock";
+import type { HouseholdRepository } from "../household/household.repository";
 import type { ProjectsService } from "../projects/projects.service";
 import type { FinanceSettingsService } from "../settings/settings.service";
 import type { TransactionRow } from "../transactions/transactions.repository";
+import { bookInvoicePayment } from "./invoice-payment";
 import { selectInvoices } from "./invoice-selection";
 import type { InvoiceStatusFilter } from "./invoice-selection";
 import type {
@@ -50,6 +52,7 @@ export class InvoicesService {
   readonly #projects: Pick<ProjectsService, "requireForInvoice">;
   readonly #attachments: AttachmentsRepositoryPort;
   readonly #clock: ClockPort;
+  readonly #household: Pick<HouseholdRepository, "preferences">;
 
   constructor(deps: {
     repo: InvoicesRepositoryPort;
@@ -60,6 +63,7 @@ export class InvoicesService {
     projects: Pick<ProjectsService, "requireForInvoice">;
     attachments: AttachmentsRepositoryPort;
     clock: ClockPort;
+    household: Pick<HouseholdRepository, "preferences">;
   }) {
     this.#repo = deps.repo;
     this.#transactions = deps.transactions;
@@ -69,6 +73,7 @@ export class InvoicesService {
     this.#projects = deps.projects;
     this.#attachments = deps.attachments;
     this.#clock = deps.clock;
+    this.#household = deps.household;
   }
 
   async #withDerived(
@@ -287,21 +292,20 @@ export class InvoicesService {
       throw domainError("finances.invoice_void");
     }
 
+    // A linked entry without "paid" means an earlier attempt (or a parallel request) booked it
+    // but didn't finish; reuse it instead of booking twice.
     // oxlint-disable-next-line react-doctor/server-sequential-independent-await -- only after the checks above passed
-    const category = await this.#categories.invoicesCategory();
-
-    // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
-    const transaction = await this.#transactions.insertForInvoice({
-      amountMinor: payment.amountMinor,
-      categoryId: category.id,
-      clientId: invoice.clientId,
-      currency: invoice.currency,
-      date: payment.paidDate,
-      description: `Invoice ${invoice.number}`,
-      invoiceId,
-      kind: "income",
-      notes: null,
-    });
+    const transaction =
+      (await this.#transactions.findByInvoice(invoiceId)) ??
+      (await bookInvoicePayment(
+        {
+          categories: this.#categories,
+          household: this.#household,
+          transactions: this.#transactions,
+        },
+        invoice,
+        payment
+      ));
 
     await this.#repo.update(invoiceId, {
       paidAt: payment.paidDate,

@@ -115,6 +115,7 @@
     "categorySystem": "This category is used by the app and can't be changed.",
     "clientInUse": "This client has invoices or income. Archive it instead.",
     "invoiceAlreadyPaid": "This invoice is already paid.",
+    "recurringAlreadyHandled": "This month is already confirmed or skipped.",
     "invoiceNotPaid": "This invoice isn't paid.",
     "invoiceNumberTaken": "That invoice number is already used.",
     "transactionLinked": "This entry belongs to a paid invoice. Mark the invoice unpaid instead.",

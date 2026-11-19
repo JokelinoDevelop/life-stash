@@ -75,12 +75,19 @@ export const runFinancesSweep = async (env: Bindings): Promise<void> => {
       };
 
       const { finances } = new Container({ db, defer, env, householdId });
-      // Entries first: an invoice's ledger entry references it.
-      const transactionIds = await finances.transactions.purgeExpired();
-      // oxlint-disable-next-line react-doctor/server-sequential-independent-await -- must run after the entries are gone (foreign key)
-      const invoiceIds = await finances.invoices.purgeExpired(cutoff);
-      await finances.deleteFiles("finance_transaction", transactionIds);
-      await finances.deleteFiles("finance_invoice", invoiceIds);
+
+      try {
+        // Entries first: an invoice's ledger entry references it. Their files go right away,
+        // so a failing invoice purge can't leave them orphaned in the bucket.
+        const transactionIds = await finances.transactions.purgeExpired();
+        await finances.deleteFiles("finance_transaction", transactionIds);
+        // oxlint-disable-next-line react-doctor/server-sequential-independent-await -- must run after the entries are gone (foreign key)
+        const invoiceIds = await finances.invoices.purgeExpired(cutoff);
+        await finances.deleteFiles("finance_invoice", invoiceIds);
+      } catch (error) {
+        console.error("Finance purge failed", householdId, error);
+      }
+
       await Promise.allSettled(pending);
     })
   );

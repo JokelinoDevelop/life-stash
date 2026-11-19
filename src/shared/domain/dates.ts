@@ -156,6 +156,18 @@ export const addMonths = (date: string, months: number): string => {
   return fromUtc(Date.UTC(year, targetMonthIndex, Math.min(day, lastDay)));
 };
 
+/**
+ * Like `addMonths`, but a month's last day stays the last day (31.05 → 30.06 → 31.07), so
+ * month-end dates don't drift when stepped one month at a time.
+ */
+export const addMonthsKeepingMonthEnd = (
+  date: string,
+  months: number
+): string =>
+  addDays(date, 1).slice(8, 10) === "01"
+    ? addDays(addMonths(addDays(date, 1), months), -1)
+    : addMonths(date, months);
+
 /** Whole days from `from` to `to` (negative when `to` is earlier). */
 export const daysBetween = (from: string, to: string): number =>
   Math.round((toUtc(to) - toUtc(from)) / MS_PER_DAY);

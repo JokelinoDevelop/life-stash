@@ -1,4 +1,8 @@
-import { addDays, addMonths } from "@shared/domain/dates";
+import {
+  addDays,
+  addMonths,
+  addMonthsKeepingMonthEnd,
+} from "@shared/domain/dates";
 import { defaultDueDate } from "@shared/domain/finances/invoices";
 import { toMajor, toMinor } from "@shared/domain/money";
 import type { Currency } from "@shared/domain/money";
@@ -95,8 +99,8 @@ export const duplicateToFormValues = (
 
   return {
     ...values,
-    dueDate: addMonths(invoice.dueDate, 1),
-    issueDate: addMonths(invoice.issueDate, 1),
+    dueDate: addMonthsKeepingMonthEnd(invoice.dueDate, 1),
+    issueDate: addMonthsKeepingMonthEnd(invoice.issueDate, 1),
     number,
     period:
       values.period === NO_PERIOD

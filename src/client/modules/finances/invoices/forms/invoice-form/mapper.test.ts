@@ -40,7 +40,7 @@ describe(duplicateToFormValues, () => {
       values.issueDate,
       values.dueDate,
       values.number,
-    ]).toStrictEqual(["2026-10", "2026-10-30", "2026-11-30", "2026-015"]);
+    ]).toStrictEqual(["2026-10", "2026-10-31", "2026-11-30", "2026-015"]);
   });
 });
 
