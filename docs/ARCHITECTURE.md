@@ -98,6 +98,7 @@ On the client, Finances lives in `src/client/modules/finances` (queries, mutatio
 
 - A reminder is due by date, by odometer, or by whichever comes first; it may recur by months and/or km.
 - Status: `overdue` (past date or odometer reached), `due-soon` (within 7 days or 1,000 km), `upcoming`.
+- **Finances** (`finances.cron.ts`, same daily trigger): one push per invoice the day after it becomes overdue (`overdue_notified_at`; skipped when "Remind me about overdue invoices" is off), tapping opens Mark paid; then purges soft-deleted finance records past the 7-day undo window, with their files.
 - **One heads-up per reminder** (`notified_at`): the daily cron notifies date reminders 7 days ahead; logging an odometer reading checks km reminders immediately.
 - **Odometer nudge**: if no reading has been logged for N weeks (setting, default 4, 0 = off), the cron sends one nudge per car per period.
 - Completing a service reminder opens a prefilled service visit; saving it completes the reminder and schedules the next one when an interval is set. Insurance/registration reminders open a prefilled expense instead.
