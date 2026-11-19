@@ -2,7 +2,6 @@ import type { DatePrecision } from "@shared/domain/dates";
 import type { Currency } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { useFormat } from "@/lib/format";
 
 interface CarDetails {
@@ -87,22 +86,23 @@ export const DetailsTab = ({ car }: { car: CarDetails }) => {
     [tc("fields.notes"), car.notes],
   ];
 
+  const present = rows.filter(
+    (row): row is [string, string] => row[1] !== null
+  );
+
   return (
-    <Card>
-      <CardContent>
-        <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-          {rows.flatMap(([label, value]) =>
-            value === null
-              ? []
-              : [
-                  <div className="flex flex-col" key={label}>
-                    <dt className="text-muted-foreground text-sm">{label}</dt>
-                    <dd className="whitespace-pre-wrap">{value}</dd>
-                  </div>,
-                ]
-          )}
-        </dl>
-      </CardContent>
-    </Card>
+    <dl className="bg-card divide-divider divide-y overflow-hidden rounded-lg border">
+      {present.map(([label, value]) => (
+        <div
+          className="flex flex-col gap-0.5 px-4 py-2.5 md:grid md:min-h-10 md:grid-cols-[12rem_minmax(0,1fr)] md:items-center md:gap-4 md:py-2"
+          key={label}
+        >
+          <dt className="text-muted-foreground text-xs md:text-sm">{label}</dt>
+          <dd className="break-words whitespace-pre-wrap tabular-nums">
+            {value}
+          </dd>
+        </div>
+      ))}
+    </dl>
   );
 };

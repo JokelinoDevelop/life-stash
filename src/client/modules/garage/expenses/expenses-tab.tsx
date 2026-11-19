@@ -3,9 +3,9 @@ import { Link } from "@tanstack/react-router";
 import { Plus, Receipt } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ListRow, ListSection } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 
@@ -44,7 +44,7 @@ export const ExpensesTab = ({
   const categories = totalsByCategory(list, Number(todayIso().slice(0, 4)));
 
   const addButton = readOnly ? null : (
-    <Button asChild>
+    <Button asChild size="compact">
       <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
         <Plus />
         {t("add")}
@@ -63,36 +63,29 @@ export const ExpensesTab = ({
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("thisYear")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {categories.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("noneThisYear")}</p>
-          ) : (
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((entry) => (
-                <li className="flex items-center gap-3" key={entry.category}>
-                  <CategoryIcon category={entry.category} />
-                  <div className="min-w-0">
-                    <p className="text-muted-foreground text-sm">
-                      {t(`categories.${entry.category}`)}
-                    </p>
-                    <p className="font-semibold tabular-nums">
-                      {format.totals(entry.totals)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <ListSection title={t("thisYear")}>
+        {categories.length === 0 ? (
+          <ListRow className="text-muted-foreground">
+            {t("noneThisYear")}
+          </ListRow>
+        ) : (
+          categories.map((entry) => (
+            <ListRow className="py-2 md:py-1.5" key={entry.category}>
+              <CategoryIcon category={entry.category} />
+              <span className="min-w-0 flex-1 truncate font-medium">
+                {t(`categories.${entry.category}`)}
+              </span>
+              <span className="shrink-0 font-medium tabular-nums">
+                {format.totals(entry.totals)}
+              </span>
+            </ListRow>
+          ))
+        )}
+      </ListSection>
       <ExpenseList carId={carId} expenses={list} readOnly={readOnly} />
     </div>
   );

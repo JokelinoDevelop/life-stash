@@ -2,8 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ListRow, ListSection } from "@/components/app/list-section";
 import { useFormat } from "@/lib/format";
 
 import { itemHistoryQuery } from "./visits.queries";
@@ -16,41 +15,38 @@ export const ItemHistoryCard = ({ carId }: { carId: string }) => {
   const items = history.data?.items ?? [];
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("history.lastDone")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {history.isSuccess && items.length === 0 && (
-          <p className="text-muted-foreground text-sm">
-            {t("history.lastDoneEmpty")}
-          </p>
-        )}
-        <ul className="flex flex-col divide-y">
-          {items.map((item) => (
-            <li key={item.itemId}>
-              <Link
-                className="flex items-center justify-between gap-3 py-2"
-                params={{ carId, visitId: item.visitId }}
-                to="/garage/cars/$carId/services/$visitId"
-              >
-                <span className="min-w-0 truncate">{item.name}</span>
-                <span className="text-muted-foreground flex shrink-0 items-center gap-2 text-sm">
-                  {item.byPreviousOwner && (
-                    <Badge variant="secondary">
-                      {t("history.previousOwner")}
-                    </Badge>
-                  )}
-                  {format.date(item.lastDate, item.lastDatePrecision)}
-                  {item.lastOdometerKm !== null &&
-                    ` · ${format.distance(item.lastOdometerKm)}`}
-                  <span>{t("history.times", { count: item.timesDone })}</span>
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+    <ListSection count={items.length} title={t("history.lastDone")}>
+      {history.isSuccess && items.length === 0 && (
+        <ListRow className="text-muted-foreground">
+          {t("history.lastDoneEmpty")}
+        </ListRow>
+      )}
+      {items.map((item) => (
+        <ListRow asChild className="py-2 md:py-1.5" key={item.itemId}>
+          <Link
+            params={{ carId, visitId: item.visitId }}
+            to="/garage/cars/$carId/services/$visitId"
+          >
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="truncate font-medium">{item.name}</span>
+              <span className="text-muted-foreground truncate text-xs tabular-nums">
+                {[
+                  format.date(item.lastDate, item.lastDatePrecision),
+                  item.lastOdometerKm === null
+                    ? null
+                    : format.distance(item.lastOdometerKm),
+                  item.byPreviousOwner ? t("history.previousOwner") : null,
+                ]
+                  .filter((part) => part !== null)
+                  .join(" · ")}
+              </span>
+            </div>
+            <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+              {t("history.times", { count: item.timesDone })}
+            </span>
+          </Link>
+        </ListRow>
+      ))}
+    </ListSection>
   );
 };

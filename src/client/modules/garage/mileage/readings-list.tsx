@@ -4,9 +4,12 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
-import { Badge } from "@/components/ui/badge";
+import {
+  ListRow,
+  ListRowText,
+  ListSection,
+} from "@/components/app/list-section";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
@@ -43,71 +46,66 @@ export const ReadingsList = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("list.title")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ul className="flex flex-col divide-y">
-          {rows.map(({ reading, kmSincePrevious, daysSincePrevious }) => (
-            <li
-              className="flex items-center gap-3 py-2"
-              key={`${reading.source}-${reading.id}`}
-            >
-              <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium tabular-nums">
-                    {format.distance(reading.odometerKm)}
-                  </span>
-                  <Badge variant="secondary">
-                    {t(`sources.${reading.source}`)}
-                  </Badge>
-                </p>
-                <p className="text-muted-foreground truncate text-sm">
-                  {format.date(reading.date)}
-                  {kmSincePrevious !== null &&
-                    daysSincePrevious !== null &&
-                    ` · ${t("list.sinceLast", {
-                      days: t("list.days", { count: daysSincePrevious }),
-                      distance: format.distance(kmSincePrevious),
-                    })}`}
-                  {reading.source === "reading" &&
-                    reading.notes !== null &&
-                    ` · ${reading.notes}`}
-                </p>
-              </div>
-              {!readOnly && reading.source === "reading" && (
-                <div className="flex shrink-0 gap-1">
+    <ListSection count={rows.length} title={t("list.title")}>
+      {rows.map(({ reading, kmSincePrevious, daysSincePrevious }) => (
+        <ListRow
+          className="py-2 md:py-1"
+          key={`${reading.source}-${reading.id}`}
+        >
+          <ListRowText
+            meta={
+              <span className="tabular-nums">
+                {[
+                  format.date(reading.date),
+                  t(`sources.${reading.source}`),
+                  kmSincePrevious === null || daysSincePrevious === null
+                    ? null
+                    : t("list.sinceLast", {
+                        days: t("list.days", { count: daysSincePrevious }),
+                        distance: format.distance(kmSincePrevious),
+                      }),
+                  reading.source === "reading" ? reading.notes : null,
+                ]
+                  .filter((part) => part !== null)
+                  .join(" · ")}
+              </span>
+            }
+            title={
+              <span className="tabular-nums">
+                {format.distance(reading.odometerKm)}
+              </span>
+            }
+          />
+          {!readOnly && reading.source === "reading" && (
+            <div className="flex shrink-0">
+              <Button
+                aria-label={tc("actions.edit")}
+                onClick={() => {
+                  onEdit(reading);
+                }}
+                size="icon-compact"
+                variant="ghost"
+              >
+                <Pencil />
+              </Button>
+              <ConfirmDialog
+                onConfirm={async () => {
+                  await remove(reading.id);
+                }}
+                trigger={
                   <Button
-                    aria-label={tc("actions.edit")}
-                    onClick={() => {
-                      onEdit(reading);
-                    }}
-                    size="icon"
+                    aria-label={tc("actions.delete")}
+                    size="icon-compact"
                     variant="ghost"
                   >
-                    <Pencil />
+                    <Trash2 />
                   </Button>
-                  <ConfirmDialog
-                    onConfirm={async () => {
-                      await remove(reading.id);
-                    }}
-                    trigger={
-                      <Button
-                        aria-label={tc("actions.delete")}
-                        size="icon"
-                        variant="ghost"
-                      >
-                        <Trash2 />
-                      </Button>
-                    }
-                  />
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+                }
+              />
+            </div>
+          )}
+        </ListRow>
+      ))}
+    </ListSection>
   );
 };

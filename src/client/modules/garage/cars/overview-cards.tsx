@@ -7,6 +7,7 @@ import {
   ListRowText,
   ListSection,
 } from "@/components/app/list-section";
+import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { StatusRing } from "@/components/app/status-ring";
 import { STATUS_TEXT_TONE } from "@/components/app/status-tone";
 import type { api, SuccessBody } from "@/lib/api";
@@ -136,28 +137,6 @@ export const RecentVisitsCard = ({
   );
 };
 
-const Stat = ({
-  hint,
-  label,
-  value,
-}: {
-  hint?: string;
-  label: string;
-  value: string;
-}) => (
-  <div className="bg-card flex min-w-0 flex-col gap-0.5 px-4 py-3">
-    <span className="text-muted-foreground text-xs font-medium md:text-sm">
-      {label}
-    </span>
-    <span className="truncate text-lg font-semibold tracking-tight tabular-nums">
-      {value}
-    </span>
-    {hint !== undefined && (
-      <span className="text-muted-foreground truncate text-xs">{hint}</span>
-    )}
-  </div>
-);
-
 /** Odometer, distance this year and this year's costs in one hairline panel. */
 export const StatsPanel = ({ overview }: { overview: Overview }) => {
   const { t } = useTranslation("garage");
@@ -168,7 +147,7 @@ export const StatsPanel = ({ overview }: { overview: Overview }) => {
     values.length === 0 ? t("overview.nothingSpent") : format.totals(values);
 
   return (
-    <section className="bg-divider grid grid-cols-2 gap-px overflow-hidden rounded-lg border md:grid-cols-4">
+    <StatPanel>
       <Stat
         hint={
           latest === null
@@ -192,6 +171,6 @@ export const StatsPanel = ({ overview }: { overview: Overview }) => {
         label={t("overview.otherCosts")}
         value={amount(overview.expensesThisYear)}
       />
-    </section>
+    </StatPanel>
   );
 };

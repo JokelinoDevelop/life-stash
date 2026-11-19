@@ -7,17 +7,8 @@ import type { OdometerPoint } from "@shared/domain/mileage";
 import { averagePerMonth } from "@shared/domain/mileage-buckets";
 import { useTranslation } from "react-i18next";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { useFormat } from "@/lib/format";
-
-const Stat = ({ label, value }: { label: string; value: string }) => (
-  <Card>
-    <CardContent>
-      <p className="text-muted-foreground text-sm">{label}</p>
-      <p className="text-xl font-semibold tabular-nums">{value}</p>
-    </CardContent>
-  </Card>
-);
 
 export const MileageStats = ({
   points,
@@ -37,7 +28,7 @@ export const MileageStats = ({
   const average = averagePerMonth(points);
 
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+    <StatPanel>
       <Stat
         label={t("stats.latest")}
         value={
@@ -53,6 +44,6 @@ export const MileageStats = ({
         label={t("stats.perMonth")}
         value={average === null ? t("stats.none") : format.distance(average)}
       />
-    </div>
+    </StatPanel>
   );
 };

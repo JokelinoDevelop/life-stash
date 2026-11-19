@@ -71,7 +71,7 @@ export const MileageTab = ({
       onClick={() => {
         setDialog({ open: true, reading: null });
       }}
-      size="lg"
+      size="compact"
     >
       <Gauge />
       {t("log")}
@@ -79,7 +79,7 @@ export const MileageTab = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {points.length === 0 ? (
         <EmptyState
           action={logButton}

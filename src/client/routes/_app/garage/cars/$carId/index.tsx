@@ -1,5 +1,6 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
@@ -31,6 +32,30 @@ const CarPage = () => {
   const { data } = useSuspenseQuery(carQuery(carId));
   const { car } = data;
   const readOnly = car.archivedAt !== null;
+  const tabStrip = useRef<HTMLDivElement>(null);
+
+  // Keep the active pill visible in the scrollable strip on phones.
+  useEffect(() => {
+    const strip = tabStrip.current;
+
+    const reveal = () => {
+      strip
+        ?.querySelector(`[id$="-trigger-${tab}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    };
+
+    // Runs once the strip has a real size (after Suspense reveals it and
+    // fonts load), then again whenever the tab changes.
+    const observer = new ResizeObserver(reveal);
+
+    if (strip !== null) {
+      observer.observe(strip);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [tab]);
 
   const subtitle = [
     [car.year, car.make, car.model].filter((part) => part !== null).join(" "),
@@ -65,7 +90,10 @@ const CarPage = () => {
         }}
         value={tab}
       >
-        <div className="-mx-4 mb-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0">
+        <div
+          className="-mx-4 mb-4 scroll-px-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0"
+          ref={tabStrip}
+        >
           <TabsList variant="pill">
             {CAR_TABS.map((value) => (
               <TabsTrigger key={value} value={value}>

@@ -56,7 +56,7 @@ export const SpendingTab = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <Suspense fallback={<LoadingState rows={1} />}>
         <SpendingChart currency={currency} years={years} />
       </Suspense>
