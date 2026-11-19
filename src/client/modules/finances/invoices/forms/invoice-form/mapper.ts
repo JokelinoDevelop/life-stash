@@ -16,8 +16,15 @@ type UpdateBody = InferRequestType<
   (typeof api.finances.invoices)[":invoiceId"]["$patch"]
 >["json"];
 
-/** The work-period value for "no period". */
+/** The select value for "no period" / "no project". */
 export const NO_PERIOD = "none";
+
+export interface InvoiceProjectOption {
+  id: string;
+  clientId: string;
+  name: string;
+  status: "active" | "done";
+}
 
 export interface InvoiceClientOption {
   id: string;
@@ -58,6 +65,7 @@ export const invoiceFormDefaults = (context: {
   notes: "",
   number: context.number,
   period: context.today.slice(0, 7),
+  projectId: NO_PERIOD,
 });
 
 export const invoiceToFormValues = (
@@ -72,6 +80,7 @@ export const invoiceToFormValues = (
   notes: invoice.notes ?? "",
   number: invoice.number,
   period: invoice.periodStart?.slice(0, 7) ?? NO_PERIOD,
+  projectId: invoice.projectId ?? NO_PERIOD,
 });
 
 /**
@@ -110,6 +119,7 @@ const toBody = (values: InvoiceFormValues) => {
     number: values.number.trim(),
     periodEnd: bounds?.end ?? null,
     periodStart: bounds?.start ?? null,
+    projectId: values.projectId === NO_PERIOD ? null : values.projectId,
   };
 };
 

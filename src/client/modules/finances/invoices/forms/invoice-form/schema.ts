@@ -23,6 +23,8 @@ export const invoiceFormSchema = z.object({
   number: requiredText(40),
   /** `YYYY-MM` of the billed month, or "none". */
   period: z.string(),
+  /** A project of the chosen client, or "none". */
+  projectId: z.string(),
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceFormSchema>;

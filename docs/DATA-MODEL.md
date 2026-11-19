@@ -74,7 +74,7 @@ Defaults are created (in the household's language) the first time Finances lists
 
 ### `finance_transactions`
 
-id, household_id, kind (`income`/`expense`), date, amount_minor (always positive), currency, category_id, client_id? (income), invoice_id? (unique; set by "mark paid"), description, notes?, deleted_at?, created_at, updated_at
+id, household_id, kind (`income`/`expense`), date, amount_minor (always positive), currency, category_id, client_id? (income), invoice_id? (unique; set by "mark paid"), recurring_id? (set when confirmed from a recurring template; no FK, so deleting the template keeps its entries), description, notes?, deleted_at?, created_at, updated_at
 
 Indexes: (household_id, date), (household_id, category_id), unique (invoice_id) where set. An entry with `invoice_id` belongs to its invoice: it can't be edited or deleted on its own (`finances.transaction_linked`); "mark unpaid" removes it. `deleted_at` is a soft delete so a delete can be undone; the daily cron purges rows deleted more than 7 days ago.
 
@@ -86,13 +86,25 @@ A client with invoices or income is archived, not deleted (`finances.client_in_u
 
 ### `finance_invoices`
 
-id, household_id, client_id, number, issue_date, due_date, period_start?, period_end? (the billed month), description?, amount_minor, currency, status (`draft`/`sent`/`paid`/`void`), sent_at? (date), paid_at? (date the money arrived), notes?, deleted_at?, created_at, updated_at
+id, household_id, client_id, project_id?, number, issue_date, due_date, period_start?, period_end? (the billed month), description?, amount_minor, currency, status (`draft`/`sent`/`paid`/`void`), sent_at? (date), paid_at? (date the money arrived), overdue_notified_at? (the one push heads-up; cleared when the due date changes), notes?, deleted_at?, created_at, updated_at
 
 Unique: (household_id, number) among live rows. **Overdue is derived** (`sent` and `due_date` before today in the household's time zone), never stored. Marking paid inserts one income entry in the system "Invoices" category with `invoice_id`; a paid invoice is locked until marked unpaid. Deleting soft-deletes the invoice and its entry together (Undo restores both).
 
 ### `finance_settings` (one row per household, created on first change)
 
 household_id (pk), default_payment_terms_days (30), invoice_number_format (`YYYY-NNN` / `YYYY/NNN` / `NNN`), overdue_reminders (bool, default true), updated_at. The main currency stays in `user_preferences.currency`.
+
+### `finance_projects`
+
+id, household_id, client_id, name, status (`active`/`done`), notes?, created_at, updated_at
+
+Optional grouping of one client's invoices; the client page shows what each project earned (paid invoices). A project with invoices can't be deleted (`finances.project_in_use`); an invoice's project must belong to its client.
+
+### `finance_recurring`
+
+id, household_id, kind, client_id?, category_id, description, amount_minor, currency, day_of_month (1–31, clamped to short months), active, last_handled_month? (`YYYY-MM`), created_at, updated_at
+
+Each month the overview lists active templates whose `last_handled_month` is before the current month. **Confirm** books one entry (dated the template's day, or today if that's still ahead) and sets `last_handled_month`; **Skip** only sets it. Nothing is ever booked automatically.
 
 ### Attachments
 

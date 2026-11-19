@@ -24,6 +24,8 @@ const DETAIL = {
   paidAt: "2026-10-28",
   periodEnd: "2026-09-30",
   periodStart: "2026-09-01",
+  projectId: null,
+  projectName: null,
   sentAt: "2026-09-30",
   status: "paid",
   transaction: null,

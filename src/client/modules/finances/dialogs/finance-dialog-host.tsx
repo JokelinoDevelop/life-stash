@@ -4,6 +4,8 @@ import { CategoryDialog } from "../categories/category-dialog";
 import { ClientDialog } from "../clients/client-dialog";
 import { InvoiceDialog } from "../invoices/invoice-dialog";
 import { MarkPaidDialog } from "../invoices/mark-paid-dialog";
+import { ProjectDialog } from "../projects/project-dialog";
+import { RecurringDialog } from "../recurring/recurring-dialog";
 import { TransactionDialog } from "../transactions/transaction-dialog";
 import { isFinanceDialog } from "./finance-dialog-search";
 import type { FinanceDialogSearch } from "./finance-dialog-search";
@@ -80,6 +82,21 @@ export const FinanceDialogHost = () => {
 
   if (current.dialog === "client") {
     return <ClientDialog clientId={current.id} key={key} {...common} />;
+  }
+
+  if (current.dialog === "recurring") {
+    return <RecurringDialog key={key} recurringId={current.id} {...common} />;
+  }
+
+  if (current.dialog === "project") {
+    return (
+      <ProjectDialog
+        forClient={current.forClient}
+        key={key}
+        projectId={current.id}
+        {...common}
+      />
+    );
   }
 
   if (current.dialog === "mark-paid" && current.id !== undefined) {

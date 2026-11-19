@@ -12,6 +12,8 @@ export const APP_DIALOGS = [
   "invoice",
   "client",
   "mark-paid",
+  "recurring",
+  "project",
 ] as const;
 
 export type AppDialog = (typeof APP_DIALOGS)[number];

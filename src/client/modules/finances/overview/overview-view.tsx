@@ -14,6 +14,7 @@ import { OverviewKpis } from "./overview-kpis";
 import { OverviewMobileTop } from "./overview-mobile";
 import { overviewQuery } from "./overview.queries";
 import { RecentList } from "./recent-list";
+import { ToConfirm } from "./to-confirm";
 import { WaitingList } from "./waiting-list";
 import { WhereMoneyWent } from "./where-money-went";
 
@@ -92,6 +93,7 @@ export const OverviewView = ({ year }: { year: number }) => {
       <div className="hidden md:block" data-bleed="">
         <OverviewKpis overview={data} />
       </div>
+      <ToConfirm overview={data} />
       <WaitingList overview={data} />
       <div className="hidden gap-4 md:mx-5 md:my-4 md:grid md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <div className="hidden md:block">

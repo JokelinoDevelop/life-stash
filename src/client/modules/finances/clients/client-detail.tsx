@@ -16,6 +16,7 @@ import { FinanceDialogLink } from "../dialogs/finance-dialog-link";
 import { useDueLabel, useInvoiceFor } from "../invoices/invoice-labels";
 import { InvoiceStatusIcon } from "../invoices/invoice-status-icon";
 import { useLedgerMoney } from "../money";
+import { ProjectsSection } from "../projects/projects-section";
 import { useMonthLabel } from "../transactions/month-band";
 import { ClientMonogram } from "./client-monogram";
 import { useUpdateClient } from "./clients.mutations";
@@ -250,6 +251,7 @@ export const ClientDetail = ({
           />
         </StatPanel>
         <InvoicesList data={detail.data} />
+        {client.kind === "client" && <ProjectsSection clientId={client.id} />}
         <div className="md:px-5 md:py-4">
           <EarnedByMonth
             currency={client.currency}

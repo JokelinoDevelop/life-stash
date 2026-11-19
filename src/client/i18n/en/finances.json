@@ -119,7 +119,9 @@
     "invoiceNumberTaken": "That invoice number is already used.",
     "transactionLinked": "This entry belongs to a paid invoice. Mark the invoice unpaid instead.",
     "clientNameTaken": "You already have a client with this name.",
-    "invoiceVoid": "This invoice is void."
+    "invoiceVoid": "This invoice is void.",
+    "projectClientMismatch": "That project belongs to another client.",
+    "projectInUse": "This project has invoices."
   },
   "command": {
     "logExpense": "Log expense",
@@ -131,7 +133,9 @@
     "invoices": "Invoices",
     "clients": "Clients",
     "overview": "Finances overview",
-    "invoicesGroup": "Invoices"
+    "invoicesGroup": "Invoices",
+    "exportInvoices": "Export invoices as CSV",
+    "exportTransactions": "Export transactions as CSV"
   },
   "overview": {
     "title": "Overview",
@@ -429,5 +433,87 @@
   "form2": {
     "client": "Client",
     "noClient": "No client"
+  },
+  "recurring": {
+    "title": "Recurring income",
+    "description": "Each month a row appears on the overview to confirm or skip. Nothing is booked on its own.",
+    "add": "Add recurring income",
+    "newTitle": "New recurring income",
+    "editTitle": "Edit recurring income",
+    "lastConfirmed": "last handled {{month}}",
+    "never": "not handled yet",
+    "activeLabel": "{{name}} active",
+    "moreFor": "More actions for {{name}}",
+    "toConfirm": "To confirm",
+    "toConfirmHint": "Recurring income",
+    "confirm": "Confirm",
+    "skip": "Skip",
+    "monthItem": "{{month}} {{name}}",
+    "confirmed": "{{name}} booked · +{{amount}}",
+    "skipped": "{{name}} skipped this month",
+    "created": "Recurring income added",
+    "updated": "Recurring income updated",
+    "deleted": "Recurring income deleted",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteDescription": "Entries it already booked stay in the ledger.",
+    "empty": "Add your salary or other regular income to confirm it each month.",
+    "form": {
+      "description": "Description",
+      "descriptionPlaceholder": "Salary",
+      "amount": "Amount",
+      "currency": "Currency",
+      "category": "Category",
+      "client": "From",
+      "noClient": "Nobody in particular",
+      "day": "Day of month",
+      "dayHint": "Short months use their last day.",
+      "active": "Ask every month"
+    },
+    "usuallyOn_ordinal_one": "usually on the {{count}}st",
+    "usuallyOn_ordinal_two": "usually on the {{count}}nd",
+    "usuallyOn_ordinal_few": "usually on the {{count}}rd",
+    "usuallyOn_ordinal_other": "usually on the {{count}}th",
+    "onDay_ordinal_one": "on the {{count}}st",
+    "onDay_ordinal_two": "on the {{count}}nd",
+    "onDay_ordinal_few": "on the {{count}}rd",
+    "onDay_ordinal_other": "on the {{count}}th"
+  },
+  "export": {
+    "title": "Export",
+    "description": "A CSV per year, for your accountant or tax return.",
+    "transactions": "Transactions {{year}}",
+    "invoices": "Invoices {{year}}",
+    "download": "Download CSV",
+    "year": "Year"
+  },
+  "projects": {
+    "title": "Projects",
+    "add": "Add project",
+    "newTitle": "New project",
+    "editTitle": "Edit project",
+    "status": {
+      "active": "Active",
+      "done": "Done"
+    },
+    "earned": "{{amount}} earned",
+    "invoices_one": "{{count}} invoice",
+    "invoices_other": "{{count}} invoices",
+    "markDone": "Mark done",
+    "reopen": "Reopen",
+    "rename": "Edit",
+    "delete": "Delete",
+    "deleteTitle": "Delete “{{name}}”?",
+    "deleteDescription": "It has no invoices, so it is removed for good.",
+    "created": "Project added",
+    "updated": "Project updated",
+    "deleted": "Project deleted",
+    "empty": "Group this client's invoices into projects to see what each one earned.",
+    "none": "No project",
+    "field": "Project",
+    "moreFor": "More actions for {{name}}",
+    "form": {
+      "name": "Name",
+      "notes": "Notes"
+    }
   }
 }

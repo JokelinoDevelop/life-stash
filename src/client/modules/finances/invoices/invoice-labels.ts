@@ -38,8 +38,21 @@ export const useDueLabel = () => {
 export const useInvoiceFor = () => {
   const month = useMonthLabel();
 
-  return (invoice: Pick<InvoiceLike, "periodStart" | "description">): string =>
-    invoice.periodStart === null
-      ? (invoice.description ?? "—")
-      : month(invoice.periodStart.slice(0, 7));
+  return (
+    invoice: Pick<InvoiceLike, "periodStart" | "description"> & {
+      projectName?: string | null;
+    }
+  ): string => {
+    const what =
+      invoice.periodStart === null
+        ? (invoice.description ?? "—")
+        : month(invoice.periodStart.slice(0, 7));
+
+    const project = invoice.projectName ?? null;
+
+    // Skip the prefix when the description already names the project.
+    return project === null || what.startsWith(project)
+      ? what
+      : `${project} · ${what}`;
+  };
 };

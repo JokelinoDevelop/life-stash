@@ -9,6 +9,8 @@ export const FINANCE_DIALOGS = [
   "invoice",
   "client",
   "mark-paid",
+  "recurring",
+  "project",
 ] as const satisfies readonly AppDialog[];
 
 export type FinanceDialogKind = (typeof FINANCE_DIALOGS)[number];
@@ -38,7 +40,9 @@ export type FinanceDialogTarget =
   | { dialog: "category"; id?: string; entryKind?: "income" | "expense" }
   | { dialog: "invoice"; id?: string; duplicate?: string; forClient?: string }
   | { dialog: "client"; id?: string }
-  | { dialog: "mark-paid"; id: string };
+  | { dialog: "mark-paid"; id: string }
+  | { dialog: "recurring"; id?: string }
+  | { dialog: "project"; id?: string; forClient?: string };
 
 export interface FinanceDialogSearch {
   dialog?: AppDialog;

@@ -9,7 +9,7 @@ import { FieldGroup } from "@/components/ui/field";
 
 import { useMonthLabel } from "../../../transactions/month-band";
 import { INVOICE_FORM_TEMPLATE, NO_PERIOD } from "./mapper";
-import type { InvoiceClientOption } from "./mapper";
+import type { InvoiceClientOption, InvoiceProjectOption } from "./mapper";
 
 const PERIOD_MONTHS_BACK = 12;
 const PERIOD_MONTHS_AHEAD = 2;
@@ -32,15 +32,22 @@ const NO_CLIENTS: readonly InvoiceClientOption[] = [];
 
 const noPrevious = (): string | null => null;
 
+const NO_PROJECTS: readonly InvoiceProjectOption[] = [];
+
 const defaultTerms = (_clientId: string): number => 30;
 
 export const InvoiceClientSection = withForm({
   defaultValues: INVOICE_FORM_TEMPLATE,
-  props: { clients: NO_CLIENTS, previousNumber: noPrevious() },
+  props: {
+    clients: NO_CLIENTS,
+    previousNumber: noPrevious(),
+    projects: NO_PROJECTS,
+  },
   render: function InvoiceClientSectionRender({
-    form,
     clients,
+    form,
     previousNumber,
+    projects,
   }) {
     const { t } = useTranslation("finances");
     const month = useMonthLabel();
@@ -52,6 +59,16 @@ export const InvoiceClientSection = withForm({
             listeners={{
               onChange: ({ value }) => {
                 const client = clients.find((row) => row.id === value);
+
+                const project = form.getFieldValue("projectId");
+
+                if (
+                  !projects.some(
+                    (row) => row.id === project && row.clientId === value
+                  )
+                ) {
+                  form.setFieldValue("projectId", NO_PERIOD);
+                }
 
                 if (client !== undefined) {
                   form.setFieldValue("currency", client.currency);
@@ -129,6 +146,7 @@ export const InvoiceClientSection = withForm({
               )}
             </form.Subscribe>
           </div>
+          <InvoiceProjectField form={form} projects={projects} />
         </FieldGroup>
       </FormSection>
     );
@@ -228,6 +246,46 @@ export const InvoiceAmountSection = withForm({
           </form.AppField>
         </FieldGroup>
       </FormSection>
+    );
+  },
+});
+
+/** The client's active projects (shown only when it has some). */
+export const InvoiceProjectField = withForm({
+  defaultValues: INVOICE_FORM_TEMPLATE,
+  props: { projects: NO_PROJECTS },
+  render: function InvoiceProjectFieldRender({ form, projects }) {
+    const { t } = useTranslation("finances");
+
+    return (
+      <form.Subscribe selector={(state) => state.values.clientId}>
+        {(clientId) => {
+          const own = projects.filter(
+            (project) =>
+              project.clientId === clientId && project.status === "active"
+          );
+
+          return (
+            own.length > 0 && (
+              <form.AppField name="projectId">
+                {(field) => (
+                  <field.SelectField
+                    label={t("projects.field")}
+                    optional
+                    options={[
+                      { label: t("projects.none"), value: NO_PERIOD },
+                      ...own.map((project) => ({
+                        label: project.name,
+                        value: project.id,
+                      })),
+                    ]}
+                  />
+                )}
+              </form.AppField>
+            )
+          );
+        }}
+      </form.Subscribe>
     );
   },
 });

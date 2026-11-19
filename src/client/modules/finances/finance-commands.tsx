@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownLeft,
+  Download,
   ArrowUpRight,
   CircleCheck,
   FileText,
@@ -22,6 +23,7 @@ import { useFinanceDialog } from "./dialogs/use-finance-dialog";
 import { useDueLabel } from "./invoices/invoice-labels";
 import { invoicesQuery } from "./invoices/invoices.queries";
 import { useLedgerMoney } from "./money";
+import { exportUrl } from "./settings/export-url";
 
 /** Closes the menu, then starts the given navigation. */
 type Run = (start: () => Promise<void>) => void;
@@ -57,6 +59,30 @@ export const FinanceActionsGroup = ({ run }: { run: Run }) => {
           });
         }}
         shortcut={FINANCE_SHORTCUTS.markPaid}
+      />
+      <Item
+        icon={Download}
+        label={t("command.exportInvoices")}
+        onSelect={() => {
+          run(async () => {
+            window.location.assign(
+              exportUrl("invoices", Number(todayIso().slice(0, 4)))
+            );
+            await Promise.resolve();
+          });
+        }}
+      />
+      <Item
+        icon={Download}
+        label={t("command.exportTransactions")}
+        onSelect={() => {
+          run(async () => {
+            window.location.assign(
+              exportUrl("transactions", Number(todayIso().slice(0, 4)))
+            );
+            await Promise.resolve();
+          });
+        }}
       />
       <Item
         icon={ArrowUpRight}

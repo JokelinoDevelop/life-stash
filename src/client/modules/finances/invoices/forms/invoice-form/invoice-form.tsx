@@ -14,13 +14,15 @@ import {
   InvoiceDatesSection,
 } from "./invoice-form-sections";
 import { INVOICE_SERVER_FIELDS } from "./mapper";
-import type { InvoiceClientOption } from "./mapper";
+import type { InvoiceClientOption, InvoiceProjectOption } from "./mapper";
 import { invoiceFormSchema } from "./schema";
 import type { InvoiceFormValues } from "./schema";
 
 export interface InvoiceFormProps {
   defaultValues: InvoiceFormValues;
   clients: readonly InvoiceClientOption[];
+  /** Projects of every client; the form offers the chosen client's active ones. */
+  projects: readonly InvoiceProjectOption[];
   /** The number this one continues from, for the hint. */
   previousNumber: string | null;
   /** Draft (or new): two saves, draft and "& mark sent". Sent: one Save. */
@@ -45,6 +47,7 @@ export const InvoiceForm = ({
   onCancel,
   onSubmit,
   previousNumber,
+  projects,
 }: InvoiceFormProps) => {
   const { t } = useTranslation("finances");
   const errorMessage = useErrorMessage();
@@ -115,6 +118,7 @@ export const InvoiceForm = ({
         clients={clients}
         form={form}
         previousNumber={previousNumber}
+        projects={projects}
       />
       <InvoiceDatesSection form={form} termsOf={termsOf} />
       <InvoiceAmountSection form={form} />

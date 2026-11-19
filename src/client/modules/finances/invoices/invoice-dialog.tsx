@@ -17,6 +17,7 @@ import { uploadFiles } from "../attachments/attachments.queries";
 import { FileList, PendingFileList } from "../attachments/file-list";
 import { clientsQuery } from "../clients/clients.queries";
 import { useLedgerMoney } from "../money";
+import { projectsQuery } from "../projects/projects.queries";
 import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { InvoiceForm } from "./forms/invoice-form/invoice-form";
 import {
@@ -48,7 +49,14 @@ const useClientOptions = (keep: string | null) => {
     (client) => !client.archived || client.id === keep
   );
 
-  return { isPending: clients.isPending, options };
+  const projects = useQuery(projectsQuery(null));
+
+  // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
+  return {
+    isPending: clients.isPending || projects.isPending,
+    options,
+    projects: projects.data?.projects ?? [],
+  };
 };
 
 /** A fresh invoice (for `forClient` if given), or a copy of `source` one month on. */
@@ -136,6 +144,7 @@ const NewInvoice = ({
   return (
     <InvoiceForm
       clients={clients.options}
+      projects={clients.projects}
       defaultTermsDays={terms}
       defaultValues={defaults}
       draftable
@@ -213,6 +222,7 @@ const EditInvoice = ({
   return (
     <InvoiceForm
       clients={clients.options}
+      projects={clients.projects}
       defaultTermsDays={settings.data?.defaultPaymentTermsDays ?? 30}
       defaultValues={invoiceToFormValues(invoice)}
       draftable={invoice.status === "draft"}

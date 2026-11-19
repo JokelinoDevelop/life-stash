@@ -13,6 +13,9 @@ export const financeKeys = {
   invoices: (filter: { status: string; clientId?: string; year: number }) =>
     ["finances", "invoices", filter] as const,
   nextInvoiceNumber: ["finances", "invoices", "next-number"] as const,
+  projects: (clientId: string | null) =>
+    ["finances", "projects", clientId] as const,
+  recurring: ["finances", "recurring"] as const,
   overview: (year: number) => ["finances", "overview", year] as const,
   settings: ["finances", "settings"] as const,
   transaction: (transactionId: string) =>
