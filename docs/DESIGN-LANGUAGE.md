@@ -27,6 +27,13 @@ Radii: `--radius` is 0.5rem, giving `rounded-sm` 4 · `md` 6 · `lg` 8 · `xl` 1
 
 All of this is set at the theme level, so shadcn components stay unedited. When a design needs something new, add a **variant** in `components/ui` (examples: `Button` `compact` / `icon-compact`, `Toggle` `segmented`, `TabsList` `pill`).
 
+## Layout
+
+- **Desktop:** the sidebar (household menu, search, Overview / Reminders / History / Service catalog, the car list, Settings) sits on the canvas; pages render inside one white bordered panel. `PageHeader` draws a 44px bar at the top of the panel (crumb › title, actions).
+- **Phones:** a Garage / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title.
+- **Lists vs padded pages:** list pages wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form, settings and catalog pages use `PageContent` (padded, max 4xl).
+- The Garage home and the household Reminders page read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
+
 ## Building blocks (`src/client/components/app`)
 
 | Component | When |
@@ -39,10 +46,12 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `CarMonogram` (garage) | car initials in a neutral square |
 | `SettingsSection` (settings) | settings group: title/description left, box right |
 | `Kbd` (`components/ui`) | key hints; hide on touch with `hidden md:inline-flex` |
+| `DialogContent variant="bare"` | dialogs with their own header and footer (log reading) |
+| `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
 
 ## Keyboard
 
-- ⌘K / Ctrl+K or `/` opens the command menu (`CommandMenuProvider` in the app shell; `useCommandMenu().open()` from buttons).
+- ⌘K / Ctrl+K or `/` opens the command menu (scoped to the car you are on) (`CommandMenuProvider` in the app shell; `useCommandMenu().open()` from buttons).
 - Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer, S service, E expense, R reminder. Garage: C add car. Show the key with `Kbd` on the matching button.
 
 ## Rules of thumb
