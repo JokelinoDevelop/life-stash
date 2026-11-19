@@ -1,4 +1,6 @@
 # Copy to .dev.vars for local development. Never commit .dev.vars.
+# Photo storage: `pnpm storage:up && pnpm storage:setup` fills the B2_* lines
+# with a local Garage bucket. For real B2 use values like these:
 B2_ENDPOINT=https://s3.eu-central-003.backblazeb2.com
 B2_REGION=eu-central-003
 B2_BUCKET=

@@ -18,6 +18,17 @@ Open <http://localhost:5173>. The first visit sets up your account: choose **Ema
 
 Optional local secrets (photos and push) go in `.dev.vars`; copy `.dev.vars.example`.
 
+### Local photo storage (Garage)
+
+Photos and attachments need S3-compatible storage. Locally that's [Garage](https://garagehq.deuxfleurs.fr/) in Docker, so you don't need a B2 account:
+
+```bash
+pnpm storage:up
+pnpm storage:setup
+```
+
+`storage:setup` creates the `lifestash-dev` bucket, a dev key and the CORS rule for `localhost:5173`, then writes the `B2_*` lines in `.dev.vars` (creating it from the example if needed). It is safe to re-run. Restart `pnpm dev` afterwards. Data lives in Docker volumes; `docker compose down -v` wipes it.
+
 ### Demo data
 
 `pnpm db:seed` fills the local database with a demo household (four cars with years of services, fuel, renewals and reminders in every state) and prints its sign-in: `demo@lifestash.dev` / `lifestash-demo`. Dates are relative to today, so the data never goes stale. Re-running it replaces only the demo household; `pnpm db:seed --fresh` wipes the whole local database first.

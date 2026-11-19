@@ -107,6 +107,8 @@ On the client, Finances lives in `src/client/modules/finances` (queries, mutatio
 
 The Worker signs short-lived S3 URLs for Backblaze B2. The browser compresses photos (max 1600 px, WebP/JPEG ~0.8) and uploads directly; PDFs (invoices, receipts) go up unchanged, up to 10 MB. Views use 1-hour presigned GET URLs; PDFs are signed with `response-content-disposition: inline` and their original file name so they open in a new tab. If B2 is not configured, photo and attachment controls are hidden.
 
+Locally the same code talks to [Garage](https://garagehq.deuxfleurs.fr/) (`docker-compose.yml`, `dev/garage/garage.toml`): `pnpm storage:up` starts it and `pnpm storage:setup` (`scripts/garage-setup.ts`) creates the bucket, key and CORS rule and fills `.dev.vars`. URLs are path-style (`endpoint/bucket/key`), which both B2 and Garage accept.
+
 ## Configuration
 
 `wrangler.jsonc` holds bindings (D1, assets, cron). Secrets (`wrangler secret put`):

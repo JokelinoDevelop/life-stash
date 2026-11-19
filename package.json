@@ -21,7 +21,9 @@
     "vapid": "pnpm dlx @pushforge/builder vapid",
     "prepare": "lefthook install",
     "routes": "tsr generate",
-    "db:seed": "tsx src/worker/db/seed/seed.ts"
+    "db:seed": "tsx src/worker/db/seed/seed.ts",
+    "storage:up": "docker compose up -d garage",
+    "storage:setup": "tsx scripts/garage-setup.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
