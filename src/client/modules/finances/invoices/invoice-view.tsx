@@ -150,7 +150,7 @@ export const InvoiceView = ({
         </section>
         <FormNotice icon={<Lock />}>{t("invoices.view.locked")}</FormNotice>
       </div>
-      <div className="border-divider pb-safe flex shrink-0 flex-wrap items-center gap-2 border-t px-3 py-2.5">
+      <div className="border-divider pb-safe-2.5 flex shrink-0 flex-wrap items-center gap-2 border-t px-3 pt-2.5">
         <Button
           onClick={async () => {
             if (await actions.remove(invoice, amount)) {

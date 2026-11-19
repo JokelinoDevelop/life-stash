@@ -16,6 +16,14 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* `pb-safe-2.5`: that spacing plus the home-indicator inset (plain `pb-safe`
+   would replace a `py-*` bottom padding with 0 on desktop). */
+@utility pb-safe-* {
+  padding-bottom: calc(
+    var(--spacing) * --value(number) + env(safe-area-inset-bottom)
+  );
+}
+
 /* Loading placeholders wait 150 ms before fading in, so fast loads never flash. */
 @keyframes reveal {
   from {
