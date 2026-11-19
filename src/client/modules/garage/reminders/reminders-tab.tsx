@@ -5,9 +5,9 @@ import { BellPlus, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ListSection } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormat } from "@/lib/format";
 
 import { ReminderRow } from "./reminder-row";
@@ -68,7 +68,7 @@ export const RemindersTab = ({
   const reminders = useQuery(remindersQuery(carId));
 
   const addButton = readOnly ? null : (
-    <Button asChild>
+    <Button asChild size="compact">
       <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
         <BellPlus />
         {t("tab.add")}
@@ -94,7 +94,7 @@ export const RemindersTab = ({
   const { active, completed } = reminders.data;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {addButton !== null && active.length > 0 && (
         <div className="flex justify-end">{addButton}</div>
       )}
@@ -109,23 +109,20 @@ export const RemindersTab = ({
         const group = active.filter((reminder) => reminder.status === status);
 
         return group.length === 0 ? null : (
-          <Card key={status}>
-            <CardHeader>
-              <CardTitle>{t(`groups.${status}`)}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="flex flex-col divide-y">
-                {group.map((reminder) => (
-                  <ReminderRow
-                    carId={carId}
-                    key={reminder.id}
-                    readOnly={readOnly}
-                    reminder={reminder}
-                  />
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <ListSection
+            count={group.length}
+            key={status}
+            title={t(`groups.${status}`)}
+          >
+            {group.map((reminder) => (
+              <ReminderRow
+                carId={carId}
+                key={reminder.id}
+                readOnly={readOnly}
+                reminder={reminder}
+              />
+            ))}
+          </ListSection>
         );
       })}
       <CompletedList reminders={completed} />

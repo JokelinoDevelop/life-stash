@@ -6,10 +6,9 @@ import { z } from "zod";
 import { BackLink } from "@/components/app/back-link";
 import { PageHeader } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarActions } from "@/modules/garage/cars/car-actions";
+import { CarMonogram } from "@/modules/garage/cars/car-monogram";
 import { CAR_TABS } from "@/modules/garage/cars/car-tabs";
 import type { CarTab } from "@/modules/garage/cars/car-tabs";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
@@ -33,9 +32,12 @@ const CarPage = () => {
   const { car } = data;
   const readOnly = car.archivedAt !== null;
 
-  const subtitle = [car.year, car.make, car.model]
-    .filter((part) => part !== null)
-    .join(" ");
+  const subtitle = [
+    [car.year, car.make, car.model].filter((part) => part !== null).join(" "),
+    car.plate,
+  ]
+    .filter((part) => part !== null && part !== "")
+    .join(" · ");
 
   return (
     <>
@@ -44,9 +46,9 @@ const CarPage = () => {
         back={<BackLink to="/garage" />}
         description={subtitle === "" ? undefined : subtitle}
         title={
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-3">
+            <CarMonogram className="size-10 text-sm" name={car.name} />
             {car.name}
-            {car.plate !== null && <Badge variant="outline">{car.plate}</Badge>}
           </span>
         }
       />
@@ -63,17 +65,14 @@ const CarPage = () => {
         }}
         value={tab}
       >
-        <div className="-mx-4 px-4 md:mx-0 md:px-0">
-          <ScrollArea>
-            <TabsList className="mb-4">
-              {CAR_TABS.map((value) => (
-                <TabsTrigger key={value} value={value}>
-                  {t(`car.tabs.${value}`)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+        <div className="-mx-4 mb-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0">
+          <TabsList variant="pill">
+            {CAR_TABS.map((value) => (
+              <TabsTrigger key={value} value={value}>
+                {t(`car.tabs.${value}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </div>
         <TabsContent value="overview">
           <OverviewTab carId={carId} readOnly={readOnly} />

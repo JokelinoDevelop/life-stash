@@ -16,6 +16,8 @@ export interface CarListItemDto {
     status: ReminderStatus;
     dueDate: string | null;
     dueOdometerKm: number | null;
+    intervalKm: number | null;
+    intervalMonths: number | null;
     kmLeft: number | null;
     daysLeft: number | null;
   } | null;

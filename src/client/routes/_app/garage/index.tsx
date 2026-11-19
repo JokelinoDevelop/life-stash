@@ -4,33 +4,52 @@ import { CarFront, ListChecks, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ListSection } from "@/components/app/list-section";
 import { PageHeader } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { CarCard } from "@/modules/garage/cars/car-card";
+import { CarRow } from "@/modules/garage/cars/car-row";
+import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { UpcomingAcrossCars } from "@/modules/garage/cars/upcoming-across-cars";
 import { HouseholdSpendingCard } from "@/modules/garage/spending/household-spending-card";
+
+const useSummary = (cars: CarListItem[] | undefined): string | undefined => {
+  const { t } = useTranslation("garage");
+
+  if (cars === undefined || cars.length === 0) {
+    return undefined;
+  }
+
+  const active = cars.filter((car) => car.archivedAt === null);
+  const overdue = active.reduce((sum, car) => sum + car.overdueCount, 0);
+  const dueSoon = active.reduce((sum, car) => sum + car.dueSoonCount, 0);
+
+  return overdue + dueSoon === 0
+    ? t("home.summaryClear")
+    : t("home.summary", { dueSoon, overdue });
+};
 
 const GarageHome = () => {
   const { t } = useTranslation("garage");
   const [showArchived, setShowArchived] = useState(false);
   const cars = useQuery(carsQuery(showArchived));
+  const summary = useSummary(cars.data?.cars);
 
   return (
     <>
       <PageHeader
         actions={
           <>
-            <Button asChild variant="outline">
+            <Button asChild size="compact" variant="ghost">
               <Link to="/garage/catalog">
                 <ListChecks />
                 {t("home.catalog")}
               </Link>
             </Button>
-            <Button asChild>
+            <Button asChild size="compact">
               <Link to="/garage/cars/new">
                 <Plus />
                 {t("cars.add")}
@@ -38,6 +57,7 @@ const GarageHome = () => {
             </Button>
           </>
         }
+        description={summary}
         title={t("title")}
       />
       {cars.isPending && <LoadingState />}
@@ -50,32 +70,32 @@ const GarageHome = () => {
         />
       )}
       {cars.isSuccess && (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6">
           {cars.data.cars.length === 0 ? (
             <EmptyState
               action={
-                <Button asChild>
+                <Button asChild size="compact">
                   <Link to="/garage/cars/new">
                     <Plus />
                     {t("cars.add")}
                   </Link>
                 </Button>
               }
-              icon={<CarFront className="size-10" />}
+              icon={<CarFront className="size-8" />}
               message={t("cars.empty")}
             />
           ) : (
             <>
               <UpcomingAcrossCars cars={cars.data.cars} />
+              <ListSection
+                count={cars.data.cars.length}
+                title={t("cars.title")}
+              >
+                {cars.data.cars.map((car) => (
+                  <CarRow car={car} key={car.id} />
+                ))}
+              </ListSection>
               <HouseholdSpendingCard />
-              <section className="flex flex-col gap-3">
-                <h2 className="text-lg font-semibold">{t("cars.title")}</h2>
-                <div className="grid gap-3 lg:grid-cols-2">
-                  {cars.data.cars.map((car) => (
-                    <CarCard car={car} key={car.id} />
-                  ))}
-                </div>
-              </section>
             </>
           )}
           <div className="flex items-center gap-2">

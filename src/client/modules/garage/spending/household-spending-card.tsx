@@ -2,7 +2,11 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ListRow,
+  ListRowText,
+  ListSection,
+} from "@/components/app/list-section";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 
@@ -39,37 +43,34 @@ export const HouseholdSpendingCard = () => {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("household.title")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {rows.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t("household.empty")}
-          </p>
-        ) : (
-          <ul className="flex flex-col divide-y">
-            {rows.map((row) => (
-              <li key={row.carId}>
-                <Link
-                  className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2"
-                  params={{ carId: row.carId }}
-                  search={{ tab: "spending" }}
-                  to="/garage/cars/$carId"
-                >
-                  <span className="font-medium">{row.carName}</span>
-                  <span className="text-muted-foreground text-sm tabular-nums">
-                    {t("household.maintenance")}:{" "}
-                    {format.totals(row.maintenance)} · {t("household.other")}:{" "}
-                    {format.totals(row.other)}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+    <ListSection title={t("household.title")}>
+      {rows.length === 0 ? (
+        <ListRow className="text-muted-foreground">
+          {t("household.empty")}
+        </ListRow>
+      ) : (
+        rows.map((row) => (
+          <ListRow asChild key={row.carId}>
+            <Link
+              params={{ carId: row.carId }}
+              search={{ tab: "spending" }}
+              to="/garage/cars/$carId"
+            >
+              <ListRowText
+                meta={`${t("household.other")}: ${format.totals(row.other)}`}
+                title={row.carName}
+              />
+              <span className="shrink-0 text-right font-medium tabular-nums">
+                {format.totals(row.maintenance)}
+                <span className="text-muted-foreground block text-xs font-normal md:inline md:text-sm">
+                  {" "}
+                  {t("household.maintenance")}
+                </span>
+              </span>
+            </Link>
+          </ListRow>
+        ))
+      )}
+    </ListSection>
   );
 };

@@ -28,7 +28,7 @@ export const CompleteReminderButton = ({
 
   if (EXPENSE_REMINDER_KINDS.includes(reminder.kind)) {
     return (
-      <Button asChild size="sm" variant="outline">
+      <Button asChild size="compact" variant="outline">
         <Link
           params={{ carId }}
           search={{ reminderId: reminder.id }}
@@ -41,7 +41,7 @@ export const CompleteReminderButton = ({
   }
 
   return (
-    <Button asChild size="sm" variant="outline">
+    <Button asChild size="compact" variant="outline">
       <Link
         params={{ carId }}
         search={{ reminderId: reminder.id }}

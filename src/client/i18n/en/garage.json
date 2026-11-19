@@ -66,18 +66,16 @@
     "nothingDue": "Nothing scheduled. Add a reminder to stay ahead.",
     "lastDone": "What's been done",
     "noHistory": "No service history yet.",
-    "driven": "How much I've driven",
-    "kmThisYear": "{{distance}} this year",
-    "latestOdometer": "Latest odometer",
     "loggedOn": "logged {{date}}",
-    "spent": "What I've spent this year",
     "maintenance": "Maintenance & repairs",
     "otherCosts": "Other costs",
     "nothingSpent": "Nothing yet",
     "viewAll": "View all",
     "logOdometer": "Log odometer",
     "addService": "Add service",
-    "previousOwner": "Previous owner"
+    "previousOwner": "Previous owner",
+    "odometer": "Odometer",
+    "thisYear": "Driven this year"
   },
   "quickActions": {
     "title": "Quick add",
@@ -89,6 +87,9 @@
   "home": {
     "upcoming": "Upcoming across all cars",
     "allClear": "All clear — nothing due soon.",
-    "catalog": "Items & packages"
+    "catalog": "Items & packages",
+    "needsAttention": "Needs attention",
+    "summary": "{{overdue}} overdue · {{dueSoon}} due soon",
+    "summaryClear": "Nothing due soon"
   }
 }

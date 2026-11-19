@@ -66,18 +66,16 @@
     "nothingDue": "Ништо не е закажано. Додај потсетник.",
     "lastDone": "Што е направено",
     "noHistory": "Сè уште нема историја на сервиси.",
-    "driven": "Колку сум возел",
-    "kmThisYear": "{{distance}} оваа година",
-    "latestOdometer": "Последна километража",
     "loggedOn": "внесено {{date}}",
-    "spent": "Колку сум потрошил оваа година",
     "maintenance": "Одржување и поправки",
     "otherCosts": "Други трошоци",
     "nothingSpent": "Сè уште ништо",
     "viewAll": "Види сè",
     "logOdometer": "Внеси километража",
     "addService": "Додај сервис",
-    "previousOwner": "Претходен сопственик"
+    "previousOwner": "Претходен сопственик",
+    "odometer": "Километража",
+    "thisYear": "Изминато оваа година"
   },
   "quickActions": {
     "title": "Брзо додај",
@@ -89,6 +87,9 @@
   "home": {
     "upcoming": "Претстојно за сите возила",
     "allClear": "Сè е во ред — ништо не следува наскоро.",
-    "catalog": "Делови и пакети"
+    "catalog": "Делови и пакети",
+    "needsAttention": "Бара внимание",
+    "summary": "{{overdue}} задоцнети · {{dueSoon}} наскоро",
+    "summaryClear": "Ништо не доспева наскоро"
   }
 }

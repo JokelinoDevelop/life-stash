@@ -1,18 +1,17 @@
+import { reminderProgress } from "@shared/domain/reminders";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
-import { StatusBadge } from "@/components/app/status-badge";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  ListRow,
+  ListRowText,
+  ListSection,
+} from "@/components/app/list-section";
+import { StatusRing } from "@/components/app/status-ring";
+import { STATUS_TEXT_TONE } from "@/components/app/status-tone";
 import type { api, SuccessBody } from "@/lib/api";
 import { useFormat } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 import { CompleteReminderButton } from "../reminders/complete-reminder-button";
 import type { CarTab } from "./car-tabs";
@@ -26,13 +25,14 @@ const ViewAll = ({ carId, tab }: { carId: string; tab: CarTab }) => {
   const { t } = useTranslation("garage");
 
   return (
-    <CardAction>
-      <Button asChild size="sm" variant="link">
-        <Link params={{ carId }} search={{ tab }} to="/garage/cars/$carId">
-          {t("overview.viewAll")}
-        </Link>
-      </Button>
-    </CardAction>
+    <Link
+      className="text-primary text-sm font-medium hover:underline"
+      params={{ carId }}
+      search={{ tab }}
+      to="/garage/cars/$carId"
+    >
+      {t("overview.viewAll")}
+    </Link>
   );
 };
 
@@ -50,41 +50,42 @@ export const DueNextCard = ({
   const format = useFormat();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("overview.dueNext")}</CardTitle>
-        <ViewAll carId={carId} tab="reminders" />
-      </CardHeader>
-      <CardContent>
-        {reminders.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t("overview.nothingDue")}
-          </p>
-        ) : (
-          <ul className="flex flex-col divide-y">
-            {reminders.map((reminder) => (
-              <li
-                className="flex items-center justify-between gap-3 py-2"
-                key={reminder.id}
-              >
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{reminder.title}</p>
-                  <p className="text-muted-foreground truncate text-sm">
-                    {describeDue(reminder, format, tc)}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <StatusBadge status={reminder.status} />
-                  {!readOnly && (
-                    <CompleteReminderButton carId={carId} reminder={reminder} />
+    <ListSection
+      action={<ViewAll carId={carId} tab="reminders" />}
+      count={reminders.length}
+      title={t("overview.dueNext")}
+    >
+      {reminders.length === 0 ? (
+        <ListRow className="text-muted-foreground">
+          {t("overview.nothingDue")}
+        </ListRow>
+      ) : (
+        reminders.map((reminder) => (
+          <ListRow className="py-2 md:py-1" key={reminder.id}>
+            <StatusRing
+              progress={reminderProgress(reminder)}
+              status={reminder.status}
+            />
+            <ListRowText
+              meta={
+                <span
+                  className={cn(
+                    "tabular-nums",
+                    STATUS_TEXT_TONE[reminder.status]
                   )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+                >
+                  {describeDue(reminder, format, tc)}
+                </span>
+              }
+              title={reminder.title}
+            />
+            {!readOnly && (
+              <CompleteReminderButton carId={carId} reminder={reminder} />
+            )}
+          </ListRow>
+        ))
+      )}
+    </ListSection>
   );
 };
 
@@ -99,124 +100,98 @@ export const RecentVisitsCard = ({
   const format = useFormat();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("overview.lastDone")}</CardTitle>
-        <ViewAll carId={carId} tab="history" />
-      </CardHeader>
-      <CardContent>
-        {visits.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {t("overview.noHistory")}
-          </p>
-        ) : (
-          <ul className="flex flex-col divide-y">
-            {visits.map((visit) => (
-              <li key={visit.id}>
-                <Link
-                  className="flex flex-col gap-0.5 py-2"
-                  params={{ carId, visitId: visit.id }}
-                  to="/garage/cars/$carId/services/$visitId"
-                >
-                  <span className="text-muted-foreground flex items-center gap-2 text-sm">
-                    {format.date(visit.date, visit.datePrecision)}
-                    {visit.odometerKm !== null &&
-                      ` · ${format.distance(visit.odometerKm)}`}
-                    {visit.byPreviousOwner && (
-                      <Badge variant="secondary">
-                        {t("overview.previousOwner")}
-                      </Badge>
-                    )}
-                  </span>
-                  <span className="line-clamp-2">{visit.items.join(", ")}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+    <ListSection
+      action={<ViewAll carId={carId} tab="history" />}
+      title={t("overview.lastDone")}
+    >
+      {visits.length === 0 ? (
+        <ListRow className="text-muted-foreground">
+          {t("overview.noHistory")}
+        </ListRow>
+      ) : (
+        visits.map((visit) => (
+          <ListRow asChild key={visit.id}>
+            <Link
+              params={{ carId, visitId: visit.id }}
+              to="/garage/cars/$carId/services/$visitId"
+            >
+              <StatusRing label={null} status="done" />
+              <ListRowText
+                meta={[
+                  format.date(visit.date, visit.datePrecision),
+                  visit.odometerKm === null
+                    ? null
+                    : format.distance(visit.odometerKm),
+                  visit.byPreviousOwner ? t("overview.previousOwner") : null,
+                ]
+                  .filter((part) => part !== null)
+                  .join(" · ")}
+                title={visit.items.join(", ")}
+              />
+            </Link>
+          </ListRow>
+        ))
+      )}
+    </ListSection>
   );
 };
 
-export const DrivenCard = ({
-  carId,
-  overview,
+const Stat = ({
+  hint,
+  label,
+  value,
 }: {
-  carId: string;
-  overview: Overview;
-}) => {
+  hint?: string;
+  label: string;
+  value: string;
+}) => (
+  <div className="bg-card flex min-w-0 flex-col gap-0.5 px-4 py-3">
+    <span className="text-muted-foreground text-xs font-medium md:text-sm">
+      {label}
+    </span>
+    <span className="truncate text-lg font-semibold tracking-tight tabular-nums">
+      {value}
+    </span>
+    {hint !== undefined && (
+      <span className="text-muted-foreground truncate text-xs">{hint}</span>
+    )}
+  </div>
+);
+
+/** Odometer, distance this year and this year's costs in one hairline panel. */
+export const StatsPanel = ({ overview }: { overview: Overview }) => {
   const { t } = useTranslation("garage");
   const format = useFormat();
   const latest = overview.latestOdometer;
-
-  const latestText =
-    latest === null
-      ? t("cars.noOdometer")
-      : `${t("overview.latestOdometer")}: ${format.distance(latest.km)} · ${t(
-          "overview.loggedOn",
-          {
-            date: format.date(latest.date),
-          }
-        )}`;
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("overview.driven")}</CardTitle>
-        <ViewAll carId={carId} tab="mileage" />
-      </CardHeader>
-      <CardContent>
-        <p className="text-3xl font-semibold tabular-nums">
-          {t("overview.kmThisYear", {
-            distance: format.distance(overview.kmThisYear),
-          })}
-        </p>
-        <p className="text-muted-foreground mt-1 text-sm">{latestText}</p>
-      </CardContent>
-    </Card>
-  );
-};
-
-export const SpentCard = ({
-  carId,
-  overview,
-}: {
-  carId: string;
-  overview: Overview;
-}) => {
-  const { t } = useTranslation("garage");
-  const format = useFormat();
 
   const amount = (values: Overview["maintenanceThisYear"]) =>
     values.length === 0 ? t("overview.nothingSpent") : format.totals(values);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("overview.spent")}</CardTitle>
-        <ViewAll carId={carId} tab="spending" />
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-muted-foreground text-sm">
-              {t("overview.maintenance")}
-            </p>
-            <p className="text-xl font-semibold tabular-nums">
-              {amount(overview.maintenanceThisYear)}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground text-sm">
-              {t("overview.otherCosts")}
-            </p>
-            <p className="text-xl font-semibold tabular-nums">
-              {amount(overview.expensesThisYear)}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <section className="bg-divider grid grid-cols-2 gap-px overflow-hidden rounded-lg border md:grid-cols-4">
+      <Stat
+        hint={
+          latest === null
+            ? undefined
+            : t("overview.loggedOn", { date: format.date(latest.date) })
+        }
+        label={t("overview.odometer")}
+        value={
+          latest === null ? t("cars.noOdometer") : format.distance(latest.km)
+        }
+      />
+      <Stat
+        label={t("overview.thisYear")}
+        value={format.distance(overview.kmThisYear)}
+      />
+      <Stat
+        label={t("overview.maintenance")}
+        value={amount(overview.maintenanceThisYear)}
+      />
+      <Stat
+        label={t("overview.otherCosts")}
+        value={amount(overview.expensesThisYear)}
+      />
+    </section>
   );
 };
