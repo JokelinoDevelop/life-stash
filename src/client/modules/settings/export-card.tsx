@@ -2,13 +2,8 @@ import { Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
+import { SettingsSection } from "./settings-section";
 
 const DATASETS = [
   "service-history",
@@ -21,29 +16,26 @@ export const ExportCard = () => {
   const { t } = useTranslation("settings");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("export.title")}</CardTitle>
-        <CardDescription>{t("export.description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild>
-            <a download href="/api/settings/export/json">
+    <SettingsSection
+      title={t("export.title")}
+      description={t("export.description")}
+    >
+      <div className="flex flex-wrap gap-2">
+        <Button asChild size="compact">
+          <a download href="/api/settings/export/json">
+            <Download />
+            {t("export.json")}
+          </a>
+        </Button>
+        {DATASETS.map((dataset) => (
+          <Button asChild key={dataset} size="compact" variant="outline">
+            <a download href={`/api/settings/export/csv/${dataset}`}>
               <Download />
-              {t("export.json")}
+              {t(`export.datasets.${dataset}`)}
             </a>
           </Button>
-          {DATASETS.map((dataset) => (
-            <Button asChild key={dataset} variant="outline">
-              <a download href={`/api/settings/export/csv/${dataset}`}>
-                <Download />
-                {t(`export.datasets.${dataset}`)}
-              </a>
-            </Button>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+    </SettingsSection>
   );
 };

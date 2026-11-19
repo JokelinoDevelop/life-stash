@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { Panel } from "@/components/app/list-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
@@ -80,73 +80,63 @@ export const VisitDetail = ({
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("detail.items")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline">{t(`kinds.${visit.kind}`)}</Badge>
-              {visit.byPreviousOwner && (
-                <Badge variant="secondary">{t("history.previousOwner")}</Badge>
-              )}
-              {visit.odometerKm !== null && (
-                <Badge variant="outline">
-                  {format.distance(visit.odometerKm)}
-                </Badge>
-              )}
-            </div>
-            <ul className="flex flex-col divide-y">
-              {visit.items.map((item) => (
-                <li className="flex justify-between gap-3 py-2" key={item.id}>
-                  <span>{item.label}</span>
-                  {item.costMinor !== null && (
-                    <span className="tabular-nums">
-                      {format.money(item.costMinor, visit.currency)}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <div className="flex justify-between border-t pt-2 font-semibold">
-              <span>{t("detail.total")}</span>
-              <span className="tabular-nums">
-                {visit.effectiveTotalMinor === null
-                  ? t("detail.noTotal")
-                  : format.money(visit.effectiveTotalMinor, visit.currency)}
-              </span>
-            </div>
-            {visit.shop !== null && (
-              <p className="text-sm">
-                <span className="text-muted-foreground">
-                  {t("detail.shop")}:{" "}
-                </span>
-                {visit.shop}
-              </p>
+      <Panel title={t("detail.items")}>
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">{t(`kinds.${visit.kind}`)}</Badge>
+            {visit.byPreviousOwner && (
+              <Badge variant="secondary">{t("history.previousOwner")}</Badge>
             )}
-            {visit.notes !== null && (
-              <p className="text-sm whitespace-pre-wrap">
-                <span className="text-muted-foreground">
-                  {tc("fields.notes")}:{" "}
-                </span>
-                {visit.notes}
-              </p>
+            {visit.odometerKm !== null && (
+              <Badge variant="outline">
+                {format.distance(visit.odometerKm)}
+              </Badge>
             )}
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("photos.title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PhotoGallery
-            owner={{ ownerId: visit.id, ownerType: "service_visit" }}
-            readOnly={readOnly}
-          />
-        </CardContent>
-      </Card>
+          <ul className="flex flex-col divide-y">
+            {visit.items.map((item) => (
+              <li className="flex justify-between gap-3 py-2" key={item.id}>
+                <span>{item.label}</span>
+                {item.costMinor !== null && (
+                  <span className="tabular-nums">
+                    {format.money(item.costMinor, visit.currency)}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-between border-t pt-2 font-semibold">
+            <span>{t("detail.total")}</span>
+            <span className="tabular-nums">
+              {visit.effectiveTotalMinor === null
+                ? t("detail.noTotal")
+                : format.money(visit.effectiveTotalMinor, visit.currency)}
+            </span>
+          </div>
+          {visit.shop !== null && (
+            <p className="text-sm">
+              <span className="text-muted-foreground">
+                {t("detail.shop")}:{" "}
+              </span>
+              {visit.shop}
+            </p>
+          )}
+          {visit.notes !== null && (
+            <p className="text-sm whitespace-pre-wrap">
+              <span className="text-muted-foreground">
+                {tc("fields.notes")}:{" "}
+              </span>
+              {visit.notes}
+            </p>
+          )}
+        </div>
+      </Panel>
+      <Panel title={t("photos.title")}>
+        <PhotoGallery
+          owner={{ ownerId: visit.id, ownerType: "service_visit" }}
+          readOnly={readOnly}
+        />
+      </Panel>
     </div>
   );
 };

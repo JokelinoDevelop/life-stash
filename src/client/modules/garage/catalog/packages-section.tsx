@@ -5,16 +5,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { Panel } from "@/components/app/list-section";
 import { ResponsiveDialog } from "@/components/app/responsive-dialog";
 import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 
@@ -60,7 +54,7 @@ const PackageRow = ({
       <Button
         aria-label={t("packages.editTitle")}
         onClick={onEdit}
-        size="icon"
+        size="icon-compact"
         variant="ghost"
       >
         <Pencil />
@@ -70,7 +64,7 @@ const PackageRow = ({
         trigger={
           <Button
             aria-label={t("packages.deleted")}
-            size="icon"
+            size="icon-compact"
             variant="ghost"
           >
             <Trash2 />
@@ -145,30 +139,32 @@ export const PackagesSection = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("packages.title")}</CardTitle>
-        <CardAction>
+    <>
+      <Panel
+        action={
           <Button
             onClick={() => {
               setEditing({ mode: "create" });
             }}
-            size="sm"
-            variant="outline"
+            size="compact"
+            variant="ghost"
           >
             <Plus />
             {t("packages.add")}
           </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent>
+        }
+        className="py-1"
+        title={t("packages.title")}
+      >
         {packages.isPending && <LoadingState rows={2} />}
         {packages.isError && <ErrorState error={packages.error} />}
         {packages.isSuccess && packages.data.packages.length === 0 && (
-          <p className="text-muted-foreground text-sm">{t("packages.empty")}</p>
+          <p className="text-muted-foreground py-3 text-sm">
+            {t("packages.empty")}
+          </p>
         )}
         {packages.isSuccess && (
-          <ul className="flex flex-col divide-y">
+          <ul className="divide-divider flex flex-col divide-y">
             {packages.data.packages.map((pkg) => (
               <PackageRow
                 key={pkg.id}
@@ -184,7 +180,7 @@ export const PackagesSection = () => {
             ))}
           </ul>
         )}
-      </CardContent>
+      </Panel>
       <ResponsiveDialog
         onOpenChange={(open) => {
           if (!open) {
@@ -208,6 +204,6 @@ export const PackagesSection = () => {
           />
         )}
       </ResponsiveDialog>
-    </Card>
+    </>
   );
 };

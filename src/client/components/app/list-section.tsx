@@ -51,20 +51,29 @@ export const ListSection = ({
   </section>
 );
 
-/** A titled hairline box for non-list content such as charts and tables. */
+/** A hairline box for non-list content (charts, tables, form fields), optionally titled. */
 export const Panel = ({
   action,
   children,
   className,
+  description,
   title,
 }: {
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  description?: React.ReactNode;
   title?: React.ReactNode;
 }) => (
   <section className="flex flex-col gap-2">
-    {title !== undefined && <SectionHeading action={action} title={title} />}
+    {title !== undefined && (
+      <div className="flex flex-col gap-0.5">
+        <SectionHeading action={action} title={title} />
+        {description !== undefined && (
+          <p className="text-muted-foreground px-0.5 text-sm">{description}</p>
+        )}
+      </div>
+    )}
     <div
       className={cn("bg-card overflow-hidden rounded-lg border p-4", className)}
     >

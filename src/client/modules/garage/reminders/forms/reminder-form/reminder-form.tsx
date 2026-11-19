@@ -2,14 +2,8 @@ import { REMINDER_KINDS } from "@shared/domain/garage-kinds";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { Panel } from "@/components/app/list-section";
 import { useAppForm } from "@/components/form/form-hook";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { FieldGroup } from "@/components/ui/field";
 import { useFormat } from "@/lib/format";
 
@@ -67,31 +61,25 @@ const DueCard = ({ form }: { form: ReminderFormApi }) => {
   const { unit } = useFormat();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("form.due")}</CardTitle>
-        <CardDescription>{t("form.dueHelp")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <form.AppField name="dueDate">
-            {(field) => (
-              <field.TextField label={t("form.dueDate")} optional type="date" />
-            )}
-          </form.AppField>
-          <form.AppField name="dueOdometer">
-            {(field) => (
-              <field.TextField
-                inputMode="numeric"
-                label={t("form.dueOdometer")}
-                optional
-                suffix={tc(`units.${unit}`)}
-              />
-            )}
-          </form.AppField>
-        </div>
-      </CardContent>
-    </Card>
+    <Panel title={t("form.due")} description={t("form.dueHelp")}>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <form.AppField name="dueDate">
+          {(field) => (
+            <field.TextField label={t("form.dueDate")} optional type="date" />
+          )}
+        </form.AppField>
+        <form.AppField name="dueOdometer">
+          {(field) => (
+            <field.TextField
+              inputMode="numeric"
+              label={t("form.dueOdometer")}
+              optional
+              suffix={tc(`units.${unit}`)}
+            />
+          )}
+        </form.AppField>
+      </div>
+    </Panel>
   );
 };
 
@@ -101,41 +89,36 @@ const RecurringCard = ({ form }: { form: ReminderFormApi }) => {
   const { unit } = useFormat();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("form.recurring")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <FieldGroup>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <form.AppField name="intervalMonths">
-              {(field) => (
-                <field.TextField
-                  inputMode="numeric"
-                  label={t("form.intervalMonths")}
-                  optional
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="intervalKm">
-              {(field) => (
-                <field.TextField
-                  inputMode="numeric"
-                  label={t("form.intervalKm")}
-                  optional
-                  suffix={tc(`units.${unit}`)}
-                />
-              )}
-            </form.AppField>
-          </div>
-          <form.AppField name="notes">
+    <Panel title={t("form.recurring")}>
+      <FieldGroup>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <form.AppField name="intervalMonths">
             {(field) => (
-              <field.TextareaField label={tc("fields.notes")} optional />
+              <field.TextField
+                inputMode="numeric"
+                label={t("form.intervalMonths")}
+                optional
+              />
             )}
           </form.AppField>
-        </FieldGroup>
-      </CardContent>
-    </Card>
+          <form.AppField name="intervalKm">
+            {(field) => (
+              <field.TextField
+                inputMode="numeric"
+                label={t("form.intervalKm")}
+                optional
+                suffix={tc(`units.${unit}`)}
+              />
+            )}
+          </form.AppField>
+        </div>
+        <form.AppField name="notes">
+          {(field) => (
+            <field.TextareaField label={tc("fields.notes")} optional />
+          )}
+        </form.AppField>
+      </FieldGroup>
+    </Panel>
   );
 };
 
@@ -160,64 +143,62 @@ export const ReminderForm = ({
         void form.handleSubmit();
       }}
     >
-      <Card>
-        <CardContent>
-          <FieldGroup>
-            <form.AppField name="kind">
-              {(field) => (
-                <field.SelectField
-                  label={t("form.kind")}
-                  options={REMINDER_KINDS.map((kind) => ({
-                    label: t(`kinds.${kind}`),
-                    value: kind,
-                  }))}
-                />
-              )}
-            </form.AppField>
-            <form.Subscribe selector={(state) => state.values.kind}>
-              {(kind) =>
-                kind === "service" && (
-                  <form.AppField
-                    listeners={{
-                      onChange: ({ value }) => {
-                        const title = form.getFieldValue("title").trim();
+      <Panel>
+        <FieldGroup>
+          <form.AppField name="kind">
+            {(field) => (
+              <field.SelectField
+                label={t("form.kind")}
+                options={REMINDER_KINDS.map((kind) => ({
+                  label: t(`kinds.${kind}`),
+                  value: kind,
+                }))}
+              />
+            )}
+          </form.AppField>
+          <form.Subscribe selector={(state) => state.values.kind}>
+            {(kind) =>
+              kind === "service" && (
+                <form.AppField
+                  listeners={{
+                    onChange: ({ value }) => {
+                      const title = form.getFieldValue("title").trim();
 
-                        const name =
-                          targets.find((target) => target.value === value)
-                            ?.name ?? "";
+                      const name =
+                        targets.find((target) => target.value === value)
+                          ?.name ?? "";
 
-                        if (
-                          name !== "" &&
-                          (title === "" || autoTitles.has(title))
-                        ) {
-                          form.setFieldValue("title", name);
-                        }
-                      },
-                    }}
-                    name="target"
-                  >
-                    {(field) => (
-                      <field.SelectField
-                        label={t("form.target")}
-                        optional
-                        options={targets}
-                      />
-                    )}
-                  </form.AppField>
-                )
-              }
-            </form.Subscribe>
-            <form.AppField name="title">
-              {(field) => (
-                <field.TextField
-                  label={t("form.title")}
-                  placeholder={t("form.titlePlaceholder")}
-                />
-              )}
-            </form.AppField>
-          </FieldGroup>
-        </CardContent>
-      </Card>
+                      if (
+                        name !== "" &&
+                        (title === "" || autoTitles.has(title))
+                      ) {
+                        form.setFieldValue("title", name);
+                      }
+                    },
+                  }}
+                  name="target"
+                >
+                  {(field) => (
+                    <field.SelectField
+                      label={t("form.target")}
+                      optional
+                      options={targets}
+                    />
+                  )}
+                </form.AppField>
+              )
+            }
+          </form.Subscribe>
+          <form.AppField name="title">
+            {(field) => (
+              <field.TextField
+                label={t("form.title")}
+                placeholder={t("form.titlePlaceholder")}
+              />
+            )}
+          </form.AppField>
+        </FieldGroup>
+      </Panel>
       <DueCard form={form} />
       <RecurringCard form={form} />
       <form.AppForm>

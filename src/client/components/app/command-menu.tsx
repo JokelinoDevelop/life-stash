@@ -248,7 +248,9 @@ const CommandMenuDialog = ({
 }) => {
   const { t } = useTranslation("command");
   const { carId } = useParams({ strict: false });
-  const cars = useQuery({ ...carsQuery(false), enabled: open });
+  // Loaded with the app shell so the list is ready before the menu opens;
+  // otherwise the first highlighted row jumps when it arrives.
+  const cars = useQuery(carsQuery(false));
   const list = cars.data?.cars ?? [];
 
   const run: Run = (start) => {

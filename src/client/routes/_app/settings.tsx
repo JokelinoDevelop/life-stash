@@ -30,6 +30,7 @@ const SettingsPage = () => {
               queryClient.clear();
               await navigate({ to: "/login" });
             }}
+            size="compact"
             variant="outline"
           >
             <LogOut />
@@ -38,7 +39,7 @@ const SettingsPage = () => {
         }
         title={t("title")}
       />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <PreferencesForm
           key={JSON.stringify(preferences)}
           preferences={preferences}

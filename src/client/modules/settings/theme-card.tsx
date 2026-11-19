@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/app/theme";
 import type { Theme } from "@/app/theme";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+import { SettingsSection } from "./settings-section";
 
 const THEMES: { value: Theme; icon: typeof Sun }[] = [
   { icon: Monitor, value: "system" },
@@ -17,36 +18,33 @@ export const ThemeCard = () => {
   const { theme, setTheme } = useTheme();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("preferences.theme")}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ToggleGroup
-          className="w-full"
-          onValueChange={(value) => {
-            const next = THEMES.find((option) => option.value === value);
+    <SettingsSection title={t("preferences.theme")}>
+      <ToggleGroup
+        className="w-full sm:w-fit"
+        onValueChange={(value) => {
+          const next = THEMES.find((option) => option.value === value);
 
-            if (next) {
-              setTheme(next.value);
-            }
-          }}
-          type="single"
-          value={theme}
-          variant="outline"
-        >
-          {THEMES.map((option) => (
-            <ToggleGroupItem
-              className="flex-1"
-              key={option.value}
-              value={option.value}
-            >
-              <option.icon />
-              {t(`preferences.themes.${option.value}`)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </CardContent>
-    </Card>
+          if (next) {
+            setTheme(next.value);
+          }
+        }}
+        size="segmented"
+        spacing={0.5}
+        type="single"
+        value={theme}
+        variant="segmented"
+      >
+        {THEMES.map((option) => (
+          <ToggleGroupItem
+            className="flex-1"
+            key={option.value}
+            value={option.value}
+          >
+            <option.icon />
+            {t(`preferences.themes.${option.value}`)}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
+    </SettingsSection>
   );
 };

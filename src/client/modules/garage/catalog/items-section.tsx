@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { Panel } from "@/components/app/list-section";
 import { ResponsiveDialog } from "@/components/app/responsive-dialog";
 import { ErrorState, LoadingState } from "@/components/app/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { api, unwrap } from "@/lib/api";
@@ -50,13 +50,13 @@ const ItemRow = ({
   };
 
   return (
-    <li className="flex items-center gap-2 py-2">
+    <li className="flex min-h-12 items-center gap-1 px-4 md:min-h-10">
       <span className="min-w-0 flex-1 truncate">{item.name}</span>
       {archived && <Badge variant="secondary">{t("items.archived")}</Badge>}
       <Button
         aria-label={t("items.rename")}
         onClick={onRename}
-        size="icon"
+        size="icon-compact"
         variant="ghost"
       >
         <Pencil />
@@ -64,7 +64,7 @@ const ItemRow = ({
       <Button
         aria-label={archived ? t("items.restore") : t("items.archive")}
         onClick={toggleArchive}
-        size="icon"
+        size="icon-compact"
         variant="ghost"
       >
         {archived ? <ArchiveRestore /> : <Archive />}
@@ -82,11 +82,8 @@ export const ItemsSection = () => {
   const errorMessage = useErrorMessage();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("items.title")}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Panel title={t("items.title")}>
         <div className="flex flex-col gap-4">
           <ItemForm
             defaultValues={itemFormDefaults()}
@@ -109,7 +106,7 @@ export const ItemsSection = () => {
             <p className="text-muted-foreground text-sm">{t("items.empty")}</p>
           )}
           {items.isSuccess && (
-            <ul className="flex flex-col divide-y">
+            <ul className="divide-divider -mx-4 flex flex-col divide-y border-y">
               {items.data.items.map((item) => (
                 <ItemRow
                   item={item}
@@ -132,7 +129,7 @@ export const ItemsSection = () => {
             </Label>
           </div>
         </div>
-      </CardContent>
+      </Panel>
       <ResponsiveDialog
         onOpenChange={(open) => {
           if (!open) {
@@ -163,6 +160,6 @@ export const ItemsSection = () => {
           />
         )}
       </ResponsiveDialog>
-    </Card>
+    </>
   );
 };

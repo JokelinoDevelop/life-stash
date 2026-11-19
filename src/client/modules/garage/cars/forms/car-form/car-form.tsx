@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { Panel } from "@/components/app/list-section";
 import { useAppForm } from "@/components/form/form-hook";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { CarIdentityFields, CarPurchaseFields } from "./car-form-sections";
 import { carFormSchema } from "./schema";
@@ -32,19 +32,12 @@ export const CarForm = ({
         void form.handleSubmit();
       }}
     >
-      <Card>
-        <CardContent>
-          <CarIdentityFields form={form} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("carForm.purchase")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CarPurchaseFields form={form} />
-        </CardContent>
-      </Card>
+      <Panel>
+        <CarIdentityFields form={form} />
+      </Panel>
+      <Panel title={t("carForm.purchase")}>
+        <CarPurchaseFields form={form} />
+      </Panel>
       <form.AppForm>
         <form.SubmitButton className="self-end" />
       </form.AppForm>
