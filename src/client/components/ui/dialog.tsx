@@ -49,17 +49,27 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  variant = "default",
+  size = "md",
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean;
+  /** `bare`: no padding or gap, 12px radius; the content brings its own header and footer. */
+  variant?: "default" | "bare";
+  /** Width of a `bare` dialog: `md` for quick entries, `lg` for longer forms. */
+  size?: "md" | "lg";
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        data-variant={variant}
         className={cn(
           "bg-background data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 outline-none sm:max-w-lg",
+          variant === "bare" &&
+            "bg-card flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden rounded-xl p-0 duration-150 data-[state=closed]:duration-100 sm:max-w-md",
+          variant === "bare" && size === "lg" && "sm:max-w-xl",
           className
         )}
         {...props}

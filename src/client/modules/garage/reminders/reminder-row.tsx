@@ -1,12 +1,14 @@
-import { Link } from "@tanstack/react-router";
+import { reminderProgress } from "@shared/domain/reminders";
 import { CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { ListRow, ListRowText } from "@/components/app/list-section";
 import { ResponsiveDialog } from "@/components/app/responsive-dialog";
-import { StatusBadge } from "@/components/app/status-badge";
+import { StatusRing } from "@/components/app/status-ring";
+import { STATUS_TEXT_TONE } from "@/components/app/status-tone";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,9 +20,11 @@ import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
+import { cn } from "@/lib/utils";
 
 import { useInvalidateGarage } from "../cars/cars.queries";
 import { describeDue } from "../cars/describe-due";
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CompleteReminderButton } from "./complete-reminder-button";
 import { skipFormDefaults, skipFormToRequest } from "./forms/skip-form/mapper";
 import { SkipForm } from "./forms/skip-form/skip-form";
@@ -60,19 +64,22 @@ const ReminderMenu = ({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button aria-label={tc("actions.edit")} size="icon" variant="ghost">
+          <Button
+            aria-label={tc("actions.edit")}
+            size="icon-compact"
+            variant="ghost"
+          >
             <MoreHorizontal />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link
-              params={{ carId, reminderId: reminder.id }}
-              to="/garage/cars/$carId/reminders/$reminderId/edit"
+            <EntryDialogLink
+              entry={{ car: carId, dialog: "reminder", id: reminder.id }}
             >
               <Pencil />
               {tc("actions.edit")}
-            </Link>
+            </EntryDialogLink>
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
@@ -153,25 +160,40 @@ export const ReminderRow = ({
   const format = useFormat();
   const interval = useIntervalText(reminder);
 
+  const due = describeDue(reminder, format, tc);
+
+  const extra = [t(`kinds.${reminder.kind}`), interval].filter(
+    (part): part is string => part !== null && part !== ""
+  );
+
   return (
-    <li className="flex flex-wrap items-center gap-3 py-3">
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-medium">{reminder.title}</p>
-        <p className="text-muted-foreground text-sm">
-          {[
-            t(`kinds.${reminder.kind}`),
-            describeDue(reminder, format, tc),
-            interval,
-          ]
-            .filter((part) => part !== null && part !== "")
-            .join(" · ")}
-        </p>
-      </div>
-      <StatusBadge status={reminder.status} />
+    <ListRow className="gap-2.5 py-2 md:gap-3 md:py-1">
+      <StatusRing
+        progress={reminderProgress(reminder)}
+        status={reminder.status}
+      />
+      <ListRowText
+        meta={
+          <>
+            {due !== "" && (
+              <span
+                className={cn(
+                  "tabular-nums",
+                  STATUS_TEXT_TONE[reminder.status]
+                )}
+              >
+                {due}
+              </span>
+            )}
+            {extra.length > 0 && ` · ${extra.join(" · ")}`}
+          </>
+        }
+        title={reminder.title}
+      />
       {!readOnly && (
         <CompleteReminderButton carId={carId} reminder={reminder} />
       )}
       {!readOnly && <ReminderMenu carId={carId} reminder={reminder} />}
-    </li>
+    </ListRow>
   );
 };

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 // oxlint-disable-next-line react-doctor/prefer-dynamic-import
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Panel } from "@/components/app/list-section";
 import {
   ChartContainer,
   ChartLegend,
@@ -43,37 +43,32 @@ export const SpendingChart = ({
     }));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("chartTitle", { currency })}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer className="aspect-auto h-60 w-full" config={config}>
-          <BarChart accessibilityLayer data={rows}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              axisLine={false}
-              dataKey="label"
-              tickLine={false}
-              tickMargin={8}
-            />
-            <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-            <ChartLegend content={<ChartLegendContent />} />
-            <Bar
-              dataKey="maintenance"
-              fill="var(--color-maintenance)"
-              stackId="costs"
-            />
-            <Bar dataKey="repair" fill="var(--color-repair)" stackId="costs" />
-            <Bar
-              dataKey="other"
-              fill="var(--color-other)"
-              radius={[4, 4, 0, 0]}
-              stackId="costs"
-            />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+    <Panel title={t("chartTitle", { currency })}>
+      <ChartContainer className="aspect-auto h-60 w-full" config={config}>
+        <BarChart accessibilityLayer data={rows}>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            axisLine={false}
+            dataKey="label"
+            tickLine={false}
+            tickMargin={8}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+          <ChartLegend content={<ChartLegendContent />} />
+          <Bar
+            dataKey="maintenance"
+            fill="var(--color-maintenance)"
+            stackId="costs"
+          />
+          <Bar dataKey="repair" fill="var(--color-repair)" stackId="costs" />
+          <Bar
+            dataKey="other"
+            fill="var(--color-other)"
+            radius={[3, 3, 0, 0]}
+            stackId="costs"
+          />
+        </BarChart>
+      </ChartContainer>
+    </Panel>
   );
 };

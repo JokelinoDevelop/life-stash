@@ -5,6 +5,7 @@ import { Gauge } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
@@ -64,14 +65,19 @@ export const MileageTab = ({
   }
 
   const { points } = mileage.data;
-  const latestKm = latestOdometer(points)?.odometerKm ?? null;
+  const latestPoint = latestOdometer(points);
+
+  const latest =
+    latestPoint === null
+      ? null
+      : { date: latestPoint.date, km: latestPoint.odometerKm };
 
   const logButton = readOnly ? null : (
     <Button
       onClick={() => {
         setDialog({ open: true, reading: null });
       }}
-      size="lg"
+      size="compact"
     >
       <Gauge />
       {t("log")}
@@ -79,11 +85,11 @@ export const MileageTab = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageStack>
       {points.length === 0 ? (
         <EmptyState
           action={logButton}
-          icon={<Gauge className="size-10" />}
+          icon={<Gauge />}
           message={t("list.empty")}
         />
       ) : (
@@ -92,7 +98,7 @@ export const MileageTab = ({
             <div className="flex justify-end">{logButton}</div>
           )}
           <MileageStats points={points} today={today} />
-          <Suspense fallback={<LoadingState rows={1} />}>
+          <Suspense fallback={<LoadingState variant="block" />}>
             <MileageCharts points={points} today={today} />
           </Suspense>
           <ReadingsList
@@ -106,7 +112,7 @@ export const MileageTab = ({
       )}
       <ReadingDialog
         carId={carId}
-        latestKm={latestKm}
+        latest={latest}
         onOpenChange={(open) => {
           setDialog((current) => ({ ...current, open }));
 
@@ -117,6 +123,6 @@ export const MileageTab = ({
         open={dialog.open || autoOpen}
         reading={autoOpen ? null : dialog.reading}
       />
-    </div>
+    </PageStack>
   );
 };

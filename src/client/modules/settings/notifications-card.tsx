@@ -4,13 +4,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import {
@@ -20,6 +13,8 @@ import {
   isPushSupported,
 } from "@/lib/push";
 import { useConfig } from "@/lib/session";
+
+import { SettingsSection } from "./settings-section";
 
 const PUSH_KEY = ["settings", "push-subscription"] as const;
 
@@ -130,14 +125,11 @@ export const NotificationsCard = () => {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{t("notifications.title")}</CardTitle>
-        <CardDescription>{t("notifications.description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col">{body()}</div>
-      </CardContent>
-    </Card>
+    <SettingsSection
+      title={t("notifications.title")}
+      description={t("notifications.description")}
+    >
+      <div className="flex flex-col">{body()}</div>
+    </SettingsSection>
   );
 };

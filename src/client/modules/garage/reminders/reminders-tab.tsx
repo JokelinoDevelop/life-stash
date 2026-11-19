@@ -1,15 +1,18 @@
 import { REMINDER_STATUSES } from "@shared/domain/reminders";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { BellPlus, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { ReminderRow } from "./reminder-row";
 import { remindersQuery } from "./reminders.queries";
 import type { CompletedReminder } from "./reminders.queries";
@@ -68,11 +71,14 @@ export const RemindersTab = ({
   const reminders = useQuery(remindersQuery(carId));
 
   const addButton = readOnly ? null : (
-    <Button asChild>
-      <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
+    <Button asChild size="compact">
+      <EntryDialogLink entry={{ car: carId, dialog: "reminder" }}>
         <BellPlus />
         {t("tab.add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addReminder.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
@@ -94,14 +100,14 @@ export const RemindersTab = ({
   const { active, completed } = reminders.data;
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageStack>
       {addButton !== null && active.length > 0 && (
         <div className="flex justify-end">{addButton}</div>
       )}
       {active.length === 0 && (
         <EmptyState
           action={addButton}
-          icon={<BellPlus className="size-10" />}
+          icon={<BellPlus />}
           message={t("tab.empty")}
         />
       )}
@@ -109,26 +115,23 @@ export const RemindersTab = ({
         const group = active.filter((reminder) => reminder.status === status);
 
         return group.length === 0 ? null : (
-          <Card key={status}>
-            <CardHeader>
-              <CardTitle>{t(`groups.${status}`)}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="flex flex-col divide-y">
-                {group.map((reminder) => (
-                  <ReminderRow
-                    carId={carId}
-                    key={reminder.id}
-                    readOnly={readOnly}
-                    reminder={reminder}
-                  />
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <ListSection
+            count={group.length}
+            key={status}
+            title={t(`groups.${status}`)}
+          >
+            {group.map((reminder) => (
+              <ReminderRow
+                carId={carId}
+                key={reminder.id}
+                readOnly={readOnly}
+                reminder={reminder}
+              />
+            ))}
+          </ListSection>
         );
       })}
       <CompletedList reminders={completed} />
-    </div>
+    </PageStack>
   );
 };

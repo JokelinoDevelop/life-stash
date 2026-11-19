@@ -12,11 +12,15 @@ const toggleVariants = cva(
         default: "bg-transparent",
         outline:
           "border-input hover:bg-accent hover:text-accent-foreground border bg-transparent shadow-xs",
+        // Design v0.3 segmented control: the selected option is a raised chip.
+        segmented:
+          "text-muted-foreground hover:text-foreground data-[state=on]:bg-card data-[state=on]:text-foreground data-[state=on]:ring-border bg-transparent hover:bg-transparent data-[state=on]:ring-1",
       },
       size: {
         default: "h-9 min-w-9 px-2",
         sm: "h-8 min-w-8 px-1.5",
         lg: "h-10 min-w-10 px-2.5",
+        segmented: "h-8 min-w-8 rounded-sm px-2 text-xs md:h-6 md:min-w-6",
       },
     },
     defaultVariants: {

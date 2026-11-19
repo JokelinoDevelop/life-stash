@@ -1,83 +1,163 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "@fontsource-variable/inter/opsz.css";
 
 @custom-variant dark (&:is(.dark *));
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
 
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Loading placeholders wait 150 ms before fading in, so fast loads never flash. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-reveal {
+  animation: reveal 150ms ease-out 150ms both;
+}
+
+/* Indeterminate bar for route transitions. */
+@keyframes progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@utility animate-progress {
+  animation: progress-slide 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal {
+    animation-duration: 0s;
+  }
+}
+
+/* Design language v0.3 "crisp" — flat surfaces, hairlines, one accent.
+   Source of truth: the "LifeStash Design Language" canvas (Tokens board). */
 :root {
-  --radius: 0.75rem;
-  --background: oklch(0.985 0.002 247);
-  --foreground: oklch(0.21 0.02 257);
+  --radius: 0.5rem; /* sm 4 · md 6 · lg 8 · xl 12 */
+  --background: oklch(0.984 0.002 260);
+  --foreground: oklch(0.21 0.012 265);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 257);
+  --card-foreground: oklch(0.21 0.012 265);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 257);
-  --primary: oklch(0.55 0.17 250);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.96 0.006 247);
-  --secondary-foreground: oklch(0.25 0.02 257);
-  --muted: oklch(0.96 0.006 247);
-  --muted-foreground: oklch(0.52 0.02 257);
-  --accent: oklch(0.95 0.015 250);
-  --accent-foreground: oklch(0.25 0.02 257);
-  --destructive: oklch(0.58 0.22 27);
-  --success: oklch(0.6 0.15 155);
-  --warning: oklch(0.75 0.15 75);
-  --border: oklch(0.92 0.006 247);
-  --input: oklch(0.92 0.006 247);
-  --ring: oklch(0.55 0.17 250);
-  --chart-1: oklch(0.55 0.17 250);
-  --chart-2: oklch(0.65 0.15 175);
-  --chart-3: oklch(0.72 0.15 75);
-  --chart-4: oklch(0.6 0.18 310);
-  --chart-5: oklch(0.62 0.2 27);
-  --sidebar: oklch(0.98 0.003 247);
-  --sidebar-foreground: oklch(0.21 0.02 257);
-  --sidebar-primary: oklch(0.55 0.17 250);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.95 0.015 250);
-  --sidebar-accent-foreground: oklch(0.25 0.02 257);
-  --sidebar-border: oklch(0.92 0.006 247);
-  --sidebar-ring: oklch(0.55 0.17 250);
+  --popover-foreground: oklch(0.21 0.012 265);
+  --primary: oklch(0.53 0.17 263);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0.003 260);
+  --secondary-foreground: oklch(0.21 0.012 265);
+  --muted: oklch(0.97 0.003 260);
+  --muted-foreground: oklch(0.53 0.012 265);
+  --subtle-foreground: oklch(0.42 0.012 265);
+  --accent: oklch(0.955 0.004 260);
+  --accent-foreground: oklch(0.21 0.012 265);
+  --destructive: oklch(0.58 0.2 27);
+  --success: oklch(0.6 0.13 155);
+  --warning: oklch(0.74 0.15 70);
+  --warning-foreground: oklch(0.52 0.12 60);
+  --border: oklch(0.912 0.005 260);
+  --divider: oklch(0.94 0.004 260);
+  --input: oklch(0.912 0.005 260);
+  --ring: oklch(0.53 0.17 263);
+  --chart-1: oklch(0.53 0.17 263);
+  --chart-2: oklch(0.68 0.12 250);
+  --chart-3: oklch(0.8 0.07 250);
+  --chart-4: oklch(0.9 0.025 255);
+  --chart-5: oklch(0.4 0.08 265);
+  --sidebar: oklch(0.984 0.002 260);
+  --sidebar-foreground: oklch(0.42 0.012 265);
+  --sidebar-primary: oklch(0.53 0.17 263);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.955 0.004 260);
+  --sidebar-accent-foreground: oklch(0.21 0.012 265);
+  --sidebar-border: oklch(0.912 0.005 260);
+  --sidebar-ring: oklch(0.53 0.17 263);
+  --overlay-shadow:
+    0 16px 48px -12px oklch(0.2 0.02 265 / 0.22),
+    0 2px 6px oklch(0.2 0.02 265 / 0.05);
 }
 
 .dark {
-  --background: oklch(0.17 0.015 257);
-  --foreground: oklch(0.96 0.005 247);
-  --card: oklch(0.21 0.018 257);
-  --card-foreground: oklch(0.96 0.005 247);
-  --popover: oklch(0.21 0.018 257);
-  --popover-foreground: oklch(0.96 0.005 247);
-  --primary: oklch(0.68 0.15 250);
-  --primary-foreground: oklch(0.17 0.015 257);
-  --secondary: oklch(0.27 0.02 257);
-  --secondary-foreground: oklch(0.96 0.005 247);
-  --muted: oklch(0.27 0.02 257);
-  --muted-foreground: oklch(0.7 0.015 257);
-  --accent: oklch(0.29 0.03 257);
-  --accent-foreground: oklch(0.96 0.005 247);
-  --destructive: oklch(0.65 0.2 25);
-  --success: oklch(0.7 0.15 155);
-  --warning: oklch(0.8 0.14 80);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.68 0.15 250);
-  --chart-1: oklch(0.68 0.15 250);
-  --chart-2: oklch(0.72 0.13 175);
-  --chart-3: oklch(0.8 0.14 80);
-  --chart-4: oklch(0.7 0.16 310);
-  --chart-5: oklch(0.68 0.19 27);
-  --sidebar: oklch(0.2 0.017 257);
-  --sidebar-foreground: oklch(0.96 0.005 247);
-  --sidebar-primary: oklch(0.68 0.15 250);
-  --sidebar-primary-foreground: oklch(0.17 0.015 257);
-  --sidebar-accent: oklch(0.29 0.03 257);
-  --sidebar-accent-foreground: oklch(0.96 0.005 247);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.68 0.15 250);
+  --background: oklch(0.165 0.006 265);
+  --foreground: oklch(0.95 0.004 260);
+  --card: oklch(0.195 0.006 265);
+  --card-foreground: oklch(0.95 0.004 260);
+  --popover: oklch(0.215 0.007 265);
+  --popover-foreground: oklch(0.95 0.004 260);
+  --primary: oklch(0.66 0.15 263);
+  --primary-foreground: oklch(0.165 0.006 265);
+  --secondary: oklch(0.235 0.007 265);
+  --secondary-foreground: oklch(0.95 0.004 260);
+  --muted: oklch(0.235 0.007 265);
+  --muted-foreground: oklch(0.68 0.01 265);
+  --subtle-foreground: oklch(0.78 0.008 265);
+  --accent: oklch(0.25 0.008 265);
+  --accent-foreground: oklch(0.95 0.004 260);
+  --destructive: oklch(0.66 0.19 25);
+  --success: oklch(0.7 0.14 155);
+  --warning: oklch(0.8 0.14 75);
+  --warning-foreground: oklch(0.8 0.14 75);
+  --border: oklch(1 0 0 / 9%);
+  --divider: oklch(1 0 0 / 6%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.66 0.15 263);
+  --chart-1: oklch(0.66 0.15 263);
+  --chart-2: oklch(0.58 0.11 250);
+  --chart-3: oklch(0.47 0.07 255);
+  --chart-4: oklch(0.36 0.03 260);
+  --chart-5: oklch(0.82 0.06 260);
+  --sidebar: oklch(0.165 0.006 265);
+  --sidebar-foreground: oklch(0.78 0.008 265);
+  --sidebar-primary: oklch(0.66 0.15 263);
+  --sidebar-primary-foreground: oklch(0.165 0.006 265);
+  --sidebar-accent: oklch(0.25 0.008 265);
+  --sidebar-accent-foreground: oklch(0.95 0.004 260);
+  --sidebar-border: oklch(1 0 0 / 9%);
+  --sidebar-ring: oklch(0.66 0.15 263);
+  --overlay-shadow:
+    0 0 0 1px oklch(1 0 0 / 6%), 0 16px 48px -12px oklch(0 0 0 / 0.6);
+}
+
+/* Type, elevation and motion. Non-inline so utilities read the variables at
+   runtime: overriding them below (e.g. --text-sm on desktop) restyles every
+   shadcn component without touching its classes. */
+@theme {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.45;
+  --shadow-2xs: 0 0 #0000;
+  --shadow-xs: 0 0 #0000;
+  --shadow-sm: 0 0 #0000;
+  --shadow-md: var(--overlay-shadow);
+  --shadow-lg: var(--overlay-shadow);
+  --shadow-xl: var(--overlay-shadow);
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --default-transition-duration: 100ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* 14px body on touch, 13px on desktop (pointer + room). */
+@media (min-width: 48rem) {
+  :root {
+    --text-sm: 0.8125rem;
+  }
 }
 
 @theme inline {
@@ -97,12 +177,15 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  --color-subtle-foreground: var(--subtle-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
   --color-border: var(--border);
+  --color-divider: var(--divider);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);
@@ -127,8 +210,56 @@
   html {
     -webkit-tap-highlight-color: transparent;
   }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
   body {
-    @apply bg-background text-foreground antialiased;
+    /* 13px on desktop, 14px on touch (see --text-sm). */
+    @apply bg-background text-foreground text-sm antialiased;
+    font-feature-settings: "cv11", "ss01", "ss03";
+    font-optical-sizing: auto;
+    letter-spacing: -0.006em;
     padding-bottom: env(safe-area-inset-bottom);
   }
+}
+
+/* Motion spec v0.3 — overlays enter in 150 ms (menus 120 ms), leave in 100 ms,
+   with a subtle .98 scale instead of shadcn's .95. Unlayered so it overrides
+   the component utilities without restyling the components themselves. */
+:is([data-slot="dialog-content"], [data-slot="alert-dialog-content"]) {
+  --tw-enter-scale: 0.98;
+  --tw-exit-scale: 0.98;
+  animation-duration: 150ms;
+  animation-timing-function: var(--ease-out);
+}
+:is(
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="select-content"],
+  [data-slot="tooltip-content"]
+) {
+  --tw-enter-scale: 0.98;
+  --tw-exit-scale: 0.98;
+  animation-duration: 120ms;
+  animation-timing-function: var(--ease-out);
+}
+:is([data-slot="dialog-overlay"], [data-slot="alert-dialog-overlay"]) {
+  animation-duration: 150ms;
+}
+[data-state="closed"]:is(
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="select-content"],
+  [data-slot="dialog-overlay"],
+  [data-slot="alert-dialog-overlay"]
+) {
+  animation-duration: 100ms;
 }

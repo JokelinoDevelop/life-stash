@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { spendingByYear } from "./spending-report";
+import { spendingByMonth, spendingByYear } from "./spending-report";
 
 describe(spendingByYear, () => {
   it("splits maintenance, repairs and other costs per year and currency", () => {
@@ -81,6 +81,50 @@ describe(spendingByYear, () => {
         repairMinor: 0,
         year: 2025,
       },
+    ]);
+  });
+});
+
+describe(spendingByMonth, () => {
+  it("sums visits and expenses per month of one year, skipping previous owners", () => {
+    const visit = {
+      byPreviousOwner: false,
+      currency: "EUR" as const,
+      itemCostsMinor: [],
+      kind: "maintenance" as const,
+    };
+
+    const result = spendingByMonth(
+      [
+        { ...visit, date: "2026-06-14", totalMinor: 56_800 },
+        {
+          ...visit,
+          byPreviousOwner: true,
+          date: "2026-06-01",
+          totalMinor: 999,
+        },
+        { ...visit, date: "2025-06-14", totalMinor: 100 },
+      ],
+      [
+        {
+          amountMinor: 6200,
+          category: "fuel",
+          currency: "EUR",
+          date: "2026-06-20",
+        },
+        {
+          amountMinor: 300,
+          category: "parking",
+          currency: "MKD",
+          date: "2026-11-05",
+        },
+      ],
+      2026
+    );
+
+    expect(result).toStrictEqual([
+      { amountMinor: 63_000, currency: "EUR", month: "2026-06" },
+      { amountMinor: 300, currency: "MKD", month: "2026-11" },
     ]);
   });
 });

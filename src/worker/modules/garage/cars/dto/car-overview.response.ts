@@ -13,6 +13,8 @@ export interface CarOverviewResponse {
     kind: ReminderKind;
     dueDate: string | null;
     dueOdometerKm: number | null;
+    intervalKm: number | null;
+    intervalMonths: number | null;
     status: ReminderStatus;
     daysLeft: number | null;
     kmLeft: number | null;

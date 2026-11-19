@@ -144,3 +144,28 @@ export const daysBetween = (from: string, to: string): number =>
   Math.round((toUtc(to) - toUtc(from)) / MS_PER_DAY);
 
 export const yearOf = (date: string): number => parseIsoDate(date).year;
+
+const TYPED_DATE =
+  /^(?<day>\d{1,2})[./-](?<month>\d{1,2})[./-](?<year>\d{4})$/u;
+
+/**
+ * A date the user typed: `2026-11-19` or day-first `19.11.2026`, `19/11/2026`,
+ * `19-11-2026`. Returns the ISO date, or null when it isn't a real date.
+ */
+export const parseTypedDate = (text: string): string | null => {
+  const value = text.trim();
+
+  if (isIsoDate(value)) {
+    return value;
+  }
+
+  const groups = TYPED_DATE.exec(value)?.groups;
+
+  if (!groups) {
+    return null;
+  }
+
+  const iso = `${groups.year}-${pad(Number(groups.month))}-${pad(Number(groups.day))}`;
+
+  return isIsoDate(iso) ? iso : null;
+};

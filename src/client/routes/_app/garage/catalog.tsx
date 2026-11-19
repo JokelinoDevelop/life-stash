@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { ItemsSection } from "@/modules/garage/catalog/items-section";
 import { PackagesSection } from "@/modules/garage/catalog/packages-section";
 
@@ -16,10 +16,12 @@ const CatalogPage = () => {
         description={t("description")}
         title={t("title")}
       />
-      <div className="grid gap-4 lg:grid-cols-2">
-        <PackagesSection />
-        <ItemsSection />
-      </div>
+      <PageContent>
+        <div className="grid items-start gap-6 lg:grid-cols-2">
+          <PackagesSection />
+          <ItemsSection />
+        </div>
+      </PageContent>
     </>
   );
 };

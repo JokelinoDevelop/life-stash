@@ -9,7 +9,6 @@
   "thisYear": "This year by category",
   "noneThisYear": "Nothing logged this year.",
   "completing": "Completing reminder: {{title}}",
-  "completingGeneric": "Saving this expense completes the selected reminder.",
   "fields": {
     "category": "Category",
     "date": "Date",

@@ -1,12 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
-import { ResponsiveDialog } from "@/components/app/responsive-dialog";
+import { FormDialog } from "@/components/app/form-dialog";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 
+import { CarCrumb } from "../cars/car-crumb";
 import { useInvalidateGarage } from "../cars/cars.queries";
 import type { MileagePoint } from "./mileage.queries";
 import {
@@ -21,16 +22,16 @@ import type { ReadingFormValues } from "./reading-form/schema";
 /** Log a new reading (no `reading`) or edit a manual one — a bottom sheet on phones. */
 export const ReadingDialog = ({
   carId,
-  reading,
-  latestKm,
-  open,
+  latest,
   onOpenChange,
+  open,
+  reading,
 }: {
   carId: string;
-  reading: MileagePoint | null;
-  latestKm: number | null;
-  open: boolean;
+  latest: { km: number; date: string } | null;
   onOpenChange: (open: boolean) => void;
+  open: boolean;
+  reading: MileagePoint | null;
 }) => {
   const { t } = useTranslation("garageMileage");
   const format = useFormat();
@@ -62,24 +63,33 @@ export const ReadingDialog = ({
     }
   };
 
+  const title = reading === null ? t("inline.dialogTitle") : t("editTitle");
+  const description = reading === null ? t("logDescription") : undefined;
+
+  const form = open && (
+    <ReadingForm
+      defaultValues={
+        reading === null
+          ? readingFormDefaults(todayIso())
+          : readingToFormValues(reading, format.unit)
+      }
+      latest={reading === null ? latest : null}
+      onCancel={() => {
+        onOpenChange(false);
+      }}
+      onSubmit={save}
+    />
+  );
+
   return (
-    <ResponsiveDialog
-      description={reading === null ? t("logDescription") : undefined}
+    <FormDialog
+      crumb={<CarCrumb carId={carId} />}
+      description={description}
       onOpenChange={onOpenChange}
       open={open}
-      title={reading === null ? t("logTitle") : t("editTitle")}
+      title={title}
     >
-      {open && (
-        <ReadingForm
-          defaultValues={
-            reading === null
-              ? readingFormDefaults(todayIso())
-              : readingToFormValues(reading, format.unit)
-          }
-          latestKm={reading === null ? latestKm : null}
-          onSubmit={save}
-        />
-      )}
-    </ResponsiveDialog>
+      {form}
+    </FormDialog>
   );
 };

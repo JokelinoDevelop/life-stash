@@ -22,8 +22,11 @@ export const CategoryIcon = ({ category }: { category: ExpenseCategory }) => {
   const Icon = CATEGORY_ICONS[category];
 
   return (
-    <div className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-lg">
-      <Icon className="size-4" />
-    </div>
+    <span
+      aria-hidden="true"
+      className="bg-muted text-subtle-foreground flex size-8 shrink-0 items-center justify-center rounded-md border md:size-7"
+    >
+      <Icon className="size-4 md:size-3.5" />
+    </span>
   );
 };

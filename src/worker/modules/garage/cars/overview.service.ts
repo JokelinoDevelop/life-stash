@@ -89,6 +89,8 @@ export const carOverview = async (
         dueDate: reminder.dueDate,
         dueOdometerKm: reminder.dueOdometerKm,
         id: reminder.id,
+        intervalKm: reminder.intervalKm,
+        intervalMonths: reminder.intervalMonths,
         kind: reminder.kind,
         kmLeft: evaluation.kmLeft,
         status: evaluation.status,

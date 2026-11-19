@@ -1,20 +1,21 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageHeader, PageStack } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarActions } from "@/modules/garage/cars/car-actions";
+import { CarHeading } from "@/modules/garage/cars/car-heading";
 import { CAR_TABS } from "@/modules/garage/cars/car-tabs";
 import type { CarTab } from "@/modules/garage/cars/car-tabs";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
 import { DetailsTab } from "@/modules/garage/cars/details-tab";
 import { OverviewTab } from "@/modules/garage/cars/overview-tab";
+import { useCarShortcuts } from "@/modules/garage/cars/use-car-shortcuts";
 import { ExpensesTab } from "@/modules/garage/expenses/expenses-tab";
 import { MileageTab } from "@/modules/garage/mileage/mileage-tab";
 import { RemindersTab } from "@/modules/garage/reminders/reminders-tab";
@@ -32,26 +33,42 @@ const CarPage = () => {
   const { data } = useSuspenseQuery(carQuery(carId));
   const { car } = data;
   const readOnly = car.archivedAt !== null;
+  const tabStrip = useRef<HTMLDivElement>(null);
+  useCarShortcuts(carId, !readOnly);
 
-  const subtitle = [car.year, car.make, car.model]
-    .filter((part) => part !== null)
-    .join(" ");
+  useEffect(() => {
+    const strip = tabStrip.current;
+
+    const reveal = () => {
+      strip
+        ?.querySelector(`[id$="-trigger-${tab}"]`)
+        ?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    };
+
+    // Runs once the strip has a real size (after Suspense reveals it and
+    // fonts load), then again whenever the tab changes.
+    const observer = new ResizeObserver(reveal);
+
+    if (strip !== null) {
+      observer.observe(strip);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [tab]);
 
   return (
     <>
       <PageHeader
         actions={<CarActions car={car} />}
-        back={<BackLink to="/garage" />}
-        description={subtitle === "" ? undefined : subtitle}
-        title={
-          <span className="flex items-center gap-2">
-            {car.name}
-            {car.plate !== null && <Badge variant="outline">{car.plate}</Badge>}
-          </span>
-        }
+        back={<BackLink label={t("title")} to="/garage" />}
+        hideMobileTitle
+        title={car.name}
       />
+      <CarHeading car={car} />
       {readOnly && (
-        <Alert className="mb-4">
+        <Alert className="mt-4 md:mx-7 md:w-auto">
           <AlertDescription>{t("car.readOnly")}</AlertDescription>
         </Alert>
       )}
@@ -63,20 +80,20 @@ const CarPage = () => {
         }}
         value={tab}
       >
-        <div className="-mx-4 px-4 md:mx-0 md:px-0">
-          <ScrollArea>
-            <TabsList className="mb-4">
-              {CAR_TABS.map((value) => (
-                <TabsTrigger key={value} value={value}>
-                  {t(`car.tabs.${value}`)}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+        <div
+          className="-mx-4 mt-4 mb-4 scroll-px-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:mb-0 md:px-6"
+          ref={tabStrip}
+        >
+          <TabsList variant="pill">
+            {CAR_TABS.map((value) => (
+              <TabsTrigger key={value} value={value}>
+                {t(`car.tabs.${value}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
         </div>
         <TabsContent value="overview">
-          <OverviewTab carId={carId} readOnly={readOnly} />
+          <OverviewTab car={car} carId={carId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="history">
           <HistoryTab carId={carId} readOnly={readOnly} />
@@ -94,7 +111,9 @@ const CarPage = () => {
           <SpendingTab carId={carId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="details">
-          <DetailsTab car={car} />
+          <PageStack>
+            <DetailsTab car={car} />
+          </PageStack>
         </TabsContent>
       </Tabs>
     </>

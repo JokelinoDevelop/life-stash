@@ -1,13 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Plus, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { ItemHistoryCard } from "./item-history-card";
-import { VisitCard } from "./visit-card";
+import { VisitRow } from "./visit-row";
 import { visitsQuery } from "./visits.queries";
 import type { VisitListItem } from "./visits.queries";
 
@@ -33,11 +37,14 @@ export const HistoryTab = ({
   const visits = useQuery(visitsQuery(carId));
 
   const addButton = readOnly ? null : (
-    <Button asChild>
-      <Link params={{ carId }} to="/garage/cars/$carId/services/new">
+    <Button asChild size="compact">
+      <EntryDialogLink entry={{ car: carId, dialog: "service" }}>
         <Plus />
         {t("history.add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addService.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
@@ -58,40 +65,38 @@ export const HistoryTab = ({
 
   if (visits.data.visits.length === 0) {
     return (
-      <EmptyState
-        action={addButton}
-        icon={<Wrench className="size-10" />}
-        message={t("history.empty")}
-      />
+      <PageStack>
+        <EmptyState
+          action={addButton}
+          icon={<Wrench />}
+          message={t("history.empty")}
+        />
+      </PageStack>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <PageStack>
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <ol className="flex flex-col gap-6">
+      <div
+        className="lg:[&>*+*]:border-divider grid gap-6 md:gap-0 lg:grid-cols-[minmax(0,1fr)_20rem] lg:[&>*+*]:border-l"
+        data-bleed=""
+      >
+        <div className="flex min-w-0 flex-col gap-6 md:gap-0">
           {groupByYear(visits.data.visits).map(([year, entries]) => (
-            <li className="flex flex-col gap-3" key={year}>
-              <h3 className="text-muted-foreground text-sm font-semibold">
-                {year}
-              </h3>
-              <ul className="flex flex-col gap-3 border-l pl-4">
-                {entries.map((visit) => (
-                  <li key={visit.id}>
-                    <VisitCard carId={carId} visit={visit} />
-                  </li>
-                ))}
-              </ul>
-            </li>
+            <ListSection count={entries.length} key={year} title={year}>
+              {entries.map((visit) => (
+                <VisitRow carId={carId} key={visit.id} visit={visit} />
+              ))}
+            </ListSection>
           ))}
-        </ol>
+        </div>
         <div>
           <ItemHistoryCard carId={carId} />
         </div>
       </div>
-    </div>
+    </PageStack>
   );
 };

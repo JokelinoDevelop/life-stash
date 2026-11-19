@@ -59,25 +59,51 @@
     "deleteTitle": "Delete this car and all of its records?",
     "deleteDescription": "Service history, mileage, reminders, expenses and photos for this car will be permanently deleted.",
     "deletedToast": "Car deleted",
-    "readOnly": "This car is archived. Restore it to make changes."
+    "readOnly": "This car is archived. Restore it to make changes.",
+    "soldDatePlaceholder": "Not sold yet"
   },
   "overview": {
     "dueNext": "What's due next",
     "nothingDue": "Nothing scheduled. Add a reminder to stay ahead.",
     "lastDone": "What's been done",
     "noHistory": "No service history yet.",
-    "driven": "How much I've driven",
-    "kmThisYear": "{{distance}} this year",
-    "latestOdometer": "Latest odometer",
     "loggedOn": "logged {{date}}",
-    "spent": "What I've spent this year",
     "maintenance": "Maintenance & repairs",
     "otherCosts": "Other costs",
     "nothingSpent": "Nothing yet",
     "viewAll": "View all",
     "logOdometer": "Log odometer",
     "addService": "Add service",
-    "previousOwner": "Previous owner"
+    "previousOwner": "Previous owner",
+    "odometer": "Odometer",
+    "thisYear": "Driven this year",
+    "sinceDate": "+{{distance}} since {{date}}",
+    "logged": "logged {{when}}",
+    "perMonth": "Per month",
+    "costPerDistance": "Cost / {{unit}}",
+    "range": {
+      "6m": "6M",
+      "1y": "1Y",
+      "all": "All"
+    },
+    "details": "Details",
+    "averages": "Averages",
+    "spentIn": "Spent in {{year}}",
+    "perMonthAmount": "{{amount}} / month",
+    "remindersTitle": "Reminders",
+    "historyTitle": "History",
+    "dueNextShort": "Due next",
+    "lastDoneShort": "Last done",
+    "all": "All",
+    "breakdown": "Breakdown",
+    "every": "every {{interval}}",
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "rangeLabel": "Chart range",
+    "thisYearShort": "This year",
+    "other": "Other"
   },
   "quickActions": {
     "title": "Quick add",
@@ -89,6 +115,26 @@
   "home": {
     "upcoming": "Upcoming across all cars",
     "allClear": "All clear — nothing due soon.",
-    "catalog": "Items & packages"
+    "catalog": "Items & packages",
+    "needsAttention": "Needs attention",
+    "summary": "{{overdue}} overdue · {{dueSoon}} due soon",
+    "summaryClear": "Nothing due soon",
+    "horizons": {
+      "overdue": "Overdue",
+      "next30": "Next 30 days",
+      "later": "Later"
+    },
+    "remindersEmpty": "Nothing scheduled across your cars.",
+    "historyEmpty": "No service history yet.",
+    "spentThisYear": "Spent in {{year}}",
+    "vsLastYear": "{{change}} vs {{year}}",
+    "drivenThisYear": "Driven in {{year}}",
+    "acrossCars_one": "across {{count}} car",
+    "acrossCars_other": "across {{count}} cars",
+    "dueIn30": "Due in 30 days",
+    "overdueLabel": "Overdue",
+    "nothingOverdue": "Nothing overdue",
+    "spendingByMonth": "Spending by month",
+    "addCar": "Add car"
   }
 }

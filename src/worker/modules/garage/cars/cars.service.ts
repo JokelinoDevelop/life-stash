@@ -71,6 +71,8 @@ export const listCars = async (
             daysLeft: next.evaluation.daysLeft,
             dueDate: next.reminder.dueDate,
             dueOdometerKm: next.reminder.dueOdometerKm,
+            intervalKm: next.reminder.intervalKm,
+            intervalMonths: next.reminder.intervalMonths,
             kmLeft: next.evaluation.kmLeft,
             status: next.evaluation.status,
             title: next.reminder.title,

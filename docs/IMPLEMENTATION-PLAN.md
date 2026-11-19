@@ -1,6 +1,6 @@
 # LifeStash — Implementation plan (post-v1 rework)
 
-Status: **planned, not started** · Written 2026-11-19
+Status: **planned, not started** · Written 2026-11-19 · Visual design language v0.3 and the command menu shipped separately on 2026-11-19 (see `docs/DESIGN-LANGUAGE.md`)
 
 This plan turns the working v1 Garage module into a cleaner codebase with a calmer, more premium UX. It is written so each phase can be picked up later, by a person or a coding agent, without the conversation that produced it.
 
@@ -17,8 +17,8 @@ Read `docs/ARCHITECTURE.md`, `docs/DATA-MODEL.md`, `AGENTS.md` and `CLAUDE.md` f
 
 **Deferred (do not start without asking)**
 
-- Visual polish pass (typography, palette, empty/loading states, motion) and the full accessibility audit. The user will do this in a later iteration. Phases 2–3 still build their _new_ components accessibly (see "Accessibility baseline").
-- CI/deploy pipeline, staging environment, D1 → R2 backups, offline/persisted query cache, command palette.
+- Remaining visual polish (empty/loading states, the auth screens) and the full accessibility audit. Typography, palette, motion and the main screens are done (design language v0.3). New components follow `docs/DESIGN-LANGUAGE.md` and are built accessibly (see "Accessibility baseline").
+- CI/deploy pipeline, staging environment, D1 → R2 backups, offline/persisted query cache. (The ⌘K command menu is done.)
 
 ## UX rules this plan implements
 
@@ -175,6 +175,8 @@ useAppMutation({
 - Simple yes/no questions only. A confirmation that needs input (type-to-confirm, options) is a normal dialog.
 
 ### 2.4 URL-driven dialogs (`src/client/components/app/route-dialog.tsx`)
+
+> **Done (differently):** create/edit dialogs are URL-driven from the `_app` route (`?dialog=…&car=…&id=…&reminder=…`) via `modules/garage/entry-dialogs`, rendered by one `EntryDialogHost`; the discard guard from 2.5 is in `FormDialog`. See DESIGN-LANGUAGE "Forms and dialogs".
 
 - The open dialog lives in the route's search params, e.g. `?dialog=expense-new`, `?dialog=expense-edit&expenseId=…`, `?dialog=visit-new&reminderId=…`. Each route that hosts dialogs declares them in `validateSearch` (Zod discriminated union on `dialog`).
 - `useRouteDialog(name)` returns `{ open, params, show(params), close() }`. `show` pushes a history entry, so the phone/browser Back button closes the dialog. `close` goes back if the dialog opened in-app, or replaces the URL if the page was opened directly from a deep link.

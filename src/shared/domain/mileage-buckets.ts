@@ -55,3 +55,36 @@ export const averagePerMonth = (
     ((last.odometerKm - first.odometerKm) / days) * AVERAGE_DAYS_PER_MONTH
   );
 };
+
+export interface MonthOdometer {
+  /** `YYYY-MM` */
+  month: string;
+  /** Highest odometer known by the end of the month; null before the first reading. */
+  odometerKm: number | null;
+}
+
+/** Odometer at the end of each of the last `months` months up to `today`, for a line chart. */
+export const odometerByMonth = (
+  points: readonly OdometerPoint[],
+  today: string,
+  months = 12
+): MonthOdometer[] => {
+  const firstMonth = addMonths(`${today.slice(0, 7)}-01`, -(months - 1));
+  const sorted = points.toSorted((a, b) => a.date.localeCompare(b.date));
+  const result: MonthOdometer[] = [];
+
+  for (let index = 0; index < months; index += 1) {
+    const month = addMonths(firstMonth, index).slice(0, 7);
+    let best: number | null = null;
+
+    for (const point of sorted) {
+      if (point.date.slice(0, 7) <= month) {
+        best = Math.max(best ?? 0, point.odometerKm);
+      }
+    }
+
+    result.push({ month, odometerKm: best });
+  }
+
+  return result;
+};

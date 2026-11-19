@@ -59,25 +59,51 @@
     "deleteTitle": "Да се избрише возилото и сите записи?",
     "deleteDescription": "Историјата на сервиси, километражата, потсетниците, трошоците и фотографиите трајно ќе се избришат.",
     "deletedToast": "Возилото е избришано",
-    "readOnly": "Возилото е архивирано. Врати го за да правиш измени."
+    "readOnly": "Возилото е архивирано. Врати го за да правиш измени.",
+    "soldDatePlaceholder": "Сè уште не е продаден"
   },
   "overview": {
     "dueNext": "Што следува",
     "nothingDue": "Ништо не е закажано. Додај потсетник.",
     "lastDone": "Што е направено",
     "noHistory": "Сè уште нема историја на сервиси.",
-    "driven": "Колку сум возел",
-    "kmThisYear": "{{distance}} оваа година",
-    "latestOdometer": "Последна километража",
     "loggedOn": "внесено {{date}}",
-    "spent": "Колку сум потрошил оваа година",
     "maintenance": "Одржување и поправки",
     "otherCosts": "Други трошоци",
     "nothingSpent": "Сè уште ништо",
     "viewAll": "Види сè",
     "logOdometer": "Внеси километража",
     "addService": "Додај сервис",
-    "previousOwner": "Претходен сопственик"
+    "previousOwner": "Претходен сопственик",
+    "odometer": "Километража",
+    "thisYear": "Изминато оваа година",
+    "sinceDate": "+{{distance}} од {{date}}",
+    "logged": "внесено {{when}}",
+    "perMonth": "Месечно",
+    "costPerDistance": "Цена / {{unit}}",
+    "range": {
+      "6m": "6М",
+      "1y": "1Г",
+      "all": "Сè"
+    },
+    "details": "Детали",
+    "averages": "Просеци",
+    "spentIn": "Потрошено во {{year}}",
+    "perMonthAmount": "{{amount}} / месец",
+    "remindersTitle": "Потсетници",
+    "historyTitle": "Историја",
+    "dueNextShort": "Следно",
+    "lastDoneShort": "Последно",
+    "all": "Сите",
+    "breakdown": "Распределба",
+    "every": "на секои {{interval}}",
+    "months_one": "{{count}} месец",
+    "months_other": "{{count}} месеци",
+    "years_one": "{{count}} година",
+    "years_other": "{{count}} години",
+    "rangeLabel": "Опсег на графикон",
+    "thisYearShort": "Оваа година",
+    "other": "Друго"
   },
   "quickActions": {
     "title": "Брзо додај",
@@ -89,6 +115,26 @@
   "home": {
     "upcoming": "Претстојно за сите возила",
     "allClear": "Сè е во ред — ништо не следува наскоро.",
-    "catalog": "Делови и пакети"
+    "catalog": "Делови и пакети",
+    "needsAttention": "Бара внимание",
+    "summary": "{{overdue}} задоцнети · {{dueSoon}} наскоро",
+    "summaryClear": "Ништо не доспева наскоро",
+    "horizons": {
+      "overdue": "Задоцнети",
+      "next30": "Следни 30 дена",
+      "later": "Подоцна"
+    },
+    "remindersEmpty": "Ништо не е закажано за вашите возила.",
+    "historyEmpty": "Сè уште нема сервисна историја.",
+    "spentThisYear": "Потрошено во {{year}}",
+    "vsLastYear": "{{change}} во однос на {{year}}",
+    "drivenThisYear": "Изминато во {{year}}",
+    "acrossCars_one": "со {{count}} возило",
+    "acrossCars_other": "со {{count}} возила",
+    "dueIn30": "Следни 30 дена",
+    "overdueLabel": "Задоцнети",
+    "nothingOverdue": "Ништо не е задоцнето",
+    "spendingByMonth": "Трошоци по месец",
+    "addCar": "Додај возило"
   }
 }

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
+import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { useAppForm } from "@/components/form/form-hook";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { CarIdentityFields, CarPurchaseFields } from "./car-form-sections";
 import { carFormSchema } from "./schema";
@@ -9,9 +9,11 @@ import type { CarFormValues } from "./schema";
 
 export const CarForm = ({
   defaultValues,
+  onCancel,
   onSubmit,
 }: {
   defaultValues: CarFormValues;
+  onCancel: () => void;
   onSubmit: (values: CarFormValues) => Promise<void>;
 }) => {
   const { t } = useTranslation("garage");
@@ -25,29 +27,22 @@ export const CarForm = ({
   });
 
   return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
-      <Card>
-        <CardContent>
-          <CarIdentityFields form={form} />
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("carForm.purchase")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CarPurchaseFields form={form} />
-        </CardContent>
-      </Card>
-      <form.AppForm>
-        <form.SubmitButton className="self-end" />
-      </form.AppForm>
-    </form>
+      <FormSection>
+        <CarIdentityFields form={form} />
+      </FormSection>
+      <FormSection title={t("carForm.purchase")}>
+        <CarPurchaseFields form={form} />
+      </FormSection>
+    </DialogForm>
   );
 };

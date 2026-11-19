@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 // oxlint-disable-next-line react-doctor/prefer-dynamic-import
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Panel } from "@/components/app/list-section";
 import {
   ChartContainer,
   ChartTooltip,
@@ -36,26 +36,25 @@ const DistanceChart = ({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer className="aspect-auto h-52 w-full" config={config}>
-          <BarChart accessibilityLayer data={rows}>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              axisLine={false}
-              dataKey="label"
-              tickLine={false}
-              tickMargin={8}
-            />
-            <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
-            <Bar dataKey="distance" fill="var(--color-distance)" radius={4} />
-          </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
+    <Panel title={title}>
+      <ChartContainer className="aspect-auto h-52 w-full" config={config}>
+        <BarChart accessibilityLayer data={rows}>
+          <CartesianGrid vertical={false} />
+          <XAxis
+            axisLine={false}
+            dataKey="label"
+            tickLine={false}
+            tickMargin={8}
+          />
+          <ChartTooltip content={<ChartTooltipContent />} cursor={false} />
+          <Bar
+            dataKey="distance"
+            fill="var(--color-distance)"
+            radius={[3, 3, 0, 0]}
+          />
+        </BarChart>
+      </ChartContainer>
+    </Panel>
   );
 };
 
@@ -89,7 +88,7 @@ export const MileageCharts = ({
   }));
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-6 lg:grid-cols-2">
       <DistanceChart rows={monthly} title={t("charts.perMonth")} />
       <DistanceChart rows={yearly} title={t("charts.perYear")} />
     </div>

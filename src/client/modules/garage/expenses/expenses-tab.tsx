@@ -1,14 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Plus, Receipt } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ListRow, ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CategoryIcon } from "./expense-category";
 import { ExpenseList } from "./expense-list";
 import { expensesQuery } from "./expenses.queries";
@@ -44,56 +47,54 @@ export const ExpensesTab = ({
   const categories = totalsByCategory(list, Number(todayIso().slice(0, 4)));
 
   const addButton = readOnly ? null : (
-    <Button asChild>
-      <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
+    <Button asChild size="compact">
+      <EntryDialogLink entry={{ car: carId, dialog: "expense" }}>
         <Plus />
         {t("add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addExpense.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
   if (list.length === 0) {
     return (
-      <EmptyState
-        action={addButton}
-        icon={<Receipt className="size-10" />}
-        message={t("empty")}
-      />
+      <PageStack>
+        <EmptyState
+          action={addButton}
+          icon={<Receipt />}
+          message={t("empty")}
+        />
+      </PageStack>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <PageStack>
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("thisYear")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {categories.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t("noneThisYear")}</p>
-          ) : (
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {categories.map((entry) => (
-                <li className="flex items-center gap-3" key={entry.category}>
-                  <CategoryIcon category={entry.category} />
-                  <div className="min-w-0">
-                    <p className="text-muted-foreground text-sm">
-                      {t(`categories.${entry.category}`)}
-                    </p>
-                    <p className="font-semibold tabular-nums">
-                      {format.totals(entry.totals)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <ListSection title={t("thisYear")}>
+        {categories.length === 0 ? (
+          <ListRow className="text-muted-foreground">
+            {t("noneThisYear")}
+          </ListRow>
+        ) : (
+          categories.map((entry) => (
+            <ListRow className="py-2 md:py-1.5" key={entry.category}>
+              <CategoryIcon category={entry.category} />
+              <span className="min-w-0 flex-1 truncate font-medium">
+                {t(`categories.${entry.category}`)}
+              </span>
+              <span className="shrink-0 font-medium tabular-nums">
+                {format.totals(entry.totals)}
+              </span>
+            </ListRow>
+          ))
+        )}
+      </ListSection>
       <ExpenseList carId={carId} expenses={list} readOnly={readOnly} />
-    </div>
+    </PageStack>
   );
 };

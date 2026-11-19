@@ -32,5 +32,10 @@
     "service": "Сервис",
     "expense": "Трошок",
     "purchase": "Купување"
+  },
+  "inline": {
+    "addNote": "Додај белешка…",
+    "sinceLast": "од {{distance}} на {{date}}",
+    "dialogTitle": "Внеси километража"
   }
 }

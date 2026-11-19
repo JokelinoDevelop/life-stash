@@ -2,7 +2,12 @@
   "appName": "LifeStash",
   "nav": {
     "garage": "Garage",
-    "settings": "Settings"
+    "settings": "Settings",
+    "overview": "Overview",
+    "reminders": "Reminders",
+    "history": "History",
+    "catalog": "Service catalog",
+    "cars": "Cars"
   },
   "actions": {
     "save": "Save",
@@ -16,12 +21,19 @@
     "confirm": "Confirm",
     "remove": "Remove",
     "retry": "Try again",
-    "done": "Done"
+    "done": "Done",
+    "markDone": "Mark done",
+    "markDoneOf": "Mark {{title}} done",
+    "logEntry": "Log entry",
+    "log": "Log",
+    "more": "More actions",
+    "view": "View"
   },
   "status": {
     "overdue": "Overdue",
     "due-soon": "Due soon",
-    "upcoming": "Upcoming"
+    "upcoming": "Upcoming",
+    "done": "Done"
   },
   "fields": {
     "optional": "optional",
@@ -40,7 +52,12 @@
     "day": "Day",
     "month": "Month",
     "year": "Year",
-    "today": "Today"
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "pick": "Pick a date",
+    "clear": "Clear",
+    "type": "Type a date",
+    "typePlaceholder": "dd.mm.yyyy"
   },
   "validation": {
     "required": "Required",
@@ -60,7 +77,9 @@
     "unauthorized": "Please sign in again.",
     "notConfigured": "This feature isn't configured yet.",
     "validation": "Some fields are invalid.",
-    "rateLimited": "Too many attempts. Wait a few minutes and try again."
+    "rateLimited": "Too many attempts. Wait a few minutes and try again.",
+    "loadFailed": "Couldn't load this",
+    "pageFailed": "This page couldn't be shown"
   },
   "confirmDelete": {
     "title": "Delete this?",
@@ -84,5 +103,14 @@
   "update": {
     "available": "A new version of LifeStash is available.",
     "reload": "Reload"
+  },
+  "form": {
+    "escToCancel": "to cancel"
+  },
+  "discard": {
+    "title": "Discard changes?",
+    "description": "What you entered in this form will be lost.",
+    "keep": "Keep editing",
+    "confirm": "Discard"
   }
 }

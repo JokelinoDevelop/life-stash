@@ -1,16 +1,14 @@
-import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  ListRow,
+  ListRowText,
+  ListSection,
+} from "@/components/app/list-section";
 import { useFormat } from "@/lib/format";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CategoryIcon } from "./expense-category";
 import type { ExpenseListItem } from "./expenses.queries";
 import { groupByMonth } from "./group-expenses";
@@ -40,65 +38,64 @@ export const ExpenseList = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6 md:gap-0" data-bleed="">
       {groupByMonth(expenses).map((group) => (
-        <Card key={group.month}>
-          <CardHeader>
-            <CardTitle>
-              <span className="capitalize">
-                {monthFormat.format(new Date(`${group.month}-01T00:00:00Z`))}
-              </span>
-            </CardTitle>
-            <CardAction>
-              <span className="text-muted-foreground text-sm tabular-nums">
-                {format.totals(group.totals)}
-              </span>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col divide-y">
-              {group.expenses.map((expense) => {
-                const row = (
-                  <>
-                    <CategoryIcon category={expense.category} />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium">
-                        {t(`categories.${expense.category}`)}
-                      </p>
-                      <p className="text-muted-foreground truncate text-sm">
-                        {format.date(expense.date)}
-                        {expense.quantityMilli !== null &&
-                          ` · ${t("litres", { value: expense.quantityMilli / MILLI })}`}
-                        {expense.odometerKm !== null &&
-                          ` · ${format.distance(expense.odometerKm)}`}
-                        {expense.notes !== null && ` · ${expense.notes}`}
-                      </p>
-                    </div>
-                    <span className="shrink-0 font-medium tabular-nums">
-                      {format.money(expense.amountMinor, expense.currency)}
-                    </span>
-                  </>
-                );
+        <ListSection
+          action={
+            <span className="text-muted-foreground text-sm tabular-nums">
+              {format.totals(group.totals)}
+            </span>
+          }
+          count={group.expenses.length}
+          key={group.month}
+          title={
+            <span className="capitalize">
+              {monthFormat.format(new Date(`${group.month}-01T00:00:00Z`))}
+            </span>
+          }
+        >
+          {group.expenses.map((expense) => {
+            const meta = [
+              format.date(expense.date),
+              expense.quantityMilli === null
+                ? null
+                : t("litres", { value: expense.quantityMilli / MILLI }),
+              expense.odometerKm === null
+                ? null
+                : format.distance(expense.odometerKm),
+              expense.notes,
+            ]
+              .filter((part) => part !== null)
+              .join(" · ");
 
-                return (
-                  <li key={expense.id}>
-                    {readOnly ? (
-                      <div className="flex items-center gap-3 py-2">{row}</div>
-                    ) : (
-                      <Link
-                        className="flex items-center gap-3 py-2"
-                        params={{ carId, expenseId: expense.id }}
-                        to="/garage/cars/$carId/expenses/$expenseId/edit"
-                      >
-                        {row}
-                      </Link>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </CardContent>
-        </Card>
+            const row = (
+              <>
+                <CategoryIcon category={expense.category} />
+                <ListRowText
+                  meta={<span className="tabular-nums">{meta}</span>}
+                  title={t(`categories.${expense.category}`)}
+                />
+                <span className="shrink-0 font-medium tabular-nums">
+                  {format.money(expense.amountMinor, expense.currency)}
+                </span>
+              </>
+            );
+
+            return readOnly ? (
+              <ListRow className="py-2 md:py-1.5" key={expense.id}>
+                {row}
+              </ListRow>
+            ) : (
+              <ListRow asChild className="py-2 md:py-1.5" key={expense.id}>
+                <EntryDialogLink
+                  entry={{ car: carId, dialog: "expense", id: expense.id }}
+                >
+                  {row}
+                </EntryDialogLink>
+              </ListRow>
+            );
+          })}
+        </ListSection>
       ))}
     </div>
   );

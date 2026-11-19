@@ -3,6 +3,7 @@ import { Wallet } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { useFormat } from "@/lib/format";
 
@@ -45,7 +46,9 @@ export const SpendingTab = ({
 
   if (years.length === 0) {
     return (
-      <EmptyState icon={<Wallet className="size-10" />} message={t("empty")} />
+      <PageStack>
+        <EmptyState icon={<Wallet />} message={t("empty")} />
+      </PageStack>
     );
   }
 
@@ -56,8 +59,8 @@ export const SpendingTab = ({
   );
 
   return (
-    <div className="flex flex-col gap-4">
-      <Suspense fallback={<LoadingState rows={1} />}>
+    <PageStack>
+      <Suspense fallback={<LoadingState variant="block" />}>
         <SpendingChart currency={currency} years={years} />
       </Suspense>
       {others.length > 0 && (
@@ -67,6 +70,6 @@ export const SpendingTab = ({
       )}
       <SpendingTable years={years} />
       <p className="text-muted-foreground text-xs">{t("previousOwnerNote")}</p>
-    </div>
+    </PageStack>
   );
 };

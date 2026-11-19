@@ -32,5 +32,10 @@
     "service": "Service",
     "expense": "Expense",
     "purchase": "Purchase"
+  },
+  "inline": {
+    "addNote": "Add a note…",
+    "sinceLast": "since {{distance}} on {{date}}",
+    "dialogTitle": "Log odometer reading"
   }
 }
