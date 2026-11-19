@@ -18,6 +18,8 @@ import { useInvoiceActions } from "./use-invoice-actions";
 export const INVOICE_GRID =
   "md:grid md:grid-cols-[16px_72px_minmax(120px,170px)_minmax(0,1fr)_84px_110px_96px_112px] md:gap-3";
 
+const MUTED = "text-muted-foreground";
+
 const ROW_CLASS =
   "group/row bg-card hover:bg-background relative flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5 before:bg-primary before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100";
 
@@ -73,6 +75,7 @@ export const InvoiceRow = ({
   const muted = invoice.status === "draft" || invoice.status === "void";
   const amount = ledger.money(invoice.amountMinor, invoice.currency);
   const paid = invoice.status === "paid";
+
   const mobileMeta = [
     invoice.number,
     overdue ? amount : null,
@@ -105,7 +108,7 @@ export const InvoiceRow = ({
         <span
           className={cn(
             "truncate text-xs tabular-nums md:hidden",
-            overdue ? "text-destructive" : "text-muted-foreground"
+            overdue ? "text-destructive" : MUTED
           )}
         >
           {mobileMeta}
@@ -128,7 +131,7 @@ export const InvoiceRow = ({
       <span
         className={cn(
           "hidden tabular-nums md:block",
-          overdue ? "text-destructive font-medium" : "text-muted-foreground",
+          overdue ? "text-destructive font-medium" : MUTED,
           invoice.status === "sent" && "text-foreground"
         )}
       >
@@ -137,7 +140,7 @@ export const InvoiceRow = ({
       <span
         className={cn(
           "shrink-0 text-right tabular-nums",
-          muted ? "text-muted-foreground" : "font-medium",
+          muted ? MUTED : "font-medium",
           overdue && "hidden md:block"
         )}
       >
