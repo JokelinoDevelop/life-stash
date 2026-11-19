@@ -18,6 +18,18 @@ Open <http://localhost:5173>. The first visit sets up your account: choose **Ema
 
 Optional local secrets (photos and push) go in `.dev.vars`; copy `.dev.vars.example`.
 
+### Demo data
+
+`pnpm db:seed` fills the local database with a demo household (four cars with years of services, fuel, renewals and reminders in every state) and prints its sign-in: `demo@lifestash.dev` / `lifestash-demo`. Dates are relative to today, so the data never goes stale. Re-running it replaces only the demo household; `pnpm db:seed --fresh` wipes the whole local database first.
+
+The seed lives in `src/worker/db/seed/`:
+
+- `fixtures/` — the data, written as habits and plans ("oil service every 12 months, next due in 9 days"). Edit these to change what you see.
+- `seeders/` — one seeder per kind of record; `seeders.ts` lists them in order. Each gets a shared context with the household, today's date, a seeded random generator, and what earlier seeders created (catalog, cars).
+- `records/` — builders for rows that several seeders write (visits, expenses, recurring reminders).
+
+To seed a new feature, add its fixture fields, write a `Seeder` (`{ name, run(ctx) }` returning counts) and append it to `seeders.ts`.
+
 Useful scripts:
 
 | Command | What it does |
@@ -26,6 +38,7 @@ Useful scripts:
 | `pnpm fix` | Auto-fix formatting and lint issues |
 | `pnpm test` | Unit tests (Vitest) |
 | `pnpm db:generate` | Create a migration after changing `src/worker/db/schema/*` |
+| `pnpm db:seed` | Fill the local database with demo data (`--fresh` to wipe first) |
 | `pnpm build` | Production build (client + worker + service worker) |
 
 ## Deploying to Cloudflare (free)
