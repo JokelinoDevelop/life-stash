@@ -11,15 +11,19 @@ import type { VisitListItem } from "./visits.queries";
 /** One service visit as a list row: what was done, when, and what it cost. */
 export const VisitRow = ({
   carId,
+  carName,
   visit,
 }: {
   carId: string;
+  /** Shown first in the meta line on household-wide lists. */
+  carName?: string;
   visit: VisitListItem;
 }) => {
   const { t } = useTranslation("garageVisits");
   const format = useFormat();
 
   const meta = [
+    carName ?? null,
     format.date(visit.date, visit.datePrecision),
     visit.odometerKm === null ? null : format.distance(visit.odometerKm),
     t(`kinds.${visit.kind}`),

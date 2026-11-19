@@ -2,7 +2,12 @@
   "appName": "LifeStash",
   "nav": {
     "garage": "Гаража",
-    "settings": "Поставки"
+    "settings": "Поставки",
+    "overview": "Преглед",
+    "reminders": "Потсетници",
+    "history": "Историја",
+    "catalog": "Каталог",
+    "cars": "Возила"
   },
   "actions": {
     "save": "Зачувај",
@@ -16,7 +21,12 @@
     "confirm": "Потврди",
     "remove": "Отстрани",
     "retry": "Обиди се повторно",
-    "done": "Готово"
+    "done": "Готово",
+    "markDone": "Означи како готово",
+    "markDoneOf": "Означи „{{title}}“ како готово",
+    "logEntry": "Внеси",
+    "log": "Внеси",
+    "more": "Повеќе дејства"
   },
   "status": {
     "overdue": "Задоцнето",

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
@@ -28,31 +28,33 @@ const NewCarPage = () => {
         back={<BackLink to="/garage" />}
         title={t("carForm.createTitle")}
       />
-      <CarForm
-        defaultValues={carFormDefaults({
-          currency: format.currency,
-          today: todayIso(),
-          unit: format.unit,
-        })}
-        onSubmit={async (values) => {
-          try {
-            const { id } = await unwrap(
-              api.garage.cars.$post({
-                json: carFormToRequest(values, format.unit),
-              })
-            );
+      <PageContent>
+        <CarForm
+          defaultValues={carFormDefaults({
+            currency: format.currency,
+            today: todayIso(),
+            unit: format.unit,
+          })}
+          onSubmit={async (values) => {
+            try {
+              const { id } = await unwrap(
+                api.garage.cars.$post({
+                  json: carFormToRequest(values, format.unit),
+                })
+              );
 
-            await invalidate();
-            toast.success(t("carForm.created"));
-            await navigate({
-              params: { carId: id },
-              to: "/garage/cars/$carId",
-            });
-          } catch (error) {
-            toast.error(errorMessage(error));
-          }
-        }}
-      />
+              await invalidate();
+              toast.success(t("carForm.created"));
+              await navigate({
+                params: { carId: id },
+                to: "/garage/cars/$carId",
+              });
+            } catch (error) {
+              toast.error(errorMessage(error));
+            }
+          }}
+        />
+      </PageContent>
     </>
   );
 };

@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { useFormat } from "@/lib/format";
 
+import { useFuelLabel } from "./fuel-label";
+
 interface CarDetails {
   make: string | null;
   model: string | null;
@@ -21,32 +23,12 @@ interface CarDetails {
   notes: string | null;
 }
 
-const FUELS = [
-  "petrol",
-  "diesel",
-  "lpg",
-  "hybrid",
-  "electric",
-  "other",
-] as const;
-
-type Fuel = (typeof FUELS)[number];
-
-const isFuel = (value: string): value is Fuel =>
-  FUELS.some((fuel) => fuel === value);
-
 export const DetailsTab = ({ car }: { car: CarDetails }) => {
   const { t } = useTranslation("garage");
   const { t: tc } = useTranslation();
   const format = useFormat();
 
-  const fuelLabel = (value: string | null): string | null => {
-    if (value === null || !isFuel(value)) {
-      return value;
-    }
-
-    return t(`carForm.fuel.${value}`);
-  };
+  const fuelLabel = useFuelLabel();
 
   const fuel = fuelLabel(car.fuelType);
 

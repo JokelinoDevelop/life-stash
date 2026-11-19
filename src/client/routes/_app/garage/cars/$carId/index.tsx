@@ -5,11 +5,11 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageHeader, PageStack } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarActions } from "@/modules/garage/cars/car-actions";
-import { CarMonogram } from "@/modules/garage/cars/car-monogram";
+import { CarHeading } from "@/modules/garage/cars/car-heading";
 import { CAR_TABS } from "@/modules/garage/cars/car-tabs";
 import type { CarTab } from "@/modules/garage/cars/car-tabs";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
@@ -58,28 +58,17 @@ const CarPage = () => {
     };
   }, [tab]);
 
-  const subtitle = [
-    [car.year, car.make, car.model].filter((part) => part !== null).join(" "),
-    car.plate,
-  ]
-    .filter((part) => part !== null && part !== "")
-    .join(" · ");
-
   return (
     <>
       <PageHeader
         actions={<CarActions car={car} />}
-        back={<BackLink to="/garage" />}
-        description={subtitle === "" ? undefined : subtitle}
-        title={
-          <span className="flex items-center gap-3">
-            <CarMonogram className="size-10 text-sm" name={car.name} />
-            {car.name}
-          </span>
-        }
+        back={<BackLink label={t("title")} to="/garage" />}
+        hideMobileTitle
+        title={car.name}
       />
+      <CarHeading car={car} />
       {readOnly && (
-        <Alert className="mb-4">
+        <Alert className="mt-4 md:mx-7 md:w-auto">
           <AlertDescription>{t("car.readOnly")}</AlertDescription>
         </Alert>
       )}
@@ -92,7 +81,7 @@ const CarPage = () => {
         value={tab}
       >
         <div
-          className="-mx-4 mb-4 scroll-px-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0"
+          className="-mx-4 mt-4 mb-4 scroll-px-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:mb-0 md:px-6"
           ref={tabStrip}
         >
           <TabsList variant="pill">
@@ -104,7 +93,7 @@ const CarPage = () => {
           </TabsList>
         </div>
         <TabsContent value="overview">
-          <OverviewTab carId={carId} readOnly={readOnly} />
+          <OverviewTab car={car} carId={carId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="history">
           <HistoryTab carId={carId} readOnly={readOnly} />
@@ -122,7 +111,9 @@ const CarPage = () => {
           <SpendingTab carId={carId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="details">
-          <DetailsTab car={car} />
+          <PageStack>
+            <DetailsTab car={car} />
+          </PageStack>
         </TabsContent>
       </Tabs>
     </>

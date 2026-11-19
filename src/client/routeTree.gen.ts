@@ -17,6 +17,8 @@ import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppGarageIndexRouteImport } from './routes/_app/garage/index'
 import { Route as AppGarageCatalogRouteImport } from './routes/_app/garage/catalog'
+import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/history'
+import { Route as AppGarageRemindersRouteImport } from './routes/_app/garage/reminders'
 import { Route as AppGarageCarsNewRouteImport } from './routes/_app/garage/cars/new'
 import { Route as AppGarageCarsCarIdIndexRouteImport } from './routes/_app/garage/cars/$carId/index'
 import { Route as AppGarageCarsCarIdEditRouteImport } from './routes/_app/garage/cars/$carId/edit'
@@ -65,6 +67,16 @@ const AppGarageIndexRoute = AppGarageIndexRouteImport.update({
 const AppGarageCatalogRoute = AppGarageCatalogRouteImport.update({
   id: '/garage/catalog',
   path: '/garage/catalog',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGarageHistoryRoute = AppGarageHistoryRouteImport.update({
+  id: '/garage/history',
+  path: '/garage/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppGarageRemindersRoute = AppGarageRemindersRouteImport.update({
+  id: '/garage/reminders',
+  path: '/garage/reminders',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGarageCarsNewRoute = AppGarageCarsNewRouteImport.update({
@@ -132,6 +144,8 @@ export interface FileRoutesByFullPath {
   '/setup': typeof SetupRoute
   '/settings': typeof AppSettingsRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
+  '/garage/history': typeof AppGarageHistoryRoute
+  '/garage/reminders': typeof AppGarageRemindersRoute
   '/garage/': typeof AppGarageIndexRoute
   '/garage/cars/new': typeof AppGarageCarsNewRoute
   '/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
@@ -151,6 +165,8 @@ export interface FileRoutesByTo {
   '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
+  '/garage/history': typeof AppGarageHistoryRoute
+  '/garage/reminders': typeof AppGarageRemindersRoute
   '/garage': typeof AppGarageIndexRoute
   '/garage/cars/new': typeof AppGarageCarsNewRoute
   '/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
@@ -172,6 +188,8 @@ export interface FileRoutesById {
   '/_app/settings': typeof AppSettingsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/garage/catalog': typeof AppGarageCatalogRoute
+  '/_app/garage/history': typeof AppGarageHistoryRoute
+  '/_app/garage/reminders': typeof AppGarageRemindersRoute
   '/_app/garage/': typeof AppGarageIndexRoute
   '/_app/garage/cars/new': typeof AppGarageCarsNewRoute
   '/_app/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
@@ -193,6 +211,8 @@ export interface FileRouteTypes {
     | '/setup'
     | '/settings'
     | '/garage/catalog'
+    | '/garage/history'
+    | '/garage/reminders'
     | '/garage/'
     | '/garage/cars/new'
     | '/garage/cars/$carId/edit'
@@ -212,6 +232,8 @@ export interface FileRouteTypes {
     | '/settings'
     | '/'
     | '/garage/catalog'
+    | '/garage/history'
+    | '/garage/reminders'
     | '/garage'
     | '/garage/cars/new'
     | '/garage/cars/$carId/edit'
@@ -232,6 +254,8 @@ export interface FileRouteTypes {
     | '/_app/settings'
     | '/_app/'
     | '/_app/garage/catalog'
+    | '/_app/garage/history'
+    | '/_app/garage/reminders'
     | '/_app/garage/'
     | '/_app/garage/cars/new'
     | '/_app/garage/cars/$carId/edit'
@@ -308,6 +332,20 @@ declare module '@tanstack/react-router' {
       path: '/garage/catalog'
       fullPath: '/garage/catalog'
       preLoaderRoute: typeof AppGarageCatalogRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/garage/history': {
+      id: '/_app/garage/history'
+      path: '/garage/history'
+      fullPath: '/garage/history'
+      preLoaderRoute: typeof AppGarageHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/garage/reminders': {
+      id: '/_app/garage/reminders'
+      path: '/garage/reminders'
+      fullPath: '/garage/reminders'
+      preLoaderRoute: typeof AppGarageRemindersRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/garage/cars/new': {
@@ -387,6 +425,8 @@ interface AppRouteChildren {
   AppSettingsRoute: typeof AppSettingsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppGarageCatalogRoute: typeof AppGarageCatalogRoute
+  AppGarageHistoryRoute: typeof AppGarageHistoryRoute
+  AppGarageRemindersRoute: typeof AppGarageRemindersRoute
   AppGarageIndexRoute: typeof AppGarageIndexRoute
   AppGarageCarsNewRoute: typeof AppGarageCarsNewRoute
   AppGarageCarsCarIdEditRoute: typeof AppGarageCarsCarIdEditRoute
@@ -404,6 +444,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppSettingsRoute: AppSettingsRoute,
   AppIndexRoute: AppIndexRoute,
   AppGarageCatalogRoute: AppGarageCatalogRoute,
+  AppGarageHistoryRoute: AppGarageHistoryRoute,
+  AppGarageRemindersRoute: AppGarageRemindersRoute,
   AppGarageIndexRoute: AppGarageIndexRoute,
   AppGarageCarsNewRoute: AppGarageCarsNewRoute,
   AppGarageCarsCarIdEditRoute: AppGarageCarsCarIdEditRoute,

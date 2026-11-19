@@ -4,17 +4,23 @@ import { cn } from "@/lib/utils";
 
 /** Figures side by side in one hairline panel (2 columns on phones, 4 on desktop). */
 export const StatPanel = ({
+  bleed = false,
   children,
   className,
 }: {
+  /** Desktop: full width with only a bottom hairline (top of a `PageStack`). */
+  bleed?: boolean;
   children: React.ReactNode;
   className?: string;
 }) => (
   <section
     className={cn(
       "bg-divider grid grid-cols-2 gap-px overflow-hidden rounded-lg border md:grid-cols-4",
+      bleed &&
+        "md:border-divider md:rounded-none md:border-0 md:border-b md:[&>*]:px-5 md:[&>*]:py-4",
       className
     )}
+    data-bleed={bleed ? "" : undefined}
   >
     {children}
   </section>

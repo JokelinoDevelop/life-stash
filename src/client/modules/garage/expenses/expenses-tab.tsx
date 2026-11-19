@@ -4,6 +4,7 @@ import { Plus, Receipt } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ListRow, ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
@@ -54,16 +55,18 @@ export const ExpensesTab = ({
 
   if (list.length === 0) {
     return (
-      <EmptyState
-        action={addButton}
-        icon={<Receipt className="size-10" />}
-        message={t("empty")}
-      />
+      <PageStack>
+        <EmptyState
+          action={addButton}
+          icon={<Receipt className="size-10" />}
+          message={t("empty")}
+        />
+      </PageStack>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <PageStack>
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
@@ -87,6 +90,6 @@ export const ExpensesTab = ({
         )}
       </ListSection>
       <ExpenseList carId={carId} expenses={list} readOnly={readOnly} />
-    </div>
+    </PageStack>
   );
 };

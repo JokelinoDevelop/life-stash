@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { BackLink } from "@/components/app/back-link";
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
@@ -73,24 +73,26 @@ const EditExpensePage = () => {
         }
         title={t("editTitle")}
       />
-      <ExpenseForm
-        defaultValues={expenseToFormValues(data.expense, format.unit)}
-        onSubmit={async (values) => {
-          try {
-            await unwrap(
-              api.garage.expenses[":expenseId"].$put({
-                json: expenseFormToUpdateRequest(values, format.unit),
-                param: { expenseId },
-              })
-            );
-            await invalidate();
-            toast.success(t("updated"));
-            await backToList();
-          } catch (error) {
-            toast.error(errorMessage(error));
-          }
-        }}
-      />
+      <PageContent>
+        <ExpenseForm
+          defaultValues={expenseToFormValues(data.expense, format.unit)}
+          onSubmit={async (values) => {
+            try {
+              await unwrap(
+                api.garage.expenses[":expenseId"].$put({
+                  json: expenseFormToUpdateRequest(values, format.unit),
+                  param: { expenseId },
+                })
+              );
+              await invalidate();
+              toast.success(t("updated"));
+              await backToList();
+            } catch (error) {
+              toast.error(errorMessage(error));
+            }
+          }}
+        />
+      </PageContent>
     </>
   );
 };

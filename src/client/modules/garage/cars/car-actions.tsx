@@ -2,9 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Archive,
   ArchiveRestore,
+  BellPlus,
+  Fuel,
   MoreHorizontal,
   Pencil,
+  Plus,
   Trash2,
+  Wrench,
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,29 +21,23 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import { useErrorMessage } from "@/lib/errors";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
 import { useArchiveCar, useDeleteCar, useUnarchiveCar } from "./cars.queries";
 
-export const CarActions = ({
-  car,
-}: {
-  car: { id: string; archivedAt: string | null };
-}) => {
-  const { t } = useTranslation("garage");
-  const { t: tc } = useTranslation();
-  const navigate = useNavigate();
-  const errorMessage = useErrorMessage();
-  const archive = useArchiveCar(car.id);
-  const unarchive = useUnarchiveCar(car.id);
-  const remove = useDeleteCar(car.id);
-  const [soldDate, setSoldDate] = useState("");
+type Run = (action: () => Promise<void>, success: string) => Promise<void>;
 
-  const run = async (action: () => Promise<void>, success: string) => {
+const useRun = (): Run => {
+  const errorMessage = useErrorMessage();
+
+  return async (action, success) => {
     try {
       await action();
       toast.success(success);
@@ -47,16 +45,192 @@ export const CarActions = ({
       toast.error(errorMessage(error));
     }
   };
+};
+
+/** Log service / expense / reminder and edit: the actions without a button of their own. */
+const AddItems = ({ carId }: { carId: string }) => {
+  const { t } = useTranslation("command");
+  const { t: tc } = useTranslation();
 
   return (
-    <div className="flex gap-2">
-      {car.archivedAt === null ? (
-        <Button asChild variant="outline">
-          <Link params={{ carId: car.id }} to="/garage/cars/$carId/edit">
-            <Pencil />
-            {tc("actions.edit")}
-          </Link>
+    <>
+      <DropdownMenuItem asChild>
+        <Link params={{ carId }} to="/garage/cars/$carId/services/new">
+          <Wrench />
+          {t("actions.addService")}
+          <DropdownMenuShortcut>
+            {CAR_SHORTCUTS.addService.toUpperCase()}
+          </DropdownMenuShortcut>
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
+          <Fuel />
+          {t("actions.addExpense")}
+          <DropdownMenuShortcut>
+            {CAR_SHORTCUTS.addExpense.toUpperCase()}
+          </DropdownMenuShortcut>
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild>
+        <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
+          <BellPlus />
+          {t("actions.addReminder")}
+          <DropdownMenuShortcut>
+            {CAR_SHORTCUTS.addReminder.toUpperCase()}
+          </DropdownMenuShortcut>
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuItem asChild className="md:hidden">
+        <Link params={{ carId }} to="/garage/cars/$carId/edit">
+          <Pencil />
+          {tc("actions.edit")}
+        </Link>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+    </>
+  );
+};
+
+const ArchiveItem = ({ carId, run }: { carId: string; run: Run }) => {
+  const { t } = useTranslation("garage");
+  const archive = useArchiveCar(carId);
+  const [soldDate, setSoldDate] = useState("");
+
+  return (
+    <ConfirmDialog
+      confirmLabel={t("car.archive")}
+      description={t("car.archiveDescription")}
+      onConfirm={async () => {
+        await run(async () => {
+          await archive.mutateAsync(soldDate === "" ? null : soldDate);
+        }, t("car.archivedToast"));
+      }}
+      title={t("car.archiveTitle")}
+      trigger={
+        <DropdownMenuItem
+          onSelect={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <Archive />
+          {t("car.archive")}
+        </DropdownMenuItem>
+      }
+    >
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="sold-date">{t("car.soldDate")}</Label>
+        <Input
+          id="sold-date"
+          onChange={(event) => {
+            setSoldDate(event.target.value);
+          }}
+          type="date"
+          value={soldDate}
+        />
+      </div>
+    </ConfirmDialog>
+  );
+};
+
+const DeleteItem = ({ carId, run }: { carId: string; run: Run }) => {
+  const { t } = useTranslation("garage");
+  const { t: tc } = useTranslation();
+  const navigate = useNavigate();
+  const remove = useDeleteCar(carId);
+
+  return (
+    <ConfirmDialog
+      description={t("car.deleteDescription")}
+      onConfirm={async () => {
+        await run(async () => {
+          await remove.mutateAsync();
+          await navigate({ to: "/garage" });
+        }, t("car.deletedToast"));
+      }}
+      title={t("car.deleteTitle")}
+      trigger={
+        <DropdownMenuItem
+          onSelect={(event) => {
+            event.preventDefault();
+          }}
+          variant="destructive"
+        >
+          <Trash2 />
+          {tc("actions.delete")}
+        </DropdownMenuItem>
+      }
+    />
+  );
+};
+
+const MoreMenu = ({
+  car,
+  run,
+}: {
+  car: { id: string; archivedAt: string | null };
+  run: Run;
+}) => {
+  const { t: tc } = useTranslation();
+  const active = car.archivedAt === null;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          aria-label={tc("actions.more")}
+          size="icon-compact"
+          variant="ghost"
+        >
+          <MoreHorizontal />
         </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        {active && <AddItems carId={car.id} />}
+        {active && <ArchiveItem carId={car.id} run={run} />}
+        <DeleteItem carId={car.id} run={run} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+/** Page-bar actions on a car: Edit and Log entry (L), or Restore when archived, plus More. */
+export const CarActions = ({
+  car,
+}: {
+  car: { id: string; archivedAt: string | null };
+}) => {
+  const { t } = useTranslation("garage");
+  const { t: tc } = useTranslation();
+  const unarchive = useUnarchiveCar(car.id);
+  const run = useRun();
+
+  return (
+    <div className="flex items-center gap-1 md:gap-1.5">
+      {car.archivedAt === null ? (
+        <>
+          <span className="hidden md:flex">
+            <Button asChild size="compact" variant="ghost">
+              <Link params={{ carId: car.id }} to="/garage/cars/$carId/edit">
+                {tc("actions.edit")}
+              </Link>
+            </Button>
+          </span>
+          <Button asChild size="compact">
+            <Link
+              params={{ carId: car.id }}
+              search={{ log: true, tab: "mileage" }}
+              to="/garage/cars/$carId"
+            >
+              <Plus />
+              <span className="md:hidden">{tc("actions.log")}</span>
+              <span className="hidden md:inline">{tc("actions.logEntry")}</span>
+              <Kbd className="hidden md:inline-flex">
+                {CAR_SHORTCUTS.logOdometer.toUpperCase()}
+              </Kbd>
+            </Link>
+          </Button>
+        </>
       ) : (
         <Button
           onClick={async () => {
@@ -64,77 +238,14 @@ export const CarActions = ({
               await unarchive.mutateAsync();
             }, t("car.restoredToast"));
           }}
+          size="compact"
           variant="outline"
         >
           <ArchiveRestore />
           {t("car.unarchive")}
         </Button>
       )}
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button aria-label={tc("actions.edit")} size="icon" variant="outline">
-            <MoreHorizontal />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {car.archivedAt === null && (
-            <ConfirmDialog
-              confirmLabel={t("car.archive")}
-              description={t("car.archiveDescription")}
-              onConfirm={async () => {
-                await run(async () => {
-                  await archive.mutateAsync(soldDate === "" ? null : soldDate);
-                }, t("car.archivedToast"));
-              }}
-              title={t("car.archiveTitle")}
-              trigger={
-                <DropdownMenuItem
-                  onSelect={(event) => {
-                    event.preventDefault();
-                  }}
-                >
-                  <Archive />
-                  {t("car.archive")}
-                </DropdownMenuItem>
-              }
-            >
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="sold-date">{t("car.soldDate")}</Label>
-                <Input
-                  id="sold-date"
-                  onChange={(event) => {
-                    setSoldDate(event.target.value);
-                  }}
-                  type="date"
-                  value={soldDate}
-                />
-              </div>
-            </ConfirmDialog>
-          )}
-          <DropdownMenuSeparator />
-          <ConfirmDialog
-            description={t("car.deleteDescription")}
-            onConfirm={async () => {
-              await run(async () => {
-                await remove.mutateAsync();
-                await navigate({ to: "/garage" });
-              }, t("car.deletedToast"));
-            }}
-            title={t("car.deleteTitle")}
-            trigger={
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                }}
-                variant="destructive"
-              >
-                <Trash2 />
-                {tc("actions.delete")}
-              </DropdownMenuItem>
-            }
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <MoreMenu car={car} run={run} />
     </div>
   );
 };

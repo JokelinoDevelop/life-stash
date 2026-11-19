@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { preferencesQuery } from "@/lib/session";
@@ -39,19 +39,21 @@ const SettingsPage = () => {
         }
         title={t("title")}
       />
-      <div className="flex flex-col gap-6">
-        <PreferencesForm
-          key={JSON.stringify(preferences)}
-          preferences={preferences}
-        />
-        <ThemeCard />
-        <NotificationsCard />
-        <SecurityCard />
-        <ExportCard />
-        <p className="text-muted-foreground text-center text-xs">
-          {t("about.version", { version: __APP_VERSION__ })}
-        </p>
-      </div>
+      <PageContent>
+        <div className="flex flex-col gap-6">
+          <PreferencesForm
+            key={JSON.stringify(preferences)}
+            preferences={preferences}
+          />
+          <ThemeCard />
+          <NotificationsCard />
+          <SecurityCard />
+          <ExportCard />
+          <p className="text-muted-foreground text-center text-xs">
+            {t("about.version", { version: __APP_VERSION__ })}
+          </p>
+        </div>
+      </PageContent>
     </>
   );
 };

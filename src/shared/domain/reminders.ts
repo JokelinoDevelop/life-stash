@@ -181,3 +181,28 @@ export const reminderProgress = (input: ReminderProgressInput): number => {
 
   return Math.min(1, Math.max(0, ...shares));
 };
+
+export const REMINDER_HORIZONS = ["overdue", "next30", "later"] as const;
+
+export type ReminderHorizon = (typeof REMINDER_HORIZONS)[number];
+
+/** Days ahead that count as "next 30 days" on the household overview. */
+export const NEXT_HORIZON_DAYS = 30;
+
+/** Overdue, due within 30 days (or due soon by km), or later. */
+export const reminderHorizon = (
+  evaluation: ReminderEvaluation
+): ReminderHorizon => {
+  if (evaluation.status === "overdue") {
+    return "overdue";
+  }
+
+  if (
+    evaluation.status === "due-soon" ||
+    (evaluation.daysLeft !== null && evaluation.daysLeft <= NEXT_HORIZON_DAYS)
+  ) {
+    return "next30";
+  }
+
+  return "later";
+};

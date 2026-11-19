@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { useFormat } from "@/lib/format";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
 import {
@@ -35,7 +35,9 @@ const VisitPage = () => {
         description={carData.car.name}
         title={`${t("detail.title")} · ${format.date(visit.date, visit.datePrecision)}`}
       />
-      <VisitDetail readOnly={readOnly} visit={visit} />
+      <PageContent>
+        <VisitDetail readOnly={readOnly} visit={visit} />
+      </PageContent>
     </>
   );
 };

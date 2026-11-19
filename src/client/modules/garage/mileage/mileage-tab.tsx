@@ -5,6 +5,7 @@ import { Gauge } from "lucide-react";
 import { lazy, Suspense, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
@@ -79,7 +80,7 @@ export const MileageTab = ({
   );
 
   return (
-    <div className="flex flex-col gap-6">
+    <PageStack>
       {points.length === 0 ? (
         <EmptyState
           action={logButton}
@@ -117,6 +118,6 @@ export const MileageTab = ({
         open={dialog.open || autoOpen}
         reading={autoOpen ? null : dialog.reading}
       />
-    </div>
+    </PageStack>
   );
 };

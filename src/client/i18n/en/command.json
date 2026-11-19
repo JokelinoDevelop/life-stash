@@ -26,5 +26,6 @@
     "move": "move",
     "open": "open",
     "close": "close"
-  }
+  },
+  "searchOrRun": "Search or run…"
 }

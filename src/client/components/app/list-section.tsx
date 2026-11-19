@@ -27,8 +27,9 @@ export const SectionHeading = ({
 );
 
 /**
- * A titled group of rows: heading outside, rows inside one hairline box.
- * Rows are 56px on touch and 40px on desktop (design language v0.3).
+ * A titled group of rows. Phones: heading outside, rows in one hairline box.
+ * Desktop: a grey band heading with full-bleed rows (add `data-bleed` so a
+ * `PageStack` does not pad it). Rows are 56px on touch and 40px on desktop.
  */
 export const ListSection = ({
   action,
@@ -43,9 +44,16 @@ export const ListSection = ({
   count?: number;
   title: React.ReactNode;
 }) => (
-  <section className={cn("flex flex-col gap-2", className)}>
-    <SectionHeading action={action} count={count} title={title} />
-    <ul className="bg-card divide-divider divide-y overflow-hidden rounded-lg border">
+  <section
+    className={cn("flex flex-col gap-2 md:gap-0", className)}
+    data-bleed=""
+  >
+    <div className="md:bg-background md:border-divider md:flex md:h-8 md:items-center md:border-b md:px-5 md:[&_h2]:text-xs md:[&_h2]:font-medium">
+      <div className="w-full">
+        <SectionHeading action={action} count={count} title={title} />
+      </div>
+    </div>
+    <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
       {children}
     </ul>
   </section>
@@ -94,7 +102,7 @@ export const ListRow = ({
     <li>
       <Comp
         className={cn(
-          "hover:bg-background flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-4",
+          "group/row hover:bg-background flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
           className
         )}
         data-slot="list-row"

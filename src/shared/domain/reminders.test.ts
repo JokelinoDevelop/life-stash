@@ -4,6 +4,7 @@ import {
   evaluateReminder,
   needsHeadsUp,
   nextRecurrence,
+  reminderHorizon,
   reminderProgress,
 } from "./reminders";
 
@@ -129,5 +130,22 @@ describe(reminderProgress, () => {
     ).toBe(0);
     expect(reminderProgress({ ...base, status: "upcoming" })).toBe(0.25);
     expect(reminderProgress({ ...base, status: "due-soon" })).toBe(0.9);
+  });
+});
+
+describe(reminderHorizon, () => {
+  it("groups by overdue, the next 30 days and later", () => {
+    expect(
+      reminderHorizon({ daysLeft: -2, kmLeft: null, status: "overdue" })
+    ).toBe("overdue");
+    expect(
+      reminderHorizon({ daysLeft: 25, kmLeft: null, status: "upcoming" })
+    ).toBe("next30");
+    expect(
+      reminderHorizon({ daysLeft: null, kmLeft: 600, status: "due-soon" })
+    ).toBe("next30");
+    expect(
+      reminderHorizon({ daysLeft: 200, kmLeft: 9000, status: "upcoming" })
+    ).toBe("later");
   });
 });

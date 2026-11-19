@@ -185,7 +185,8 @@
     }
   }
   body {
-    @apply bg-background text-foreground antialiased;
+    /* 13px on desktop, 14px on touch (see --text-sm). */
+    @apply bg-background text-foreground text-sm antialiased;
     font-feature-settings: "cv11", "ss01", "ss03";
     font-optical-sizing: auto;
     letter-spacing: -0.006em;

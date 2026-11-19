@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { LoadingState } from "@/components/app/states";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api, unwrap } from "@/lib/api";
@@ -56,48 +56,50 @@ const NewExpensePage = () => {
   return (
     <>
       <PageHeader back={back} title={t("createTitle")} />
-      {reminderId !== undefined && (
-        <Alert className="mb-4">
-          <AlertDescription>
-            {reminder === undefined
-              ? t("completingGeneric")
-              : t("completing", { title: reminder.title })}
-          </AlertDescription>
-        </Alert>
-      )}
-      <ExpenseForm
-        defaultValues={expenseFormDefaults({
-          category: categoryForReminder(
-            reminder?.kind ?? (reminderId === undefined ? undefined : "other")
-          ),
-          currency: format.currency,
-          today: todayIso(),
-        })}
-        onSubmit={async (values) => {
-          try {
-            await unwrap(
-              api.garage.expenses.$post({
-                json: expenseFormToCreateRequest(values, {
-                  carId,
-                  reminderId: reminderId ?? null,
-                  unit: format.unit,
-                }),
-              })
-            );
-            await invalidate();
-            toast.success(t("created"));
-            await navigate({
-              params: { carId },
-              search: {
-                tab: reminderId === undefined ? "expenses" : "reminders",
-              },
-              to: "/garage/cars/$carId",
-            });
-          } catch (error) {
-            toast.error(errorMessage(error));
-          }
-        }}
-      />
+      <PageContent>
+        {reminderId !== undefined && (
+          <Alert className="mb-4">
+            <AlertDescription>
+              {reminder === undefined
+                ? t("completingGeneric")
+                : t("completing", { title: reminder.title })}
+            </AlertDescription>
+          </Alert>
+        )}
+        <ExpenseForm
+          defaultValues={expenseFormDefaults({
+            category: categoryForReminder(
+              reminder?.kind ?? (reminderId === undefined ? undefined : "other")
+            ),
+            currency: format.currency,
+            today: todayIso(),
+          })}
+          onSubmit={async (values) => {
+            try {
+              await unwrap(
+                api.garage.expenses.$post({
+                  json: expenseFormToCreateRequest(values, {
+                    carId,
+                    reminderId: reminderId ?? null,
+                    unit: format.unit,
+                  }),
+                })
+              );
+              await invalidate();
+              toast.success(t("created"));
+              await navigate({
+                params: { carId },
+                search: {
+                  tab: reminderId === undefined ? "expenses" : "reminders",
+                },
+                to: "/garage/cars/$carId",
+              });
+            } catch (error) {
+              toast.error(errorMessage(error));
+            }
+          }}
+        />
+      </PageContent>
     </>
   );
 };

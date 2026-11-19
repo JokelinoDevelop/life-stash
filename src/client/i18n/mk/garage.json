@@ -75,7 +75,34 @@
     "addService": "Додај сервис",
     "previousOwner": "Претходен сопственик",
     "odometer": "Километража",
-    "thisYear": "Изминато оваа година"
+    "thisYear": "Изминато оваа година",
+    "sinceDate": "+{{distance}} од {{date}}",
+    "logged": "внесено {{when}}",
+    "perMonth": "Месечно",
+    "costPerDistance": "Цена / {{unit}}",
+    "range": {
+      "6m": "6М",
+      "1y": "1Г",
+      "all": "Сè"
+    },
+    "details": "Детали",
+    "averages": "Просеци",
+    "spentIn": "Потрошено во {{year}}",
+    "perMonthAmount": "{{amount}} / месец",
+    "remindersTitle": "Потсетници",
+    "historyTitle": "Историја",
+    "dueNextShort": "Следно",
+    "lastDoneShort": "Последно",
+    "all": "Сите",
+    "breakdown": "Распределба",
+    "every": "на секои {{interval}}",
+    "months_one": "{{count}} месец",
+    "months_other": "{{count}} месеци",
+    "years_one": "{{count}} година",
+    "years_other": "{{count}} години",
+    "rangeLabel": "Опсег на графикон",
+    "thisYearShort": "Оваа година",
+    "other": "Друго"
   },
   "quickActions": {
     "title": "Брзо додај",
@@ -90,6 +117,23 @@
     "catalog": "Делови и пакети",
     "needsAttention": "Бара внимание",
     "summary": "{{overdue}} задоцнети · {{dueSoon}} наскоро",
-    "summaryClear": "Ништо не доспева наскоро"
+    "summaryClear": "Ништо не доспева наскоро",
+    "horizons": {
+      "overdue": "Задоцнети",
+      "next30": "Следни 30 дена",
+      "later": "Подоцна"
+    },
+    "remindersEmpty": "Ништо не е закажано за вашите возила.",
+    "historyEmpty": "Сè уште нема сервисна историја.",
+    "spentThisYear": "Потрошено во {{year}}",
+    "vsLastYear": "{{change}} во однос на {{year}}",
+    "drivenThisYear": "Изминато во {{year}}",
+    "acrossCars_one": "со {{count}} возило",
+    "acrossCars_other": "со {{count}} возила",
+    "dueIn30": "Следни 30 дена",
+    "overdueLabel": "Задоцнети",
+    "nothingOverdue": "Ништо не е задоцнето",
+    "spendingByMonth": "Трошоци по месец",
+    "addCar": "Додај возило"
   }
 }

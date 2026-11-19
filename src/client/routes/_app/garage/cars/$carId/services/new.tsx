@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
@@ -127,11 +127,13 @@ const NewVisitPage = () => {
         }
         title={t("form.createTitle")}
       />
-      {reminderId === undefined ? (
-        <NewVisit carId={carId} reminder={null} />
-      ) : (
-        <NewVisitFromReminder carId={carId} reminderId={reminderId} />
-      )}
+      <PageContent>
+        {reminderId === undefined ? (
+          <NewVisit carId={carId} reminder={null} />
+        ) : (
+          <NewVisitFromReminder carId={carId} reminderId={reminderId} />
+        )}
+      </PageContent>
     </>
   );
 };

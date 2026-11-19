@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
@@ -94,7 +95,7 @@ export const RemindersTab = ({
   const { active, completed } = reminders.data;
 
   return (
-    <div className="flex flex-col gap-6">
+    <PageStack>
       {addButton !== null && active.length > 0 && (
         <div className="flex justify-end">{addButton}</div>
       )}
@@ -126,6 +127,6 @@ export const RemindersTab = ({
         );
       })}
       <CompletedList reminders={completed} />
-    </div>
+    </PageStack>
   );
 };

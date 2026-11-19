@@ -4,6 +4,7 @@ import { Plus, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ListSection } from "@/components/app/list-section";
+import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 
@@ -59,21 +60,26 @@ export const HistoryTab = ({
 
   if (visits.data.visits.length === 0) {
     return (
-      <EmptyState
-        action={addButton}
-        icon={<Wrench className="size-10" />}
-        message={t("history.empty")}
-      />
+      <PageStack>
+        <EmptyState
+          action={addButton}
+          icon={<Wrench className="size-10" />}
+          message={t("history.empty")}
+        />
+      </PageStack>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <PageStack>
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="flex min-w-0 flex-col gap-6">
+      <div
+        className="lg:[&>*+*]:border-divider grid gap-6 md:gap-0 lg:grid-cols-[minmax(0,1fr)_20rem] lg:[&>*+*]:border-l"
+        data-bleed=""
+      >
+        <div className="flex min-w-0 flex-col gap-6 md:gap-0">
           {groupByYear(visits.data.visits).map(([year, entries]) => (
             <ListSection count={entries.length} key={year} title={year}>
               {entries.map((visit) => (
@@ -86,6 +92,6 @@ export const HistoryTab = ({
           <ItemHistoryCard carId={carId} />
         </div>
       </div>
-    </div>
+    </PageStack>
   );
 };

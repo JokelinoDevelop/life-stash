@@ -2,7 +2,12 @@
   "appName": "LifeStash",
   "nav": {
     "garage": "Garage",
-    "settings": "Settings"
+    "settings": "Settings",
+    "overview": "Overview",
+    "reminders": "Reminders",
+    "history": "History",
+    "catalog": "Service catalog",
+    "cars": "Cars"
   },
   "actions": {
     "save": "Save",
@@ -16,7 +21,12 @@
     "confirm": "Confirm",
     "remove": "Remove",
     "retry": "Try again",
-    "done": "Done"
+    "done": "Done",
+    "markDone": "Mark done",
+    "markDoneOf": "Mark {{title}} done",
+    "logEntry": "Log entry",
+    "log": "Log",
+    "more": "More actions"
   },
   "status": {
     "overdue": "Overdue",

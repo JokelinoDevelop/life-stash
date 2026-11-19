@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
@@ -36,28 +36,30 @@ const EditVisitPage = () => {
         }
         title={t("form.editTitle")}
       />
-      <VisitForm
-        defaultValues={visitToFormValues(data.visit, unit)}
-        onSubmit={async (values) => {
-          try {
-            await unwrap(
-              api.garage.visits[":visitId"].$put({
-                json: visitFormToUpdateRequest(values, unit),
-                param: { visitId },
-              })
-            );
-            await invalidate();
-            toast.success(t("form.updated"));
-            await navigate({
-              params: { carId, visitId },
-              to: "/garage/cars/$carId/services/$visitId",
-            });
-          } catch (error) {
-            toast.error(errorMessage(error));
-          }
-        }}
-        showPhotosHint={false}
-      />
+      <PageContent>
+        <VisitForm
+          defaultValues={visitToFormValues(data.visit, unit)}
+          onSubmit={async (values) => {
+            try {
+              await unwrap(
+                api.garage.visits[":visitId"].$put({
+                  json: visitFormToUpdateRequest(values, unit),
+                  param: { visitId },
+                })
+              );
+              await invalidate();
+              toast.success(t("form.updated"));
+              await navigate({
+                params: { carId, visitId },
+                to: "/garage/cars/$carId/services/$visitId",
+              });
+            } catch (error) {
+              toast.error(errorMessage(error));
+            }
+          }}
+          showPhotosHint={false}
+        />
+      </PageContent>
     </>
   );
 };
