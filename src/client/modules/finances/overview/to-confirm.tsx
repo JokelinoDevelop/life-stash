@@ -34,7 +34,10 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
     });
 
   const meta = (item: Pending) =>
-    [item.clientName, t("recurring.usuallyOn", { count: item.dayOfMonth, ordinal: true })]
+    [
+      item.clientName,
+      t("recurring.usuallyOn", { count: item.dayOfMonth, ordinal: true }),
+    ]
       .filter((part) => part !== null)
       .join(" · ");
 
