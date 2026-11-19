@@ -5,6 +5,7 @@ export default defineConfig({
   schema: [
     "./src/worker/db/schema/core.ts",
     "./src/worker/db/schema/garage.ts",
+    "./src/worker/db/schema/finances.ts",
   ],
   out: "./migrations",
 });

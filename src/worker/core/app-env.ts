@@ -1,3 +1,4 @@
+import type { Container } from "./container";
 import type { Db } from "./db";
 import type { Bindings } from "./env";
 
@@ -15,5 +16,5 @@ export interface PublicEnv {
 
 export interface AppEnv {
   Bindings: Bindings;
-  Variables: { db: Db; auth: AuthContext };
+  Variables: { db: Db; auth: AuthContext; container: Container };
 }

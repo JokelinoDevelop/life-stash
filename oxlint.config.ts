@@ -173,6 +173,18 @@ export default defineConfig({
       },
     },
     {
+      // Test-only adapter between node:sqlite and the D1 API: an I/O boundary like api.ts.
+      files: ["src/worker/test/sqlite-d1.ts"],
+      rules: {
+        "anti-slop/no-chained-type-assertions": "off",
+        "anti-slop/no-known-value-widening": "off",
+        "anti-slop/no-runtime-typeof": "off",
+        "anti-slop/no-unknown-parameters": "off",
+        "anti-slop/no-unsafe-dictionary-type": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+      },
+    },
+    {
       files: ["**/*.test.ts", "**/*.test.tsx"],
       rules: { "max-lines-per-function": "off", "max-lines": "off" },
     },

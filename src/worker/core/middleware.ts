@@ -1,6 +1,7 @@
 import { createMiddleware } from "hono/factory";
 
 import type { AppEnv, PublicEnv } from "./app-env";
+import { Container } from "./container";
 import { createDb } from "./db";
 import { unauthorized } from "./errors";
 import { readSession } from "./session";
@@ -19,6 +20,17 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
   }
 
   c.set("auth", auth);
+  c.set(
+    "container",
+    new Container({
+      db: c.var.db,
+      defer: (work) => {
+        c.executionCtx.waitUntil(work);
+      },
+      env: c.env,
+      householdId: auth.householdId,
+    })
+  );
 
   await next();
 });
