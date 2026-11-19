@@ -1,6 +1,6 @@
 # LifeStash — Architecture
 
-LifeStash is a private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module; future modules live alongside it.
+LifeStash is a private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module; **Finances** (income, spending, invoices; see `docs/FINANCES-SPEC.md`) is the second.
 
 ## Goals
 
@@ -66,6 +66,27 @@ src/
 - **`shared/domain`** holds only pure, tested functions used by both sides. No schemas.
 - **Every query is scoped by `householdId`**, which middleware attaches after authenticating.
 - **Storage units**: distance always in km, money as integer minor units plus an ISO currency. Conversion happens only at the UI edge.
+
+## Finances module (controller → service → repository)
+
+Finances is the first module built on the layered layout from `docs/IMPLEMENTATION-PLAN.md` §1.2:
+
+```
+src/worker/modules/finances/
+├─ finances.controller.ts      mounts the sub-controllers under /api/finances
+├─ finances.module.ts          builds repositories + services for one household
+├─ finances.cron.ts            daily purge of soft-deleted records
+├─ categories/ transactions/   <feature>.controller.ts · .service.ts · .repository.ts · dto/
+└─ household/                  reads household preferences (locale, time zone)
+```
+
+- `core/container.ts` is the per-request composition root: `requireAuth` stores a `Container` on `c.var.container`, and `container.finances` lazily builds the module. Garage still uses its older route/service files.
+- Controllers validate the DTO, call one service method and map the result to the response DTO; they never import Drizzle. Services hold the rules, take repositories by constructor and never import Hono. Repositories are constructed with `(db, householdId)` and scope every query.
+- Business errors use typed codes (`finances.category_in_use`, `finances.invoice_number_taken`, …) via `domainError(code, { field })`; the client translates them (`finances:errors.*`) and shows field errors on the matching input.
+- Deletes are soft (`deleted_at`) so the Undo toast can call `POST …/:id/restore`.
+- Tests: services with in-memory fakes; controllers through `app.request()` against a real SQLite database (`src/worker/test/sqlite-d1.ts`, Node's built-in `node:sqlite` behind a D1 shim with all migrations applied), including household isolation.
+
+On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar shows Garage and Finances as module groups (the active one expanded); phones get Garage / Finances / Reminders / Settings.
 
 ## Reminders and notifications
 

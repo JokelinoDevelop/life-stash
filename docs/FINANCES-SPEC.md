@@ -1,6 +1,6 @@
 # LifeStash — Finances module spec
 
-Status: **proposed, not started** · Written 2026-11-19 · Mocks: ["LifeStash Finances" design canvas](https://claude.ai/artifact/MssgjHtjxpUoKie1rvC5wt)
+Status: **F1 (ledger) built** · F2, F3 in progress · Written 2026-11-19 · Mocks: ["LifeStash Finances" design canvas](https://claude.ai/artifact/MssgjHtjxpUoKie1rvC5wt)
 
 Finances replaces the Excel sheet where work invoices are tracked by hand, and adds a light personal spending log. It is for one person's own organisation: no accounting, no tax filing, no bank sync.
 

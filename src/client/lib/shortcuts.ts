@@ -15,3 +15,10 @@ export const CATALOG_SHORTCUTS = {
   newItem: "n",
   newPackage: "p",
 } as const;
+
+/** Finance pages. */
+export const FINANCE_SHORTCUTS = {
+  logTransaction: "t",
+  markPaid: "p",
+  newInvoice: "i",
+} as const;

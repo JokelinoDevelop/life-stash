@@ -61,3 +61,19 @@ id, household_id, car_id, category (`fuel`/`insurance`/`registration`/`tolls`/`p
 - Maintenance/repair totals = sum of visit `total_minor` (or the sum of item costs when the total is blank), where `by_previous_owner = false`, grouped by car, year and currency.
 - Expenses are reported separately by category and never included in maintenance totals.
 - Mixed currencies are never converted; totals are grouped per currency.
+
+## Finances
+
+See `docs/FINANCES-SPEC.md` for the rules. Money is integer minor units plus a currency; totals are grouped per currency and never converted.
+
+### `finance_categories`
+
+id, household_id, kind (`income`/`expense`), name, icon? (lucide name from `CATEGORY_ICONS`), position, system_key? (`invoices`: used by "mark paid", can't be renamed, archived or deleted), archived_at?, created_at
+
+Defaults are created (in the household's language) the first time Finances lists categories. A category in use is archived, not deleted.
+
+### `finance_transactions`
+
+id, household_id, kind (`income`/`expense`), date, amount_minor (always positive), currency, category_id, description, notes?, deleted_at?, created_at, updated_at
+
+Indexes: (household_id, date), (household_id, category_id). `deleted_at` is a soft delete so a delete can be undone; the daily cron purges rows deleted more than 7 days ago.

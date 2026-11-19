@@ -4,6 +4,7 @@ import { initReactI18next } from "react-i18next";
 import enAuth from "./en/auth.json";
 import enCommand from "./en/command.json";
 import enCommon from "./en/common.json";
+import enFinances from "./en/finances.json";
 import enGarage from "./en/garage.json";
 import enGarageCatalog from "./en/garageCatalog.json";
 import enGarageExpenses from "./en/garageExpenses.json";
@@ -15,6 +16,7 @@ import enSettings from "./en/settings.json";
 import mkAuth from "./mk/auth.json";
 import mkCommand from "./mk/command.json";
 import mkCommon from "./mk/common.json";
+import mkFinances from "./mk/finances.json";
 import mkGarage from "./mk/garage.json";
 import mkGarageCatalog from "./mk/garageCatalog.json";
 import mkGarageExpenses from "./mk/garageExpenses.json";
@@ -29,6 +31,7 @@ export const resources = {
     auth: enAuth,
     command: enCommand,
     common: enCommon,
+    finances: enFinances,
     garage: enGarage,
     garageCatalog: enGarageCatalog,
     garageExpenses: enGarageExpenses,
@@ -42,6 +45,7 @@ export const resources = {
     auth: mkAuth,
     command: mkCommand,
     common: mkCommon,
+    finances: mkFinances,
     garage: mkGarage,
     garageCatalog: mkGarageCatalog,
     garageExpenses: mkGarageExpenses,

@@ -7,7 +7,8 @@
     "reminders": "Reminders",
     "history": "History",
     "catalog": "Service catalog",
-    "cars": "Cars"
+    "cars": "Cars",
+    "finances": "Finances"
   },
   "actions": {
     "save": "Save",
@@ -27,7 +28,8 @@
     "logEntry": "Log entry",
     "log": "Log",
     "more": "More actions",
-    "view": "View"
+    "view": "View",
+    "undo": "Undo"
   },
   "status": {
     "overdue": "Overdue",

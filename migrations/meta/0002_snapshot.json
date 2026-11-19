@@ -144,9 +144,7 @@
       "indexes": {
         "passkeys_user_idx": {
           "name": "passkeys_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -155,12 +153,8 @@
           "name": "passkeys_user_id_users_id_fk",
           "tableFrom": "passkeys",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -232,17 +226,12 @@
       "indexes": {
         "photos_object_key_unique": {
           "name": "photos_object_key_unique",
-          "columns": [
-            "object_key"
-          ],
+          "columns": ["object_key"],
           "isUnique": true
         },
         "photos_owner_idx": {
           "name": "photos_owner_idx",
-          "columns": [
-            "owner_type",
-            "owner_id"
-          ],
+          "columns": ["owner_type", "owner_id"],
           "isUnique": false
         }
       },
@@ -251,12 +240,8 @@
           "name": "photos_household_id_households_id_fk",
           "tableFrom": "photos",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -314,16 +299,12 @@
       "indexes": {
         "push_subscriptions_endpoint_unique": {
           "name": "push_subscriptions_endpoint_unique",
-          "columns": [
-            "endpoint"
-          ],
+          "columns": ["endpoint"],
           "isUnique": true
         },
         "push_subscriptions_user_idx": {
           "name": "push_subscriptions_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -332,12 +313,8 @@
           "name": "push_subscriptions_user_id_users_id_fk",
           "tableFrom": "push_subscriptions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -381,16 +358,12 @@
       "indexes": {
         "recovery_codes_code_hash_unique": {
           "name": "recovery_codes_code_hash_unique",
-          "columns": [
-            "code_hash"
-          ],
+          "columns": ["code_hash"],
           "isUnique": true
         },
         "recovery_codes_user_idx": {
           "name": "recovery_codes_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -399,12 +372,8 @@
           "name": "recovery_codes_user_id_users_id_fk",
           "tableFrom": "recovery_codes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -448,9 +417,7 @@
       "indexes": {
         "sessions_user_idx": {
           "name": "sessions_user_idx",
-          "columns": [
-            "user_id"
-          ],
+          "columns": ["user_id"],
           "isUnique": false
         }
       },
@@ -459,12 +426,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -530,12 +493,8 @@
           "name": "user_preferences_user_id_users_id_fk",
           "tableFrom": "user_preferences",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -608,9 +567,7 @@
       "indexes": {
         "users_email_unique": {
           "name": "users_email_unique",
-          "columns": [
-            "email"
-          ],
+          "columns": ["email"],
           "isUnique": true
         }
       },
@@ -619,12 +576,8 @@
           "name": "users_household_id_households_id_fk",
           "tableFrom": "users",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -787,9 +740,7 @@
       "indexes": {
         "garage_cars_household_idx": {
           "name": "garage_cars_household_idx",
-          "columns": [
-            "household_id"
-          ],
+          "columns": ["household_id"],
           "isUnique": false
         }
       },
@@ -798,12 +749,8 @@
           "name": "garage_cars_household_id_households_id_fk",
           "tableFrom": "garage_cars",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -903,10 +850,7 @@
       "indexes": {
         "garage_expenses_car_date_idx": {
           "name": "garage_expenses_car_date_idx",
-          "columns": [
-            "car_id",
-            "date"
-          ],
+          "columns": ["car_id", "date"],
           "isUnique": false
         }
       },
@@ -915,12 +859,8 @@
           "name": "garage_expenses_car_id_garage_cars_id_fk",
           "tableFrom": "garage_expenses",
           "tableTo": "garage_cars",
-          "columnsFrom": [
-            "car_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["car_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -928,12 +868,8 @@
           "name": "garage_expenses_household_id_households_id_fk",
           "tableFrom": "garage_expenses",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -984,9 +920,7 @@
       "indexes": {
         "garage_items_household_idx": {
           "name": "garage_items_household_idx",
-          "columns": [
-            "household_id"
-          ],
+          "columns": ["household_id"],
           "isUnique": false
         }
       },
@@ -995,12 +929,8 @@
           "name": "garage_items_household_id_households_id_fk",
           "tableFrom": "garage_items",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1065,10 +995,7 @@
       "indexes": {
         "garage_readings_car_date_idx": {
           "name": "garage_readings_car_date_idx",
-          "columns": [
-            "car_id",
-            "date"
-          ],
+          "columns": ["car_id", "date"],
           "isUnique": false
         }
       },
@@ -1077,12 +1004,8 @@
           "name": "garage_odometer_readings_car_id_garage_cars_id_fk",
           "tableFrom": "garage_odometer_readings",
           "tableTo": "garage_cars",
-          "columnsFrom": [
-            "car_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["car_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1090,12 +1013,8 @@
           "name": "garage_odometer_readings_household_id_households_id_fk",
           "tableFrom": "garage_odometer_readings",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1128,12 +1047,8 @@
           "name": "garage_package_items_item_id_garage_items_id_fk",
           "tableFrom": "garage_package_items",
           "tableTo": "garage_items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1141,22 +1056,15 @@
           "name": "garage_package_items_package_id_garage_packages_id_fk",
           "tableFrom": "garage_package_items",
           "tableTo": "garage_packages",
-          "columnsFrom": [
-            "package_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["package_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {
         "garage_package_items_package_id_item_id_pk": {
-          "columns": [
-            "package_id",
-            "item_id"
-          ],
+          "columns": ["package_id", "item_id"],
           "name": "garage_package_items_package_id_item_id_pk"
         }
       },
@@ -1205,9 +1113,7 @@
       "indexes": {
         "garage_packages_household_idx": {
           "name": "garage_packages_household_idx",
-          "columns": [
-            "household_id"
-          ],
+          "columns": ["household_id"],
           "isUnique": false
         }
       },
@@ -1216,12 +1122,8 @@
           "name": "garage_packages_household_id_households_id_fk",
           "tableFrom": "garage_packages",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1370,17 +1272,12 @@
       "indexes": {
         "garage_reminders_car_idx": {
           "name": "garage_reminders_car_idx",
-          "columns": [
-            "car_id",
-            "completed_at"
-          ],
+          "columns": ["car_id", "completed_at"],
           "isUnique": false
         },
         "garage_reminders_household_idx": {
           "name": "garage_reminders_household_idx",
-          "columns": [
-            "household_id"
-          ],
+          "columns": ["household_id"],
           "isUnique": false
         }
       },
@@ -1389,12 +1286,8 @@
           "name": "garage_reminders_car_id_garage_cars_id_fk",
           "tableFrom": "garage_reminders",
           "tableTo": "garage_cars",
-          "columnsFrom": [
-            "car_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["car_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1402,12 +1295,8 @@
           "name": "garage_reminders_household_id_households_id_fk",
           "tableFrom": "garage_reminders",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1415,12 +1304,8 @@
           "name": "garage_reminders_item_id_garage_items_id_fk",
           "tableFrom": "garage_reminders",
           "tableTo": "garage_items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1428,12 +1313,8 @@
           "name": "garage_reminders_package_id_garage_packages_id_fk",
           "tableFrom": "garage_reminders",
           "tableTo": "garage_packages",
-          "columnsFrom": [
-            "package_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["package_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1499,16 +1380,12 @@
       "indexes": {
         "garage_visit_items_visit_idx": {
           "name": "garage_visit_items_visit_idx",
-          "columns": [
-            "visit_id"
-          ],
+          "columns": ["visit_id"],
           "isUnique": false
         },
         "garage_visit_items_item_idx": {
           "name": "garage_visit_items_item_idx",
-          "columns": [
-            "item_id"
-          ],
+          "columns": ["item_id"],
           "isUnique": false
         }
       },
@@ -1517,12 +1394,8 @@
           "name": "garage_service_visit_items_item_id_garage_items_id_fk",
           "tableFrom": "garage_service_visit_items",
           "tableTo": "garage_items",
-          "columnsFrom": [
-            "item_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["item_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1530,12 +1403,8 @@
           "name": "garage_service_visit_items_visit_id_garage_service_visits_id_fk",
           "tableFrom": "garage_service_visit_items",
           "tableTo": "garage_service_visits",
-          "columnsFrom": [
-            "visit_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["visit_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1650,17 +1519,12 @@
       "indexes": {
         "garage_visits_car_date_idx": {
           "name": "garage_visits_car_date_idx",
-          "columns": [
-            "car_id",
-            "date"
-          ],
+          "columns": ["car_id", "date"],
           "isUnique": false
         },
         "garage_visits_household_idx": {
           "name": "garage_visits_household_idx",
-          "columns": [
-            "household_id"
-          ],
+          "columns": ["household_id"],
           "isUnique": false
         }
       },
@@ -1669,12 +1533,8 @@
           "name": "garage_service_visits_car_id_garage_cars_id_fk",
           "tableFrom": "garage_service_visits",
           "tableTo": "garage_cars",
-          "columnsFrom": [
-            "car_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["car_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1682,12 +1542,8 @@
           "name": "garage_service_visits_household_id_households_id_fk",
           "tableFrom": "garage_service_visits",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1767,10 +1623,7 @@
       "indexes": {
         "finance_categories_household_idx": {
           "name": "finance_categories_household_idx",
-          "columns": [
-            "household_id",
-            "kind"
-          ],
+          "columns": ["household_id", "kind"],
           "isUnique": false
         }
       },
@@ -1779,12 +1632,8 @@
           "name": "finance_categories_household_id_households_id_fk",
           "tableFrom": "finance_categories",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1884,25 +1733,17 @@
       "indexes": {
         "finance_transactions_date_idx": {
           "name": "finance_transactions_date_idx",
-          "columns": [
-            "household_id",
-            "date"
-          ],
+          "columns": ["household_id", "date"],
           "isUnique": false
         },
         "finance_transactions_category_idx": {
           "name": "finance_transactions_category_idx",
-          "columns": [
-            "household_id",
-            "category_id"
-          ],
+          "columns": ["household_id", "category_id"],
           "isUnique": false
         },
         "finance_transactions_deleted_idx": {
           "name": "finance_transactions_deleted_idx",
-          "columns": [
-            "deleted_at"
-          ],
+          "columns": ["deleted_at"],
           "isUnique": false,
           "where": "\"finance_transactions\".\"deleted_at\" IS NOT NULL"
         }
@@ -1912,12 +1753,8 @@
           "name": "finance_transactions_category_id_finance_categories_id_fk",
           "tableFrom": "finance_transactions",
           "tableTo": "finance_categories",
-          "columnsFrom": [
-            "category_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["category_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1925,12 +1762,8 @@
           "name": "finance_transactions_household_id_households_id_fk",
           "tableFrom": "finance_transactions",
           "tableTo": "households",
-          "columnsFrom": [
-            "household_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["household_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

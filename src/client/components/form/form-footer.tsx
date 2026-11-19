@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useFormDialog } from "@/components/app/form-dialog-context";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { cn } from "@/lib/utils";
 
 import { useFormContext } from "./form-context";
 
@@ -27,10 +28,13 @@ const ReportDirty = ({ dirty }: { dirty: boolean }) => {
 export const FormFooter = ({
   onCancel,
   start,
+  stretchOnMobile = false,
   submitLabel,
 }: {
   onCancel: () => void;
   start?: ReactNode;
+  /** Phones: one full-width Save (sheets that close by swiping down need no Cancel). */
+  stretchOnMobile?: boolean;
   submitLabel?: string;
 }) => {
   const form = useFormContext();
@@ -39,7 +43,12 @@ export const FormFooter = ({
 
   return (
     <div className="border-divider pb-safe flex shrink-0 items-center gap-2 border-t px-3 py-2.5">
-      <div className="flex min-w-0 flex-1 items-center">
+      <div
+        className={cn(
+          "flex min-w-0 flex-1 items-center",
+          stretchOnMobile && start === undefined && "hidden md:flex"
+        )}
+      >
         {start ?? (
           <span className="text-muted-foreground hidden items-center gap-1.5 text-xs md:flex">
             <Kbd>esc</Kbd>
@@ -60,6 +69,7 @@ export const FormFooter = ({
             dialog.requestClose();
           }
         }}
+        className={cn(stretchOnMobile && "hidden md:inline-flex")}
         size="compact"
         type="button"
         variant="ghost"
@@ -70,6 +80,7 @@ export const FormFooter = ({
         {(isSubmitting) => (
           <Button
             aria-busy={isSubmitting}
+            className={cn(stretchOnMobile && "max-md:h-11 max-md:flex-1")}
             disabled={isSubmitting}
             size="compact"
             type="submit"

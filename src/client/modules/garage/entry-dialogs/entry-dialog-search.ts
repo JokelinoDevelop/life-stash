@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { APP_DIALOGS } from "@/app/dialogs";
 import type { CarShortcutAction } from "@/lib/shortcuts";
 
 export const ENTRY_DIALOGS = ["car", "service", "expense", "reminder"] as const;
@@ -17,7 +18,8 @@ const optionalId = z.string().min(1).optional().catch(undefined);
  */
 export const entryDialogSearchSchema = z.object({
   car: optionalId,
-  dialog: z.enum(ENTRY_DIALOGS).optional().catch(undefined),
+  // Any app dialog parses, so Finances dialogs survive; the garage host only opens its own.
+  dialog: z.enum(APP_DIALOGS).optional().catch(undefined),
   id: optionalId,
   reminder: optionalId,
 });

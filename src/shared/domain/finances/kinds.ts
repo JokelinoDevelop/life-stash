@@ -41,3 +41,9 @@ export type CategoryIcon = (typeof CATEGORY_ICONS)[number];
 
 /** `YYYY-MM` of an ISO date. */
 export const monthOf = (date: string): string => date.slice(0, 7);
+
+export const isTransactionKind = (value: string): value is TransactionKind =>
+  TRANSACTION_KINDS.some((kind) => kind === value);
+
+export const isCategoryIcon = (value: string): value is CategoryIcon =>
+  CATEGORY_ICONS.some((icon) => icon === value);

@@ -19,6 +19,8 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // A rounded suggestion pill (category shortcuts); `aria-pressed` marks the chosen one.
+        chip: "bg-card text-subtle-foreground hover:bg-accent aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-foreground border data-[variant=chip]:rounded-full",
         // Looks like an input (date picker trigger); `data-empty` greys the placeholder.
         field:
           "border-input hover:bg-accent/50 dark:bg-input/30 dark:hover:bg-input/50 data-[empty=true]:text-muted-foreground [&_svg]:text-muted-foreground justify-start border bg-transparent font-normal shadow-xs",

@@ -20,17 +20,17 @@ Flat surfaces, hairlines, one accent, fast. The visual reference is the "LifeSta
 | `border` / `divider` | outer hairlines / row separators inside a box |
 | `foreground`, `subtle-foreground`, `muted-foreground` | text levels (primary, secondary, tertiary) |
 | `primary` | the one accent |
-| `destructive`, `warning`, `success` | status; use `warning-foreground` for warning **text** |
+| `destructive`, `warning`, `success` | status; use `warning-foreground` / `success-foreground` for warning / success **text** (income amounts) |
 | `chart-1…5` | blue ramp (chart-5 is a dark navy for a fourth series) |
 
 Radii: `--radius` is 0.5rem, giving `rounded-sm` 4 · `md` 6 · `lg` 8 · `xl` 12. Shadows: `shadow-xs`/`sm` are none; `shadow-md`/`lg`/`xl` are the overlay shadow. Font: Inter Variable (self-hosted, optical sizing, `cv11 ss01 ss03`).
 
-All of this is set at the theme level, so shadcn components stay unedited. When a design needs something new, add a **variant** in `components/ui` (examples: `Button` `compact` / `icon-compact`, `Toggle` `segmented`, `TabsList` `pill`).
+All of this is set at the theme level, so shadcn components stay unedited. When a design needs something new, add a **variant** in `components/ui` (examples: `Button` `compact` / `icon-compact` / `chip` (rounded suggestion pill, `aria-pressed` when chosen), `Toggle` `segmented`, `TabsList` `pill`, `SelectTrigger` size `chip` (filter chips) and variant `ghost` (plain "EUR · tap to change")).
 
 ## Layout
 
-- **Desktop:** the sidebar (household menu, search, Overview / Reminders / History / Service catalog, the car list, Settings) sits on the canvas; pages render inside one white bordered panel. `PageHeader` draws a 44px bar at the top of the panel (crumb › title, actions).
-- **Phones:** a Garage / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (History, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
+- **Desktop:** the sidebar (household menu, search, the **Garage** and **Finances** module groups — the active one expanded with its pages, the car list under Garage — then Reminders and Settings at the bottom) sits on the canvas; pages render inside one white bordered panel. `PageHeader` draws a 44px bar at the top of the panel (crumb › title, actions).
+- **Phones:** a Garage / Finances / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (History, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
 - **Lists vs padded pages:** list pages (including the Service catalog) wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, max 4xl).
 - The Garage home and the household Reminders page read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
 
@@ -51,6 +51,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover, Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
 | `LoadingState` (`list` / `rows` / `block`), `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
+| `useConfirm()` (`components/app/confirm`) | imperative yes/no: `await confirm({ title, tone })` |
+| `useAppMutation` (`lib/mutation`) | every mutation: one toast, optional Undo / action, invalidation |
 | `PagedList` + `paginate` (`lib/paginate`) | any list that can grow past a screen: 12 rows a page, "‹ Newer · 13–24 of 79 · Older ›" |
 | `DrawerHeader align="start"` | sheet titles read top-left like their dialogs |
 
