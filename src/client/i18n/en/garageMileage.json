@@ -36,8 +36,6 @@
   "inline": {
     "addNote": "Add a note…",
     "sinceLast": "since {{distance}} on {{date}}",
-    "escToCancel": "to cancel",
-    "today": "Today",
     "dialogTitle": "Log odometer reading"
   }
 }

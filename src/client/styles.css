@@ -15,6 +15,40 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Loading placeholders wait 150 ms before fading in, so fast loads never flash. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-reveal {
+  animation: reveal 150ms ease-out 150ms both;
+}
+
+/* Indeterminate bar for route transitions. */
+@keyframes progress-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(250%);
+  }
+}
+
+@utility animate-progress {
+  animation: progress-slide 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-reveal {
+    animation-duration: 0s;
+  }
+}
+
 /* Design language v0.3 "crisp" — flat surfaces, hairlines, one accent.
    Source of truth: the "LifeStash Design Language" canvas (Tokens board). */
 :root {

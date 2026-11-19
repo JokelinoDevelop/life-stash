@@ -36,8 +36,6 @@
   "inline": {
     "addNote": "Додај белешка…",
     "sinceLast": "од {{distance}} на {{date}}",
-    "escToCancel": "за откажување",
-    "today": "Денес",
     "dialogTitle": "Внеси километража"
   }
 }

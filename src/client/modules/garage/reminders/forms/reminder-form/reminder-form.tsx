@@ -2,7 +2,7 @@ import { REMINDER_KINDS } from "@shared/domain/garage-kinds";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { Panel } from "@/components/app/list-section";
+import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { useAppForm } from "@/components/form/form-hook";
 import { FieldGroup } from "@/components/ui/field";
 import { useFormat } from "@/lib/format";
@@ -61,12 +61,10 @@ const DueCard = ({ form }: { form: ReminderFormApi }) => {
   const { unit } = useFormat();
 
   return (
-    <Panel title={t("form.due")} description={t("form.dueHelp")}>
+    <FormSection description={t("form.dueHelp")} title={t("form.due")}>
       <div className="grid gap-4 sm:grid-cols-2">
         <form.AppField name="dueDate">
-          {(field) => (
-            <field.TextField label={t("form.dueDate")} optional type="date" />
-          )}
+          {(field) => <field.DateField label={t("form.dueDate")} optional />}
         </form.AppField>
         <form.AppField name="dueOdometer">
           {(field) => (
@@ -79,7 +77,7 @@ const DueCard = ({ form }: { form: ReminderFormApi }) => {
           )}
         </form.AppField>
       </div>
-    </Panel>
+    </FormSection>
   );
 };
 
@@ -89,7 +87,7 @@ const RecurringCard = ({ form }: { form: ReminderFormApi }) => {
   const { unit } = useFormat();
 
   return (
-    <Panel title={t("form.recurring")}>
+    <FormSection title={t("form.recurring")}>
       <FieldGroup>
         <div className="grid gap-4 sm:grid-cols-2">
           <form.AppField name="intervalMonths">
@@ -118,15 +116,17 @@ const RecurringCard = ({ form }: { form: ReminderFormApi }) => {
           )}
         </form.AppField>
       </FieldGroup>
-    </Panel>
+    </FormSection>
   );
 };
 
 export const ReminderForm = ({
   defaultValues,
+  onCancel,
   onSubmit,
 }: {
   defaultValues: ReminderFormValues;
+  onCancel: () => void;
   onSubmit: (values: ReminderFormValues) => Promise<void>;
 }) => {
   const { t } = useTranslation("garageReminders");
@@ -136,14 +136,17 @@ export const ReminderForm = ({
   const form = useReminderForm(defaultValues, onSubmit);
 
   return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
-      <Panel>
+      <FormSection>
         <FieldGroup>
           <form.AppField name="kind">
             {(field) => (
@@ -198,12 +201,9 @@ export const ReminderForm = ({
             )}
           </form.AppField>
         </FieldGroup>
-      </Panel>
+      </FormSection>
       <DueCard form={form} />
       <RecurringCard form={form} />
-      <form.AppForm>
-        <form.SubmitButton className="self-end" />
-      </form.AppForm>
-    </form>
+    </DialogForm>
   );
 };

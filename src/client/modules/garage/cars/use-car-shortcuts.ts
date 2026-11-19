@@ -3,9 +3,12 @@ import { useNavigate } from "@tanstack/react-router";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { useEntryDialog } from "../entry-dialogs/use-entry-dialog";
+
 /** L / S / E / R on a car page: log odometer, service, expense, reminder. */
 export const useCarShortcuts = (carId: string, enabled: boolean): void => {
   const navigate = useNavigate();
+  const entryDialog = useEntryDialog();
   const options = { enabled };
 
   const handleLogOdometer = () => {
@@ -18,24 +21,15 @@ export const useCarShortcuts = (carId: string, enabled: boolean): void => {
   };
 
   const handleAddService = () => {
-    void navigate({
-      params: { carId },
-      to: "/garage/cars/$carId/services/new",
-    });
+    void entryDialog.open({ car: carId, dialog: "service" });
   };
 
   const handleAddExpense = () => {
-    void navigate({
-      params: { carId },
-      to: "/garage/cars/$carId/expenses/new",
-    });
+    void entryDialog.open({ car: carId, dialog: "expense" });
   };
 
   const handleAddReminder = () => {
-    void navigate({
-      params: { carId },
-      to: "/garage/cars/$carId/reminders/new",
-    });
+    void entryDialog.open({ car: carId, dialog: "reminder" });
   };
 
   useHotkey(CAR_SHORTCUTS.logOdometer, handleLogOdometer, options);

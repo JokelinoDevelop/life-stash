@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +8,7 @@ import {
 } from "@/components/app/list-section";
 import { useFormat } from "@/lib/format";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CategoryIcon } from "./expense-category";
 import type { ExpenseListItem } from "./expenses.queries";
 import { groupByMonth } from "./group-expenses";
@@ -87,12 +87,11 @@ export const ExpenseList = ({
               </ListRow>
             ) : (
               <ListRow asChild className="py-2 md:py-1.5" key={expense.id}>
-                <Link
-                  params={{ carId, expenseId: expense.id }}
-                  to="/garage/cars/$carId/expenses/$expenseId/edit"
+                <EntryDialogLink
+                  entry={{ car: carId, dialog: "expense", id: expense.id }}
                 >
                   {row}
-                </Link>
+                </EntryDialogLink>
               </ListRow>
             );
           })}

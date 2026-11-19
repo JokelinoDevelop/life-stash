@@ -89,7 +89,7 @@ export const MileageTab = ({
       {points.length === 0 ? (
         <EmptyState
           action={logButton}
-          icon={<Gauge className="size-10" />}
+          icon={<Gauge />}
           message={t("list.empty")}
         />
       ) : (
@@ -98,7 +98,7 @@ export const MileageTab = ({
             <div className="flex justify-end">{logButton}</div>
           )}
           <MileageStats points={points} today={today} />
-          <Suspense fallback={<LoadingState rows={1} />}>
+          <Suspense fallback={<LoadingState variant="block" />}>
             <MileageCharts points={points} today={today} />
           </Suspense>
           <ReadingsList

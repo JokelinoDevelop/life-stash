@@ -28,6 +28,8 @@ import type { CarShortcutAction } from "@/lib/shortcuts";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { useCarJump } from "@/modules/garage/cars/use-car-jump";
+import { DIALOG_FOR_CAR_ACTION } from "@/modules/garage/entry-dialogs/entry-dialog-search";
+import { useEntryDialog } from "@/modules/garage/entry-dialogs/use-entry-dialog";
 
 import { CommandMenuContext } from "./command-menu-context";
 import type { CommandMenuControls } from "./command-menu-context";
@@ -59,31 +61,20 @@ const ActionsGroup = ({
 }) => {
   const { t } = useTranslation("command");
   const navigate = useNavigate();
+  const entryDialog = useEntryDialog();
   const car = current?.archivedAt === null ? current : undefined;
 
   const go = async (action: CarShortcutAction, carId: string) => {
-    if (action === "logOdometer") {
-      await navigate({
-        params: { carId },
-        search: { log: true, tab: "mileage" },
-        to: "/garage/cars/$carId",
-      });
-    } else if (action === "addService") {
-      await navigate({
-        params: { carId },
-        to: "/garage/cars/$carId/services/new",
-      });
-    } else if (action === "addExpense") {
-      await navigate({
-        params: { carId },
-        to: "/garage/cars/$carId/expenses/new",
-      });
-    } else {
-      await navigate({
-        params: { carId },
-        to: "/garage/cars/$carId/reminders/new",
-      });
-    }
+    await (action === "logOdometer"
+      ? navigate({
+          params: { carId },
+          search: { log: true, tab: "mileage" },
+          to: "/garage/cars/$carId",
+        })
+      : entryDialog.open({
+          car: carId,
+          dialog: DIALOG_FOR_CAR_ACTION[action],
+        }));
   };
 
   return (
@@ -108,7 +99,7 @@ const ActionsGroup = ({
         label={t("actions.addCar")}
         onSelect={() => {
           run(async () => {
-            await navigate({ to: "/garage/cars/new" });
+            await entryDialog.open({ dialog: "car" });
           });
         }}
         shortcut={ADD_CAR_SHORTCUT}

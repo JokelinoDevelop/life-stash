@@ -1,8 +1,9 @@
 import { EXPENSE_CATEGORIES } from "@shared/domain/garage-kinds";
 import { CURRENCIES } from "@shared/domain/money";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Panel } from "@/components/app/list-section";
+import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { useAppForm } from "@/components/form/form-hook";
 import { FieldGroup } from "@/components/ui/field";
 import { useFormat } from "@/lib/format";
@@ -12,9 +13,17 @@ import type { ExpenseFormValues } from "./schema";
 
 export const ExpenseForm = ({
   defaultValues,
+  footerStart,
+  notice,
+  onCancel,
   onSubmit,
 }: {
   defaultValues: ExpenseFormValues;
+  /** Left side of the footer, e.g. Delete when editing. */
+  footerStart?: ReactNode;
+  /** A line above the fields, e.g. which reminder this completes. */
+  notice?: ReactNode;
+  onCancel: () => void;
   onSubmit: (values: ExpenseFormValues) => Promise<void>;
 }) => {
   const { t } = useTranslation("garageExpenses");
@@ -30,14 +39,18 @@ export const ExpenseForm = ({
   });
 
   return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} start={footerStart} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
-      <Panel>
+      {notice}
+      <FormSection>
         <FieldGroup>
           <form.AppField name="category">
             {(field) => (
@@ -73,9 +86,7 @@ export const ExpenseForm = ({
             </form.AppField>
           </div>
           <form.AppField name="date">
-            {(field) => (
-              <field.TextField label={t("fields.date")} type="date" />
-            )}
+            {(field) => <field.DateField label={t("fields.date")} />}
           </form.AppField>
           <div className="grid gap-4 sm:grid-cols-2">
             <form.AppField name="odometer">
@@ -111,10 +122,7 @@ export const ExpenseForm = ({
             )}
           </form.AppField>
         </FieldGroup>
-      </Panel>
-      <form.AppForm>
-        <form.SubmitButton className="self-end" />
-      </form.AppForm>
-    </form>
+      </FormSection>
+    </DialogForm>
   );
 };

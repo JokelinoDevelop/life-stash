@@ -176,6 +176,8 @@ useAppMutation({
 
 ### 2.4 URL-driven dialogs (`src/client/components/app/route-dialog.tsx`)
 
+> **Done (differently):** create/edit dialogs are URL-driven from the `_app` route (`?dialog=…&car=…&id=…&reminder=…`) via `modules/garage/entry-dialogs`, rendered by one `EntryDialogHost`; the discard guard from 2.5 is in `FormDialog`. See DESIGN-LANGUAGE "Forms and dialogs".
+
 - The open dialog lives in the route's search params, e.g. `?dialog=expense-new`, `?dialog=expense-edit&expenseId=…`, `?dialog=visit-new&reminderId=…`. Each route that hosts dialogs declares them in `validateSearch` (Zod discriminated union on `dialog`).
 - `useRouteDialog(name)` returns `{ open, params, show(params), close() }`. `show` pushes a history entry, so the phone/browser Back button closes the dialog. `close` goes back if the dialog opened in-app, or replaces the URL if the page was opened directly from a deep link.
 - `ResponsiveDialog` gets a `size: "default" | "wide" | "full"` variant (`wide` for the visit form; `full` = full-height drawer on mobile). Per CLAUDE.md the variant is added in `components/app`, not by restyling shadcn.

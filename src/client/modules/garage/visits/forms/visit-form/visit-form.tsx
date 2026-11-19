@@ -1,8 +1,9 @@
 import { VISIT_KINDS } from "@shared/domain/garage-kinds";
 import { CURRENCIES } from "@shared/domain/money";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Panel } from "@/components/app/list-section";
+import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { FieldGroup } from "@/components/ui/field";
 import { useFormat } from "@/lib/format";
 
@@ -12,10 +13,15 @@ import { useVisitForm } from "./use-visit-form";
 
 export const VisitForm = ({
   defaultValues,
+  notice,
+  onCancel,
   onSubmit,
   showPhotosHint,
 }: {
   defaultValues: VisitFormValues;
+  /** A line above the fields, e.g. which reminder this completes. */
+  notice?: ReactNode;
+  onCancel: () => void;
   onSubmit: (values: VisitFormValues) => Promise<void>;
   showPhotosHint: boolean;
 }) => {
@@ -25,14 +31,18 @@ export const VisitForm = ({
   const form = useVisitForm(defaultValues, onSubmit);
 
   return (
-    <form
-      className="flex flex-col gap-6"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
-      <Panel>
+      {notice}
+      <FormSection>
         <FieldGroup>
           <form.AppField name="date">
             {(field) => <field.PartialDateField label={t("form.date")} />}
@@ -72,11 +82,11 @@ export const VisitForm = ({
             {(field) => <field.TextField label={t("form.shop")} optional />}
           </form.AppField>
         </FieldGroup>
-      </Panel>
-      <Panel>
+      </FormSection>
+      <FormSection>
         <ItemsEditor form={form} />
-      </Panel>
-      <Panel>
+      </FormSection>
+      <FormSection>
         <FieldGroup>
           <div className="grid grid-cols-[1fr_auto] gap-3">
             <form.AppField name="total">
@@ -112,10 +122,7 @@ export const VisitForm = ({
             </p>
           )}
         </FieldGroup>
-      </Panel>
-      <form.AppForm>
-        <form.SubmitButton className="self-end" />
-      </form.AppForm>
-    </form>
+      </FormSection>
+    </DialogForm>
   );
 };

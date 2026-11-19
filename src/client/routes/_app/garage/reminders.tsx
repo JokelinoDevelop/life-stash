@@ -30,10 +30,7 @@ const RemindersPage = () => {
       {overview.isSuccess && cars.isSuccess && (
         <PageStack>
           {overview.data.reminders.length === 0 ? (
-            <EmptyState
-              icon={<Bell className="size-8" />}
-              message={tg("home.remindersEmpty")}
-            />
+            <EmptyState icon={<Bell />} message={tg("home.remindersEmpty")} />
           ) : (
             <ReminderGroups
               cars={cars.data.cars}

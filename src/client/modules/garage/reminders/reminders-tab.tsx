@@ -1,6 +1,5 @@
 import { REMINDER_STATUSES } from "@shared/domain/reminders";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { BellPlus, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,8 +8,11 @@ import { ListSection } from "@/components/app/list-section";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { ReminderRow } from "./reminder-row";
 import { remindersQuery } from "./reminders.queries";
 import type { CompletedReminder } from "./reminders.queries";
@@ -70,10 +72,13 @@ export const RemindersTab = ({
 
   const addButton = readOnly ? null : (
     <Button asChild size="compact">
-      <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
+      <EntryDialogLink entry={{ car: carId, dialog: "reminder" }}>
         <BellPlus />
         {t("tab.add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addReminder.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
@@ -102,7 +107,7 @@ export const RemindersTab = ({
       {active.length === 0 && (
         <EmptyState
           action={addButton}
-          icon={<BellPlus className="size-10" />}
+          icon={<BellPlus />}
           message={t("tab.empty")}
         />
       )}

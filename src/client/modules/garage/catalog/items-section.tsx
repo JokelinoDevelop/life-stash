@@ -100,8 +100,16 @@ export const ItemsSection = () => {
             }}
             submitLabel={t("items.add")}
           />
-          {items.isPending && <LoadingState rows={2} />}
-          {items.isError && <ErrorState error={items.error} />}
+          {items.isPending && <LoadingState rows={2} variant="rows" />}
+          {items.isError && (
+            <ErrorState
+              className="md:m-0"
+              error={items.error}
+              onRetry={() => {
+                void items.refetch();
+              }}
+            />
+          )}
           {items.isSuccess && items.data.items.length === 0 && (
             <p className="text-muted-foreground text-sm">{t("items.empty")}</p>
           )}

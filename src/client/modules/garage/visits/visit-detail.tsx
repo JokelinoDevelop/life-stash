@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ import { useFormat } from "@/lib/format";
 
 import { PhotoGallery } from "../../photos/photo-gallery";
 import { useInvalidateGarage } from "../cars/cars.queries";
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import type { VisitDetail as Visit } from "./visits.queries";
 
 export const VisitActions = ({ visit }: { visit: Visit }) => {
@@ -25,13 +26,12 @@ export const VisitActions = ({ visit }: { visit: Visit }) => {
   return (
     <div className="flex gap-2">
       <Button asChild variant="outline">
-        <Link
-          params={{ carId: visit.carId, visitId: visit.id }}
-          to="/garage/cars/$carId/services/$visitId/edit"
+        <EntryDialogLink
+          entry={{ car: visit.carId, dialog: "service", id: visit.id }}
         >
           <Pencil />
           {tc("actions.edit")}
-        </Link>
+        </EntryDialogLink>
       </Button>
       <ConfirmDialog
         onConfirm={async () => {

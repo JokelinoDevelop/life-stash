@@ -25,10 +25,12 @@ import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
 import { CarMonogram } from "@/modules/garage/cars/car-monogram";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { EntryDialogHost } from "@/modules/garage/entry-dialogs/entry-dialog-host";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
+import { RouteProgress } from "./route-progress";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
@@ -240,11 +242,13 @@ export const AppShell = () => (
     <div className="bg-background flex min-h-dvh">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
-        <main className="md:bg-card flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0">
+        <main className="md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0">
+          <RouteProgress />
           <Outlet />
         </main>
         <MobileNav />
       </div>
     </div>
+    <EntryDialogHost />
   </CommandMenuProvider>
 );

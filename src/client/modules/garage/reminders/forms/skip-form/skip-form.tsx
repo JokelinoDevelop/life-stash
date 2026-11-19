@@ -36,7 +36,7 @@ export const SkipForm = ({
     >
       <FieldGroup>
         <form.AppField name="date">
-          {(field) => <field.TextField label={t("skip.date")} type="date" />}
+          {(field) => <field.DateField label={t("skip.date")} />}
         </form.AppField>
         <form.AppField name="odometer">
           {(field) => (

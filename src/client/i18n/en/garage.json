@@ -59,7 +59,8 @@
     "deleteTitle": "Delete this car and all of its records?",
     "deleteDescription": "Service history, mileage, reminders, expenses and photos for this car will be permanently deleted.",
     "deletedToast": "Car deleted",
-    "readOnly": "This car is archived. Restore it to make changes."
+    "readOnly": "This car is archived. Restore it to make changes.",
+    "soldDatePlaceholder": "Not sold yet"
   },
   "overview": {
     "dueNext": "What's due next",

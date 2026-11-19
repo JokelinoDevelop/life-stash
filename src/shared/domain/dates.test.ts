@@ -6,6 +6,7 @@ import {
   formatPartialDate,
   isIsoDate,
   normalizePartialDate,
+  parseTypedDate,
   todayInTimeZone,
 } from "./dates";
 
@@ -50,5 +51,21 @@ describe("date arithmetic", () => {
     const lateUtc = new Date("2026-11-18T23:30:00Z");
     expect(todayInTimeZone("Europe/Skopje", lateUtc)).toBe("2026-11-19");
     expect(todayInTimeZone("UTC", lateUtc)).toBe("2026-11-18");
+  });
+});
+
+describe(parseTypedDate, () => {
+  it("accepts ISO and day-first dates", () => {
+    expect(parseTypedDate("2026-11-19")).toBe("2026-11-19");
+    expect(parseTypedDate(" 19.11.2026 ")).toBe("2026-11-19");
+    expect(parseTypedDate("3/2/2024")).toBe("2024-02-03");
+    expect(parseTypedDate("03-02-2024")).toBe("2024-02-03");
+  });
+
+  it("rejects impossible or partial dates", () => {
+    expect(parseTypedDate("31.02.2024")).toBeNull();
+    expect(parseTypedDate("19.11.26")).toBeNull();
+    expect(parseTypedDate("tomorrow")).toBeNull();
+    expect(parseTypedDate("")).toBeNull();
   });
 });

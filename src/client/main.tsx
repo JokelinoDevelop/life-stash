@@ -6,6 +6,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./app/app";
+import { RouteError } from "./components/app/route-error";
+import { RoutePending } from "./components/app/route-pending";
 import { ApiClientError } from "./lib/api";
 import { routeTree } from "./routeTree.gen";
 
@@ -25,6 +27,12 @@ const queryClient = new QueryClient({
 
 const router = createRouter({
   context: { queryClient },
+  defaultErrorComponent: RouteError,
+  // Keep the current page up while the next loads (with the top progress bar);
+  // only a slow load swaps in the pending view.
+  defaultPendingComponent: RoutePending,
+  defaultPendingMinMs: 300,
+  defaultPendingMs: 800,
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
   scrollRestoration: true,

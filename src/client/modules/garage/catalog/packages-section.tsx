@@ -80,9 +80,64 @@ type Editing =
   | { mode: "edit"; pkg: CatalogPackage }
   | null;
 
-export const PackagesSection = () => {
+/** The package rows, or their loading, error or empty state. */
+const PackageList = ({
+  names,
+  onDelete,
+  onEdit,
+}: {
+  names: Map<string, string>;
+  onDelete: (pkg: CatalogPackage) => Promise<void>;
+  onEdit: (pkg: CatalogPackage) => void;
+}) => {
   const { t } = useTranslation("garageCatalog");
   const packages = useQuery(catalogPackagesQuery);
+
+  if (packages.isPending) {
+    return <LoadingState rows={2} variant="rows" />;
+  }
+
+  if (packages.isError) {
+    return (
+      <ErrorState
+        className="md:m-0"
+        error={packages.error}
+        onRetry={() => {
+          void packages.refetch();
+        }}
+      />
+    );
+  }
+
+  if (packages.data.packages.length === 0) {
+    return (
+      <p className="text-muted-foreground py-3 text-sm">
+        {t("packages.empty")}
+      </p>
+    );
+  }
+
+  return (
+    <ul className="divide-divider flex flex-col divide-y">
+      {packages.data.packages.map((pkg) => (
+        <PackageRow
+          key={pkg.id}
+          names={names}
+          onDelete={async () => {
+            await onDelete(pkg);
+          }}
+          onEdit={() => {
+            onEdit(pkg);
+          }}
+          pkg={pkg}
+        />
+      ))}
+    </ul>
+  );
+};
+
+export const PackagesSection = () => {
+  const { t } = useTranslation("garageCatalog");
   const items = useQuery(catalogItemsQuery(true));
   const invalidate = useInvalidateGarage();
   const errorMessage = useErrorMessage();
@@ -156,30 +211,13 @@ export const PackagesSection = () => {
         className="py-1"
         title={t("packages.title")}
       >
-        {packages.isPending && <LoadingState rows={2} />}
-        {packages.isError && <ErrorState error={packages.error} />}
-        {packages.isSuccess && packages.data.packages.length === 0 && (
-          <p className="text-muted-foreground py-3 text-sm">
-            {t("packages.empty")}
-          </p>
-        )}
-        {packages.isSuccess && (
-          <ul className="divide-divider flex flex-col divide-y">
-            {packages.data.packages.map((pkg) => (
-              <PackageRow
-                key={pkg.id}
-                names={names}
-                onDelete={async () => {
-                  await remove(pkg);
-                }}
-                onEdit={() => {
-                  setEditing({ mode: "edit", pkg });
-                }}
-                pkg={pkg}
-              />
-            ))}
-          </ul>
-        )}
+        <PackageList
+          names={names}
+          onDelete={remove}
+          onEdit={(pkg) => {
+            setEditing({ mode: "edit", pkg });
+          }}
+        />
       </Panel>
       <ResponsiveDialog
         onOpenChange={(open) => {

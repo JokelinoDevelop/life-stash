@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Plus, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +6,10 @@ import { ListSection } from "@/components/app/list-section";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { ItemHistoryCard } from "./item-history-card";
 import { VisitRow } from "./visit-row";
 import { visitsQuery } from "./visits.queries";
@@ -36,10 +38,13 @@ export const HistoryTab = ({
 
   const addButton = readOnly ? null : (
     <Button asChild size="compact">
-      <Link params={{ carId }} to="/garage/cars/$carId/services/new">
+      <EntryDialogLink entry={{ car: carId, dialog: "service" }}>
         <Plus />
         {t("history.add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addService.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
@@ -63,7 +68,7 @@ export const HistoryTab = ({
       <PageStack>
         <EmptyState
           action={addButton}
-          icon={<Wrench className="size-10" />}
+          icon={<Wrench />}
           message={t("history.empty")}
         />
       </PageStack>

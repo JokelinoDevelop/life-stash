@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Plus, Receipt } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -7,9 +6,12 @@ import { ListRow, ListSection } from "@/components/app/list-section";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CategoryIcon } from "./expense-category";
 import { ExpenseList } from "./expense-list";
 import { expensesQuery } from "./expenses.queries";
@@ -46,10 +48,13 @@ export const ExpensesTab = ({
 
   const addButton = readOnly ? null : (
     <Button asChild size="compact">
-      <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
+      <EntryDialogLink entry={{ car: carId, dialog: "expense" }}>
         <Plus />
         {t("add")}
-      </Link>
+        <Kbd className="hidden md:inline-flex">
+          {CAR_SHORTCUTS.addExpense.toUpperCase()}
+        </Kbd>
+      </EntryDialogLink>
     </Button>
   );
 
@@ -58,7 +63,7 @@ export const ExpensesTab = ({
       <PageStack>
         <EmptyState
           action={addButton}
-          icon={<Receipt className="size-10" />}
+          icon={<Receipt />}
           message={t("empty")}
         />
       </PageStack>

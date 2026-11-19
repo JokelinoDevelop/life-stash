@@ -57,10 +57,7 @@ const HistoryPage = () => {
       {!pending && (
         <PageStack>
           {entries.length === 0 ? (
-            <EmptyState
-              icon={<Wrench className="size-8" />}
-              message={tg("home.historyEmpty")}
-            />
+            <EmptyState icon={<Wrench />} message={tg("home.historyEmpty")} />
           ) : (
             byYear(entries).map(([year, group]) => (
               <ListSection count={group.length} key={year} title={year}>

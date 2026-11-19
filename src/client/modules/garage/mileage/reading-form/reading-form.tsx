@@ -1,13 +1,10 @@
-import { CalendarDays } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { DatePicker } from "@/components/form/date-picker";
+import { DialogForm } from "@/components/form/dialog-form";
 import { FieldErrors } from "@/components/form/field-errors";
 import { useAppForm } from "@/components/form/form-hook";
-import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
-import { useHotkey } from "@/hooks/use-hotkey";
 import { useFormat } from "@/lib/format";
-import { todayIso } from "@/lib/partial-date";
 
 import { readingOdometerKm } from "./mapper";
 import { readingFormSchema } from "./schema";
@@ -54,68 +51,6 @@ const Delta = ({
   );
 };
 
-const DateChip = ({
-  name,
-  onChange,
-  value,
-}: {
-  name: string;
-  onChange: (value: string) => void;
-  value: string;
-}) => {
-  const { t } = useTranslation("garageMileage");
-  const isToday = value === todayIso();
-
-  return (
-    <label className="text-subtle-foreground hover:bg-accent mt-1 flex h-8 w-fit items-center gap-1.5 rounded-md border px-2 text-xs font-medium md:h-7">
-      <CalendarDays className="text-muted-foreground size-3.5" />
-      <span className="sr-only">{t("date")}</span>
-      {isToday && <span aria-hidden="true">{t("inline.today")}</span>}
-      <input
-        className={
-          isToday
-            ? "w-4 bg-transparent text-transparent outline-none"
-            : "bg-transparent outline-none"
-        }
-        name={name}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-        type="date"
-        value={value}
-      />
-    </label>
-  );
-};
-
-const Footer = ({
-  isSubmitting,
-  onCancel,
-}: {
-  isSubmitting: boolean;
-  onCancel: () => void;
-}) => {
-  const { t } = useTranslation("garageMileage");
-  const { t: tc } = useTranslation();
-
-  return (
-    <div className="border-divider flex items-center gap-2 border-t px-3 py-2.5">
-      <span className="text-muted-foreground hidden flex-1 items-center gap-1.5 text-xs md:flex">
-        <Kbd>esc</Kbd>
-        {t("inline.escToCancel")}
-      </span>
-      <span className="flex-1 md:hidden" />
-      <Button onClick={onCancel} size="compact" type="button" variant="ghost">
-        {tc("actions.cancel")}
-      </Button>
-      <Button disabled={isSubmitting} size="compact" type="submit">
-        {isSubmitting ? tc("actions.saving") : tc("actions.save")}
-        <Kbd className="hidden md:inline-flex">⌘↵</Kbd>
-      </Button>
-    </div>
-  );
-};
-
 /**
  * Odometer reading in the artifact's dialog layout: a large borderless
  * number, a note and a date chip, then Cancel / Save (⌘↵).
@@ -144,17 +79,14 @@ export const ReadingForm = ({
     validators: { onSubmit: readingFormSchema },
   });
 
-  const handleSubmitShortcut = () => {
-    void form.handleSubmit();
-  };
-
-  useHotkey("Enter", handleSubmitShortcut, { mod: true });
-
   return (
-    <form
-      className="flex flex-col"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
@@ -224,21 +156,20 @@ export const ReadingForm = ({
         </form.AppField>
         <form.AppField name="date">
           {(field) => (
-            <DateChip
-              name={field.name}
-              onChange={(value) => {
-                field.handleChange(value);
-              }}
-              value={field.state.value}
-            />
+            <div className="mt-1">
+              <DatePicker
+                aria-label={t("date")}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                }}
+                value={field.state.value}
+                variant="chip"
+              />
+            </div>
           )}
         </form.AppField>
       </div>
-      <form.Subscribe selector={(state) => state.isSubmitting}>
-        {(isSubmitting) => (
-          <Footer isSubmitting={isSubmitting} onCancel={onCancel} />
-        )}
-      </form.Subscribe>
-    </form>
+    </DialogForm>
   );
 };

@@ -46,8 +46,29 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `CarMonogram` (garage) | car initials in a neutral square |
 | `SettingsSection` (settings) | settings group: title/description left, box right |
 | `Kbd` (`components/ui`) | key hints; hide on touch with `hidden md:inline-flex` |
-| `DialogContent variant="bare"` | dialogs with their own header and footer (log reading) |
+| `DialogContent variant="bare"` | dialogs with their own header and footer; `size="lg"` for long forms |
+| `FormDialog` + `DialogForm` / `FormSection` / `FormNotice` | every create/edit form (see "Forms and dialogs") |
+| `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover, Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
+| `LoadingState` (`list` / `rows` / `block`), `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
+
+## Forms and dialogs
+
+- Create and edit always open in a dialog over the current page (bottom sheet on phones), never a page. There are no `/new` or `/edit` routes.
+- The open dialog lives in the URL on the `_app` route: `?dialog=car|service|expense|reminder`, plus `car`, `id` (edit) and `reminder` (the reminder a new entry completes). Open one with `EntryDialogLink` (keeps ⌘-click / new tab) or `useEntryDialog().open(...)`; `EntryDialogHost` in the app shell renders it. Back closes a dialog opened in-app; a deep link closes by dropping the keys.
+- Layout: a 44px crumb bar (car monogram › title, ×), a scrolling body split into `FormSection`s by hairlines, and a pinned footer (`form.FormFooter`): `esc to cancel` or a slot such as Delete on the left, Cancel and Save `⌘↵` on the right. ⌘↵ / Ctrl+↵ submits from anywhere in the dialog.
+- The dialog opens on the first field. Closing with unsaved changes asks "Discard changes?". After a save: one toast, close, stay on the page (a new service offers "View" in the toast; a new car opens its page).
+- Edit dialogs load their own data and show `FormSkeleton` meanwhile, or `ErrorState` with retry.
+- Native `<input type="date">` is not used anywhere.
+
+## In-between states
+
+- **Loading:** skeletons shaped like the content they replace (`LoadingState` list rows, `FormSkeleton` fields). They fade in after 150 ms (`animate-reveal`), so fast loads show nothing. Never a spinner for a whole page.
+- **Navigating:** the current page stays up; a 2px progress bar runs along the top of the panel after 150 ms. A route only swaps to the pending skeleton after 800 ms.
+- **Refetching:** keep the old data on screen (`placeholderData: keepPreviousData`) instead of returning to a skeleton.
+- **Saving:** the Save button keeps its label and width; a small spinner replaces the `⌘↵` hint and the button is disabled.
+- **Empty:** a neutral 40px icon tile, optional title, one line of help and the main action (with its key hint). No dashed boxes.
+- **Errors:** inline where the content would be: icon, "Couldn't load this", the reason and Retry. A failed route shows the same, centred, via the router's `defaultErrorComponent`.
 
 ## Keyboard
 

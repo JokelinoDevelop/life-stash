@@ -47,10 +47,7 @@ export const SpendingTab = ({
   if (years.length === 0) {
     return (
       <PageStack>
-        <EmptyState
-          icon={<Wallet className="size-10" />}
-          message={t("empty")}
-        />
+        <EmptyState icon={<Wallet />} message={t("empty")} />
       </PageStack>
     );
   }
@@ -63,7 +60,7 @@ export const SpendingTab = ({
 
   return (
     <PageStack>
-      <Suspense fallback={<LoadingState rows={1} />}>
+      <Suspense fallback={<LoadingState variant="block" />}>
         <SpendingChart currency={currency} years={years} />
       </Suspense>
       {others.length > 0 && (

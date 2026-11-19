@@ -3,8 +3,10 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AppShell } from "@/components/app/app-shell";
 import { setLocale } from "@/i18n";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";
+import { entryDialogSearchSchema } from "@/modules/garage/entry-dialogs/entry-dialog-search";
 
 export const Route = createFileRoute("/_app")({
+  validateSearch: entryDialogSearchSchema,
   beforeLoad: async ({ context, location }) => {
     const status = await context.queryClient.query(authStatusQuery);
 

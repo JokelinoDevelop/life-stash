@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { DatePicker } from "@/components/form/date-picker";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -24,12 +25,12 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import { useErrorMessage } from "@/lib/errors";
 import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { useArchiveCar, useDeleteCar, useUnarchiveCar } from "./cars.queries";
 
 type Run = (action: () => Promise<void>, success: string) => Promise<void>;
@@ -55,37 +56,37 @@ const AddItems = ({ carId }: { carId: string }) => {
   return (
     <>
       <DropdownMenuItem asChild>
-        <Link params={{ carId }} to="/garage/cars/$carId/services/new">
+        <EntryDialogLink entry={{ car: carId, dialog: "service" }}>
           <Wrench />
           {t("actions.addService")}
           <DropdownMenuShortcut>
             {CAR_SHORTCUTS.addService.toUpperCase()}
           </DropdownMenuShortcut>
-        </Link>
+        </EntryDialogLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
+        <EntryDialogLink entry={{ car: carId, dialog: "expense" }}>
           <Fuel />
           {t("actions.addExpense")}
           <DropdownMenuShortcut>
             {CAR_SHORTCUTS.addExpense.toUpperCase()}
           </DropdownMenuShortcut>
-        </Link>
+        </EntryDialogLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild>
-        <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
+        <EntryDialogLink entry={{ car: carId, dialog: "reminder" }}>
           <BellPlus />
           {t("actions.addReminder")}
           <DropdownMenuShortcut>
             {CAR_SHORTCUTS.addReminder.toUpperCase()}
           </DropdownMenuShortcut>
-        </Link>
+        </EntryDialogLink>
       </DropdownMenuItem>
       <DropdownMenuItem asChild className="md:hidden">
-        <Link params={{ carId }} to="/garage/cars/$carId/edit">
+        <EntryDialogLink entry={{ car: carId, dialog: "car" }}>
           <Pencil />
           {tc("actions.edit")}
-        </Link>
+        </EntryDialogLink>
       </DropdownMenuItem>
       <DropdownMenuSeparator />
     </>
@@ -120,12 +121,11 @@ const ArchiveItem = ({ carId, run }: { carId: string; run: Run }) => {
     >
       <div className="flex flex-col gap-2">
         <Label htmlFor="sold-date">{t("car.soldDate")}</Label>
-        <Input
+        <DatePicker
+          clearable
           id="sold-date"
-          onChange={(event) => {
-            setSoldDate(event.target.value);
-          }}
-          type="date"
+          onChange={setSoldDate}
+          placeholder={t("car.soldDatePlaceholder")}
           value={soldDate}
         />
       </div>
@@ -211,9 +211,9 @@ export const CarActions = ({
         <>
           <span className="hidden md:flex">
             <Button asChild size="compact" variant="ghost">
-              <Link params={{ carId: car.id }} to="/garage/cars/$carId/edit">
+              <EntryDialogLink entry={{ car: car.id, dialog: "car" }}>
                 {tc("actions.edit")}
-              </Link>
+              </EntryDialogLink>
             </Button>
           </span>
           <Button asChild size="compact">

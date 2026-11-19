@@ -1,5 +1,4 @@
 import { reminderProgress } from "@shared/domain/reminders";
-import { Link } from "@tanstack/react-router";
 import { CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,6 +24,7 @@ import { cn } from "@/lib/utils";
 
 import { useInvalidateGarage } from "../cars/cars.queries";
 import { describeDue } from "../cars/describe-due";
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CompleteReminderButton } from "./complete-reminder-button";
 import { skipFormDefaults, skipFormToRequest } from "./forms/skip-form/mapper";
 import { SkipForm } from "./forms/skip-form/skip-form";
@@ -74,13 +74,12 @@ const ReminderMenu = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem asChild>
-            <Link
-              params={{ carId, reminderId: reminder.id }}
-              to="/garage/cars/$carId/reminders/$reminderId/edit"
+            <EntryDialogLink
+              entry={{ car: carId, dialog: "reminder", id: reminder.id }}
             >
               <Pencil />
               {tc("actions.edit")}
-            </Link>
+            </EntryDialogLink>
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {

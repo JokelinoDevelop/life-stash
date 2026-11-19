@@ -14,6 +14,7 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { PartialDateValue } from "@/lib/partial-date";
 
+import { DatePicker } from "./date-picker";
 import { FieldErrors } from "./field-errors";
 import { useFieldContext } from "./form-context";
 
@@ -85,14 +86,13 @@ export const PartialDateField = ({
         </ToggleGroup>
       )}
       {value.precision === "day" && (
-        <Input
-          aria-invalid={invalid}
+        <DatePicker
           id={`${field.name}-input`}
+          invalid={invalid}
           onBlur={field.handleBlur}
-          onChange={(event) => {
-            update({ date: event.target.value });
+          onChange={(date) => {
+            update({ date });
           }}
-          type="date"
           value={value.date}
         />
       )}

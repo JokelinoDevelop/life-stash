@@ -19,16 +19,8 @@ import { Route as AppGarageIndexRouteImport } from './routes/_app/garage/index'
 import { Route as AppGarageCatalogRouteImport } from './routes/_app/garage/catalog'
 import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/history'
 import { Route as AppGarageRemindersRouteImport } from './routes/_app/garage/reminders'
-import { Route as AppGarageCarsNewRouteImport } from './routes/_app/garage/cars/new'
 import { Route as AppGarageCarsCarIdIndexRouteImport } from './routes/_app/garage/cars/$carId/index'
-import { Route as AppGarageCarsCarIdEditRouteImport } from './routes/_app/garage/cars/$carId/edit'
-import { Route as AppGarageCarsCarIdExpensesNewRouteImport } from './routes/_app/garage/cars/$carId/expenses/new'
-import { Route as AppGarageCarsCarIdRemindersNewRouteImport } from './routes/_app/garage/cars/$carId/reminders/new'
-import { Route as AppGarageCarsCarIdServicesNewRouteImport } from './routes/_app/garage/cars/$carId/services/new'
-import { Route as AppGarageCarsCarIdExpensesExpenseIdEditRouteImport } from './routes/_app/garage/cars/$carId/expenses/$expenseId/edit'
-import { Route as AppGarageCarsCarIdRemindersReminderIdEditRouteImport } from './routes/_app/garage/cars/$carId/reminders/$reminderId/edit'
 import { Route as AppGarageCarsCarIdServicesVisitIdIndexRouteImport } from './routes/_app/garage/cars/$carId/services/$visitId/index'
-import { Route as AppGarageCarsCarIdServicesVisitIdEditRouteImport } from './routes/_app/garage/cars/$carId/services/$visitId/edit'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -79,61 +71,15 @@ const AppGarageRemindersRoute = AppGarageRemindersRouteImport.update({
   path: '/garage/reminders',
   getParentRoute: () => AppRoute,
 } as any)
-const AppGarageCarsNewRoute = AppGarageCarsNewRouteImport.update({
-  id: '/garage/cars/new',
-  path: '/garage/cars/new',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppGarageCarsCarIdIndexRoute = AppGarageCarsCarIdIndexRouteImport.update({
   id: '/garage/cars/$carId/',
   path: '/garage/cars/$carId/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppGarageCarsCarIdEditRoute = AppGarageCarsCarIdEditRouteImport.update({
-  id: '/garage/cars/$carId/edit',
-  path: '/garage/cars/$carId/edit',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppGarageCarsCarIdExpensesNewRoute =
-  AppGarageCarsCarIdExpensesNewRouteImport.update({
-    id: '/garage/cars/$carId/expenses/new',
-    path: '/garage/cars/$carId/expenses/new',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppGarageCarsCarIdRemindersNewRoute =
-  AppGarageCarsCarIdRemindersNewRouteImport.update({
-    id: '/garage/cars/$carId/reminders/new',
-    path: '/garage/cars/$carId/reminders/new',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppGarageCarsCarIdServicesNewRoute =
-  AppGarageCarsCarIdServicesNewRouteImport.update({
-    id: '/garage/cars/$carId/services/new',
-    path: '/garage/cars/$carId/services/new',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppGarageCarsCarIdExpensesExpenseIdEditRoute =
-  AppGarageCarsCarIdExpensesExpenseIdEditRouteImport.update({
-    id: '/garage/cars/$carId/expenses/$expenseId/edit',
-    path: '/garage/cars/$carId/expenses/$expenseId/edit',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppGarageCarsCarIdRemindersReminderIdEditRoute =
-  AppGarageCarsCarIdRemindersReminderIdEditRouteImport.update({
-    id: '/garage/cars/$carId/reminders/$reminderId/edit',
-    path: '/garage/cars/$carId/reminders/$reminderId/edit',
-    getParentRoute: () => AppRoute,
-  } as any)
 const AppGarageCarsCarIdServicesVisitIdIndexRoute =
   AppGarageCarsCarIdServicesVisitIdIndexRouteImport.update({
     id: '/garage/cars/$carId/services/$visitId/',
     path: '/garage/cars/$carId/services/$visitId/',
-    getParentRoute: () => AppRoute,
-  } as any)
-const AppGarageCarsCarIdServicesVisitIdEditRoute =
-  AppGarageCarsCarIdServicesVisitIdEditRouteImport.update({
-    id: '/garage/cars/$carId/services/$visitId/edit',
-    path: '/garage/cars/$carId/services/$visitId/edit',
     getParentRoute: () => AppRoute,
   } as any)
 
@@ -147,15 +93,7 @@ export interface FileRoutesByFullPath {
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/garage/': typeof AppGarageIndexRoute
-  '/garage/cars/new': typeof AppGarageCarsNewRoute
-  '/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
   '/garage/cars/$carId/': typeof AppGarageCarsCarIdIndexRoute
-  '/garage/cars/$carId/expenses/new': typeof AppGarageCarsCarIdExpensesNewRoute
-  '/garage/cars/$carId/reminders/new': typeof AppGarageCarsCarIdRemindersNewRoute
-  '/garage/cars/$carId/services/new': typeof AppGarageCarsCarIdServicesNewRoute
-  '/garage/cars/$carId/expenses/$expenseId/edit': typeof AppGarageCarsCarIdExpensesExpenseIdEditRoute
-  '/garage/cars/$carId/reminders/$reminderId/edit': typeof AppGarageCarsCarIdRemindersReminderIdEditRoute
-  '/garage/cars/$carId/services/$visitId/edit': typeof AppGarageCarsCarIdServicesVisitIdEditRoute
   '/garage/cars/$carId/services/$visitId/': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -168,15 +106,7 @@ export interface FileRoutesByTo {
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/garage': typeof AppGarageIndexRoute
-  '/garage/cars/new': typeof AppGarageCarsNewRoute
-  '/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
   '/garage/cars/$carId': typeof AppGarageCarsCarIdIndexRoute
-  '/garage/cars/$carId/expenses/new': typeof AppGarageCarsCarIdExpensesNewRoute
-  '/garage/cars/$carId/reminders/new': typeof AppGarageCarsCarIdRemindersNewRoute
-  '/garage/cars/$carId/services/new': typeof AppGarageCarsCarIdServicesNewRoute
-  '/garage/cars/$carId/expenses/$expenseId/edit': typeof AppGarageCarsCarIdExpensesExpenseIdEditRoute
-  '/garage/cars/$carId/reminders/$reminderId/edit': typeof AppGarageCarsCarIdRemindersReminderIdEditRoute
-  '/garage/cars/$carId/services/$visitId/edit': typeof AppGarageCarsCarIdServicesVisitIdEditRoute
   '/garage/cars/$carId/services/$visitId': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
 export interface FileRoutesById {
@@ -191,15 +121,7 @@ export interface FileRoutesById {
   '/_app/garage/history': typeof AppGarageHistoryRoute
   '/_app/garage/reminders': typeof AppGarageRemindersRoute
   '/_app/garage/': typeof AppGarageIndexRoute
-  '/_app/garage/cars/new': typeof AppGarageCarsNewRoute
-  '/_app/garage/cars/$carId/edit': typeof AppGarageCarsCarIdEditRoute
   '/_app/garage/cars/$carId/': typeof AppGarageCarsCarIdIndexRoute
-  '/_app/garage/cars/$carId/expenses/new': typeof AppGarageCarsCarIdExpensesNewRoute
-  '/_app/garage/cars/$carId/reminders/new': typeof AppGarageCarsCarIdRemindersNewRoute
-  '/_app/garage/cars/$carId/services/new': typeof AppGarageCarsCarIdServicesNewRoute
-  '/_app/garage/cars/$carId/expenses/$expenseId/edit': typeof AppGarageCarsCarIdExpensesExpenseIdEditRoute
-  '/_app/garage/cars/$carId/reminders/$reminderId/edit': typeof AppGarageCarsCarIdRemindersReminderIdEditRoute
-  '/_app/garage/cars/$carId/services/$visitId/edit': typeof AppGarageCarsCarIdServicesVisitIdEditRoute
   '/_app/garage/cars/$carId/services/$visitId/': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -214,15 +136,7 @@ export interface FileRouteTypes {
     | '/garage/history'
     | '/garage/reminders'
     | '/garage/'
-    | '/garage/cars/new'
-    | '/garage/cars/$carId/edit'
     | '/garage/cars/$carId/'
-    | '/garage/cars/$carId/expenses/new'
-    | '/garage/cars/$carId/reminders/new'
-    | '/garage/cars/$carId/services/new'
-    | '/garage/cars/$carId/expenses/$expenseId/edit'
-    | '/garage/cars/$carId/reminders/$reminderId/edit'
-    | '/garage/cars/$carId/services/$visitId/edit'
     | '/garage/cars/$carId/services/$visitId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -235,15 +149,7 @@ export interface FileRouteTypes {
     | '/garage/history'
     | '/garage/reminders'
     | '/garage'
-    | '/garage/cars/new'
-    | '/garage/cars/$carId/edit'
     | '/garage/cars/$carId'
-    | '/garage/cars/$carId/expenses/new'
-    | '/garage/cars/$carId/reminders/new'
-    | '/garage/cars/$carId/services/new'
-    | '/garage/cars/$carId/expenses/$expenseId/edit'
-    | '/garage/cars/$carId/reminders/$reminderId/edit'
-    | '/garage/cars/$carId/services/$visitId/edit'
     | '/garage/cars/$carId/services/$visitId'
   id:
     | '__root__'
@@ -257,15 +163,7 @@ export interface FileRouteTypes {
     | '/_app/garage/history'
     | '/_app/garage/reminders'
     | '/_app/garage/'
-    | '/_app/garage/cars/new'
-    | '/_app/garage/cars/$carId/edit'
     | '/_app/garage/cars/$carId/'
-    | '/_app/garage/cars/$carId/expenses/new'
-    | '/_app/garage/cars/$carId/reminders/new'
-    | '/_app/garage/cars/$carId/services/new'
-    | '/_app/garage/cars/$carId/expenses/$expenseId/edit'
-    | '/_app/garage/cars/$carId/reminders/$reminderId/edit'
-    | '/_app/garage/cars/$carId/services/$visitId/edit'
     | '/_app/garage/cars/$carId/services/$visitId/'
   fileRoutesById: FileRoutesById
 }
@@ -348,13 +246,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGarageRemindersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/garage/cars/new': {
-      id: '/_app/garage/cars/new'
-      path: '/garage/cars/new'
-      fullPath: '/garage/cars/new'
-      preLoaderRoute: typeof AppGarageCarsNewRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/garage/cars/$carId/': {
       id: '/_app/garage/cars/$carId/'
       path: '/garage/cars/$carId'
@@ -362,60 +253,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGarageCarsCarIdIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/garage/cars/$carId/edit': {
-      id: '/_app/garage/cars/$carId/edit'
-      path: '/garage/cars/$carId/edit'
-      fullPath: '/garage/cars/$carId/edit'
-      preLoaderRoute: typeof AppGarageCarsCarIdEditRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/expenses/new': {
-      id: '/_app/garage/cars/$carId/expenses/new'
-      path: '/garage/cars/$carId/expenses/new'
-      fullPath: '/garage/cars/$carId/expenses/new'
-      preLoaderRoute: typeof AppGarageCarsCarIdExpensesNewRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/reminders/new': {
-      id: '/_app/garage/cars/$carId/reminders/new'
-      path: '/garage/cars/$carId/reminders/new'
-      fullPath: '/garage/cars/$carId/reminders/new'
-      preLoaderRoute: typeof AppGarageCarsCarIdRemindersNewRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/services/new': {
-      id: '/_app/garage/cars/$carId/services/new'
-      path: '/garage/cars/$carId/services/new'
-      fullPath: '/garage/cars/$carId/services/new'
-      preLoaderRoute: typeof AppGarageCarsCarIdServicesNewRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/expenses/$expenseId/edit': {
-      id: '/_app/garage/cars/$carId/expenses/$expenseId/edit'
-      path: '/garage/cars/$carId/expenses/$expenseId/edit'
-      fullPath: '/garage/cars/$carId/expenses/$expenseId/edit'
-      preLoaderRoute: typeof AppGarageCarsCarIdExpensesExpenseIdEditRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/reminders/$reminderId/edit': {
-      id: '/_app/garage/cars/$carId/reminders/$reminderId/edit'
-      path: '/garage/cars/$carId/reminders/$reminderId/edit'
-      fullPath: '/garage/cars/$carId/reminders/$reminderId/edit'
-      preLoaderRoute: typeof AppGarageCarsCarIdRemindersReminderIdEditRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/garage/cars/$carId/services/$visitId/': {
       id: '/_app/garage/cars/$carId/services/$visitId/'
       path: '/garage/cars/$carId/services/$visitId'
       fullPath: '/garage/cars/$carId/services/$visitId/'
       preLoaderRoute: typeof AppGarageCarsCarIdServicesVisitIdIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/garage/cars/$carId/services/$visitId/edit': {
-      id: '/_app/garage/cars/$carId/services/$visitId/edit'
-      path: '/garage/cars/$carId/services/$visitId/edit'
-      fullPath: '/garage/cars/$carId/services/$visitId/edit'
-      preLoaderRoute: typeof AppGarageCarsCarIdServicesVisitIdEditRouteImport
       parentRoute: typeof AppRoute
     }
   }
@@ -428,15 +270,7 @@ interface AppRouteChildren {
   AppGarageHistoryRoute: typeof AppGarageHistoryRoute
   AppGarageRemindersRoute: typeof AppGarageRemindersRoute
   AppGarageIndexRoute: typeof AppGarageIndexRoute
-  AppGarageCarsNewRoute: typeof AppGarageCarsNewRoute
-  AppGarageCarsCarIdEditRoute: typeof AppGarageCarsCarIdEditRoute
   AppGarageCarsCarIdIndexRoute: typeof AppGarageCarsCarIdIndexRoute
-  AppGarageCarsCarIdExpensesNewRoute: typeof AppGarageCarsCarIdExpensesNewRoute
-  AppGarageCarsCarIdRemindersNewRoute: typeof AppGarageCarsCarIdRemindersNewRoute
-  AppGarageCarsCarIdServicesNewRoute: typeof AppGarageCarsCarIdServicesNewRoute
-  AppGarageCarsCarIdExpensesExpenseIdEditRoute: typeof AppGarageCarsCarIdExpensesExpenseIdEditRoute
-  AppGarageCarsCarIdRemindersReminderIdEditRoute: typeof AppGarageCarsCarIdRemindersReminderIdEditRoute
-  AppGarageCarsCarIdServicesVisitIdEditRoute: typeof AppGarageCarsCarIdServicesVisitIdEditRoute
   AppGarageCarsCarIdServicesVisitIdIndexRoute: typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
 
@@ -447,18 +281,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppGarageHistoryRoute: AppGarageHistoryRoute,
   AppGarageRemindersRoute: AppGarageRemindersRoute,
   AppGarageIndexRoute: AppGarageIndexRoute,
-  AppGarageCarsNewRoute: AppGarageCarsNewRoute,
-  AppGarageCarsCarIdEditRoute: AppGarageCarsCarIdEditRoute,
   AppGarageCarsCarIdIndexRoute: AppGarageCarsCarIdIndexRoute,
-  AppGarageCarsCarIdExpensesNewRoute: AppGarageCarsCarIdExpensesNewRoute,
-  AppGarageCarsCarIdRemindersNewRoute: AppGarageCarsCarIdRemindersNewRoute,
-  AppGarageCarsCarIdServicesNewRoute: AppGarageCarsCarIdServicesNewRoute,
-  AppGarageCarsCarIdExpensesExpenseIdEditRoute:
-    AppGarageCarsCarIdExpensesExpenseIdEditRoute,
-  AppGarageCarsCarIdRemindersReminderIdEditRoute:
-    AppGarageCarsCarIdRemindersReminderIdEditRoute,
-  AppGarageCarsCarIdServicesVisitIdEditRoute:
-    AppGarageCarsCarIdServicesVisitIdEditRoute,
   AppGarageCarsCarIdServicesVisitIdIndexRoute:
     AppGarageCarsCarIdServicesVisitIdIndexRoute,
 }

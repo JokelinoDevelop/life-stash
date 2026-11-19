@@ -1,11 +1,12 @@
 import { EXPENSE_REMINDER_KINDS } from "@shared/domain/garage-kinds";
 import type { ReminderKind } from "@shared/domain/garage-kinds";
-import { Link } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
+
+import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 
 type Variant = "button" | "circle" | "hover";
 
@@ -21,28 +22,21 @@ const CompletionLink = ({
   className?: string;
   label?: string;
   reminder: { id: string; kind: ReminderKind };
-}) =>
-  EXPENSE_REMINDER_KINDS.includes(reminder.kind) ? (
-    <Link
-      aria-label={label}
-      className={className}
-      params={{ carId }}
-      search={{ reminderId: reminder.id }}
-      to="/garage/cars/$carId/expenses/new"
-    >
-      {children}
-    </Link>
-  ) : (
-    <Link
-      aria-label={label}
-      className={className}
-      params={{ carId }}
-      search={{ reminderId: reminder.id }}
-      to="/garage/cars/$carId/services/new"
-    >
-      {children}
-    </Link>
-  );
+}) => (
+  <EntryDialogLink
+    aria-label={label}
+    className={className}
+    entry={{
+      car: carId,
+      dialog: EXPENSE_REMINDER_KINDS.includes(reminder.kind)
+        ? "expense"
+        : "service",
+      reminder: reminder.id,
+    }}
+  >
+    {children}
+  </EntryDialogLink>
+);
 
 /**
  * "Done" opens a prefilled entry: a service visit for service reminders, an expense for

@@ -1,6 +1,6 @@
 import { reminderHorizon } from "@shared/domain/reminders";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { CarFront, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -20,6 +20,8 @@ import { ADD_CAR_SHORTCUT } from "@/lib/shortcuts";
 import { CarRow } from "@/modules/garage/cars/car-row";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { EntryDialogLink } from "@/modules/garage/entry-dialogs/entry-dialog-link";
+import { useEntryDialog } from "@/modules/garage/entry-dialogs/use-entry-dialog";
 import { householdMoney } from "@/modules/garage/household/household-money";
 import {
   SpendingByMonth,
@@ -66,18 +68,18 @@ const HeaderActions = () => {
           <Search />
         </Button>
         <Button asChild size="icon-compact" variant="ghost">
-          <Link aria-label={t("cars.add")} to="/garage/cars/new">
+          <EntryDialogLink aria-label={t("cars.add")} entry={{ dialog: "car" }}>
             <Plus />
-          </Link>
+          </EntryDialogLink>
         </Button>
       </span>
       <span className="hidden md:flex">
         <Button asChild size="compact">
-          <Link to="/garage/cars/new">
+          <EntryDialogLink entry={{ dialog: "car" }}>
             <Plus />
             {t("cars.add")}
             <Kbd>{ADD_CAR_SHORTCUT.toUpperCase()}</Kbd>
-          </Link>
+          </EntryDialogLink>
         </Button>
       </span>
     </>
@@ -153,13 +155,19 @@ const GarageHome = () => {
   const { t } = useTranslation("garage");
   const { t: tc } = useTranslation();
   const [showArchived, setShowArchived] = useState(false);
-  const cars = useQuery(carsQuery(showArchived));
+
+  // Keep the current list on screen while the archived toggle refetches.
+  const cars = useQuery({
+    ...carsQuery(showArchived),
+    placeholderData: keepPreviousData,
+  });
+
   const overview = useQuery(householdOverviewQuery);
   const summary = useSummary(cars.data?.cars);
-  const navigate = useNavigate();
+  const entryDialog = useEntryDialog();
 
   const handleAddCar = () => {
-    void navigate({ to: "/garage/cars/new" });
+    void entryDialog.open({ dialog: "car" });
   };
 
   useHotkey(ADD_CAR_SHORTCUT, handleAddCar);
@@ -189,13 +197,16 @@ const GarageHome = () => {
               <EmptyState
                 action={
                   <Button asChild size="compact">
-                    <Link to="/garage/cars/new">
+                    <EntryDialogLink entry={{ dialog: "car" }}>
                       <Plus />
                       {t("cars.add")}
-                    </Link>
+                      <Kbd className="hidden md:inline-flex">
+                        {ADD_CAR_SHORTCUT.toUpperCase()}
+                      </Kbd>
+                    </EntryDialogLink>
                   </Button>
                 }
-                icon={<CarFront className="size-8" />}
+                icon={<CarFront />}
                 message={t("cars.empty")}
               />
             </div>
