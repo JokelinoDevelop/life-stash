@@ -22,6 +22,7 @@ import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { EntryDialogLink } from "@/modules/garage/entry-dialogs/entry-dialog-link";
 import { useEntryDialog } from "@/modules/garage/entry-dialogs/use-entry-dialog";
+import { BrowseLinks } from "@/modules/garage/household/browse-links";
 import { householdMoney } from "@/modules/garage/household/household-money";
 import {
   SpendingByMonth,
@@ -67,19 +68,29 @@ const HeaderActions = () => {
         >
           <Search />
         </Button>
-        <Button asChild size="icon-compact" variant="ghost">
-          <EntryDialogLink aria-label={t("cars.add")} entry={{ dialog: "car" }}>
-            <Plus />
-          </EntryDialogLink>
+        <Button
+          size="icon-compact"
+          variant="ghost"
+          render={
+            <EntryDialogLink
+              aria-label={t("cars.add")}
+              entry={{ dialog: "car" }}
+            />
+          }
+          nativeButton={false}
+        >
+          <Plus />
         </Button>
       </span>
       <span className="hidden md:flex">
-        <Button asChild size="compact">
-          <EntryDialogLink entry={{ dialog: "car" }}>
-            <Plus />
-            {t("cars.add")}
-            <Kbd>{ADD_CAR_SHORTCUT.toUpperCase()}</Kbd>
-          </EntryDialogLink>
+        <Button
+          size="compact"
+          render={<EntryDialogLink entry={{ dialog: "car" }} />}
+          nativeButton={false}
+        >
+          <Plus />
+          {t("cars.add")}
+          <Kbd>{ADD_CAR_SHORTCUT.toUpperCase()}</Kbd>
         </Button>
       </span>
     </>
@@ -147,6 +158,7 @@ const GarageContent = ({
       <div className="hidden md:block">
         <SpendingByMonth cars={active} money={money} monthIndex={monthIndex} />
       </div>
+      <BrowseLinks />
     </PageStack>
   );
 };
@@ -196,14 +208,16 @@ const GarageHome = () => {
             <div className="md:p-5">
               <EmptyState
                 action={
-                  <Button asChild size="compact">
-                    <EntryDialogLink entry={{ dialog: "car" }}>
-                      <Plus />
-                      {t("cars.add")}
-                      <Kbd className="hidden md:inline-flex">
-                        {ADD_CAR_SHORTCUT.toUpperCase()}
-                      </Kbd>
-                    </EntryDialogLink>
+                  <Button
+                    size="compact"
+                    render={<EntryDialogLink entry={{ dialog: "car" }} />}
+                    nativeButton={false}
+                  >
+                    <Plus />
+                    {t("cars.add")}
+                    <Kbd className="hidden md:inline-flex">
+                      {ADD_CAR_SHORTCUT.toUpperCase()}
+                    </Kbd>
                   </Button>
                 }
                 icon={<CarFront />}

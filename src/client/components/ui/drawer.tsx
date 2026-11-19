@@ -72,12 +72,23 @@ function DrawerContent({
   );
 }
 
-function DrawerHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DrawerHeader({
+  align = "center",
+  className,
+  ...props
+}: React.ComponentProps<"div"> & {
+  /** Design v0.3: form sheets read top-left like their dialogs. */
+  align?: "center" | "start";
+}) {
   return (
     <div
       data-slot="drawer-header"
+      data-align={align}
       className={cn(
-        "flex flex-col gap-0.5 p-4 group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center md:gap-1.5 md:text-left",
+        "flex flex-col gap-0.5 p-4 md:gap-1.5 md:text-left",
+        align === "center"
+          ? "group-data-[vaul-drawer-direction=bottom]/drawer-content:text-center group-data-[vaul-drawer-direction=top]/drawer-content:text-center"
+          : "text-left",
         className
       )}
       {...props}

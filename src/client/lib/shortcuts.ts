@@ -9,3 +9,16 @@ export const CAR_SHORTCUTS = {
 export type CarShortcutAction = keyof typeof CAR_SHORTCUTS;
 
 export const ADD_CAR_SHORTCUT = "c";
+
+/** Service catalog page. */
+export const CATALOG_SHORTCUTS = {
+  newItem: "n",
+  newPackage: "p",
+} as const;
+
+/** Finance pages. */
+export const FINANCE_SHORTCUTS = {
+  logTransaction: "t",
+  markPaid: "p",
+  newInvoice: "i",
+} as const;

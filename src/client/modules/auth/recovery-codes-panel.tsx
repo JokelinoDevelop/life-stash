@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 /** Shows freshly issued recovery codes once, with copy and download helpers. */
 export const RecoveryCodesPanel = ({
@@ -41,15 +41,17 @@ export const RecoveryCodesPanel = ({
           {copied ? <Check /> : <Copy />}
           {copied ? t("codes.copied") : t("codes.copy")}
         </Button>
-        <Button asChild className="flex-1" variant="outline">
-          <a
-            download="lifestash-recovery-codes.txt"
-            href={`data:text/plain;charset=utf-8,${encodeURIComponent(text)}`}
-          >
-            <Download />
-            {t("codes.download")}
-          </a>
-        </Button>
+        <a
+          className={buttonVariants({
+            className: "flex-1",
+            variant: "outline",
+          })}
+          download="lifestash-recovery-codes.txt"
+          href={`data:text/plain;charset=utf-8,${encodeURIComponent(text)}`}
+        >
+          <Download />
+          {t("codes.download")}
+        </a>
       </div>
       <Button onClick={onDone} type="button">
         {t("codes.confirm")}

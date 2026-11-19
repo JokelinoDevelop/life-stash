@@ -2,14 +2,12 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import {
   Bell,
-  BookOpen,
   CarFront,
   ChevronsUpDown,
-  History,
-  LayoutGrid,
   LogOut,
   Search,
   Settings,
+  Wallet,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -23,23 +21,24 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
-import { CarMonogram } from "@/modules/garage/cars/car-monogram";
-import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { FinanceDialogHost } from "@/modules/finances/dialogs/finance-dialog-host";
+import { FinanceNavLinks } from "@/modules/finances/finance-nav-links";
 import { EntryDialogHost } from "@/modules/garage/entry-dialogs/entry-dialog-host";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
 import { RouteProgress } from "./route-progress";
+import { GarageLinks, ModuleGroup } from "./sidebar-modules";
+import {
+  activeNavLinkClass,
+  navLinkClass,
+  subLinkClass,
+  useActiveModule,
+} from "./sidebar-nav";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
-
-const navLinkClass =
-  "flex h-7 items-center gap-2 rounded-md px-2 text-sm font-medium text-sidebar-foreground transition-colors hover:bg-sidebar-accent [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-muted-foreground";
-
-const activeNavLinkClass =
-  "bg-sidebar-accent text-sidebar-accent-foreground [&_svg]:text-sidebar-accent-foreground";
 
 const mobileLinkClass =
   "flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted-foreground";
@@ -56,30 +55,30 @@ export const HouseholdMenu = ({ className }: { className?: string }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "hover:bg-sidebar-accent flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-semibold outline-none",
-            className
-          )}
-          type="button"
-        >
-          <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
-            {name.slice(0, 1).toLocaleUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1 truncate">{name}</span>
-          <ChevronsUpDown className="text-muted-foreground/70 size-3.5 shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            className={cn(
+              "hover:bg-sidebar-accent flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-semibold outline-none",
+              className
+            )}
+            type="button"
+          >
+            <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
+              {name.slice(0, 1).toLocaleUpperCase()}
+            </span>
+            <span className="min-w-0 flex-1 truncate">{name}</span>
+            <ChevronsUpDown className="text-muted-foreground/70 size-3.5 shrink-0" />
+          </button>
+        }
+      />
       <DropdownMenuContent align="start" className="w-52">
-        <DropdownMenuItem asChild>
-          <Link to={SETTINGS}>
-            <Settings />
-            {t(SETTINGS_LABEL)}
-          </Link>
+        <DropdownMenuItem render={<Link to={SETTINGS} />}>
+          <Settings />
+          {t(SETTINGS_LABEL)}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void handleSignOut();
           }}
         >
@@ -116,8 +115,8 @@ const NavCount = ({ children }: { children: ReactNode }) => (
 
 const Sidebar = () => {
   const { t } = useTranslation();
-  const cars = useQuery(carsQuery(false));
   const household = useQuery(householdOverviewQuery);
+  const active = useActiveModule();
 
   const attention = (household.data?.reminders ?? []).filter(
     (reminder) => reminder.status !== "upcoming"
@@ -128,15 +127,27 @@ const Sidebar = () => {
       <HouseholdMenu />
       <SearchButton />
       <nav aria-label={t("appName")} className="flex flex-col gap-px">
-        <Link
-          activeOptions={{ exact: true }}
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
+        <ModuleGroup
+          active={active === "garage"}
+          icon={<CarFront />}
+          label={t("nav.garage")}
           to="/garage"
         >
-          <LayoutGrid />
-          {t("nav.overview")}
-        </Link>
+          <GarageLinks />
+        </ModuleGroup>
+        <ModuleGroup
+          active={active === "finances"}
+          icon={<Wallet />}
+          label={t("nav.finances")}
+          to="/finances"
+        >
+          <FinanceNavLinks
+            className={subLinkClass}
+            activeClassName={activeNavLinkClass}
+          />
+        </ModuleGroup>
+      </nav>
+      <div className="mt-auto flex flex-col gap-px pt-6">
         <Link
           activeProps={{ className: activeNavLinkClass }}
           className={navLinkClass}
@@ -146,47 +157,6 @@ const Sidebar = () => {
           {t("nav.reminders")}
           {attention > 0 && <NavCount>{attention}</NavCount>}
         </Link>
-        <Link
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
-          to="/garage/history"
-        >
-          <History />
-          {t("nav.history")}
-        </Link>
-        <Link
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
-          to="/garage/catalog"
-        >
-          <BookOpen />
-          {t("nav.catalog")}
-        </Link>
-        {(cars.data?.cars.length ?? 0) > 0 && (
-          <p className="text-muted-foreground px-2 pt-4 pb-1 text-xs font-medium">
-            {t("nav.cars")}
-          </p>
-        )}
-        {cars.data?.cars.map((car) => (
-          <Link
-            activeProps={{ className: activeNavLinkClass }}
-            className={navLinkClass}
-            key={car.id}
-            params={{ carId: car.id }}
-            to="/garage/cars/$carId"
-          >
-            <CarMonogram name={car.name} size="xs" />
-            <span className="truncate">{car.name}</span>
-            {car.overdueCount > 0 && (
-              <span
-                aria-hidden="true"
-                className="bg-destructive ml-auto size-1.5 shrink-0 rounded-full"
-              />
-            )}
-          </Link>
-        ))}
-      </nav>
-      <div className="mt-auto pt-6">
         <Link
           activeProps={{ className: activeNavLinkClass }}
           className={navLinkClass}
@@ -216,6 +186,15 @@ const MobileNav = () => {
       >
         <CarFront className="size-5" />
         {t("nav.garage")}
+      </Link>
+      <Link
+        activeOptions={{ exact: false }}
+        activeProps={{ className: activeMobileLinkClass }}
+        className={mobileLinkClass}
+        to="/finances"
+      >
+        <Wallet className="size-5" />
+        {t("nav.finances")}
       </Link>
       <Link
         activeProps={{ className: activeMobileLinkClass }}
@@ -250,5 +229,6 @@ export const AppShell = () => (
       </div>
     </div>
     <EntryDialogHost />
+    <FinanceDialogHost />
   </CommandMenuProvider>
 );

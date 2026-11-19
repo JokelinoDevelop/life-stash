@@ -71,14 +71,16 @@ export const RemindersTab = ({
   const reminders = useQuery(remindersQuery(carId));
 
   const addButton = readOnly ? null : (
-    <Button asChild size="compact">
-      <EntryDialogLink entry={{ car: carId, dialog: "reminder" }}>
-        <BellPlus />
-        {t("tab.add")}
-        <Kbd className="hidden md:inline-flex">
-          {CAR_SHORTCUTS.addReminder.toUpperCase()}
-        </Kbd>
-      </EntryDialogLink>
+    <Button
+      size="compact"
+      render={<EntryDialogLink entry={{ car: carId, dialog: "reminder" }} />}
+      nativeButton={false}
+    >
+      <BellPlus />
+      {t("tab.add")}
+      <Kbd className="hidden md:inline-flex">
+        {CAR_SHORTCUTS.addReminder.toUpperCase()}
+      </Kbd>
     </Button>
   );
 

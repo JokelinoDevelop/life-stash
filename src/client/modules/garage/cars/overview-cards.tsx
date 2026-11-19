@@ -218,32 +218,35 @@ export const CarHistory = ({
               : format.distance(visit.odometerKm);
 
           return (
-            <ListRow asChild key={visit.id}>
-              <Link
-                params={{ carId, visitId: visit.id }}
-                to="/garage/cars/$carId/services/$visitId"
-              >
-                <StatusRing label={null} status="done" />
-                <ListRowText
-                  meta={
-                    <span className="tabular-nums md:hidden">
-                      {[date, km].filter((part) => part !== null).join(" · ")}
-                    </span>
-                  }
-                  title={visit.items.map((item) => item.label).join(", ")}
+            <ListRow
+              key={visit.id}
+              render={
+                <Link
+                  params={{ carId, visitId: visit.id }}
+                  to="/garage/cars/$carId/services/$visitId"
                 />
-                <span className="text-muted-foreground hidden w-24 shrink-0 tabular-nums md:block">
-                  {date}
-                </span>
-                <span className="text-muted-foreground hidden w-24 shrink-0 text-right tabular-nums md:block">
-                  {km}
-                </span>
-                <span className="w-16 shrink-0 text-right font-medium tabular-nums">
-                  {visit.effectiveTotalMinor === null
-                    ? null
-                    : format.money(visit.effectiveTotalMinor, visit.currency)}
-                </span>
-              </Link>
+              }
+            >
+              <StatusRing label={null} status="done" />
+              <ListRowText
+                meta={
+                  <span className="tabular-nums md:hidden">
+                    {[date, km].filter((part) => part !== null).join(" · ")}
+                  </span>
+                }
+                title={visit.items.map((item) => item.label).join(", ")}
+              />
+              <span className="text-muted-foreground hidden w-24 shrink-0 tabular-nums md:block">
+                {date}
+              </span>
+              <span className="text-muted-foreground hidden w-24 shrink-0 text-right tabular-nums md:block">
+                {km}
+              </span>
+              <span className="w-16 shrink-0 text-right font-medium tabular-nums">
+                {visit.effectiveTotalMinor === null
+                  ? null
+                  : format.money(visit.effectiveTotalMinor, visit.currency)}
+              </span>
             </ListRow>
           );
         })

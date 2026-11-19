@@ -40,12 +40,13 @@ export const SelectField = ({
         {optional === true && <OptionalHint />}
       </FieldLabel>
       <Select
+        items={options}
         name={field.name}
         onValueChange={(value) => {
-          field.handleChange(value);
+          field.handleChange(value ?? "");
           field.handleBlur();
         }}
-        value={field.state.value === "" ? undefined : field.state.value}
+        value={field.state.value === "" ? null : field.state.value}
       >
         <SelectTrigger
           aria-invalid={invalid}

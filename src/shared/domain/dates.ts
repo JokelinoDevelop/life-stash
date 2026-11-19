@@ -91,6 +91,23 @@ export const formatPartialDate = (
   return `${pad(day)}.${pad(month)}.${year}`;
 };
 
+/**
+ * Like `formatPartialDate` without the year, for rows under a year or month
+ * heading: "19.07". Month and year precision keep their full form.
+ */
+export const formatShortDate = (
+  date: string,
+  precision: DatePrecision = "day"
+): string => {
+  if (precision !== "day") {
+    return formatPartialDate(date, precision);
+  }
+
+  const { month, day } = parseIsoDate(date);
+
+  return `${pad(day)}.${pad(month)}`;
+};
+
 /** Today's calendar date in the given IANA time zone. */
 export const todayInTimeZone = (
   zone: string,
@@ -138,6 +155,18 @@ export const addMonths = (date: string, months: number): string => {
 
   return fromUtc(Date.UTC(year, targetMonthIndex, Math.min(day, lastDay)));
 };
+
+/**
+ * Like `addMonths`, but a month's last day stays the last day (31.05 → 30.06 → 31.07), so
+ * month-end dates don't drift when stepped one month at a time.
+ */
+export const addMonthsKeepingMonthEnd = (
+  date: string,
+  months: number
+): string =>
+  addDays(date, 1).slice(8, 10) === "01"
+    ? addDays(addMonths(addDays(date, 1), months), -1)
+    : addMonths(date, months);
 
 /** Whole days from `from` to `to` (negative when `to` is earlier). */
 export const daysBetween = (from: string, to: string): number =>

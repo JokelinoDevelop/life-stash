@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import { PagedList } from "@/components/app/list-pagination";
 import {
   ListRow,
   ListRowText,
@@ -13,8 +14,11 @@ import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
+import { paginate } from "@/lib/paginate";
 
 import { useInvalidateGarage } from "../cars/cars.queries";
+import { useTabPage } from "../cars/use-tab-page";
+import { groupByYear } from "../visits/group-by-year";
 import type { MileagePoint } from "./mileage.queries";
 
 export const ReadingsList = ({
@@ -31,7 +35,17 @@ export const ReadingsList = ({
   const format = useFormat();
   const errorMessage = useErrorMessage();
   const invalidate = useInvalidateGarage();
-  const rows = withDeltas(points).toReversed();
+  const { page, setPage } = useTabPage();
+
+  const rows = withDeltas(points)
+    .toReversed()
+    .map((row) => ({ ...row, date: row.reading.date }));
+
+  const slice = paginate(rows, page);
+
+  const perYear = new Map(
+    groupByYear(rows).map(([year, entries]) => [year, entries.length])
+  );
 
   const remove = async (readingId: string) => {
     try {
@@ -46,66 +60,70 @@ export const ReadingsList = ({
   };
 
   return (
-    <ListSection count={rows.length} title={t("list.title")}>
-      {rows.map(({ reading, kmSincePrevious, daysSincePrevious }) => (
-        <ListRow
-          className="py-2 md:py-1"
-          key={`${reading.source}-${reading.id}`}
-        >
-          <ListRowText
-            meta={
-              <span className="tabular-nums">
-                {[
-                  format.date(reading.date),
-                  t(`sources.${reading.source}`),
-                  kmSincePrevious === null || daysSincePrevious === null
-                    ? null
-                    : t("list.sinceLast", {
-                        days: t("list.days", { count: daysSincePrevious }),
-                        distance: format.distance(kmSincePrevious),
-                      }),
-                  reading.source === "reading" ? reading.notes : null,
-                ]
-                  .filter((part) => part !== null)
-                  .join(" · ")}
-              </span>
-            }
-            title={
-              <span className="tabular-nums">
-                {format.distance(reading.odometerKm)}
-              </span>
-            }
-          />
-          {!readOnly && reading.source === "reading" && (
-            <div className="flex shrink-0">
-              <Button
-                aria-label={tc("actions.edit")}
-                onClick={() => {
-                  onEdit(reading);
-                }}
-                size="icon-compact"
-                variant="ghost"
-              >
-                <Pencil />
-              </Button>
-              <ConfirmDialog
-                onConfirm={async () => {
-                  await remove(reading.id);
-                }}
-                trigger={
+    <PagedList onPageChange={setPage} slice={slice}>
+      {groupByYear(slice.items).map(([year, entries]) => (
+        <ListSection count={perYear.get(year)} key={year} title={year}>
+          {entries.map(({ reading, kmSincePrevious, daysSincePrevious }) => (
+            <ListRow
+              className="py-2 md:py-1"
+              key={`${reading.source}-${reading.id}`}
+            >
+              <ListRowText
+                meta={
+                  <span className="tabular-nums">
+                    {[
+                      format.shortDate(reading.date),
+                      t(`sources.${reading.source}`),
+                      kmSincePrevious === null || daysSincePrevious === null
+                        ? null
+                        : t("list.sinceLast", {
+                            days: t("list.days", { count: daysSincePrevious }),
+                            distance: format.distance(kmSincePrevious),
+                          }),
+                      reading.source === "reading" ? reading.notes : null,
+                    ]
+                      .filter((part) => part !== null)
+                      .join(" · ")}
+                  </span>
+                }
+                title={
+                  <span className="tabular-nums">
+                    {format.distance(reading.odometerKm)}
+                  </span>
+                }
+              />
+              {!readOnly && reading.source === "reading" && (
+                <div className="flex shrink-0">
                   <Button
-                    aria-label={tc("actions.delete")}
+                    aria-label={tc("actions.edit")}
+                    onClick={() => {
+                      onEdit(reading);
+                    }}
                     size="icon-compact"
                     variant="ghost"
                   >
-                    <Trash2 />
+                    <Pencil />
                   </Button>
-                }
-              />
-            </div>
-          )}
-        </ListRow>
+                  <ConfirmDialog
+                    onConfirm={async () => {
+                      await remove(reading.id);
+                    }}
+                    trigger={
+                      <Button
+                        aria-label={tc("actions.delete")}
+                        size="icon-compact"
+                        variant="ghost"
+                      >
+                        <Trash2 />
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </ListRow>
+          ))}
+        </ListSection>
       ))}
-    </ListSection>
+    </PagedList>
   );
 };

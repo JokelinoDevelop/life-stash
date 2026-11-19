@@ -10,6 +10,7 @@ import {
   publicPasswordRoutes,
 } from "./modules/auth/password.routes";
 import { accountRoutes, publicAuthRoutes } from "./modules/auth/routes";
+import { financesController } from "./modules/finances/finances.controller";
 import { garageRoutes } from "./modules/garage/garage.routes";
 import { photoRoutes } from "./modules/photos/photos.routes";
 import { configRoutes } from "./modules/settings/config.routes";
@@ -19,6 +20,7 @@ import { settingsRoutes } from "./modules/settings/settings.routes";
 const privateRoutes = new Hono<AppEnv>()
   .use(requireAuth)
   .route("/garage", garageRoutes)
+  .route("/finances", financesController)
   .route("/photos", photoRoutes)
   .route("/settings", settingsRoutes);
 

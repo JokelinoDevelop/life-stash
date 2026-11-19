@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate, useParams, useRouterState } from "@tanstack/react-router";
 import {
   BellPlus,
   CarFront,
@@ -25,6 +25,11 @@ import {
 import { useHotkey } from "@/hooks/use-hotkey";
 import { ADD_CAR_SHORTCUT, CAR_SHORTCUTS } from "@/lib/shortcuts";
 import type { CarShortcutAction } from "@/lib/shortcuts";
+import {
+  FinanceActionsGroup,
+  FinanceInvoicesGroup,
+  FinancePagesGroup,
+} from "@/modules/finances/finance-commands";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { useCarJump } from "@/modules/garage/cars/use-car-jump";
@@ -197,6 +202,10 @@ const CommandMenuDialog = ({
   const list = cars.data?.cars ?? [];
   const current = list.find((car) => car.id === carId);
 
+  const onFinances = useRouterState({
+    select: (state) => state.location.pathname.startsWith("/finances"),
+  });
+
   const run: Run = (start) => {
     onOpenChange(false);
     void start();
@@ -225,9 +234,14 @@ const CommandMenuDialog = ({
       />
       <CommandList>
         <CommandEmpty>{t("empty")}</CommandEmpty>
+        {onFinances && <FinanceActionsGroup run={run} />}
+        {onFinances && <FinanceInvoicesGroup run={run} />}
+        {onFinances && <FinancePagesGroup run={run} />}
         <ActionsGroup current={current} run={run} />
         <CarsGroup cars={list} run={run} />
         <PagesGroup run={run} />
+        {!onFinances && <FinanceActionsGroup run={run} />}
+        {!onFinances && <FinancePagesGroup run={run} />}
       </CommandList>
       <Hints />
     </CommandDialog>

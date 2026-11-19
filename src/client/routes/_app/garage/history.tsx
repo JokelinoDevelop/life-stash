@@ -1,35 +1,24 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { z } from "zod";
 
+import { BackLink } from "@/components/app/back-link";
+import { PagedList } from "@/components/app/list-pagination";
 import { ListSection } from "@/components/app/list-section";
 import { PageHeader, PageStack } from "@/components/app/page-header";
 import { EmptyState, LoadingState } from "@/components/app/states";
+import { paginate } from "@/lib/paginate";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { groupByYear } from "@/modules/garage/visits/group-by-year";
 import { VisitRow } from "@/modules/garage/visits/visit-row";
 import { visitsQuery } from "@/modules/garage/visits/visits.queries";
-import type { VisitListItem } from "@/modules/garage/visits/visits.queries";
-
-interface Entry {
-  carId: string;
-  carName: string;
-  visit: VisitListItem;
-}
-
-const byYear = (entries: Entry[]): [string, Entry[]][] => {
-  const groups = new Map<string, Entry[]>();
-
-  for (const entry of entries) {
-    const year = entry.visit.date.slice(0, 4);
-    groups.set(year, [...(groups.get(year) ?? []), entry]);
-  }
-
-  return [...groups.entries()];
-};
 
 const HistoryPage = () => {
   const { t } = useTranslation();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const { t: tg } = useTranslation("garage");
   const cars = useQuery(carsQuery(false));
   const list = cars.data?.cars ?? [];
@@ -48,29 +37,50 @@ const HistoryPage = () => {
         visit,
       }))
     )
-    .toSorted((a, b) => b.visit.date.localeCompare(a.visit.date));
+    .toSorted((a, b) => b.visit.date.localeCompare(a.visit.date))
+    .map((entry) => ({ ...entry, date: entry.visit.date }));
+
+  const slice = paginate(entries, search.page ?? 1);
+
+  const perYear = new Map(
+    groupByYear(entries).map(([year, group]) => [year, group.length])
+  );
+
+  const setPage = (next: number) => {
+    void navigate({
+      replace: true,
+      resetScroll: false,
+      search: next > 1 ? { page: next } : {},
+    });
+  };
 
   return (
     <>
-      <PageHeader title={t("nav.history")} />
+      <PageHeader
+        mobileTop={<BackLink to="/garage" />}
+        title={t("nav.history")}
+      />
       {pending && <LoadingState />}
       {!pending && (
         <PageStack>
           {entries.length === 0 ? (
             <EmptyState icon={<Wrench />} message={tg("home.historyEmpty")} />
           ) : (
-            byYear(entries).map(([year, group]) => (
-              <ListSection count={group.length} key={year} title={year}>
-                {group.map((entry) => (
-                  <VisitRow
-                    carId={entry.carId}
-                    carName={entry.carName}
-                    key={entry.visit.id}
-                    visit={entry.visit}
-                  />
-                ))}
-              </ListSection>
-            ))
+            <PagedList onPageChange={setPage} slice={slice}>
+              {groupByYear(slice.items).map(([year, group]) => (
+                <ListSection count={perYear.get(year)} key={year} title={year}>
+                  {group.map((entry) => (
+                    <VisitRow
+                      carId={entry.carId}
+                      carName={entry.carName}
+                      key={entry.visit.id}
+                      shortDate
+                      visit={entry.visit}
+                    />
+                  ))}
+                </ListSection>
+              ))}
+            </PagedList>
           )}
         </PageStack>
       )}
@@ -79,5 +89,8 @@ const HistoryPage = () => {
 };
 
 export const Route = createFileRoute("/_app/garage/history")({
+  validateSearch: z.object({
+    page: z.number().int().min(2).optional().catch(undefined),
+  }),
   component: HistoryPage,
 });

@@ -14,4 +14,10 @@ describe(toCsv, () => {
       )
     ).toBe('a,b\r\n"x,y","say ""hi"""\r\n,3');
   });
+
+  it("neutralises text that would run as a formula, but not numbers", () => {
+    expect(toCsv(["a", "b", "c"], [['=HYPERLINK("x")', "@sum", -12.5]])).toBe(
+      'a,b,c\r\n"\'=HYPERLINK(""x"")",\'@sum,-12.5'
+    );
+  });
 });

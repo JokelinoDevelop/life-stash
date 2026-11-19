@@ -115,7 +115,7 @@
   "home": {
     "upcoming": "Претстојно за сите возила",
     "allClear": "Сè е во ред — ништо не следува наскоро.",
-    "catalog": "Делови и пакети",
+    "catalog": "Каталог",
     "needsAttention": "Бара внимание",
     "summary": "{{overdue}} задоцнети · {{dueSoon}} наскоро",
     "summaryClear": "Ништо не доспева наскоро",
@@ -135,6 +135,9 @@
     "overdueLabel": "Задоцнети",
     "nothingOverdue": "Ништо не е задоцнето",
     "spendingByMonth": "Трошоци по месец",
-    "addCar": "Додај возило"
+    "addCar": "Додај возило",
+    "browse": "Прегледај",
+    "historyDescription": "Сите сервиси за сите возила",
+    "catalogDescription": "Делови, работи и пакети"
   }
 }

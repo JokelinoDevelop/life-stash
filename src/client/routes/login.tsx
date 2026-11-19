@@ -65,8 +65,12 @@ const LoginPage = () => {
           {busy ? <Loader2 className="animate-spin" /> : <Fingerprint />}
           {busy ? t("login.working") : t("login.passkey")}
         </Button>
-        <Button asChild variant="link">
-          <Link to="/recover">{t("login.useRecovery")}</Link>
+        <Button
+          variant="link"
+          render={<Link to="/recover" />}
+          nativeButton={false}
+        >
+          {t("login.useRecovery")}
         </Button>
       </div>
     </AuthLayout>

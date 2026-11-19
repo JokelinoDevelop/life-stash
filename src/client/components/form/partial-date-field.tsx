@@ -64,14 +64,13 @@ export const PartialDateField = ({
       {allowPartial && (
         <ToggleGroup
           className="w-full"
-          onValueChange={(next) => {
+          onValueChange={([next = ""]) => {
             if (isPrecision(next)) {
               update({ precision: next });
             }
           }}
           size="sm"
-          type="single"
-          value={value.precision}
+          value={[value.precision]}
           variant="outline"
         >
           {DATE_PRECISIONS.map((precision) => (
@@ -100,10 +99,14 @@ export const PartialDateField = ({
         <div className="flex gap-2">
           {value.precision === "month" && (
             <Select
+              items={MONTHS.map((month) => ({
+                label: monthName(i18n.language, month),
+                value: month,
+              }))}
               onValueChange={(month) => {
-                update({ month });
+                update({ month: month ?? undefined });
               }}
-              value={value.month}
+              value={value.month ?? null}
             >
               <SelectTrigger aria-label={t("date.month")} className="flex-1">
                 <SelectValue placeholder={t("date.month")} />

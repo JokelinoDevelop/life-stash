@@ -1,4 +1,4 @@
-import { formatPartialDate } from "@shared/domain/dates";
+import { formatPartialDate, formatShortDate } from "@shared/domain/dates";
 import type { DatePrecision } from "@shared/domain/dates";
 import { toMajor } from "@shared/domain/money";
 import type { Currency, MoneyTotal } from "@shared/domain/money";
@@ -75,5 +75,15 @@ export const useFormat = () => {
           .map((value) => money(value.amountMinor, value.currency))
           .join(" + ");
 
-  return { date: formatDate, currency, distance, money, number, totals, unit };
+  return {
+    date: formatDate,
+    /** A date under a year or month heading, without the year. */
+    shortDate: formatShortDate,
+    currency,
+    distance,
+    money,
+    number,
+    totals,
+    unit,
+  };
 };

@@ -5,18 +5,29 @@ import type { Bindings } from "../../core/env";
 import { notFound } from "../../core/errors";
 import { photoStorageFor } from "../../core/photo-storage";
 import { photos } from "../../db/schema/core";
+import { financeInvoices, financeTransactions } from "../../db/schema/finances";
 import { garageExpenses, garageServiceVisits } from "../../db/schema/garage";
 
-export type PhotoOwnerType = "service_visit" | "expense";
+export type PhotoOwnerType =
+  | "service_visit"
+  | "expense"
+  | "finance_invoice"
+  | "finance_transaction";
 
-/** Throws 404 unless the photo owner (visit or expense) belongs to the household. */
+const OWNER_TABLES = {
+  expense: garageExpenses,
+  finance_invoice: financeInvoices,
+  finance_transaction: financeTransactions,
+  service_visit: garageServiceVisits,
+} as const;
+
+/** Throws 404 unless the photo owner (visit, expense, invoice, transaction) belongs to the household. */
 export const assertPhotoOwner = async (
   db: Db,
   householdId: string,
   owner: { ownerType: PhotoOwnerType; ownerId: string }
 ): Promise<void> => {
-  const table =
-    owner.ownerType === "service_visit" ? garageServiceVisits : garageExpenses;
+  const table = OWNER_TABLES[owner.ownerType];
 
   const [row] = await db
     .select({ id: table.id })

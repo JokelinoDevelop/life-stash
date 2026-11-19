@@ -1,13 +1,16 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PagedList } from "@/components/app/list-pagination";
 import {
   ListRow,
   ListRowText,
   ListSection,
 } from "@/components/app/list-section";
 import { useFormat } from "@/lib/format";
+import { paginate } from "@/lib/paginate";
 
+import { useTabPage } from "../cars/use-tab-page";
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { CategoryIcon } from "./expense-category";
 import type { ExpenseListItem } from "./expenses.queries";
@@ -15,6 +18,10 @@ import { groupByMonth } from "./group-expenses";
 
 const MILLI = 1000;
 
+/**
+ * One page of expenses under month headings. A heading's count and total are
+ * for the whole month, even when the month continues on the next page.
+ */
 export const ExpenseList = ({
   carId,
   expenses,
@@ -26,6 +33,9 @@ export const ExpenseList = ({
 }) => {
   const { t, i18n } = useTranslation("garageExpenses");
   const format = useFormat();
+  const { page, setPage } = useTabPage();
+  const slice = paginate(expenses, page);
+  const months = new Map(groupByMonth(expenses).map((g) => [g.month, g]));
 
   const monthFormat = useMemo(
     () =>
@@ -38,15 +48,15 @@ export const ExpenseList = ({
   );
 
   return (
-    <div className="flex flex-col gap-6 md:gap-0" data-bleed="">
-      {groupByMonth(expenses).map((group) => (
+    <PagedList onPageChange={setPage} slice={slice}>
+      {groupByMonth(slice.items).map((group) => (
         <ListSection
           action={
             <span className="text-muted-foreground text-sm tabular-nums">
-              {format.totals(group.totals)}
+              {format.totals(months.get(group.month)?.totals ?? group.totals)}
             </span>
           }
-          count={group.expenses.length}
+          count={months.get(group.month)?.expenses.length}
           key={group.month}
           title={
             <span className="capitalize">
@@ -56,7 +66,7 @@ export const ExpenseList = ({
         >
           {group.expenses.map((expense) => {
             const meta = [
-              format.date(expense.date),
+              format.shortDate(expense.date),
               expense.quantityMilli === null
                 ? null
                 : t("litres", { value: expense.quantityMilli / MILLI }),
@@ -86,17 +96,21 @@ export const ExpenseList = ({
                 {row}
               </ListRow>
             ) : (
-              <ListRow asChild className="py-2 md:py-1.5" key={expense.id}>
-                <EntryDialogLink
-                  entry={{ car: carId, dialog: "expense", id: expense.id }}
-                >
-                  {row}
-                </EntryDialogLink>
+              <ListRow
+                className="py-2 md:py-1.5"
+                key={expense.id}
+                render={
+                  <EntryDialogLink
+                    entry={{ car: carId, dialog: "expense", id: expense.id }}
+                  />
+                }
+              >
+                {row}
               </ListRow>
             );
           })}
         </ListSection>
       ))}
-    </div>
+    </PagedList>
   );
 };

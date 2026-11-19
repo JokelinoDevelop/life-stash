@@ -12,11 +12,14 @@ import type { VisitListItem } from "./visits.queries";
 export const VisitRow = ({
   carId,
   carName,
+  shortDate = false,
   visit,
 }: {
   carId: string;
   /** Shown first in the meta line on household-wide lists. */
   carName?: string;
+  /** Under a year heading: leave the year out of the date. */
+  shortDate?: boolean;
   visit: VisitListItem;
 }) => {
   const { t } = useTranslation("garageVisits");
@@ -24,7 +27,9 @@ export const VisitRow = ({
 
   const meta = [
     carName ?? null,
-    format.date(visit.date, visit.datePrecision),
+    shortDate
+      ? format.shortDate(visit.date, visit.datePrecision)
+      : format.date(visit.date, visit.datePrecision),
     visit.odometerKm === null ? null : format.distance(visit.odometerKm),
     t(`kinds.${visit.kind}`),
     visit.shop,
@@ -34,31 +39,34 @@ export const VisitRow = ({
     .join(" · ");
 
   return (
-    <ListRow asChild className="py-2 md:py-1.5">
-      <Link
-        params={{ carId, visitId: visit.id }}
-        to="/garage/cars/$carId/services/$visitId"
-      >
-        <StatusRing label={null} status="done" />
-        <ListRowText
-          meta={<span className="tabular-nums">{meta}</span>}
-          title={visit.items.map((item) => item.label).join(", ")}
+    <ListRow
+      className="py-2 md:py-1.5"
+      render={
+        <Link
+          params={{ carId, visitId: visit.id }}
+          to="/garage/cars/$carId/services/$visitId"
         />
-        {visit.photoCount > 0 && (
-          <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs">
-            <Camera aria-hidden="true" className="size-3.5" />
-            <span aria-hidden="true">{visit.photoCount}</span>
-            <span className="sr-only">
-              {t("history.photos", { count: visit.photoCount })}
-            </span>
+      }
+    >
+      <StatusRing label={null} status="done" />
+      <ListRowText
+        meta={<span className="tabular-nums">{meta}</span>}
+        title={visit.items.map((item) => item.label).join(", ")}
+      />
+      {visit.photoCount > 0 && (
+        <span className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs">
+          <Camera aria-hidden="true" className="size-3.5" />
+          <span aria-hidden="true">{visit.photoCount}</span>
+          <span className="sr-only">
+            {t("history.photos", { count: visit.photoCount })}
           </span>
-        )}
-        {visit.effectiveTotalMinor !== null && (
-          <span className="shrink-0 font-medium tabular-nums">
-            {format.money(visit.effectiveTotalMinor, visit.currency)}
-          </span>
-        )}
-      </Link>
+        </span>
+      )}
+      {visit.effectiveTotalMinor !== null && (
+        <span className="shrink-0 font-medium tabular-nums">
+          {format.money(visit.effectiveTotalMinor, visit.currency)}
+        </span>
+      )}
     </ListRow>
   );
 };

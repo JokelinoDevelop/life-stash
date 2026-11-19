@@ -1,7 +1,7 @@
 import { Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 import { SettingsSection } from "./settings-section";
 
@@ -21,19 +21,24 @@ export const ExportCard = () => {
       description={t("export.description")}
     >
       <div className="flex flex-wrap gap-2">
-        <Button asChild size="compact">
-          <a download href="/api/settings/export/json">
-            <Download />
-            {t("export.json")}
-          </a>
-        </Button>
+        <a
+          className={buttonVariants({ size: "compact" })}
+          download
+          href="/api/settings/export/json"
+        >
+          <Download />
+          {t("export.json")}
+        </a>
         {DATASETS.map((dataset) => (
-          <Button asChild key={dataset} size="compact" variant="outline">
-            <a download href={`/api/settings/export/csv/${dataset}`}>
-              <Download />
-              {t(`export.datasets.${dataset}`)}
-            </a>
-          </Button>
+          <a
+            className={buttonVariants({ size: "compact", variant: "outline" })}
+            download
+            href={`/api/settings/export/csv/${dataset}`}
+            key={dataset}
+          >
+            <Download />
+            {t(`export.datasets.${dataset}`)}
+          </a>
         ))}
       </div>
     </SettingsSection>

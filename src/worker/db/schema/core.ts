@@ -121,6 +121,8 @@ export const photos = sqliteTable(
   {
     contentType: text("content_type").notNull(),
     createdAt: createdAt(),
+    /** Original file name, shown for documents (invoice PDFs, receipts). */
+    fileName: text("file_name"),
     householdId: text("household_id")
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),
@@ -128,7 +130,12 @@ export const photos = sqliteTable(
     objectKey: text("object_key").notNull().unique(),
     ownerId: text("owner_id").notNull(),
     ownerType: text("owner_type", {
-      enum: ["service_visit", "expense"],
+      enum: [
+        "service_visit",
+        "expense",
+        "finance_invoice",
+        "finance_transaction",
+      ],
     }).notNull(),
     sizeBytes: integer("size_bytes").notNull(),
   },

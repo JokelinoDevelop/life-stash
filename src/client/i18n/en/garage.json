@@ -115,7 +115,7 @@
   "home": {
     "upcoming": "Upcoming across all cars",
     "allClear": "All clear — nothing due soon.",
-    "catalog": "Items & packages",
+    "catalog": "Service catalog",
     "needsAttention": "Needs attention",
     "summary": "{{overdue}} overdue · {{dueSoon}} due soon",
     "summaryClear": "Nothing due soon",
@@ -135,6 +135,9 @@
     "overdueLabel": "Overdue",
     "nothingOverdue": "Nothing overdue",
     "spendingByMonth": "Spending by month",
-    "addCar": "Add car"
+    "addCar": "Add car",
+    "browse": "Browse",
+    "historyDescription": "Every service across your cars",
+    "catalogDescription": "Parts, jobs and packages"
   }
 }

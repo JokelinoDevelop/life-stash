@@ -14,11 +14,15 @@ export const BackLink = (
   const text = label ?? t("actions.back");
 
   return (
-    <Button asChild className="-ml-2" size="compact" variant="ghost">
-      <Link aria-label={text} {...link}>
-        <ArrowLeft className="size-5 md:hidden" />
-        <span className="hidden md:inline">{text}</span>
-      </Link>
+    <Button
+      className="-ml-2"
+      size="compact"
+      variant="ghost"
+      render={<Link aria-label={text} {...link} />}
+      nativeButton={false}
+    >
+      <ArrowLeft className="size-5 md:hidden" />
+      <span className="hidden md:inline">{text}</span>
     </Button>
   );
 };

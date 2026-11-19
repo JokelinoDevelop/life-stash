@@ -73,7 +73,7 @@ const CarPage = () => {
         </Alert>
       )}
       <Tabs
-        onValueChange={(value) => {
+        onValueChange={(value: string) => {
           if (isCarTab(value)) {
             void navigate({ replace: true, search: { tab: value } });
           }
@@ -123,6 +123,8 @@ const CarPage = () => {
 export const Route = createFileRoute("/_app/garage/cars/$carId/")({
   validateSearch: z.object({
     log: z.boolean().optional(),
+    /** Page of the tab's long list (history, mileage, expenses); 1 when absent. */
+    page: z.number().int().min(2).optional().catch(undefined),
     tab: z.enum(CAR_TABS).catch("overview").default("overview"),
   }),
   loader: async ({ context, params }) => {

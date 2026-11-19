@@ -18,17 +18,45 @@ export type ApiErrorCode =
   | "not_found"
   | "rate_limited"
   | "unauthorized"
-  | "validation";
+  | "validation"
+  | FinanceErrorCode;
+
+export const FINANCE_ERROR_CODES = [
+  "finances.category_archived",
+  "finances.category_in_use",
+  "finances.category_kind_mismatch",
+  "finances.category_system",
+  "finances.client_in_use",
+  "finances.client_name_taken",
+  "finances.invoice_already_paid",
+  "finances.invoice_not_paid",
+  "finances.invoice_number_taken",
+  "finances.invoice_void",
+  "finances.project_client_mismatch",
+  "finances.project_in_use",
+  "finances.recurring_already_handled",
+  "finances.transaction_linked",
+] as const;
+
+export type FinanceErrorCode = (typeof FINANCE_ERROR_CODES)[number];
 
 export class ApiClientError extends Error {
   override readonly name = "ApiClientError";
   readonly code: ApiErrorCode;
   readonly status: number;
+  /** The request field the server blamed, if any (e.g. `number` for a taken invoice number). */
+  readonly field: string | undefined;
 
-  constructor(code: ApiErrorCode, status: number, message: string) {
+  constructor(
+    code: ApiErrorCode,
+    status: number,
+    message: string,
+    field?: string
+  ) {
     super(message);
     this.code = code;
     this.status = status;
+    this.field = field;
   }
 }
 
@@ -42,6 +70,7 @@ const ERROR_CODES: readonly ApiErrorCode[] = [
   "rate_limited",
   "unauthorized",
   "validation",
+  ...FINANCE_ERROR_CODES,
 ];
 
 const isErrorCode = (value: unknown): value is ApiErrorCode =>
@@ -52,6 +81,14 @@ interface FailedResponse {
   statusText: string;
   json: () => Promise<unknown>;
 }
+
+const fieldOf = (error: unknown): string | undefined => {
+  if (typeof error !== "object" || error === null || !("field" in error)) {
+    return undefined;
+  }
+
+  return typeof error.field === "string" ? error.field : undefined;
+};
 
 const readError = async (response: FailedResponse): Promise<ApiClientError> => {
   const body = await response.json().catch(() => null);
@@ -71,10 +108,13 @@ const readError = async (response: FailedResponse): Promise<ApiClientError> => {
       ? String(error.message)
       : response.statusText;
 
+  const field = fieldOf(error);
+
   return new ApiClientError(
     isErrorCode(code) ? code : "internal",
     response.status,
-    message
+    message,
+    field
   );
 };
 

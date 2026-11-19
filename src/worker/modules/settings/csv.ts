@@ -1,11 +1,18 @@
 type Cell = string | number | boolean | null;
 
+/** Text a spreadsheet would run as a formula (=, +, -, @, tab, CR at the start). */
+const FORMULA_START = /^[=+\-@\t\r]/u;
+
 const escapeCell = (value: Cell): string => {
   if (value === null) {
     return "";
   }
 
-  const text = String(value);
+  // A leading apostrophe keeps user text (descriptions, names) from running as a formula.
+  const text =
+    !Number.isFinite(value) && FORMULA_START.test(String(value))
+      ? `'${value}`
+      : String(value);
 
   return /[",\n\r]/u.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 };

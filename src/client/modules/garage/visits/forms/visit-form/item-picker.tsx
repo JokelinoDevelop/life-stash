@@ -37,11 +37,11 @@ export const ItemPicker = ({
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild>
-        <Button size="sm" type="button" variant="outline">
-          <ListPlus />
-          {label}
-        </Button>
+      <PopoverTrigger
+        render={<Button size="sm" type="button" variant="outline" />}
+      >
+        <ListPlus />
+        {label}
       </PopoverTrigger>
       <PopoverContent align="start">
         <div className="flex flex-col gap-2">

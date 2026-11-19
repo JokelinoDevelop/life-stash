@@ -7,6 +7,10 @@ import { cn } from "@/lib/utils";
  * A form laid out for a dialog: a scrolling body and a pinned footer.
  * ⌘↵ / Ctrl+↵ submits from anywhere inside, including open selects and pickers.
  */
+/** Popups that portal out of the dialog but still belong to its form. */
+const PORTALLED_POPUPS =
+  "[data-slot=select-content], [data-slot=popover-content], [data-slot=dropdown-menu-content]";
+
 export const DialogForm = ({
   children,
   footer,
@@ -39,8 +43,7 @@ export const DialogForm = ({
       const dialog = form.closest("[role=dialog]") ?? form;
 
       const inside =
-        dialog.contains(target) ||
-        target.closest("[data-radix-popper-content-wrapper]") !== null;
+        dialog.contains(target) || target.closest(PORTALLED_POPUPS) !== null;
 
       if (inside) {
         event.preventDefault();

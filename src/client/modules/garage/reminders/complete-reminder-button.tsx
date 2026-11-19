@@ -18,7 +18,7 @@ const CompletionLink = ({
   reminder,
 }: {
   carId: string;
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
   label?: string;
   reminder: { id: string; kind: ReminderKind };
@@ -81,13 +81,12 @@ export const CompleteReminderButton = ({
 
   const button = (
     <Button
-      asChild
       size={variant === "hover" ? "xs" : "compact"}
       variant="outline"
+      render={<CompletionLink carId={carId} reminder={reminder} />}
+      nativeButton={false}
     >
-      <CompletionLink carId={carId} reminder={reminder}>
-        {content}
-      </CompletionLink>
+      {content}
     </Button>
   );
 

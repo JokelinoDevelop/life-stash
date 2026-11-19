@@ -21,7 +21,7 @@ export const ThemeCard = () => {
     <SettingsSection title={t("preferences.theme")}>
       <ToggleGroup
         className="w-full sm:w-fit"
-        onValueChange={(value) => {
+        onValueChange={([value]) => {
           const next = THEMES.find((option) => option.value === value);
 
           if (next) {
@@ -30,8 +30,7 @@ export const ThemeCard = () => {
         }}
         size="segmented"
         spacing={0.5}
-        type="single"
-        value={theme}
+        value={[theme]}
         variant="segmented"
       >
         {THEMES.map((option) => (

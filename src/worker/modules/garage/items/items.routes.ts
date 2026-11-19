@@ -15,7 +15,7 @@ import { listItemsQuery } from "./dto/list-items.request";
 import type { ListItemsResponse } from "./dto/list-items.response";
 import { renameItemParams, renameItemRequest } from "./dto/rename-item.request";
 import type { RenameItemResponse } from "./dto/rename-item.response";
-import { findItem } from "./items.service";
+import { findItem, itemUsage } from "./items.service";
 
 export const itemRoutes = new Hono<AppEnv>()
   .get("/", validate("query", listItemsQuery), async (c) => {
@@ -26,17 +26,22 @@ export const itemRoutes = new Hono<AppEnv>()
       filters.push(isNull(garageItems.archivedAt));
     }
 
-    const rows = await c.var.db
-      .select()
-      .from(garageItems)
-      .where(and(...filters))
-      .orderBy(asc(garageItems.name));
+    const [rows, usage] = await Promise.all([
+      c.var.db
+        .select()
+        .from(garageItems)
+        .where(and(...filters))
+        .orderBy(asc(garageItems.name)),
+      itemUsage(c.var.db, householdId),
+    ]);
 
     const body: ListItemsResponse = {
       items: rows.map((row) => ({
         archivedAt: row.archivedAt,
         id: row.id,
+        lastDoneOn: usage.get(row.id)?.lastDoneOn ?? null,
         name: row.name,
+        timesDone: usage.get(row.id)?.timesDone ?? 0,
       })),
     };
 

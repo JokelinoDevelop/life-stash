@@ -14,11 +14,18 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppSettingsRouteRouteImport } from './routes/_app/settings/route'
+import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances/index'
+import { Route as AppFinancesInvoicesRouteImport } from './routes/_app/finances/invoices'
+import { Route as AppFinancesTransactionsRouteImport } from './routes/_app/finances/transactions'
 import { Route as AppGarageIndexRouteImport } from './routes/_app/garage/index'
 import { Route as AppGarageCatalogRouteImport } from './routes/_app/garage/catalog'
 import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/history'
 import { Route as AppGarageRemindersRouteImport } from './routes/_app/garage/reminders'
+import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
+import { Route as AppSettingsFinancesRouteImport } from './routes/_app/settings/finances'
+import { Route as AppFinancesClientsIndexRouteImport } from './routes/_app/finances/clients/index'
+import { Route as AppFinancesClientsClientIdRouteImport } from './routes/_app/finances/clients/$clientId'
 import { Route as AppGarageCarsCarIdIndexRouteImport } from './routes/_app/garage/cars/$carId/index'
 import { Route as AppGarageCarsCarIdServicesVisitIdIndexRouteImport } from './routes/_app/garage/cars/$carId/services/$visitId/index'
 
@@ -46,9 +53,24 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
+const AppSettingsRouteRoute = AppSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesIndexRoute = AppFinancesIndexRouteImport.update({
+  id: '/finances/',
+  path: '/finances/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesInvoicesRoute = AppFinancesInvoicesRouteImport.update({
+  id: '/finances/invoices',
+  path: '/finances/invoices',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesTransactionsRoute = AppFinancesTransactionsRouteImport.update({
+  id: '/finances/transactions',
+  path: '/finances/transactions',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGarageIndexRoute = AppGarageIndexRouteImport.update({
@@ -71,6 +93,27 @@ const AppGarageRemindersRoute = AppGarageRemindersRouteImport.update({
   path: '/garage/reminders',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSettingsRouteRoute,
+} as any)
+const AppSettingsFinancesRoute = AppSettingsFinancesRouteImport.update({
+  id: '/finances',
+  path: '/finances',
+  getParentRoute: () => AppSettingsRouteRoute,
+} as any)
+const AppFinancesClientsIndexRoute = AppFinancesClientsIndexRouteImport.update({
+  id: '/finances/clients/',
+  path: '/finances/clients/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFinancesClientsClientIdRoute =
+  AppFinancesClientsClientIdRouteImport.update({
+    id: '/finances/clients/$clientId',
+    path: '/finances/clients/$clientId',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppGarageCarsCarIdIndexRoute = AppGarageCarsCarIdIndexRouteImport.update({
   id: '/garage/cars/$carId/',
   path: '/garage/cars/$carId/',
@@ -88,11 +131,18 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteRouteWithChildren
+  '/finances/invoices': typeof AppFinancesInvoicesRoute
+  '/finances/transactions': typeof AppFinancesTransactionsRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
+  '/settings/finances': typeof AppSettingsFinancesRoute
+  '/finances/': typeof AppFinancesIndexRoute
   '/garage/': typeof AppGarageIndexRoute
+  '/settings/': typeof AppSettingsIndexRoute
+  '/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
+  '/finances/clients/': typeof AppFinancesClientsIndexRoute
   '/garage/cars/$carId/': typeof AppGarageCarsCarIdIndexRoute
   '/garage/cars/$carId/services/$visitId/': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
@@ -100,12 +150,18 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
-  '/settings': typeof AppSettingsRoute
   '/': typeof AppIndexRoute
+  '/finances/invoices': typeof AppFinancesInvoicesRoute
+  '/finances/transactions': typeof AppFinancesTransactionsRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
+  '/settings/finances': typeof AppSettingsFinancesRoute
+  '/finances': typeof AppFinancesIndexRoute
   '/garage': typeof AppGarageIndexRoute
+  '/settings': typeof AppSettingsIndexRoute
+  '/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
+  '/finances/clients': typeof AppFinancesClientsIndexRoute
   '/garage/cars/$carId': typeof AppGarageCarsCarIdIndexRoute
   '/garage/cars/$carId/services/$visitId': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
@@ -115,12 +171,19 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
-  '/_app/settings': typeof AppSettingsRoute
+  '/_app/settings': typeof AppSettingsRouteRouteWithChildren
   '/_app/': typeof AppIndexRoute
+  '/_app/finances/invoices': typeof AppFinancesInvoicesRoute
+  '/_app/finances/transactions': typeof AppFinancesTransactionsRoute
   '/_app/garage/catalog': typeof AppGarageCatalogRoute
   '/_app/garage/history': typeof AppGarageHistoryRoute
   '/_app/garage/reminders': typeof AppGarageRemindersRoute
+  '/_app/settings/finances': typeof AppSettingsFinancesRoute
+  '/_app/finances/': typeof AppFinancesIndexRoute
   '/_app/garage/': typeof AppGarageIndexRoute
+  '/_app/settings/': typeof AppSettingsIndexRoute
+  '/_app/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
+  '/_app/finances/clients/': typeof AppFinancesClientsIndexRoute
   '/_app/garage/cars/$carId/': typeof AppGarageCarsCarIdIndexRoute
   '/_app/garage/cars/$carId/services/$visitId/': typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
@@ -132,10 +195,17 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/settings'
+    | '/finances/invoices'
+    | '/finances/transactions'
     | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
+    | '/settings/finances'
+    | '/finances/'
     | '/garage/'
+    | '/settings/'
+    | '/finances/clients/$clientId'
+    | '/finances/clients/'
     | '/garage/cars/$carId/'
     | '/garage/cars/$carId/services/$visitId/'
   fileRoutesByTo: FileRoutesByTo
@@ -143,12 +213,18 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover'
     | '/setup'
-    | '/settings'
     | '/'
+    | '/finances/invoices'
+    | '/finances/transactions'
     | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
+    | '/settings/finances'
+    | '/finances'
     | '/garage'
+    | '/settings'
+    | '/finances/clients/$clientId'
+    | '/finances/clients'
     | '/garage/cars/$carId'
     | '/garage/cars/$carId/services/$visitId'
   id:
@@ -159,10 +235,17 @@ export interface FileRouteTypes {
     | '/setup'
     | '/_app/settings'
     | '/_app/'
+    | '/_app/finances/invoices'
+    | '/_app/finances/transactions'
     | '/_app/garage/catalog'
     | '/_app/garage/history'
     | '/_app/garage/reminders'
+    | '/_app/settings/finances'
+    | '/_app/finances/'
     | '/_app/garage/'
+    | '/_app/settings/'
+    | '/_app/finances/clients/$clientId'
+    | '/_app/finances/clients/'
     | '/_app/garage/cars/$carId/'
     | '/_app/garage/cars/$carId/services/$visitId/'
   fileRoutesById: FileRoutesById
@@ -215,7 +298,28 @@ declare module '@tanstack/react-router' {
       id: '/_app/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
+      preLoaderRoute: typeof AppSettingsRouteRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/': {
+      id: '/_app/finances/'
+      path: '/finances'
+      fullPath: '/finances/'
+      preLoaderRoute: typeof AppFinancesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/invoices': {
+      id: '/_app/finances/invoices'
+      path: '/finances/invoices'
+      fullPath: '/finances/invoices'
+      preLoaderRoute: typeof AppFinancesInvoicesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/transactions': {
+      id: '/_app/finances/transactions'
+      path: '/finances/transactions'
+      fullPath: '/finances/transactions'
+      preLoaderRoute: typeof AppFinancesTransactionsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/garage/': {
@@ -246,6 +350,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGarageRemindersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/settings/': {
+      id: '/_app/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
+    '/_app/settings/finances': {
+      id: '/_app/settings/finances'
+      path: '/finances'
+      fullPath: '/settings/finances'
+      preLoaderRoute: typeof AppSettingsFinancesRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
+    '/_app/finances/clients/': {
+      id: '/_app/finances/clients/'
+      path: '/finances/clients'
+      fullPath: '/finances/clients/'
+      preLoaderRoute: typeof AppFinancesClientsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/finances/clients/$clientId': {
+      id: '/_app/finances/clients/$clientId'
+      path: '/finances/clients/$clientId'
+      fullPath: '/finances/clients/$clientId'
+      preLoaderRoute: typeof AppFinancesClientsClientIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/garage/cars/$carId/': {
       id: '/_app/garage/cars/$carId/'
       path: '/garage/cars/$carId'
@@ -263,24 +395,47 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppSettingsRouteRouteChildren {
+  AppSettingsFinancesRoute: typeof AppSettingsFinancesRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+}
+
+const AppSettingsRouteRouteChildren: AppSettingsRouteRouteChildren = {
+  AppSettingsFinancesRoute: AppSettingsFinancesRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
+}
+
+const AppSettingsRouteRouteWithChildren =
+  AppSettingsRouteRoute._addFileChildren(AppSettingsRouteRouteChildren)
+
 interface AppRouteChildren {
-  AppSettingsRoute: typeof AppSettingsRoute
+  AppSettingsRouteRoute: typeof AppSettingsRouteRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
+  AppFinancesInvoicesRoute: typeof AppFinancesInvoicesRoute
+  AppFinancesTransactionsRoute: typeof AppFinancesTransactionsRoute
   AppGarageCatalogRoute: typeof AppGarageCatalogRoute
   AppGarageHistoryRoute: typeof AppGarageHistoryRoute
   AppGarageRemindersRoute: typeof AppGarageRemindersRoute
+  AppFinancesIndexRoute: typeof AppFinancesIndexRoute
   AppGarageIndexRoute: typeof AppGarageIndexRoute
+  AppFinancesClientsClientIdRoute: typeof AppFinancesClientsClientIdRoute
+  AppFinancesClientsIndexRoute: typeof AppFinancesClientsIndexRoute
   AppGarageCarsCarIdIndexRoute: typeof AppGarageCarsCarIdIndexRoute
   AppGarageCarsCarIdServicesVisitIdIndexRoute: typeof AppGarageCarsCarIdServicesVisitIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppSettingsRoute: AppSettingsRoute,
+  AppSettingsRouteRoute: AppSettingsRouteRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
+  AppFinancesInvoicesRoute: AppFinancesInvoicesRoute,
+  AppFinancesTransactionsRoute: AppFinancesTransactionsRoute,
   AppGarageCatalogRoute: AppGarageCatalogRoute,
   AppGarageHistoryRoute: AppGarageHistoryRoute,
   AppGarageRemindersRoute: AppGarageRemindersRoute,
+  AppFinancesIndexRoute: AppFinancesIndexRoute,
   AppGarageIndexRoute: AppGarageIndexRoute,
+  AppFinancesClientsClientIdRoute: AppFinancesClientsClientIdRoute,
+  AppFinancesClientsIndexRoute: AppFinancesClientsIndexRoute,
   AppGarageCarsCarIdIndexRoute: AppGarageCarsCarIdIndexRoute,
   AppGarageCarsCarIdServicesVisitIdIndexRoute:
     AppGarageCarsCarIdServicesVisitIdIndexRoute,

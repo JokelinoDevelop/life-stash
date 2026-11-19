@@ -37,27 +37,30 @@ export const UpcomingAcrossCars = ({ cars }: { cars: CarListItem[] }) => {
         </ListRow>
       ) : (
         urgent.map(({ car, reminder }) => (
-          <ListRow asChild key={car.id}>
-            <Link
-              params={{ carId: car.id }}
-              search={{ tab: "reminders" }}
-              to="/garage/cars/$carId"
-            >
-              <StatusRing
-                label={null}
-                progress={reminderProgress(reminder)}
-                status={reminder.status}
+          <ListRow
+            key={car.id}
+            render={
+              <Link
+                params={{ carId: car.id }}
+                search={{ tab: "reminders" }}
+                to="/garage/cars/$carId"
               />
-              <ListRowText meta={car.name} title={reminder.title} />
-              <span
-                className={cn(
-                  "shrink-0 text-sm font-medium tabular-nums",
-                  STATUS_TEXT_TONE[reminder.status]
-                )}
-              >
-                {describeDue(reminder, format, tc)}
-              </span>
-            </Link>
+            }
+          >
+            <StatusRing
+              label={null}
+              progress={reminderProgress(reminder)}
+              status={reminder.status}
+            />
+            <ListRowText meta={car.name} title={reminder.title} />
+            <span
+              className={cn(
+                "shrink-0 text-sm font-medium tabular-nums",
+                STATUS_TEXT_TONE[reminder.status]
+              )}
+            >
+              {describeDue(reminder, format, tc)}
+            </span>
           </ListRow>
         ))
       )}

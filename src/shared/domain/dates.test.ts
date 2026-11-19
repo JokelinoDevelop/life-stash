@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   addMonths,
+  addMonthsKeepingMonthEnd,
   daysBetween,
   formatPartialDate,
+  formatShortDate,
   isIsoDate,
   normalizePartialDate,
   parseTypedDate,
@@ -67,5 +69,30 @@ describe(parseTypedDate, () => {
     expect(parseTypedDate("19.11.26")).toBeNull();
     expect(parseTypedDate("tomorrow")).toBeNull();
     expect(parseTypedDate("")).toBeNull();
+  });
+});
+
+describe(formatShortDate, () => {
+  it("drops the year from full dates", () => {
+    expect(formatShortDate("2026-07-09")).toBe("09.07");
+  });
+
+  it("keeps month and year precision as they are", () => {
+    expect(formatShortDate("2026-07-01", "month")).toBe("07.2026");
+    expect(formatShortDate("2026-01-01", "year")).toBe("2026");
+  });
+});
+
+describe(addMonthsKeepingMonthEnd, () => {
+  it("keeps a month's last day the last day", () => {
+    expect(addMonthsKeepingMonthEnd("2026-05-31", 1)).toBe("2026-06-30");
+    expect(addMonthsKeepingMonthEnd("2026-06-30", 1)).toBe("2026-07-31");
+    expect(addMonthsKeepingMonthEnd("2026-01-31", 1)).toBe("2026-02-28");
+    expect(addMonthsKeepingMonthEnd("2026-02-28", 1)).toBe("2026-03-31");
+  });
+
+  it("moves other days like addMonths", () => {
+    expect(addMonthsKeepingMonthEnd("2026-06-15", 1)).toBe("2026-07-15");
+    expect(addMonthsKeepingMonthEnd("2026-01-30", 1)).toBe("2026-02-28");
   });
 });

@@ -2,6 +2,9 @@ import type { Seeder } from "./seeder";
 import { carsSeeder } from "./seeders/cars";
 import { catalogSeeder } from "./seeders/catalog";
 import { extrasSeeder } from "./seeders/extras";
+import { financeExtrasSeeder } from "./seeders/finance-extras";
+import { financeLedgerSeeder } from "./seeders/finance-ledger";
+import { financeWorkSeeder } from "./seeders/finance-work";
 import { fuelSeeder } from "./seeders/fuel";
 import { maintenanceSeeder } from "./seeders/maintenance";
 import { odometerSeeder } from "./seeders/odometer";
@@ -24,4 +27,7 @@ export const SEEDERS: readonly Seeder[] = [
   extrasSeeder,
   odometerSeeder,
   remindersSeeder,
+  financeLedgerSeeder,
+  financeWorkSeeder,
+  financeExtrasSeeder,
 ];
