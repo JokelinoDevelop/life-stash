@@ -1,5 +1,5 @@
 import { formatShortDate } from "@shared/domain/dates";
-import { Copy, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Paperclip, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useConfirm } from "@/components/app/confirm/confirm-context";
@@ -27,7 +27,7 @@ const ROW_CLASS =
 
 /** Desktop columns: icon · description · category · date · amount · actions. */
 export const TRANSACTION_GRID =
-  "md:grid md:grid-cols-[24px_minmax(140px,1fr)_160px_64px_104px_56px] md:gap-3";
+  "md:grid md:grid-cols-[24px_minmax(140px,1fr)_150px_150px_64px_104px_56px] md:gap-3";
 
 const RowMenu = ({ transaction }: { transaction: TransactionListItem }) => {
   const { t } = useTranslation("finances");
@@ -107,49 +107,72 @@ export const TransactionRow = ({
     transaction.kind
   );
 
-  return (
-    <li>
-      <SwipeToDelete
-        label={t("transactions.swipeDelete")}
-        onDelete={() => {
-          remove.mutate(transaction.id);
-        }}
+  const linked = transaction.invoice;
+
+  const meta = [
+    category,
+    transaction.client?.name,
+    formatShortDate(transaction.date),
+  ].filter((part) => part !== undefined);
+
+  const row = (
+    <div className={cn(ROW_CLASS, TRANSACTION_GRID)}>
+      <CategoryIcon name={transaction.category.icon} />
+      <div className="flex min-w-0 flex-1 flex-col md:block">
+        <FinanceDialogLink
+          className="flex min-w-0 items-center gap-1.5 font-medium outline-none after:absolute after:inset-0 focus-visible:underline"
+          entry={
+            linked === null
+              ? { dialog: "transaction", id: transaction.id }
+              : { dialog: "invoice", id: linked.id }
+          }
+        >
+          <span className="truncate">{transaction.description}</span>
+          {transaction.attachments > 0 && (
+            <>
+              <Paperclip
+                aria-hidden="true"
+                className="text-muted-foreground size-3 shrink-0"
+              />
+              <span className="sr-only">
+                {t("receipts.files", {
+                  count: transaction.attachments,
+                })}
+              </span>
+            </>
+          )}
+        </FinanceDialogLink>
+        <span className="text-muted-foreground truncate text-xs md:hidden">
+          {meta.join(" · ")}
+        </span>
+      </div>
+      <span className="text-subtle-foreground hidden min-w-0 items-center gap-1.5 md:flex">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-1.5 shrink-0 rounded-full",
+            income ? "bg-success" : "bg-muted-foreground/40"
+          )}
+        />
+        <span className="truncate">{category}</span>
+      </span>
+      <span className="text-muted-foreground hidden truncate md:block">
+        {transaction.client?.name ?? "—"}
+      </span>
+      <span className="text-muted-foreground hidden tabular-nums md:block">
+        {formatShortDate(transaction.date)}
+      </span>
+      <span
+        className={cn(
+          "shrink-0 text-right tabular-nums",
+          income && "text-success-foreground font-medium"
+        )}
       >
-        <div className={cn(ROW_CLASS, TRANSACTION_GRID)}>
-          <CategoryIcon name={transaction.category.icon} />
-          <div className="flex min-w-0 flex-1 flex-col md:block">
-            <FinanceDialogLink
-              className="block truncate font-medium outline-none after:absolute after:inset-0 focus-visible:underline"
-              entry={{ dialog: "transaction", id: transaction.id }}
-            >
-              {transaction.description}
-            </FinanceDialogLink>
-            <span className="text-muted-foreground truncate text-xs md:hidden">
-              {category} · {formatShortDate(transaction.date)}
-            </span>
-          </div>
-          <span className="text-subtle-foreground hidden min-w-0 items-center gap-1.5 md:flex">
-            <span
-              aria-hidden="true"
-              className={cn(
-                "size-1.5 shrink-0 rounded-full",
-                income ? "bg-success" : "bg-muted-foreground/40"
-              )}
-            />
-            <span className="truncate">{category}</span>
-          </span>
-          <span className="text-muted-foreground hidden tabular-nums md:block">
-            {formatShortDate(transaction.date)}
-          </span>
-          <span
-            className={cn(
-              "shrink-0 text-right tabular-nums",
-              income && "text-success-foreground font-medium"
-            )}
-          >
-            {amount}
-          </span>
-          <span className="relative z-10 hidden justify-end gap-0.5 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 md:flex">
+        {amount}
+      </span>
+      <span className="relative z-10 hidden justify-end gap-0.5 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 md:flex">
+        {linked === null && (
+          <>
             <FinanceDialogLink
               aria-label={t("transactions.duplicate")}
               className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-6 items-center justify-center rounded-md"
@@ -158,8 +181,25 @@ export const TransactionRow = ({
               <Copy className="size-3.5" />
             </FinanceDialogLink>
             <RowMenu transaction={transaction} />
-          </span>
-        </div>
+          </>
+        )}
+      </span>
+    </div>
+  );
+
+  if (linked !== null) {
+    return <li>{row}</li>;
+  }
+
+  return (
+    <li>
+      <SwipeToDelete
+        label={t("transactions.swipeDelete")}
+        onDelete={() => {
+          remove.mutate(transaction.id);
+        }}
+      >
+        {row}
       </SwipeToDelete>
     </li>
   );

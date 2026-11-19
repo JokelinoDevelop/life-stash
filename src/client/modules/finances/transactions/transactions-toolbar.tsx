@@ -1,4 +1,4 @@
-import { CalendarDays, Search, Tag } from "lucide-react";
+import { CalendarDays, Search, Tag, Users } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -227,14 +227,51 @@ export const SearchBox = ({
   );
 };
 
-/** Kind, category, year and search; one row on desktop, scrolling chips on phones. */
+const ClientFilter = ({
+  clients,
+  onChange,
+  value,
+}: {
+  clients: readonly { id: string; name: string }[];
+  onChange: (patch: SearchPatch) => void;
+  value: string | undefined;
+}) => {
+  const { t } = useTranslation("finances");
+  const selected = clients.find((client) => client.id === value);
+
+  return (
+    <Select
+      onValueChange={(next) => {
+        onChange({ client: next === ANY ? null : next });
+      }}
+      value={value ?? ANY}
+    >
+      <SelectTrigger aria-label={t("form2.client")} size="chip">
+        <Users />
+        {selected?.name ?? t("form2.client")}
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ANY}>{t("invoices.allClients")}</SelectItem>
+        {clients.map((client) => (
+          <SelectItem key={client.id} value={client.id}>
+            {client.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+};
+
+/** Kind, category, client, year and search; one row on desktop, scrolling chips on phones. */
 export const TransactionsToolbar = ({
   categories,
+  clients,
   currentYear,
   onChange,
   search,
 }: {
   categories: readonly FinanceCategory[];
+  clients: readonly { id: string; name: string }[];
   currentYear: number;
   onChange: (patch: SearchPatch) => void;
   search: TransactionsSearch;
@@ -246,6 +283,7 @@ export const TransactionsToolbar = ({
       onChange={onChange}
       search={search}
     />
+    <ClientFilter clients={clients} onChange={onChange} value={search.client} />
     <YearFilter
       currentYear={currentYear}
       onChange={onChange}

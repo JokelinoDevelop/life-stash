@@ -18,12 +18,14 @@ type UpdateBody = InferRequestType<
 >["json"];
 
 export const transactionFormDefaults = (context: {
+  clientId?: string;
   kind: TransactionKind;
   currency: Currency;
   today: string;
 }): TransactionFormValues => ({
   amount: "",
   categoryId: "",
+  clientId: context.clientId ?? "",
   currency: context.currency,
   date: context.today,
   description: "",
@@ -36,6 +38,7 @@ export const transactionToFormValues = (
 ): TransactionFormValues => ({
   amount: String(toMajor(detail.amountMinor)),
   categoryId: detail.categoryId,
+  clientId: detail.clientId ?? "",
   currency: detail.currency,
   date: detail.date,
   description: detail.description,
@@ -57,6 +60,7 @@ export const transactionFormToCreateRequest = (
 ): CreateBody => ({
   amountMinor: toMinor(parseAmount(values.amount) ?? 0),
   categoryId: values.categoryId,
+  clientId: values.kind === "income" ? emptyToNull(values.clientId) : null,
   currency: values.currency,
   date: values.date,
   description: values.description.trim(),

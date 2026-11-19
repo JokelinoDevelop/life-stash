@@ -20,9 +20,11 @@ const FINANCE_MESSAGES = {
   "finances.category_kind_mismatch": "errors.categoryKindMismatch",
   "finances.category_system": "errors.categorySystem",
   "finances.client_in_use": "errors.clientInUse",
+  "finances.client_name_taken": "errors.clientNameTaken",
   "finances.invoice_already_paid": "errors.invoiceAlreadyPaid",
   "finances.invoice_not_paid": "errors.invoiceNotPaid",
   "finances.invoice_number_taken": "errors.invoiceNumberTaken",
+  "finances.invoice_void": "errors.invoiceVoid",
   "finances.transaction_linked": "errors.transactionLinked",
 } as const satisfies Record<FinanceErrorCode, string>;
 

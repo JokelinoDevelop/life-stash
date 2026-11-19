@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { useConfirm } from "@/components/app/confirm/confirm-context";
 import { FormDialog } from "@/components/app/form-dialog";
@@ -9,9 +11,14 @@ import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { formFieldOfError } from "@/lib/server-errors";
+import { useConfig } from "@/lib/session";
 
+import { uploadFiles } from "../attachments/attachments.queries";
+import { FileList } from "../attachments/file-list";
+import { ReceiptChip } from "../attachments/receipt-chip";
 import { categoriesQuery } from "../categories/categories.queries";
 import type { FinanceCategory } from "../categories/categories.queries";
+import { clientsQuery } from "../clients/clients.queries";
 import {
   TRANSACTION_SERVER_FIELDS,
   duplicateToFormValues,
@@ -31,6 +38,15 @@ import { transactionQuery } from "./transactions.queries";
 
 type Close = () => Promise<void>;
 
+/** Active clients for the income client chip (plus the entry's own, if archived). */
+const useClientOptions = (keep: string | null) => {
+  const clients = useQuery(clientsQuery(Number(todayIso().slice(0, 4))));
+
+  return (clients.data?.clients ?? []).filter(
+    (client) => !client.archived || client.id === keep
+  );
+};
+
 const isFieldError = (error: Error) =>
   formFieldOfError(error, TRANSACTION_SERVER_FIELDS) !== null;
 
@@ -44,18 +60,42 @@ const CreateForm = ({
   onClose: Close;
 }) => {
   const create = useCreateTransaction(isFieldError);
+  const clients = useClientOptions(null);
+  const photos = useConfig().data?.photosEnabled === true;
+  const [receipts, setReceipts] = useState<File[]>([]);
+  const { t } = useTranslation("finances");
 
   return (
     <TransactionForm
       categories={categories}
+      clients={clients}
       defaultValues={defaultValues}
       onCancel={() => {
         void onClose();
       }}
       onSubmit={async (values) => {
-        await create.mutateAsync(transactionFormToCreateRequest(values));
+        const { id } = await create.mutateAsync(
+          transactionFormToCreateRequest(values)
+        );
+
+        if (receipts.length > 0) {
+          const failed = await uploadFiles(
+            { ownerId: id, ownerType: "finance_transaction" },
+            receipts
+          );
+
+          for (const name of failed) {
+            toast.error(t("invoices.files.uploadFailed", { name }));
+          }
+        }
+
         await onClose();
       }}
+      receipt={
+        photos ? (
+          <ReceiptChip files={receipts} onChange={setReceipts} />
+        ) : undefined
+      }
     />
   );
 };
@@ -71,10 +111,12 @@ const LoadFailed = ({
 /** A new transaction, optionally copied from another one ("Duplicate"). */
 const NewTransaction = ({
   duplicateId,
+  forClient,
   kind: initialKind,
   onClose,
 }: {
   duplicateId: string | undefined;
+  forClient: string | undefined;
   kind: "income" | "expense";
   onClose: Close;
 }) => {
@@ -104,6 +146,7 @@ const NewTransaction = ({
   const defaults =
     source.data === undefined
       ? transactionFormDefaults({
+          clientId: forClient,
           currency: format.currency,
           kind: initialKind,
           today: todayIso(),
@@ -167,6 +210,8 @@ const EditTransaction = ({
   const categories = useQuery(categoriesQuery);
   const detail = useQuery(transactionQuery(transactionId));
   const update = useUpdateTransaction(isFieldError);
+  const clients = useClientOptions(detail.data?.transaction.clientId ?? null);
+  const photos = useConfig().data?.photosEnabled === true;
 
   if (categories.isPending || detail.isPending) {
     return <FormSkeleton />;
@@ -189,7 +234,16 @@ const EditTransaction = ({
   return (
     <TransactionForm
       categories={categories.data.categories}
+      clients={clients}
       defaultValues={transactionToFormValues(transaction)}
+      receipt={
+        photos ? (
+          <FileList
+            compact
+            owner={{ ownerId: transactionId, ownerType: "finance_transaction" }}
+          />
+        ) : undefined
+      }
       footerStart={
         <DeleteButton
           description={transaction.description}
@@ -214,6 +268,7 @@ const EditTransaction = ({
 /** Log an expense or income, duplicate one, or edit one (`?dialog=transaction`). */
 export const TransactionDialog = ({
   duplicateId,
+  forClient,
   kind,
   onClose,
   onOpenChange,
@@ -221,6 +276,7 @@ export const TransactionDialog = ({
   transactionId,
 }: {
   duplicateId: string | undefined;
+  forClient: string | undefined;
   kind: "income" | "expense" | undefined;
   onClose: Close;
   onOpenChange: (open: boolean) => void;
@@ -243,6 +299,7 @@ export const TransactionDialog = ({
       {transactionId === undefined ? (
         <NewTransaction
           duplicateId={duplicateId}
+          forClient={forClient}
           kind={kind ?? "expense"}
           onClose={onClose}
         />

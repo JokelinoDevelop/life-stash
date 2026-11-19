@@ -76,14 +76,17 @@ src/worker/modules/finances/
 ├─ finances.controller.ts      mounts the sub-controllers under /api/finances
 ├─ finances.module.ts          builds repositories + services for one household
 ├─ finances.cron.ts            daily purge of soft-deleted records
-├─ categories/ transactions/   <feature>.controller.ts · .service.ts · .repository.ts · dto/
-└─ household/                  reads household preferences (locale, time zone)
+├─ categories/ transactions/ clients/ invoices/ settings/ overview/
+│                              <feature>.controller.ts · .service.ts · .repository.ts · dto/
+├─ attachments/                counts files per finance record (files live in `photos`)
+└─ household/                  household preferences and the household-time-zone clock
 ```
 
 - `core/container.ts` is the per-request composition root: `requireAuth` stores a `Container` on `c.var.container`, and `container.finances` lazily builds the module. Garage still uses its older route/service files.
 - Controllers validate the DTO, call one service method and map the result to the response DTO; they never import Drizzle. Services hold the rules, take repositories by constructor and never import Hono. Repositories are constructed with `(db, householdId)` and scope every query.
 - Business errors use typed codes (`finances.category_in_use`, `finances.invoice_number_taken`, …) via `domainError(code, { field })`; the client translates them (`finances:errors.*`) and shows field errors on the matching input.
 - Deletes are soft (`deleted_at`) so the Undo toast can call `POST …/:id/restore`.
+- `GET /finances/overview` is one request for the overview page. Its "Car costs" line comes from Garage's spending service through `overview/garage-costs.ts` (service → service, read only), so car costs are never copied into the ledger.
 - Tests: services with in-memory fakes; controllers through `app.request()` against a real SQLite database (`src/worker/test/sqlite-d1.ts`, Node's built-in `node:sqlite` behind a D1 shim with all migrations applied), including household isolation.
 
 On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar shows Garage and Finances as module groups (the active one expanded); phones get Garage / Finances / Reminders / Settings.
@@ -96,9 +99,9 @@ On the client, Finances lives in `src/client/modules/finances` (queries, mutatio
 - **Odometer nudge**: if no reading has been logged for N weeks (setting, default 4, 0 = off), the cron sends one nudge per car per period.
 - Completing a service reminder opens a prefilled service visit; saving it completes the reminder and schedules the next one when an interval is set. Insurance/registration reminders open a prefilled expense instead.
 
-## Photos
+## Photos and documents
 
-The Worker signs short-lived S3 URLs for Backblaze B2. The browser compresses photos (max 1600 px, WebP/JPEG ~0.8) and uploads directly. Views use 1-hour presigned GET URLs. If B2 is not configured, photo features are hidden.
+The Worker signs short-lived S3 URLs for Backblaze B2. The browser compresses photos (max 1600 px, WebP/JPEG ~0.8) and uploads directly; PDFs (invoices, receipts) go up unchanged, up to 10 MB. Views use 1-hour presigned GET URLs; PDFs are signed with `response-content-disposition: inline` and their original file name so they open in a new tab. If B2 is not configured, photo and attachment controls are hidden.
 
 ## Configuration
 

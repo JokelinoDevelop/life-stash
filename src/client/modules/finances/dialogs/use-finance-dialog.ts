@@ -12,6 +12,7 @@ export const useFinanceDialogSearch = () =>
       duplicate: search.duplicate,
       id: search.id,
       entryKind: search.entryKind,
+      forClient: search.forClient,
     }),
   });
 

@@ -10,6 +10,7 @@ import { useErrorMessage } from "@/lib/errors";
 import { formFieldOfError } from "@/lib/server-errors";
 
 import type { FinanceCategory } from "../../../categories/categories.queries";
+import type { ClientOption } from "./client-picker";
 import { KindToggle } from "./kind-toggle";
 import { TRANSACTION_SERVER_FIELDS } from "./mapper";
 import { transactionFormSchema } from "./schema";
@@ -19,6 +20,10 @@ import { DesktopBody, MobileBody } from "./transaction-form-body";
 export interface TransactionFormProps {
   defaultValues: TransactionFormValues;
   categories: readonly FinanceCategory[];
+  /** Clients that can be picked for income. */
+  clients: readonly ClientOption[];
+  /** The receipt control: a chip for a new entry, the file list when editing. */
+  receipt?: ReactNode;
   /** Left side of the footer, e.g. Delete when editing. */
   footerStart?: ReactNode;
   onCancel: () => void;
@@ -29,6 +34,8 @@ export interface TransactionFormProps {
 /** Log or edit an income/expense: big amount, description, category/date chips (3.1, 3.2, 5.4). */
 export const TransactionForm = ({
   categories,
+  clients,
+  receipt,
   defaultValues,
   footerStart,
   onCancel,
@@ -123,7 +130,12 @@ export const TransactionForm = ({
             />
           )}
         </form.Subscribe>
-        <Body form={form} optionsFor={optionsFor} />
+        <Body
+          clients={clients}
+          form={form}
+          optionsFor={optionsFor}
+          receipt={receipt ?? null}
+        />
       </div>
     </DialogForm>
   );

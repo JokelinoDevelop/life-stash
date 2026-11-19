@@ -8,6 +8,7 @@ export const ALL_YEARS = "all";
 
 export const transactionsSearchSchema = z.object({
   category: z.string().min(1).optional().catch(undefined),
+  client: z.string().min(1).optional().catch(undefined),
   kind: z.enum(TRANSACTION_KINDS).optional().catch(undefined),
   q: z.string().max(100).optional().catch(undefined),
   year: z
@@ -24,15 +25,22 @@ export type SearchPatch = {
 };
 
 /** Applies a patch; keys set to null are dropped from the URL. */
+/** The patched value: null clears, undefined keeps the current one. */
+const patched = <T>(
+  next: T | null | undefined,
+  current: T | undefined
+): T | undefined => (next === null ? undefined : (next ?? current));
+
+/** Applies a patch; keys set to null are dropped from the URL. */
 export const applySearchPatch = (
   search: TransactionsSearch,
   patch: SearchPatch
 ): TransactionsSearch => ({
-  category:
-    patch.category === null ? undefined : (patch.category ?? search.category),
-  kind: patch.kind === null ? undefined : (patch.kind ?? search.kind),
-  q: patch.q === null ? undefined : (patch.q ?? search.q),
-  year: patch.year === null ? undefined : (patch.year ?? search.year),
+  category: patched(patch.category, search.category),
+  client: patched(patch.client, search.client),
+  kind: patched(patch.kind, search.kind),
+  q: patched(patch.q, search.q),
+  year: patched(patch.year, search.year),
 });
 
 /** The API filter for the page's search params. */
@@ -56,6 +64,10 @@ export const filterFromSearch = (
     filter.categoryId = search.category;
   }
 
+  if (search.client !== undefined) {
+    filter.clientId = search.client;
+  }
+
   const q = search.q?.trim();
 
   if (q !== undefined && q !== "") {
@@ -65,8 +77,13 @@ export const filterFromSearch = (
   return filter;
 };
 
-export const hasActiveFilters = (search: TransactionsSearch): boolean =>
-  search.kind !== undefined ||
-  search.category !== undefined ||
-  (search.q ?? "").trim() !== "" ||
-  search.year !== undefined;
+export const hasActiveFilters = (search: TransactionsSearch): boolean => {
+  const narrowed = [
+    search.kind,
+    search.category,
+    search.client,
+    search.year,
+  ].some((value) => value !== undefined);
+
+  return narrowed || (search.q ?? "").trim() !== "";
+};

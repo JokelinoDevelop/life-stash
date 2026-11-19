@@ -9,7 +9,10 @@ import { cn } from "@/lib/utils";
 import { useCategoryName } from "../../../categories/category-label";
 import { AmountInput } from "./amount-input";
 import { CategoryPicker } from "./category-picker";
+import { ClientPicker } from "./client-picker";
+import type { ClientOption } from "./client-picker";
 import { frequentCategories, noOptions } from "./frequent-categories";
+import { InvoiceHint } from "./invoice-hint";
 import { TRANSACTION_FORM_TEMPLATE as TEMPLATE } from "./mapper";
 
 /** Amount with its currency, bound to the form. */
@@ -226,6 +229,48 @@ export const FrequentChips = withForm({
             </div>
           );
         }}
+      </form.Subscribe>
+    );
+  },
+});
+
+const NO_CLIENTS: readonly ClientOption[] = [];
+
+/** Income only: who paid, plus the hint when that client has unpaid invoices. */
+export const ClientField = withForm({
+  defaultValues: TEMPLATE,
+  props: { clients: NO_CLIENTS },
+  render: function ClientFieldRender({ clients, form }) {
+    return (
+      <form.Subscribe selector={(state) => state.values.kind}>
+        {(kind) =>
+          kind === "income" && (
+            <form.Field name="clientId">
+              {(field) => (
+                <ClientPicker
+                  clients={clients}
+                  onChange={field.handleChange}
+                  value={field.state.value}
+                />
+              )}
+            </form.Field>
+          )
+        }
+      </form.Subscribe>
+    );
+  },
+});
+
+export const ClientHint = withForm({
+  defaultValues: TEMPLATE,
+  render: function ClientHintRender({ form }) {
+    return (
+      <form.Subscribe
+        selector={(state) =>
+          state.values.kind === "income" ? state.values.clientId : ""
+        }
+      >
+        {(clientId) => <InvoiceHint clientId={clientId} />}
       </form.Subscribe>
     );
   },

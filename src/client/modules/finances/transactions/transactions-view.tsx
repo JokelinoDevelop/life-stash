@@ -1,4 +1,8 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import type {
+  InfiniteData,
+  UseInfiniteQueryResult,
+} from "@tanstack/react-query";
 import { ReceiptText, SearchX } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -8,6 +12,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 
 import { categoriesQuery } from "../categories/categories.queries";
+import { clientsQuery } from "../clients/clients.queries";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { groupByMonth } from "./group-by-month";
 import { MonthBand } from "./month-band";
@@ -20,6 +25,7 @@ import {
 import type { SearchPatch, TransactionsSearch } from "./transactions-search";
 import { SearchBox, TransactionsToolbar } from "./transactions-toolbar";
 import { transactionsQuery } from "./transactions.queries";
+import type { TransactionPage } from "./transactions.queries";
 
 const Footer = ({
   hasMore,
@@ -102,6 +108,71 @@ const Empty = ({
   );
 };
 
+/** Loading, error, empty or the month groups with the footer. */
+const LedgerContent = ({
+  list,
+  onClear,
+  search,
+  year,
+}: {
+  list: UseInfiniteQueryResult<InfiniteData<TransactionPage>>;
+  onClear: () => void;
+  search: TransactionsSearch;
+  year: number | undefined;
+}) => {
+  const pages = list.data?.pages ?? [];
+  const [first] = pages;
+  const rows = pages.flatMap((page) => page.transactions);
+
+  if (list.isPending) {
+    return <LoadingState rows={6} sections={2} />;
+  }
+
+  if (list.isError) {
+    return (
+      <ErrorState
+        error={list.error}
+        onRetry={() => {
+          void list.refetch();
+        }}
+      />
+    );
+  }
+
+  if (rows.length === 0) {
+    return <Empty filtered={hasActiveFilters(search)} onClear={onClear} />;
+  }
+
+  return (
+    <>
+      {groupByMonth(rows, first?.months ?? []).map((group) => (
+        <section
+          className="flex flex-col md:gap-0"
+          data-bleed=""
+          key={group.month}
+        >
+          <MonthBand month={group.month} summary={group.summary} />
+          <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+            {group.rows.map((transaction) => (
+              <TransactionRow key={transaction.id} transaction={transaction} />
+            ))}
+          </ul>
+        </section>
+      ))}
+      <Footer
+        hasMore={list.hasNextPage}
+        loading={list.isFetchingNextPage}
+        onMore={() => {
+          void list.fetchNextPage();
+        }}
+        shown={rows.length}
+        total={first?.total ?? rows.length}
+        year={year}
+      />
+    </>
+  );
+};
+
 /** The ledger: filters, month groups with totals and "Load more" (1.2, 5.2). */
 export const TransactionsView = ({
   currentYear,
@@ -115,15 +186,11 @@ export const TransactionsView = ({
   searchOpen: boolean;
 }) => {
   const categories = useQuery(categoriesQuery);
+  const clients = useQuery(clientsQuery(currentYear));
 
   const list = useInfiniteQuery(
     transactionsQuery(filterFromSearch(search, currentYear))
   );
-
-  const pages = list.data?.pages ?? [];
-  const [first] = pages;
-  const rows = pages.flatMap((page) => page.transactions);
-  const groups = groupByMonth(rows, first?.months ?? []);
 
   const year =
     search.year === ALL_YEARS ? undefined : (search.year ?? currentYear);
@@ -131,65 +198,18 @@ export const TransactionsView = ({
   const clear = () => {
     onSearchChange({
       category: null,
+      client: null,
       kind: null,
       q: null,
       year: null,
     });
   };
 
-  let content: React.ReactNode;
-
-  if (list.isPending) {
-    content = <LoadingState rows={6} sections={2} />;
-  } else if (list.isError) {
-    content = (
-      <ErrorState
-        error={list.error}
-        onRetry={() => {
-          void list.refetch();
-        }}
-      />
-    );
-  } else if (rows.length === 0) {
-    content = <Empty filtered={hasActiveFilters(search)} onClear={clear} />;
-  } else {
-    content = (
-      <>
-        {groups.map((group) => (
-          <section
-            className="flex flex-col md:gap-0"
-            data-bleed=""
-            key={group.month}
-          >
-            <MonthBand month={group.month} summary={group.summary} />
-            <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
-              {group.rows.map((transaction) => (
-                <TransactionRow
-                  key={transaction.id}
-                  transaction={transaction}
-                />
-              ))}
-            </ul>
-          </section>
-        ))}
-        <Footer
-          hasMore={list.hasNextPage}
-          loading={list.isFetchingNextPage}
-          onMore={() => {
-            void list.fetchNextPage();
-          }}
-          shown={rows.length}
-          total={first?.total ?? rows.length}
-          year={year}
-        />
-      </>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-4 md:gap-0">
       <TransactionsToolbar
         categories={categories.data?.categories ?? []}
+        clients={clients.data?.clients ?? []}
         currentYear={currentYear}
         onChange={onSearchChange}
         search={search}
@@ -202,7 +222,14 @@ export const TransactionsView = ({
           q={search.q}
         />
       )}
-      <div className="flex flex-col gap-5 md:gap-0">{content}</div>
+      <div className="flex flex-col gap-5 md:gap-0">
+        <LedgerContent
+          list={list}
+          onClear={clear}
+          search={search}
+          year={year}
+        />
+      </div>
     </div>
   );
 };

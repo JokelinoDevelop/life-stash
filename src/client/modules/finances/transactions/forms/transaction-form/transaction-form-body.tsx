@@ -1,4 +1,5 @@
 import { addDays } from "@shared/domain/dates";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FieldErrors } from "@/components/form/field-errors";
@@ -6,22 +7,29 @@ import { withForm } from "@/components/form/form-hook";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
 
+import type { ClientOption } from "./client-picker";
 import { noOptions } from "./frequent-categories";
 import { TRANSACTION_FORM_TEMPLATE as TEMPLATE } from "./mapper";
 import {
   AmountFields,
   CategoryField,
+  ClientField,
+  ClientHint,
   DateChip,
   DescriptionField,
   FrequentChips,
   NoteField,
 } from "./transaction-fields";
 
+const NO_CLIENTS: readonly ClientOption[] = [];
+
+const noReceipt = (): ReactNode => null;
+
 /** Desktop dialog body (3.1 / 3.2). */
 export const DesktopBody = withForm({
   defaultValues: TEMPLATE,
-  props: { optionsFor: noOptions },
-  render: function DesktopBodyRender({ form, optionsFor }) {
+  props: { clients: NO_CLIENTS, optionsFor: noOptions, receipt: noReceipt() },
+  render: function DesktopBodyRender({ clients, form, optionsFor, receipt }) {
     const { t } = useTranslation("finances");
 
     return (
@@ -33,7 +41,9 @@ export const DesktopBody = withForm({
         <NoteField form={form} />
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <CategoryField form={form} optionsFor={optionsFor} />
+          <ClientField clients={clients} form={form} />
           <DateChip form={form} />
+          {receipt}
         </div>
         <form.Field name="categoryId">
           {(field) => (
@@ -43,6 +53,7 @@ export const DesktopBody = withForm({
             />
           )}
         </form.Field>
+        <ClientHint form={form} />
         <div className="border-divider mt-4 border-t pt-3">
           <p className="text-muted-foreground mb-2 text-xs font-medium">
             {t("form.frequent")}
@@ -57,8 +68,8 @@ export const DesktopBody = withForm({
 /** Phone sheet body (5.4): centred amount, category chips, For / Date rows. */
 export const MobileBody = withForm({
   defaultValues: TEMPLATE,
-  props: { optionsFor: noOptions },
-  render: function MobileBodyRender({ form, optionsFor }) {
+  props: { clients: NO_CLIENTS, optionsFor: noOptions, receipt: noReceipt() },
+  render: function MobileBodyRender({ clients, form, optionsFor, receipt }) {
     const { t } = useTranslation("finances");
     const { t: tc } = useTranslation();
     const today = todayIso();
@@ -112,6 +123,29 @@ export const MobileBody = withForm({
             </span>
           </div>
         </div>
+        <form.Subscribe selector={(state) => state.values.kind}>
+          {(kind) =>
+            kind === "income" && (
+              <div className="mt-2 flex min-h-12 items-center gap-3 rounded-lg border px-3.5">
+                <span className="text-muted-foreground w-14 shrink-0 text-sm">
+                  {t("form2.client")}
+                </span>
+                <span className="ml-auto">
+                  <ClientField clients={clients} form={form} />
+                </span>
+              </div>
+            )
+          }
+        </form.Subscribe>
+        {receipt !== null && (
+          <div className="mt-2 flex min-h-12 items-center gap-3 rounded-lg border px-3.5">
+            <span className="text-muted-foreground w-14 shrink-0 text-sm">
+              {t("receipts.title")}
+            </span>
+            <span className="ml-auto flex items-center gap-1">{receipt}</span>
+          </div>
+        )}
+        <ClientHint form={form} />
         <div className="mt-3">
           <NoteField form={form} />
         </div>

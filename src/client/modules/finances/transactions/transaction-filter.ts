@@ -2,6 +2,7 @@
 export interface TransactionFilter {
   kind?: "income" | "expense";
   categoryId?: string;
+  clientId?: string;
   from?: string;
   to?: string;
   q?: string;

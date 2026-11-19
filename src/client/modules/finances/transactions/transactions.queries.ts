@@ -10,18 +10,18 @@ import type { SuccessBody } from "@/lib/api";
 import { financeKeys } from "../finance-keys";
 import type { TransactionFilter } from "./transaction-filter";
 
-type ListResponse = SuccessBody<
+export type TransactionPage = SuccessBody<
   Awaited<ReturnType<typeof api.finances.transactions.$get>>
 >;
 
-export type TransactionListItem = ListResponse["transactions"][number];
+export type TransactionListItem = TransactionPage["transactions"][number];
 
-export type TransactionMonth = ListResponse["months"][number];
+export type TransactionMonth = TransactionPage["months"][number];
 
 /** Newest first, a page at a time ("Load more"); the first page carries totals and month bands. */
 export const transactionsQuery = (filter: TransactionFilter) =>
   infiniteQueryOptions({
-    getNextPageParam: (last: ListResponse) => last.nextCursor ?? undefined,
+    getNextPageParam: (last: TransactionPage) => last.nextCursor ?? undefined,
     // SAFETY: widening, not narrowing: the first page has no cursor, later ones a string.
     initialPageParam: undefined as string | undefined,
     placeholderData: keepPreviousData,

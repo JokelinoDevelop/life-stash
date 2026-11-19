@@ -27,9 +27,11 @@ export const FINANCE_ERROR_CODES = [
   "finances.category_kind_mismatch",
   "finances.category_system",
   "finances.client_in_use",
+  "finances.client_name_taken",
   "finances.invoice_already_paid",
   "finances.invoice_not_paid",
   "finances.invoice_number_taken",
+  "finances.invoice_void",
   "finances.transaction_linked",
 ] as const;
 

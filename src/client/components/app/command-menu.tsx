@@ -27,6 +27,7 @@ import { ADD_CAR_SHORTCUT, CAR_SHORTCUTS } from "@/lib/shortcuts";
 import type { CarShortcutAction } from "@/lib/shortcuts";
 import {
   FinanceActionsGroup,
+  FinanceInvoicesGroup,
   FinancePagesGroup,
 } from "@/modules/finances/finance-commands";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
@@ -234,6 +235,7 @@ const CommandMenuDialog = ({
       <CommandList>
         <CommandEmpty>{t("empty")}</CommandEmpty>
         {onFinances && <FinanceActionsGroup run={run} />}
+        {onFinances && <FinanceInvoicesGroup run={run} />}
         {onFinances && <FinancePagesGroup run={run} />}
         <ActionsGroup current={current} run={run} />
         <CarsGroup cars={list} run={run} />

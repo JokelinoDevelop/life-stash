@@ -16,6 +16,8 @@ export const transactionFormSchema = z.object({
     "validation.required"
   ),
   categoryId: z.string().min(1, "validation.required"),
+  /** "" = no client. */
+  clientId: z.string(),
   currency: z.enum(CURRENCIES),
   date: isoDateField,
   description: requiredText(120),

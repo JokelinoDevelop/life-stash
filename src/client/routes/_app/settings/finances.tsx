@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { PageContent } from "@/components/app/page-header";
 import { CategoriesSettings } from "@/modules/finances/categories/categories-settings";
+import { FinanceDefaults } from "@/modules/finances/settings/finance-defaults";
 
 const FinanceSettingsPage = () => (
   <PageContent>
     <div className="flex flex-col gap-6">
+      <FinanceDefaults />
       <CategoriesSettings />
     </div>
   </PageContent>

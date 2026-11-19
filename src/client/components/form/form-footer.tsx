@@ -27,11 +27,14 @@ const ReportDirty = ({ dirty }: { dirty: boolean }) => {
  */
 export const FormFooter = ({
   onCancel,
+  secondary,
   start,
   stretchOnMobile = false,
   submitLabel,
 }: {
   onCancel: () => void;
+  /** A second action before Save, e.g. "Save as draft". */
+  secondary?: ReactNode;
   start?: ReactNode;
   /** Phones: one full-width Save (sheets that close by swiping down need no Cancel). */
   stretchOnMobile?: boolean;
@@ -76,6 +79,7 @@ export const FormFooter = ({
       >
         {t("actions.cancel")}
       </Button>
+      {secondary}
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(isSubmitting) => (
           <Button
