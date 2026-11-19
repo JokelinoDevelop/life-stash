@@ -15,6 +15,7 @@ import type { CarTab } from "@/modules/garage/cars/car-tabs";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
 import { DetailsTab } from "@/modules/garage/cars/details-tab";
 import { OverviewTab } from "@/modules/garage/cars/overview-tab";
+import { useCarShortcuts } from "@/modules/garage/cars/use-car-shortcuts";
 import { ExpensesTab } from "@/modules/garage/expenses/expenses-tab";
 import { MileageTab } from "@/modules/garage/mileage/mileage-tab";
 import { RemindersTab } from "@/modules/garage/reminders/reminders-tab";
@@ -33,8 +34,8 @@ const CarPage = () => {
   const { car } = data;
   const readOnly = car.archivedAt !== null;
   const tabStrip = useRef<HTMLDivElement>(null);
+  useCarShortcuts(carId, !readOnly);
 
-  // Keep the active pill visible in the scrollable strip on phones.
   useEffect(() => {
     const strip = tabStrip.current;
 

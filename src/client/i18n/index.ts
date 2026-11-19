@@ -2,6 +2,7 @@ import { createInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 
 import enAuth from "./en/auth.json";
+import enCommand from "./en/command.json";
 import enCommon from "./en/common.json";
 import enGarage from "./en/garage.json";
 import enGarageCatalog from "./en/garageCatalog.json";
@@ -12,6 +13,7 @@ import enGarageSpending from "./en/garageSpending.json";
 import enGarageVisits from "./en/garageVisits.json";
 import enSettings from "./en/settings.json";
 import mkAuth from "./mk/auth.json";
+import mkCommand from "./mk/command.json";
 import mkCommon from "./mk/common.json";
 import mkGarage from "./mk/garage.json";
 import mkGarageCatalog from "./mk/garageCatalog.json";
@@ -25,6 +27,7 @@ import mkSettings from "./mk/settings.json";
 export const resources = {
   en: {
     auth: enAuth,
+    command: enCommand,
     common: enCommon,
     garage: enGarage,
     garageCatalog: enGarageCatalog,
@@ -37,6 +40,7 @@ export const resources = {
   },
   mk: {
     auth: mkAuth,
+    command: mkCommand,
     common: mkCommon,
     garage: mkGarage,
     garageCatalog: mkGarageCatalog,

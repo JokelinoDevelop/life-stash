@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CarFront, ListChecks, Plus } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,8 +8,11 @@ import { ListSection } from "@/components/app/list-section";
 import { PageHeader } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { useHotkey } from "@/hooks/use-hotkey";
+import { ADD_CAR_SHORTCUT } from "@/lib/shortcuts";
 import { CarRow } from "@/modules/garage/cars/car-row";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
@@ -37,6 +40,13 @@ const GarageHome = () => {
   const [showArchived, setShowArchived] = useState(false);
   const cars = useQuery(carsQuery(showArchived));
   const summary = useSummary(cars.data?.cars);
+  const navigate = useNavigate();
+
+  const handleAddCar = () => {
+    void navigate({ to: "/garage/cars/new" });
+  };
+
+  useHotkey(ADD_CAR_SHORTCUT, handleAddCar);
 
   return (
     <>
@@ -53,6 +63,9 @@ const GarageHome = () => {
               <Link to="/garage/cars/new">
                 <Plus />
                 {t("cars.add")}
+                <Kbd className="hidden md:inline-flex">
+                  {ADD_CAR_SHORTCUT.toUpperCase()}
+                </Kbd>
               </Link>
             </Button>
           </>

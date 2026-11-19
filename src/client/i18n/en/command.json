@@ -1,0 +1,30 @@
+{
+  "title": "Command menu",
+  "description": "Search cars, pages and actions",
+  "placeholder": "Search or run a command…",
+  "empty": "No results.",
+  "search": "Search",
+  "groups": {
+    "actions": "Actions",
+    "cars": "Cars",
+    "goTo": "Go to"
+  },
+  "actions": {
+    "logOdometer": "Log odometer reading",
+    "addService": "Log service",
+    "addExpense": "Log expense",
+    "addReminder": "Add reminder",
+    "addCar": "Add car"
+  },
+  "inCar": "in {{car}}",
+  "pages": {
+    "garage": "Garage",
+    "catalog": "Items & packages",
+    "settings": "Settings"
+  },
+  "hint": {
+    "move": "move",
+    "open": "open",
+    "close": "close"
+  }
+}

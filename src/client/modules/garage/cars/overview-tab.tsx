@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
+import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
 import { carOverviewQuery } from "./cars.queries";
 import { DueNextCard, RecentVisitsCard, StatsPanel } from "./overview-cards";
@@ -18,6 +20,9 @@ const QuickActions = ({ carId }: { carId: string }) => {
         <Link params={{ carId }} to="/garage/cars/$carId/services/new">
           <Wrench />
           {t("quickActions.service")}
+          <Kbd className="hidden md:inline-flex">
+            {CAR_SHORTCUTS.addService.toUpperCase()}
+          </Kbd>
         </Link>
       </Button>
       <Button asChild size="compact" variant="outline">
@@ -28,18 +33,27 @@ const QuickActions = ({ carId }: { carId: string }) => {
         >
           <Gauge />
           {t("quickActions.odometer")}
+          <Kbd className="hidden md:inline-flex">
+            {CAR_SHORTCUTS.logOdometer.toUpperCase()}
+          </Kbd>
         </Link>
       </Button>
       <Button asChild size="compact" variant="outline">
         <Link params={{ carId }} to="/garage/cars/$carId/expenses/new">
           <Fuel />
           {t("quickActions.expense")}
+          <Kbd className="hidden md:inline-flex">
+            {CAR_SHORTCUTS.addExpense.toUpperCase()}
+          </Kbd>
         </Link>
       </Button>
       <Button asChild size="compact" variant="outline">
         <Link params={{ carId }} to="/garage/cars/$carId/reminders/new">
           <BellPlus />
           {t("quickActions.reminder")}
+          <Kbd className="hidden md:inline-flex">
+            {CAR_SHORTCUTS.addReminder.toUpperCase()}
+          </Kbd>
         </Link>
       </Button>
     </div>
