@@ -58,14 +58,16 @@ export const HistoryTab = ({
   const visits = useQuery(visitsQuery(carId));
 
   const addButton = readOnly ? null : (
-    <Button asChild size="compact">
-      <EntryDialogLink entry={{ car: carId, dialog: "service" }}>
-        <Plus />
-        {t("history.add")}
-        <Kbd className="hidden md:inline-flex">
-          {CAR_SHORTCUTS.addService.toUpperCase()}
-        </Kbd>
-      </EntryDialogLink>
+    <Button
+      size="compact"
+      render={<EntryDialogLink entry={{ car: carId, dialog: "service" }} />}
+      nativeButton={false}
+    >
+      <Plus />
+      {t("history.add")}
+      <Kbd className="hidden md:inline-flex">
+        {CAR_SHORTCUTS.addService.toUpperCase()}
+      </Kbd>
     </Button>
   );
 

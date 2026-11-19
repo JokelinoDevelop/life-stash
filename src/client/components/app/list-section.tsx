@@ -1,4 +1,4 @@
-import { Slot } from "radix-ui";
+import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -90,26 +90,26 @@ export const Panel = ({
   </section>
 );
 
-/** One row. Use `asChild` to render a link (keep the `<li>` around it). */
+/** One row. Pass `render` to make it a link (the `<li>` stays around it). */
 export const ListRow = ({
-  asChild = false,
   className,
+  render,
   ...props
-}: React.ComponentProps<"div"> & { asChild?: boolean }) => {
-  const Comp = asChild ? Slot.Root : "div";
+}: useRender.ComponentProps<"div">) => {
+  const element = useRender({
+    defaultTagName: "div",
+    props: {
+      className: cn(
+        "group/row hover:bg-background flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
+        className
+      ),
+      "data-slot": "list-row",
+      ...props,
+    },
+    render,
+  });
 
-  return (
-    <li>
-      <Comp
-        className={cn(
-          "group/row hover:bg-background flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
-          className
-        )}
-        data-slot="list-row"
-        {...props}
-      />
-    </li>
-  );
+  return <li>{element}</li>;
 };
 
 export const ListRowText = ({

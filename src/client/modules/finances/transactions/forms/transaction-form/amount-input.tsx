@@ -46,7 +46,7 @@ export const AmountInput = ({
   const currencySelect = (
     <Select
       onValueChange={(value) => {
-        if (isCurrency(value)) {
+        if (value !== null && isCurrency(value)) {
           onCurrencyChange(value);
         }
       }}

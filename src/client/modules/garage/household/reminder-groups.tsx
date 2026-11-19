@@ -33,40 +33,42 @@ const ReminderRow = ({
   const format = useFormat();
 
   return (
-    <ListRow asChild>
-      <Link
-        params={{ carId: reminder.carId }}
-        search={{ tab: "reminders" }}
-        to="/garage/cars/$carId"
+    <ListRow
+      render={
+        <Link
+          params={{ carId: reminder.carId }}
+          search={{ tab: "reminders" }}
+          to="/garage/cars/$carId"
+        />
+      }
+    >
+      <StatusRing
+        progress={reminderProgress(reminder)}
+        status={reminder.status}
+      />
+      <ListRowText
+        meta={
+          car === undefined ? undefined : (
+            <span className="inline-flex items-center gap-1.5">
+              <CarMonogram
+                className="hidden md:flex"
+                name={car.name}
+                size="xs"
+              />
+              {car.name}
+            </span>
+          )
+        }
+        title={reminder.title}
+      />
+      <span
+        className={cn(
+          "shrink-0 text-sm font-medium tabular-nums md:font-normal",
+          STATUS_TEXT_TONE[reminder.status]
+        )}
       >
-        <StatusRing
-          progress={reminderProgress(reminder)}
-          status={reminder.status}
-        />
-        <ListRowText
-          meta={
-            car === undefined ? undefined : (
-              <span className="inline-flex items-center gap-1.5">
-                <CarMonogram
-                  className="hidden md:flex"
-                  name={car.name}
-                  size="xs"
-                />
-                {car.name}
-              </span>
-            )
-          }
-          title={reminder.title}
-        />
-        <span
-          className={cn(
-            "shrink-0 text-sm font-medium tabular-nums md:font-normal",
-            STATUS_TEXT_TONE[reminder.status]
-          )}
-        >
-          {describeDue(reminder, format, t)}
-        </span>
-      </Link>
+        {describeDue(reminder, format, t)}
+      </span>
     </ListRow>
   );
 };

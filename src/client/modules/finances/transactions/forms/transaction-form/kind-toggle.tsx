@@ -20,11 +20,14 @@ export const KindToggle = ({
     <ToggleGroup
       aria-label={t("kind.label")}
       className={cn(centered && "mx-auto")}
-      onValueChange={onChange}
+      onValueChange={([next]) => {
+        if (next !== undefined) {
+          onChange(next);
+        }
+      }}
       size="segmented"
       spacing={0.5}
-      type="single"
-      value={kind}
+      value={[kind]}
       variant="segmented"
     >
       <ToggleGroupItem value="expense">{t("kind.expense")}</ToggleGroupItem>

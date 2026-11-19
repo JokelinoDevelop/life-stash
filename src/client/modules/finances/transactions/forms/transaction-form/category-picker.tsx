@@ -56,35 +56,37 @@ export const CategoryPicker = ({
       }}
       open={open}
     >
-      <PopoverTrigger asChild>
-        {trigger === "more" ? (
-          <Button size="xs" type="button" variant="chip">
-            {label ?? t("form.more")}
-          </Button>
-        ) : (
-          <Button
-            aria-invalid={invalid}
-            aria-label={t("form.category")}
-            data-empty={selected === undefined}
-            id="categoryId"
-            size="xs"
-            type="button"
-            variant="field"
-          >
-            {selected === undefined ? (
-              <Tag />
-            ) : (
-              <CategoryIcon bare name={selected.icon} />
-            )}
-            <span className={cn(selected !== undefined && "text-foreground")}>
-              {selected === undefined
-                ? t("form.pickCategory")
-                : nameOf(selected)}
-            </span>
-            <ChevronDown className="opacity-60" />
-          </Button>
-        )}
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={
+          trigger === "more" ? (
+            <Button size="xs" type="button" variant="chip">
+              {label ?? t("form.more")}
+            </Button>
+          ) : (
+            <Button
+              aria-invalid={invalid}
+              aria-label={t("form.category")}
+              data-empty={selected === undefined}
+              id="categoryId"
+              size="xs"
+              type="button"
+              variant="field"
+            >
+              {selected === undefined ? (
+                <Tag />
+              ) : (
+                <CategoryIcon bare name={selected.icon} />
+              )}
+              <span className={cn(selected !== undefined && "text-foreground")}>
+                {selected === undefined
+                  ? t("form.pickCategory")
+                  : nameOf(selected)}
+              </span>
+              <ChevronDown className="opacity-60" />
+            </Button>
+          )
+        }
+      />
       <PopoverContent align="start" variant="bare">
         <Command className="w-60">
           <CommandInput placeholder={t("form.category")} />

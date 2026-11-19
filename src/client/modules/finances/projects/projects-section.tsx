@@ -40,18 +40,20 @@ const ProjectMenu = ({ project }: { project: ProjectItem }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={t("projects.moreFor", { name: project.name })}
-          size="icon-xs"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={t("projects.moreFor", { name: project.name })}
+            size="icon-xs"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({ dialog: "project", id: project.id });
           }}
         >
@@ -59,7 +61,7 @@ const ProjectMenu = ({ project }: { project: ProjectItem }) => {
           {t("projects.rename")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             update.mutate({
               id: project.id,
               json: { status: done ? "active" : "done" },
@@ -73,7 +75,7 @@ const ProjectMenu = ({ project }: { project: ProjectItem }) => {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onSelect={async () => {
+              onClick={async () => {
                 const ok = await confirm({
                   description: t("projects.deleteDescription"),
                   title: t("projects.deleteTitle", { name: project.name }),

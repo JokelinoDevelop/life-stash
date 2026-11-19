@@ -73,7 +73,7 @@ const CarPage = () => {
         </Alert>
       )}
       <Tabs
-        onValueChange={(value) => {
+        onValueChange={(value: string) => {
           if (isCarTab(value)) {
             void navigate({ replace: true, search: { tab: value } });
           }

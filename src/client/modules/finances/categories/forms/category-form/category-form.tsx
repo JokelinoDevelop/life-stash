@@ -55,14 +55,13 @@ export const CategoryForm = ({
                 <ToggleGroup
                   aria-label={t("categories.icon")}
                   className="flex-wrap"
-                  onValueChange={(value) => {
+                  onValueChange={([value = ""]) => {
                     if (isCategoryIcon(value)) {
                       field.handleChange(value);
                     }
                   }}
                   spacing={1.5}
-                  type="single"
-                  value={field.state.value}
+                  value={[field.state.value]}
                   variant="outline"
                 >
                   {CATEGORY_ICONS.map((icon) => (

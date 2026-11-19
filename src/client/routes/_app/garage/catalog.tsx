@@ -35,21 +35,23 @@ const HeaderActions = ({
     <>
       <span className="flex md:hidden">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              aria-label={t("newMenu")}
-              size="icon-compact"
-              variant="ghost"
-            >
-              <Plus />
-            </Button>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label={t("newMenu")}
+                size="icon-compact"
+                variant="ghost"
+              />
+            }
+          >
+            <Plus />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={onNewItem}>
+            <DropdownMenuItem onClick={onNewItem}>
               <Wrench />
               {t("items.add")}
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={onNewPackage}>
+            <DropdownMenuItem onClick={onNewPackage}>
               <Boxes />
               {t("packages.add")}
             </DropdownMenuItem>

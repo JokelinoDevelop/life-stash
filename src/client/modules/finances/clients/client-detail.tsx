@@ -116,10 +116,18 @@ const InvoicesList = ({ data }: { data: ClientDetailBody }) => {
         ))}
         {data.invoices.length > INVOICE_PREVIEW && (
           <li className="flex min-h-10 items-center px-3.5 md:px-5">
-            <Button asChild size="xs" variant="link">
-              <Link search={{ client: data.client.id }} to="/finances/invoices">
-                {t("clients.allInvoicesOf", { name: data.client.name })}
-              </Link>
+            <Button
+              size="xs"
+              variant="link"
+              render={
+                <Link
+                  search={{ client: data.client.id }}
+                  to="/finances/invoices"
+                />
+              }
+              nativeButton={false}
+            >
+              {t("clients.allInvoicesOf", { name: data.client.name })}
             </Button>
           </li>
         )}

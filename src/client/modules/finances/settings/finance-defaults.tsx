@@ -108,16 +108,20 @@ export const FinanceDefaults = () => {
   } else if (settings.data !== undefined) {
     const { data } = settings;
 
+    const terms = [
+      ...new Set([...TERMS, data.defaultPaymentTermsDays]),
+    ].toSorted((a, b) => a - b);
+
     body = (
       <div className="divide-divider divide-y">
         <Row id="main-currency" label={t("defaults.currency")}>
           <Select
             onValueChange={(value) => {
-              if (isCurrency(value)) {
+              if (value !== null && isCurrency(value)) {
                 saveCurrency.mutate(value);
               }
             }}
-            value={preferences.data?.currency}
+            value={preferences.data?.currency ?? null}
           >
             <SelectTrigger id="main-currency" size="sm">
               <SelectValue />
@@ -133,8 +137,14 @@ export const FinanceDefaults = () => {
         </Row>
         <Row id="payment-terms" label={t("defaults.terms")}>
           <Select
+            items={terms.map((days) => ({
+              label: t("defaults.termsDays", { count: days }),
+              value: String(days),
+            }))}
             onValueChange={(value) => {
-              update.mutate({ defaultPaymentTermsDays: Number(value) });
+              if (value !== null) {
+                update.mutate({ defaultPaymentTermsDays: Number(value) });
+              }
             }}
             value={String(data.defaultPaymentTermsDays)}
           >
@@ -142,20 +152,22 @@ export const FinanceDefaults = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {[...new Set([...TERMS, data.defaultPaymentTermsDays])]
-                .toSorted((a, b) => a - b)
-                .map((days) => (
-                  <SelectItem key={days} value={String(days)}>
-                    {t("defaults.termsDays", { count: days })}
-                  </SelectItem>
-                ))}
+              {terms.map((days) => (
+                <SelectItem key={days} value={String(days)}>
+                  {t("defaults.termsDays", { count: days })}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </Row>
         <Row id="invoice-numbers" label={t("defaults.numbers")}>
           <Select
+            items={INVOICE_NUMBER_FORMATS.map((format) => ({
+              label: nextInvoiceNumber([], year, format),
+              value: format,
+            }))}
             onValueChange={(value) => {
-              if (isFormat(value)) {
+              if (value !== null && isFormat(value)) {
                 update.mutate({ invoiceNumberFormat: value });
               }
             }}

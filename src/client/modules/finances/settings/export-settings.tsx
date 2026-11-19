@@ -2,7 +2,7 @@ import { Download } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -39,7 +39,9 @@ export const ExportSettings = () => {
           <span className="text-sm">{t("export.year")}</span>
           <Select
             onValueChange={(value) => {
-              setYear(Number(value));
+              if (value !== null) {
+                setYear(Number(value));
+              }
             }}
             value={String(year)}
           >
@@ -61,12 +63,17 @@ export const ExportSettings = () => {
             key={type}
           >
             <span className="text-sm">{t(`export.${type}`, { year })}</span>
-            <Button asChild size="compact" variant="outline">
-              <a download href={exportUrl(type, year)}>
-                <Download />
-                {t("export.download")}
-              </a>
-            </Button>
+            <a
+              className={buttonVariants({
+                size: "compact",
+                variant: "outline",
+              })}
+              download
+              href={exportUrl(type, year)}
+            >
+              <Download />
+              {t("export.download")}
+            </a>
           </div>
         ))}
       </div>

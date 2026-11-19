@@ -68,7 +68,7 @@ const FinancesPage = () => {
             <ToggleGroup
               aria-label={t("overview.year")}
               className="hidden md:flex"
-              onValueChange={(value) => {
+              onValueChange={([value]) => {
                 const picked = Number(value);
 
                 if (picked > 0) {
@@ -82,8 +82,7 @@ const FinancesPage = () => {
               }}
               size="segmented"
               spacing={0.5}
-              type="single"
-              value={String(year)}
+              value={[String(year)]}
               variant="segmented"
             >
               <ToggleGroupItem value={String(currentYear - 1)}>

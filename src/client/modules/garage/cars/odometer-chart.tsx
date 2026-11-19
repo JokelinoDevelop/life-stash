@@ -72,15 +72,14 @@ const RangeSwitch = ({
   return (
     <ToggleGroup
       aria-label={t("overview.rangeLabel")}
-      onValueChange={(next) => {
+      onValueChange={([next = ""]) => {
         if (isRange(next)) {
           onChange(next);
         }
       }}
       size="segmented"
       spacing={0.5}
-      type="single"
-      value={value}
+      value={[value]}
       variant="segmented"
     >
       {RANGE_KEYS.map((range) => (

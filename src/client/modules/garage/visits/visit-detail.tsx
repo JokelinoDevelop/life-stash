@@ -25,13 +25,17 @@ export const VisitActions = ({ visit }: { visit: Visit }) => {
 
   return (
     <div className="flex gap-2">
-      <Button asChild variant="outline">
-        <EntryDialogLink
-          entry={{ car: visit.carId, dialog: "service", id: visit.id }}
-        >
-          <Pencil />
-          {tc("actions.edit")}
-        </EntryDialogLink>
+      <Button
+        variant="outline"
+        render={
+          <EntryDialogLink
+            entry={{ car: visit.carId, dialog: "service", id: visit.id }}
+          />
+        }
+        nativeButton={false}
+      >
+        <Pencil />
+        {tc("actions.edit")}
       </Button>
       <ConfirmDialog
         onConfirm={async () => {

@@ -38,14 +38,20 @@ const RowMenu = ({ transaction }: { transaction: TransactionListItem }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button aria-label={tc("actions.more")} size="icon-xs" variant="ghost">
-          <MoreHorizontal />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={tc("actions.more")}
+            size="icon-xs"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({ dialog: "transaction", id: transaction.id });
           }}
         >
@@ -53,7 +59,7 @@ const RowMenu = ({ transaction }: { transaction: TransactionListItem }) => {
           {tc("actions.edit")}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({
               dialog: "transaction",
               duplicate: transaction.id,
@@ -65,7 +71,7 @@ const RowMenu = ({ transaction }: { transaction: TransactionListItem }) => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={async () => {
+          onClick={async () => {
             const ok = await confirm({
               description: t("transactions.deleteDescription", {
                 description: transaction.description,

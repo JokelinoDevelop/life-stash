@@ -40,7 +40,7 @@ const KindFilter = ({
     <ToggleGroup
       aria-label={t("kind.label")}
       className="shrink-0"
-      onValueChange={(value) => {
+      onValueChange={([value]) => {
         if (value === "income" || value === "expense") {
           onChange({ kind: value });
         } else if (value === "all") {
@@ -49,8 +49,7 @@ const KindFilter = ({
       }}
       size="segmented"
       spacing={0.5}
-      type="single"
-      value={kind ?? "all"}
+      value={[kind ?? "all"]}
       variant="segmented"
     >
       <ToggleGroupItem value="all">{t("kind.all")}</ToggleGroupItem>
@@ -99,7 +98,7 @@ const CategoryFilter = ({
           ? t("transactions.allCategories")
           : nameOf(selected)}
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align="start" alignItemWithTrigger={false}>
         <SelectItem value={ANY}>{t("transactions.anyCategory")}</SelectItem>
         {kinds.map((kind) => (
           <SelectGroup key={kind}>
@@ -152,7 +151,7 @@ const YearFilter = ({
         <CalendarDays />
         {value === ALL_YEARS ? t("transactions.allYears") : value}
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align="start" alignItemWithTrigger={false}>
         {years.map((option) => (
           <SelectItem key={option} value={String(option)}>
             {option}
@@ -250,7 +249,7 @@ const ClientFilter = ({
         <Users />
         {selected?.name ?? t("form2.client")}
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent align="start" alignItemWithTrigger={false}>
         <SelectItem value={ANY}>{t("invoices.allClients")}</SelectItem>
         {clients.map((client) => (
           <SelectItem key={client.id} value={client.id}>

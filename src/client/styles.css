@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter/opsz.css";
 
 @custom-variant dark (&:is(.dark *));
@@ -255,7 +256,7 @@
 :is([data-slot="dialog-overlay"], [data-slot="alert-dialog-overlay"]) {
   animation-duration: 150ms;
 }
-[data-state="closed"]:is(
+[data-closed]:is(
   [data-slot="dialog-content"],
   [data-slot="alert-dialog-content"],
   [data-slot="popover-content"],

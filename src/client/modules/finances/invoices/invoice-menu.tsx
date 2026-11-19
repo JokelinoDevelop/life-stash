@@ -38,14 +38,20 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button aria-label={tc("actions.more")} size="icon-xs" variant="ghost">
-          <MoreHorizontal />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={tc("actions.more")}
+            size="icon-xs"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({ dialog: "invoice", id: invoice.id });
           }}
         >
@@ -54,7 +60,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
         </DropdownMenuItem>
         {invoice.status === "draft" && (
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               actions.markSent(invoice);
             }}
           >
@@ -64,7 +70,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
         )}
         {paid && (
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               void actions.markUnpaid(invoice);
             }}
           >
@@ -73,7 +79,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
           </DropdownMenuItem>
         )}
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({ dialog: "invoice", duplicate: invoice.id });
           }}
         >
@@ -82,7 +88,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
         </DropdownMenuItem>
         {open && (
           <DropdownMenuItem
-            onSelect={async () => {
+            onClick={async () => {
               const ok = await confirm({
                 confirmLabel: t("invoices.void"),
                 description: t("invoices.voidDescription"),
@@ -100,7 +106,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void actions.remove(
               invoice,
               ledger.money(invoice.amountMinor, invoice.currency)

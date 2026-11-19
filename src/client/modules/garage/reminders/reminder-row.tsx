@@ -63,26 +63,30 @@ const ReminderMenu = ({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={tc("actions.edit")}
-            size="icon-compact"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              aria-label={tc("actions.edit")}
+              size="icon-compact"
+              variant="ghost"
+            />
+          }
+        >
+          <MoreHorizontal />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <EntryDialogLink
-              entry={{ car: carId, dialog: "reminder", id: reminder.id }}
-            >
-              <Pencil />
-              {tc("actions.edit")}
-            </EntryDialogLink>
+          <DropdownMenuItem
+            render={
+              <EntryDialogLink
+                entry={{ car: carId, dialog: "reminder", id: reminder.id }}
+              />
+            }
+          >
+            <Pencil />
+            {tc("actions.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               setSkipping(true);
             }}
           >
@@ -104,12 +108,7 @@ const ReminderMenu = ({
               }
             }}
             trigger={
-              <DropdownMenuItem
-                onSelect={(event) => {
-                  event.preventDefault();
-                }}
-                variant="destructive"
-              >
+              <DropdownMenuItem closeOnClick={false} variant="destructive">
                 <Trash2 />
                 {tc("actions.delete")}
               </DropdownMenuItem>

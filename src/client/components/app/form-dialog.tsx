@@ -37,20 +37,8 @@ const FOCUSABLE =
   "input:not([type=hidden]):not([disabled]), textarea:not([disabled]), button[role=combobox]:not([disabled])";
 
 /** Open on the first field instead of the header's close button. */
-const focusFirstField = (event: Event) => {
-  const content = event.currentTarget;
-
-  if (!(content instanceof HTMLElement)) {
-    return;
-  }
-
-  const field = content.querySelector<HTMLElement>(FOCUSABLE);
-
-  if (field !== null) {
-    event.preventDefault();
-    field.focus();
-  }
-};
+const firstField = (popup: HTMLElement | null) =>
+  popup?.querySelector<HTMLElement>(FOCUSABLE) ?? true;
 
 interface FormDialogProps {
   open: boolean;
@@ -74,11 +62,13 @@ const DesktopFormDialog = ({
   title,
 }: FormDialogProps) => {
   const { t } = useTranslation();
+  const popupRef = useRef<HTMLDivElement>(null);
 
   return (
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent
-        onOpenAutoFocus={focusFirstField}
+        initialFocus={() => firstField(popupRef.current)}
+        ref={popupRef}
         showCloseButton={false}
         size={size}
         variant="bare"
@@ -91,20 +81,18 @@ const DesktopFormDialog = ({
                 <ChevronRight aria-hidden="true" className="size-3 shrink-0" />
               </>
             )}
-            <DialogTitle asChild>
-              <h2 className="text-foreground truncate text-xs font-medium">
-                {title}
-              </h2>
-            </DialogTitle>
+            <DialogTitle variant="crumb">{title}</DialogTitle>
           </div>
-          <DialogClose asChild>
-            <Button
-              aria-label={t("actions.close")}
-              size="icon-compact"
-              variant="ghost"
-            >
-              <X />
-            </Button>
+          <DialogClose
+            render={
+              <Button
+                aria-label={t("actions.close")}
+                size="icon-compact"
+                variant="ghost"
+              />
+            }
+          >
+            <X />
           </DialogClose>
         </div>
         <DialogDescription className="sr-only">

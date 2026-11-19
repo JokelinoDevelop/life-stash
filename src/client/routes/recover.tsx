@@ -70,8 +70,12 @@ const RecoverPage = () => {
         <form.AppForm>
           <form.SubmitButton label={t("recover.submit")} />
         </form.AppForm>
-        <Button asChild variant="link">
-          <Link to="/login">{t("recover.back")}</Link>
+        <Button
+          variant="link"
+          render={<Link to="/login" />}
+          nativeButton={false}
+        >
+          {t("recover.back")}
         </Button>
       </form>
     </AuthLayout>

@@ -152,20 +152,22 @@ export const DatePicker = ({
       }}
       open={open}
     >
-      <PopoverTrigger asChild>
-        <Button
-          aria-invalid={invalid}
-          aria-label={ariaLabel}
-          className={cn(variant === "field" && "w-full")}
-          data-empty={selected === undefined}
-          id={id}
-          size={variant === "chip" ? "xs" : "default"}
-          type="button"
-          variant="field"
-        >
-          <CalendarDays />
-          <span className="truncate tabular-nums">{text}</span>
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            aria-invalid={invalid}
+            aria-label={ariaLabel}
+            className={cn(variant === "field" && "w-full")}
+            data-empty={selected === undefined}
+            id={id}
+            size={variant === "chip" ? "xs" : "default"}
+            type="button"
+            variant="field"
+          />
+        }
+      >
+        <CalendarDays />
+        <span className="truncate tabular-nums">{text}</span>
       </PopoverTrigger>
       <PopoverContent align="start" collisionPadding={8} variant="bare">
         <div className="border-divider flex items-center gap-1 border-b p-2">

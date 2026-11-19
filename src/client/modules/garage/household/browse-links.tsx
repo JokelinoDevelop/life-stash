@@ -20,20 +20,18 @@ const BrowseRow = ({
   label: string;
   to: "/garage/catalog" | "/garage/history";
 }) => (
-  <ListRow asChild>
-    <Link to={to}>
-      <span
-        aria-hidden="true"
-        className="bg-muted text-subtle-foreground flex size-8 shrink-0 items-center justify-center rounded-md border [&_svg]:size-4"
-      >
-        {icon}
-      </span>
-      <ListRowText meta={description} title={label} />
-      <ChevronRight
-        aria-hidden="true"
-        className="text-muted-foreground/60 size-4 shrink-0"
-      />
-    </Link>
+  <ListRow render={<Link to={to} />}>
+    <span
+      aria-hidden="true"
+      className="bg-muted text-subtle-foreground flex size-8 shrink-0 items-center justify-center rounded-md border [&_svg]:size-4"
+    >
+      {icon}
+    </span>
+    <ListRowText meta={description} title={label} />
+    <ChevronRight
+      aria-hidden="true"
+      className="text-muted-foreground/60 size-4 shrink-0"
+    />
   </ListRow>
 );
 

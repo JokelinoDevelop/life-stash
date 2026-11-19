@@ -77,15 +77,14 @@ export const ClientForm = ({
                 <FieldLabel>{t("clients.form.kind")}</FieldLabel>
                 <ToggleGroup
                   aria-label={t("clients.form.kind")}
-                  onValueChange={(value) => {
+                  onValueChange={([value]) => {
                     if (value === "client" || value === "employer") {
                       field.handleChange(value);
                     }
                   }}
                   size="segmented"
                   spacing={0.5}
-                  type="single"
-                  value={field.state.value}
+                  value={[field.state.value]}
                   variant="segmented"
                 >
                   <ToggleGroupItem value="client">

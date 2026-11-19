@@ -24,11 +24,14 @@ const RowButton = ({
   children: ReactNode;
   onClick: () => void;
 }) => (
-  <ListRow asChild className="w-full py-2 text-left md:py-1.5">
-    <button onClick={onClick} type="button">
-      {children}
-    </button>
-  </ListRow>
+  <ListRow
+    className="w-full py-2 text-left md:py-1.5"
+    render={
+      <button onClick={onClick} type="button">
+        {children}
+      </button>
+    }
+  />
 );
 
 /** "4 items · Coolant, Water pump, Timing belt" */

@@ -85,14 +85,16 @@ export const ExpensesTab = ({
   const categories = totalsByCategory(list, Number(todayIso().slice(0, 4)));
 
   const addButton = readOnly ? null : (
-    <Button asChild size="compact">
-      <EntryDialogLink entry={{ car: carId, dialog: "expense" }}>
-        <Plus />
-        {t("add")}
-        <Kbd className="hidden md:inline-flex">
-          {CAR_SHORTCUTS.addExpense.toUpperCase()}
-        </Kbd>
-      </EntryDialogLink>
+    <Button
+      size="compact"
+      render={<EntryDialogLink entry={{ car: carId, dialog: "expense" }} />}
+      nativeButton={false}
+    >
+      <Plus />
+      {t("add")}
+      <Kbd className="hidden md:inline-flex">
+        {CAR_SHORTCUTS.addExpense.toUpperCase()}
+      </Kbd>
     </Button>
   );
 

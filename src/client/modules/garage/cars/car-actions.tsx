@@ -55,38 +55,39 @@ const AddItems = ({ carId }: { carId: string }) => {
 
   return (
     <>
-      <DropdownMenuItem asChild>
-        <EntryDialogLink entry={{ car: carId, dialog: "service" }}>
-          <Wrench />
-          {t("actions.addService")}
-          <DropdownMenuShortcut>
-            {CAR_SHORTCUTS.addService.toUpperCase()}
-          </DropdownMenuShortcut>
-        </EntryDialogLink>
+      <DropdownMenuItem
+        render={<EntryDialogLink entry={{ car: carId, dialog: "service" }} />}
+      >
+        <Wrench />
+        {t("actions.addService")}
+        <DropdownMenuShortcut>
+          {CAR_SHORTCUTS.addService.toUpperCase()}
+        </DropdownMenuShortcut>
       </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <EntryDialogLink entry={{ car: carId, dialog: "expense" }}>
-          <Fuel />
-          {t("actions.addExpense")}
-          <DropdownMenuShortcut>
-            {CAR_SHORTCUTS.addExpense.toUpperCase()}
-          </DropdownMenuShortcut>
-        </EntryDialogLink>
+      <DropdownMenuItem
+        render={<EntryDialogLink entry={{ car: carId, dialog: "expense" }} />}
+      >
+        <Fuel />
+        {t("actions.addExpense")}
+        <DropdownMenuShortcut>
+          {CAR_SHORTCUTS.addExpense.toUpperCase()}
+        </DropdownMenuShortcut>
       </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <EntryDialogLink entry={{ car: carId, dialog: "reminder" }}>
-          <BellPlus />
-          {t("actions.addReminder")}
-          <DropdownMenuShortcut>
-            {CAR_SHORTCUTS.addReminder.toUpperCase()}
-          </DropdownMenuShortcut>
-        </EntryDialogLink>
+      <DropdownMenuItem
+        render={<EntryDialogLink entry={{ car: carId, dialog: "reminder" }} />}
+      >
+        <BellPlus />
+        {t("actions.addReminder")}
+        <DropdownMenuShortcut>
+          {CAR_SHORTCUTS.addReminder.toUpperCase()}
+        </DropdownMenuShortcut>
       </DropdownMenuItem>
-      <DropdownMenuItem asChild className="md:hidden">
-        <EntryDialogLink entry={{ car: carId, dialog: "car" }}>
-          <Pencil />
-          {tc("actions.edit")}
-        </EntryDialogLink>
+      <DropdownMenuItem
+        className="md:hidden"
+        render={<EntryDialogLink entry={{ car: carId, dialog: "car" }} />}
+      >
+        <Pencil />
+        {tc("actions.edit")}
       </DropdownMenuItem>
       <DropdownMenuSeparator />
     </>
@@ -109,11 +110,7 @@ const ArchiveItem = ({ carId, run }: { carId: string; run: Run }) => {
       }}
       title={t("car.archiveTitle")}
       trigger={
-        <DropdownMenuItem
-          onSelect={(event) => {
-            event.preventDefault();
-          }}
-        >
+        <DropdownMenuItem closeOnClick={false}>
           <Archive />
           {t("car.archive")}
         </DropdownMenuItem>
@@ -150,12 +147,7 @@ const DeleteItem = ({ carId, run }: { carId: string; run: Run }) => {
       }}
       title={t("car.deleteTitle")}
       trigger={
-        <DropdownMenuItem
-          onSelect={(event) => {
-            event.preventDefault();
-          }}
-          variant="destructive"
-        >
+        <DropdownMenuItem closeOnClick={false} variant="destructive">
           <Trash2 />
           {tc("actions.delete")}
         </DropdownMenuItem>
@@ -176,14 +168,16 @@ const MoreMenu = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={tc("actions.more")}
-          size="icon-compact"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={tc("actions.more")}
+            size="icon-compact"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         {active && <AddItems carId={car.id} />}
@@ -210,25 +204,34 @@ export const CarActions = ({
       {car.archivedAt === null ? (
         <>
           <span className="hidden md:flex">
-            <Button asChild size="compact" variant="ghost">
-              <EntryDialogLink entry={{ car: car.id, dialog: "car" }}>
-                {tc("actions.edit")}
-              </EntryDialogLink>
+            <Button
+              size="compact"
+              variant="ghost"
+              render={
+                <EntryDialogLink entry={{ car: car.id, dialog: "car" }} />
+              }
+              nativeButton={false}
+            >
+              {tc("actions.edit")}
             </Button>
           </span>
-          <Button asChild size="compact">
-            <Link
-              params={{ carId: car.id }}
-              search={{ log: true, tab: "mileage" }}
-              to="/garage/cars/$carId"
-            >
-              <Plus />
-              <span className="md:hidden">{tc("actions.log")}</span>
-              <span className="hidden md:inline">{tc("actions.logEntry")}</span>
-              <Kbd className="hidden md:inline-flex">
-                {CAR_SHORTCUTS.logOdometer.toUpperCase()}
-              </Kbd>
-            </Link>
+          <Button
+            size="compact"
+            render={
+              <Link
+                params={{ carId: car.id }}
+                search={{ log: true, tab: "mileage" }}
+                to="/garage/cars/$carId"
+              />
+            }
+            nativeButton={false}
+          >
+            <Plus />
+            <span className="md:hidden">{tc("actions.log")}</span>
+            <span className="hidden md:inline">{tc("actions.logEntry")}</span>
+            <Kbd className="hidden md:inline-flex">
+              {CAR_SHORTCUTS.logOdometer.toUpperCase()}
+            </Kbd>
           </Button>
         </>
       ) : (

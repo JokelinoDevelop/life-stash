@@ -45,15 +45,14 @@ export const CashflowPanel = ({ overview }: { overview: FinanceOverview }) => {
       action={
         currencies.length > 1 ? (
           <ToggleGroup
-            onValueChange={(value) => {
+            onValueChange={([value = ""]) => {
               if (isCurrency(value, currencies)) {
                 setPicked(value);
               }
             }}
             size="segmented"
             spacing={0.5}
-            type="single"
-            value={currency}
+            value={[currency]}
             variant="segmented"
           >
             {currencies.map((code) => (

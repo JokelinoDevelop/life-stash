@@ -50,29 +50,33 @@ export const ItemHistoryCard = ({ carId }: { carId: string }) => {
         </ListRow>
       )}
       {items.map((item) => (
-        <ListRow asChild className="py-2 md:py-1.5" key={item.itemId}>
-          <Link
-            params={{ carId, visitId: item.visitId }}
-            to="/garage/cars/$carId/services/$visitId"
-          >
-            <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-medium">{item.name}</span>
-              <span className="text-muted-foreground truncate text-xs tabular-nums">
-                {[
-                  format.date(item.lastDate, item.lastDatePrecision),
-                  item.lastOdometerKm === null
-                    ? null
-                    : format.distance(item.lastOdometerKm),
-                  item.byPreviousOwner ? t("history.previousOwner") : null,
-                ]
-                  .filter((part) => part !== null)
-                  .join(" · ")}
-              </span>
-            </div>
-            <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-              {t("history.times", { count: item.timesDone })}
+        <ListRow
+          className="py-2 md:py-1.5"
+          key={item.itemId}
+          render={
+            <Link
+              params={{ carId, visitId: item.visitId }}
+              to="/garage/cars/$carId/services/$visitId"
+            />
+          }
+        >
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="truncate font-medium">{item.name}</span>
+            <span className="text-muted-foreground truncate text-xs tabular-nums">
+              {[
+                format.date(item.lastDate, item.lastDatePrecision),
+                item.lastOdometerKm === null
+                  ? null
+                  : format.distance(item.lastOdometerKm),
+                item.byPreviousOwner ? t("history.previousOwner") : null,
+              ]
+                .filter((part) => part !== null)
+                .join(" · ")}
             </span>
-          </Link>
+          </div>
+          <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+            {t("history.times", { count: item.timesDone })}
+          </span>
         </ListRow>
       ))}
     </ListSection>

@@ -96,12 +96,16 @@ export const ExpenseList = ({
                 {row}
               </ListRow>
             ) : (
-              <ListRow asChild className="py-2 md:py-1.5" key={expense.id}>
-                <EntryDialogLink
-                  entry={{ car: carId, dialog: "expense", id: expense.id }}
-                >
-                  {row}
-                </EntryDialogLink>
+              <ListRow
+                className="py-2 md:py-1.5"
+                key={expense.id}
+                render={
+                  <EntryDialogLink
+                    entry={{ car: carId, dialog: "expense", id: expense.id }}
+                  />
+                }
+              >
+                {row}
               </ListRow>
             );
           })}

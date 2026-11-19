@@ -48,7 +48,7 @@ const ItemPicker = ({
               id={`package-item-${item.id}`}
               onCheckedChange={(next) => {
                 onChange(
-                  next === true
+                  next
                     ? [...value, item.id]
                     : value.filter((id) => id !== item.id)
                 );

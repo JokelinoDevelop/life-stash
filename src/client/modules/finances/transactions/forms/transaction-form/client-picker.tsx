@@ -41,22 +41,24 @@ export const ClientPicker = ({
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild>
-        <Button
-          aria-label={clientLabel}
-          data-empty={selected === undefined}
-          size="xs"
-          type="button"
-          variant="field"
-        >
-          {selected === undefined ? (
-            <Users />
-          ) : (
-            <ClientMonogram name={selected.name} size="xs" />
-          )}
-          <span>{selected?.name ?? clientLabel}</span>
-          <ChevronDown className="opacity-60" />
-        </Button>
+      <PopoverTrigger
+        render={
+          <Button
+            aria-label={clientLabel}
+            data-empty={selected === undefined}
+            size="xs"
+            type="button"
+            variant="field"
+          />
+        }
+      >
+        {selected === undefined ? (
+          <Users />
+        ) : (
+          <ClientMonogram name={selected.name} size="xs" />
+        )}
+        <span>{selected?.name ?? clientLabel}</span>
+        <ChevronDown className="opacity-60" />
       </PopoverTrigger>
       <PopoverContent align="start" variant="bare">
         <Command className="w-60">

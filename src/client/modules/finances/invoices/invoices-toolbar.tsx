@@ -43,7 +43,7 @@ export const InvoicesToolbar = ({
       <ToggleGroup
         aria-label={t("invoices.filter.label")}
         className="shrink-0"
-        onValueChange={(value) => {
+        onValueChange={([value]) => {
           if (value === "unpaid" || value === "paid") {
             onChange({ status: value });
           } else if (value === ALL) {
@@ -52,8 +52,7 @@ export const InvoicesToolbar = ({
         }}
         size="segmented"
         spacing={0.5}
-        type="single"
-        value={search.status ?? ALL}
+        value={[search.status ?? ALL]}
         variant="segmented"
       >
         <ToggleGroupItem value={ALL}>
@@ -76,7 +75,7 @@ export const InvoicesToolbar = ({
           <Users />
           {client?.name ?? t("invoices.allClients")}
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start" alignItemWithTrigger={false}>
           <SelectItem value={ALL}>{t("invoices.allClients")}</SelectItem>
           {clients.map((row) => (
             <SelectItem key={row.id} value={row.id}>
@@ -97,7 +96,7 @@ export const InvoicesToolbar = ({
           <CalendarDays />
           {year}
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start" alignItemWithTrigger={false}>
           {years.map((option) => (
             <SelectItem key={option} value={String(option)}>
               {option}

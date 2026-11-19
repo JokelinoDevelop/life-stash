@@ -55,30 +55,30 @@ export const HouseholdMenu = ({ className }: { className?: string }) => {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          className={cn(
-            "hover:bg-sidebar-accent flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-semibold outline-none",
-            className
-          )}
-          type="button"
-        >
-          <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
-            {name.slice(0, 1).toLocaleUpperCase()}
-          </span>
-          <span className="min-w-0 flex-1 truncate">{name}</span>
-          <ChevronsUpDown className="text-muted-foreground/70 size-3.5 shrink-0" />
-        </button>
-      </DropdownMenuTrigger>
+      <DropdownMenuTrigger
+        render={
+          <button
+            className={cn(
+              "hover:bg-sidebar-accent flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-semibold outline-none",
+              className
+            )}
+            type="button"
+          >
+            <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
+              {name.slice(0, 1).toLocaleUpperCase()}
+            </span>
+            <span className="min-w-0 flex-1 truncate">{name}</span>
+            <ChevronsUpDown className="text-muted-foreground/70 size-3.5 shrink-0" />
+          </button>
+        }
+      />
       <DropdownMenuContent align="start" className="w-52">
-        <DropdownMenuItem asChild>
-          <Link to={SETTINGS}>
-            <Settings />
-            {t(SETTINGS_LABEL)}
-          </Link>
+        <DropdownMenuItem render={<Link to={SETTINGS} />}>
+          <Settings />
+          {t(SETTINGS_LABEL)}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void handleSignOut();
           }}
         >

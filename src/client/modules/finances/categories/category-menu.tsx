@@ -81,18 +81,20 @@ export const CategoryMenu = ({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={t("categories.moreFor", { name })}
-          size="icon-compact"
-          variant="ghost"
-        >
-          <MoreHorizontal />
-        </Button>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={t("categories.moreFor", { name })}
+            size="icon-compact"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuItem
-          onSelect={() => {
+          onClick={() => {
             void dialog.open({ dialog: "category", id: category.id });
           }}
         >
@@ -103,7 +105,7 @@ export const CategoryMenu = ({
           <>
             <DropdownMenuItem
               disabled={index === 0}
-              onSelect={() => {
+              onClick={() => {
                 move.mutate({ id: category.id, json: { position: index - 1 } });
               }}
             >
@@ -112,7 +114,7 @@ export const CategoryMenu = ({
             </DropdownMenuItem>
             <DropdownMenuItem
               disabled={index >= siblings - 1}
-              onSelect={() => {
+              onClick={() => {
                 move.mutate({ id: category.id, json: { position: index + 1 } });
               }}
             >
@@ -124,7 +126,7 @@ export const CategoryMenu = ({
         <DropdownMenuSeparator />
         {category.entryCount > 0 || category.archived ? (
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               void onArchive();
             }}
           >
@@ -135,7 +137,7 @@ export const CategoryMenu = ({
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               void onDelete();
             }}
             variant="destructive"

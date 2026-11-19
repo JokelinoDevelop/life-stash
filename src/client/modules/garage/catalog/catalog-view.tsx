@@ -70,15 +70,14 @@ const Toolbar = ({
       <ToggleGroup
         aria-label={t("filterLabel")}
         className="shrink-0"
-        onValueChange={(next) => {
+        onValueChange={([next = ""]) => {
           if (isView(next)) {
             onViewChange(next);
           }
         }}
         size="segmented"
         spacing={0.5}
-        type="single"
-        value={view}
+        value={[view]}
         variant="segmented"
       >
         <ToggleGroupItem value="active">{t("filter.active")}</ToggleGroupItem>

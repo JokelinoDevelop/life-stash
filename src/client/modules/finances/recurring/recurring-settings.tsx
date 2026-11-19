@@ -65,18 +65,20 @@ const Row = ({ item }: { item: RecurringItem }) => {
         }}
       />
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            aria-label={t("recurring.moreFor", { name: item.description })}
-            size="icon-compact"
-            variant="ghost"
-          >
-            <MoreHorizontal />
-          </Button>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              aria-label={t("recurring.moreFor", { name: item.description })}
+              size="icon-compact"
+              variant="ghost"
+            />
+          }
+        >
+          <MoreHorizontal />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onSelect={() => {
+            onClick={() => {
               void dialog.open({ dialog: "recurring", id: item.id });
             }}
           >
@@ -84,7 +86,7 @@ const Row = ({ item }: { item: RecurringItem }) => {
             {tc("actions.edit")}
           </DropdownMenuItem>
           <DropdownMenuItem
-            onSelect={async () => {
+            onClick={async () => {
               const ok = await confirm({
                 description: t("recurring.deleteDescription"),
                 title: t("recurring.deleteTitle", { name: item.description }),

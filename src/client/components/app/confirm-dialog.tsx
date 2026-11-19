@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -23,7 +23,7 @@ export const ConfirmDialog = ({
   onConfirm,
   children,
 }: {
-  trigger: ReactNode;
+  trigger: ReactElement;
   title?: string;
   description?: string;
   confirmLabel?: string;
@@ -36,7 +36,7 @@ export const ConfirmDialog = ({
 
   return (
     <AlertDialog onOpenChange={setOpen} open={open}>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      <AlertDialogTrigger render={trigger} />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
