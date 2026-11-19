@@ -19,7 +19,7 @@
   "inCar": "за {{car}}",
   "pages": {
     "garage": "Гаража",
-    "catalog": "Делови и пакети",
+    "catalog": "Каталог",
     "settings": "Поставки"
   },
   "hint": {

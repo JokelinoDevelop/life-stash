@@ -21,7 +21,6 @@
     "distance": "Distance"
   },
   "list": {
-    "title": "Readings",
     "empty": "No odometer readings yet. Log one to start tracking how much you drive.",
     "sinceLast": "+{{distance}} in {{days}}",
     "days_one": "{{count}} day",

@@ -4,6 +4,7 @@ import {
   addMonths,
   daysBetween,
   formatPartialDate,
+  formatShortDate,
   isIsoDate,
   normalizePartialDate,
   parseTypedDate,
@@ -67,5 +68,16 @@ describe(parseTypedDate, () => {
     expect(parseTypedDate("19.11.26")).toBeNull();
     expect(parseTypedDate("tomorrow")).toBeNull();
     expect(parseTypedDate("")).toBeNull();
+  });
+});
+
+describe(formatShortDate, () => {
+  it("drops the year from full dates", () => {
+    expect(formatShortDate("2026-07-09")).toBe("09.07");
+  });
+
+  it("keeps month and year precision as they are", () => {
+    expect(formatShortDate("2026-07-01", "month")).toBe("07.2026");
+    expect(formatShortDate("2026-01-01", "year")).toBe("2026");
   });
 });

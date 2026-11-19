@@ -12,11 +12,14 @@ import type { VisitListItem } from "./visits.queries";
 export const VisitRow = ({
   carId,
   carName,
+  shortDate = false,
   visit,
 }: {
   carId: string;
   /** Shown first in the meta line on household-wide lists. */
   carName?: string;
+  /** Under a year heading: leave the year out of the date. */
+  shortDate?: boolean;
   visit: VisitListItem;
 }) => {
   const { t } = useTranslation("garageVisits");
@@ -24,7 +27,9 @@ export const VisitRow = ({
 
   const meta = [
     carName ?? null,
-    format.date(visit.date, visit.datePrecision),
+    shortDate
+      ? format.shortDate(visit.date, visit.datePrecision)
+      : format.date(visit.date, visit.datePrecision),
     visit.odometerKm === null ? null : format.distance(visit.odometerKm),
     t(`kinds.${visit.kind}`),
     visit.shop,

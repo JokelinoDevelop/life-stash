@@ -112,5 +112,13 @@
     "description": "What you entered in this form will be lost.",
     "keep": "Keep editing",
     "confirm": "Discard"
+  },
+  "pagination": {
+    "label": "Pages",
+    "newer": "Newer",
+    "older": "Older",
+    "range": "{{start}}–{{end}} of {{total}}",
+    "showAll": "Show all {{count}}",
+    "showLess": "Show less"
   }
 }

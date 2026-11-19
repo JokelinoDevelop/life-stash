@@ -19,7 +19,7 @@
   "inCar": "in {{car}}",
   "pages": {
     "garage": "Garage",
-    "catalog": "Items & packages",
+    "catalog": "Service catalog",
     "settings": "Settings"
   },
   "hint": {

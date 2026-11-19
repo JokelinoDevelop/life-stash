@@ -2,28 +2,49 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { PagedList } from "@/components/app/list-pagination";
 import { ListSection } from "@/components/app/list-section";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
+import { paginate } from "@/lib/paginate";
 import { CAR_SHORTCUTS } from "@/lib/shortcuts";
 
+import { useTabPage } from "../cars/use-tab-page";
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
+import { groupByYear } from "./group-by-year";
 import { ItemHistoryCard } from "./item-history-card";
 import { VisitRow } from "./visit-row";
 import { visitsQuery } from "./visits.queries";
 import type { VisitListItem } from "./visits.queries";
 
-const groupByYear = (visits: VisitListItem[]): [string, VisitListItem[]][] => {
-  const groups = new Map<string, VisitListItem[]>();
+/** One page of visits under year headings; a heading counts the whole year. */
+const VisitPages = ({
+  carId,
+  visits,
+}: {
+  carId: string;
+  visits: VisitListItem[];
+}) => {
+  const { page, setPage } = useTabPage();
+  const slice = paginate(visits, page);
 
-  for (const visit of visits) {
-    const year = visit.date.slice(0, 4);
-    groups.set(year, [...(groups.get(year) ?? []), visit]);
-  }
+  const perYear = new Map(
+    groupByYear(visits).map(([year, entries]) => [year, entries.length])
+  );
 
-  return [...groups.entries()];
+  return (
+    <PagedList onPageChange={setPage} slice={slice}>
+      {groupByYear(slice.items).map(([year, entries]) => (
+        <ListSection count={perYear.get(year)} key={year} title={year}>
+          {entries.map((visit) => (
+            <VisitRow carId={carId} key={visit.id} shortDate visit={visit} />
+          ))}
+        </ListSection>
+      ))}
+    </PagedList>
+  );
 };
 
 export const HistoryTab = ({
@@ -85,13 +106,7 @@ export const HistoryTab = ({
         data-bleed=""
       >
         <div className="flex min-w-0 flex-col gap-6 md:gap-0">
-          {groupByYear(visits.data.visits).map(([year, entries]) => (
-            <ListSection count={entries.length} key={year} title={year}>
-              {entries.map((visit) => (
-                <VisitRow carId={carId} key={visit.id} visit={visit} />
-              ))}
-            </ListSection>
-          ))}
+          <VisitPages carId={carId} visits={visits.data.visits} />
         </div>
         <div>
           <ItemHistoryCard carId={carId} />

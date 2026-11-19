@@ -125,7 +125,7 @@ const MobileFormDialog = ({
 }: FormDialogProps) => (
   <Drawer onOpenChange={onOpenChange} open={open} repositionInputs={false}>
     <DrawerContent className="max-h-[92dvh]">
-      <DrawerHeader className="text-left">
+      <DrawerHeader align="start">
         <DrawerTitle>{title}</DrawerTitle>
         <DrawerDescription className="sr-only">
           {description ?? title}

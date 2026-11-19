@@ -22,6 +22,7 @@ import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { EntryDialogLink } from "@/modules/garage/entry-dialogs/entry-dialog-link";
 import { useEntryDialog } from "@/modules/garage/entry-dialogs/use-entry-dialog";
+import { BrowseLinks } from "@/modules/garage/household/browse-links";
 import { householdMoney } from "@/modules/garage/household/household-money";
 import {
   SpendingByMonth,
@@ -147,6 +148,7 @@ const GarageContent = ({
       <div className="hidden md:block">
         <SpendingByMonth cars={active} money={money} monthIndex={monthIndex} />
       </div>
+      <BrowseLinks />
     </PageStack>
   );
 };

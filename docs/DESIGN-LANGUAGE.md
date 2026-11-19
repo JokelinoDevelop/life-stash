@@ -30,8 +30,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 ## Layout
 
 - **Desktop:** the sidebar (household menu, search, Overview / Reminders / History / Service catalog, the car list, Settings) sits on the canvas; pages render inside one white bordered panel. `PageHeader` draws a 44px bar at the top of the panel (crumb › title, actions).
-- **Phones:** a Garage / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title.
-- **Lists vs padded pages:** list pages wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form, settings and catalog pages use `PageContent` (padded, max 4xl).
+- **Phones:** a Garage / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (History, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
+- **Lists vs padded pages:** list pages (including the Service catalog) wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, max 4xl).
 - The Garage home and the household Reminders page read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
 
 ## Building blocks (`src/client/components/app`)
@@ -51,6 +51,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover, Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
 | `LoadingState` (`list` / `rows` / `block`), `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
+| `PagedList` + `paginate` (`lib/paginate`) | any list that can grow past a screen: 12 rows a page, "‹ Newer · 13–24 of 79 · Older ›" |
+| `DrawerHeader align="start"` | sheet titles read top-left like their dialogs |
 
 ## Forms and dialogs
 
@@ -70,10 +72,18 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 - **Empty:** a neutral 40px icon tile, optional title, one line of help and the main action (with its key hint). No dashed boxes.
 - **Errors:** inline where the content would be: icon, "Couldn't load this", the reason and Retry. A failed route shows the same, centred, via the router's `defaultErrorComponent`.
 
+## Long lists
+
+- Lists that grow with time (car History, Mileage readings, Expenses, the household History) show **12 rows a page** with `PagedList`. The page lives in the URL (`?page=2`, absent on page 1) so refresh and Back from a detail return to it; switching car tabs starts at page 1. Turning the page scrolls back to the top of the list.
+- Paginate the flat, sorted list, then group the page (by year or month). A group heading's count and total describe the **whole** group, even when it continues on the next page.
+- Rows under a year or month heading use `format.shortDate` ("19.07"), so the meta line keeps room for the odometer and kind instead of repeating the year.
+- Summaries above a list stay compact: a strip (Expenses "This year by category") rather than a row per entry. Side lists cap at 8 with "Show all N".
+- The Service catalog is a filterable list: filter text + Active / Archived. Whole rows open the edit dialog; archive / delete live in that dialog's footer. Items show usage (times done, last done) as right-aligned columns on desktop and in the meta line on phones. N new item, P new package.
+
 ## Keyboard
 
 - ⌘K / Ctrl+K or `/` opens the command menu (scoped to the car you are on) (`CommandMenuProvider` in the app shell; `useCommandMenu().open()` from buttons).
-- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer, S service, E expense, R reminder. Garage: C add car. Show the key with `Kbd` on the matching button.
+- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer, S service, E expense, R reminder. Garage: C add car. Service catalog: N new item, P new package. Show the key with `Kbd` on the matching button.
 
 ## Rules of thumb
 

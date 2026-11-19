@@ -1,8 +1,13 @@
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, sql } from "drizzle-orm";
 
 import type { Db } from "../../../core/db";
 import { badRequest, notFound } from "../../../core/errors";
-import { garageItems, garagePackages } from "../../../db/schema/garage";
+import {
+  garageItems,
+  garagePackages,
+  garageServiceVisitItems,
+  garageServiceVisits,
+} from "../../../db/schema/garage";
 
 export const findItem = async (db: Db, householdId: string, itemId: string) => {
   const [item] = await db
@@ -128,4 +133,47 @@ export const resolveItemIdsByName = async (
   }
 
   return result;
+};
+
+export interface ItemUsage {
+  timesDone: number;
+  lastDoneOn: string | null;
+}
+
+/** How often each catalog item was logged on a service, and when last. */
+export const itemUsage = async (
+  db: Db,
+  householdId: string
+): Promise<Map<string, ItemUsage>> => {
+  const rows = await db
+    .select({
+      itemId: garageServiceVisitItems.itemId,
+      lastDoneOn: sql<string | null>`max(${garageServiceVisits.date})`,
+      timesDone: sql<number>`count(*)`,
+    })
+    .from(garageServiceVisitItems)
+    .innerJoin(
+      garageServiceVisits,
+      eq(garageServiceVisits.id, garageServiceVisitItems.visitId)
+    )
+    .where(
+      and(
+        eq(garageServiceVisits.householdId, householdId),
+        isNotNull(garageServiceVisitItems.itemId)
+      )
+    )
+    .groupBy(garageServiceVisitItems.itemId);
+
+  return new Map(
+    rows.flatMap((row) =>
+      row.itemId === null
+        ? []
+        : [
+            [
+              row.itemId,
+              { lastDoneOn: row.lastDoneOn, timesDone: row.timesDone },
+            ],
+          ]
+    )
+  );
 };

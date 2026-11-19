@@ -68,7 +68,7 @@ export const ResponsiveDialog = ({
   return (
     <Drawer onOpenChange={onOpenChange} open={open}>
       <DrawerContent>
-        <DrawerHeader className="text-left">
+        <DrawerHeader align="start">
           <DrawerTitle>{title}</DrawerTitle>
           {description !== undefined && (
             <DrawerDescription>{description}</DrawerDescription>

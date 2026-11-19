@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, Receipt } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { ListRow, ListSection } from "@/components/app/list-section";
+import { SectionHeading } from "@/components/app/list-section";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,45 @@ import { CategoryIcon } from "./expense-category";
 import { ExpenseList } from "./expense-list";
 import { expensesQuery } from "./expenses.queries";
 import { totalsByCategory } from "./group-expenses";
+import type { CategoryTotal } from "./group-expenses";
+
+/** This year's spend per category as one strip; it scrolls sideways on phones. */
+const CategoryStrip = ({ categories }: { categories: CategoryTotal[] }) => {
+  const { t } = useTranslation("garageExpenses");
+  const format = useFormat();
+
+  return (
+    <section className="flex flex-col gap-2">
+      <SectionHeading title={t("thisYear")} />
+      {categories.length === 0 ? (
+        <p className="text-muted-foreground px-0.5 text-sm">
+          {t("noneThisYear")}
+        </p>
+      ) : (
+        <div className="-mx-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0">
+          <ul className="bg-card divide-divider flex w-max min-w-full divide-x rounded-lg border">
+            {categories.map((entry) => (
+              <li
+                className="flex min-w-32 flex-1 items-center gap-2.5 px-3 py-2.5"
+                key={entry.category}
+              >
+                <CategoryIcon category={entry.category} />
+                <div className="flex min-w-0 flex-col">
+                  <span className="text-muted-foreground truncate text-xs">
+                    {t(`categories.${entry.category}`)}
+                  </span>
+                  <span className="text-sm font-medium whitespace-nowrap tabular-nums">
+                    {format.totals(entry.totals)}
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+};
 
 export const ExpensesTab = ({
   carId,
@@ -25,7 +64,6 @@ export const ExpensesTab = ({
   readOnly: boolean;
 }) => {
   const { t } = useTranslation("garageExpenses");
-  const format = useFormat();
   const expenses = useQuery(expensesQuery(carId));
 
   if (expenses.isPending) {
@@ -75,25 +113,7 @@ export const ExpensesTab = ({
       {addButton !== null && (
         <div className="flex justify-end">{addButton}</div>
       )}
-      <ListSection title={t("thisYear")}>
-        {categories.length === 0 ? (
-          <ListRow className="text-muted-foreground">
-            {t("noneThisYear")}
-          </ListRow>
-        ) : (
-          categories.map((entry) => (
-            <ListRow className="py-2 md:py-1.5" key={entry.category}>
-              <CategoryIcon category={entry.category} />
-              <span className="min-w-0 flex-1 truncate font-medium">
-                {t(`categories.${entry.category}`)}
-              </span>
-              <span className="shrink-0 font-medium tabular-nums">
-                {format.totals(entry.totals)}
-              </span>
-            </ListRow>
-          ))
-        )}
-      </ListSection>
+      <CategoryStrip categories={categories} />
       <ExpenseList carId={carId} expenses={list} readOnly={readOnly} />
     </PageStack>
   );
