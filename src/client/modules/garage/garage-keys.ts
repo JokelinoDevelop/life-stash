@@ -6,4 +6,5 @@ export const garageKeys = {
     ["garage", "cars", carId, "overview"] as const,
   cars: (includeArchived: boolean) =>
     ["garage", "cars", "list", { includeArchived }] as const,
+  household: ["garage", "household"] as const,
 };

@@ -20,7 +20,7 @@ interface SpendingSource {
   expenses: (ReportExpense & { carId: string })[];
 }
 
-const loadSources = async (
+export const loadSources = async (
   db: Db,
   householdId: string,
   carId: string | null

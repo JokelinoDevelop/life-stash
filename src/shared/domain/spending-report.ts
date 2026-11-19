@@ -109,3 +109,52 @@ export const spendingByYear = (
       CURRENCIES.indexOf(a.currency) - CURRENCIES.indexOf(b.currency)
   );
 };
+
+export interface MonthSpending {
+  /** `YYYY-MM` */
+  month: string;
+  currency: Currency;
+  amountMinor: number;
+}
+
+/**
+ * Everything I spent per month of `year` and currency: my own service visits
+ * (previous-owner work excluded) plus expenses. Months without spending are omitted.
+ */
+export const spendingByMonth = (
+  visits: readonly ReportVisit[],
+  expenses: readonly ReportExpense[],
+  year: number
+): MonthSpending[] => {
+  const months = new Map<string, MonthSpending>();
+
+  const add = (date: string, currency: Currency, amountMinor: number) => {
+    if (yearOf(date) !== year) {
+      return;
+    }
+
+    const month = date.slice(0, 7);
+    const key = `${month}:${currency}`;
+    const current = months.get(key) ?? { amountMinor: 0, currency, month };
+    current.amountMinor += amountMinor;
+    months.set(key, current);
+  };
+
+  for (const visit of visits) {
+    const amount = visit.byPreviousOwner ? null : effectiveVisitTotal(visit);
+
+    if (amount !== null) {
+      add(visit.date, visit.currency, amount);
+    }
+  }
+
+  for (const expense of expenses) {
+    add(expense.date, expense.currency, expense.amountMinor);
+  }
+
+  return [...months.values()].toSorted(
+    (a, b) =>
+      a.month.localeCompare(b.month) ||
+      CURRENCIES.indexOf(a.currency) - CURRENCIES.indexOf(b.currency)
+  );
+};
