@@ -8,7 +8,15 @@ import { createTestD1 } from "../../../test/sqlite-d1";
 
 const ORIGIN = "http://localhost";
 
-type JsonBody = Record<string, string | number | boolean | null>;
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+type JsonBody = Record<string, JsonValue>;
 
 const idBody = z.object({ id: z.string() });
 
@@ -39,6 +47,18 @@ const detailBody = z.object({
   }),
 });
 
+const documentBody = z.object({
+  document: z.object({
+    client: z.object({ name: z.string() }),
+    issuer: z.object({ name: z.string() }).nullable(),
+    lines: z.array(
+      z.object({ amountMinor: z.number(), unit: z.string().nullable() })
+    ),
+    number: z.string().nullable(),
+    totals: z.object({ totalMinor: z.number() }),
+  }),
+});
+
 const listBody = z.object({
   invoices: z.array(z.object({ id: z.string(), status: z.string() })),
   stats: z.object({ overdueCount: z.number(), unpaidCount: z.number() }),
@@ -58,12 +78,13 @@ const read = async <T>(response: Response, schema: z.ZodType<T>) =>
 
 interface Session {
   cookie: string;
+  householdId: string;
 }
 
 describe("invoices controller", () => {
   let env = { DB: createTestD1().d1 };
-  let alice: Session = { cookie: "" };
-  let bob: Session = { cookie: "" };
+  let alice: Session = { cookie: "", householdId: "" };
+  let bob: Session = { cookie: "", householdId: "" };
 
   const request = async (
     session: Session,
@@ -399,5 +420,136 @@ describe("invoices controller", () => {
     expect(statuses.map((response) => response.status)).toStrictEqual([
       404, 404, 404, 404,
     ]);
+  });
+
+  const PROFILE = {
+    address: "Ulica 1",
+    bankName: null,
+    companyId: null,
+    defaultVatRateBp: 0,
+    email: null,
+    footerNote: "Not a VAT payer",
+    iban: "MK07300000000042425",
+    name: "Jane Dev",
+    phone: null,
+    swift: null,
+    taxId: null,
+    vatRegistered: false,
+  } satisfies JsonBody;
+
+  const createItemised = async (session: Session, client: string) =>
+    await request(session, "POST", "/invoices", {
+      amountMinor: 0,
+      clientId: client,
+      currency: "EUR",
+      description: "Thank you!",
+      dueDate: "2020-01-31",
+      issue: false,
+      issueDate: "2020-01-01",
+      lines: [
+        {
+          description: "Development",
+          quantityMilli: 80_000,
+          unit: "hrs",
+          unitPriceMinor: 4000,
+          vatRateBp: 0,
+        },
+        {
+          description: "Hosting",
+          quantityMilli: 1000,
+          unit: null,
+          unitPriceMinor: 2500,
+          vatRateBp: 0,
+        },
+      ],
+      notes: null,
+      number: null,
+      periodEnd: null,
+      periodStart: null,
+    });
+
+  it("computes itemised invoices and freezes their document when issued", async () => {
+    const { clientId } = await setup();
+    const { id } = await read(await createItemised(alice, clientId), idBody);
+
+    const noProfile = await request(alice, "POST", `/invoices/${id}/issue`, {
+      number: null,
+    });
+
+    await request(alice, "PUT", "/business-profile", PROFILE);
+
+    const issued = await request(alice, "POST", `/invoices/${id}/issue`, {
+      number: null,
+    });
+
+    await request(alice, "PUT", "/business-profile", {
+      ...PROFILE,
+      name: "Renamed later",
+    });
+
+    await expect(read(noProfile, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.profile_incomplete" },
+    });
+    expect(issued.status).toBe(200);
+    await expect(
+      read(
+        await request(alice, "GET", `/invoices/${id}/document`),
+        documentBody
+      )
+    ).resolves.toStrictEqual({
+      document: {
+        client: { name: "Northwind Labs" },
+        issuer: { name: "Jane Dev" },
+        lines: [
+          { amountMinor: 320_000, unit: "hrs" },
+          { amountMinor: 2500, unit: null },
+        ],
+        number: "2020-002",
+        totals: { totalMinor: 322_500 },
+      },
+    });
+  });
+
+  it("keeps documents and generated PDFs inside the household", async () => {
+    const { clientId } = await setup();
+    const { id } = await read(await createItemised(alice, clientId), idBody);
+
+    const bobDocument = await request(bob, "GET", `/invoices/${id}/document`);
+
+    const photo = await app.request(
+      `${ORIGIN}/api/photos`,
+      {
+        body: JSON.stringify({
+          contentType: "application/pdf",
+          fileName: "Invoice-2020-002.pdf",
+          generated: true,
+          objectKey: `${alice.householdId}/finance_invoice/${id}/x.pdf`,
+          ownerId: id,
+          ownerType: "finance_invoice",
+          sizeBytes: 1000,
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie: alice.cookie,
+          origin: ORIGIN,
+        },
+        method: "POST",
+      },
+      env
+    );
+
+    const { id: photoId } = await read(photo, idBody);
+
+    const removed = await app.request(
+      `${ORIGIN}/api/photos/${photoId}`,
+      {
+        headers: { cookie: alice.cookie, origin: ORIGIN },
+        method: "DELETE",
+      },
+      env
+    );
+
+    expect(bobDocument.status).toBe(404);
+    expect(removed.status).toBe(409);
   });
 });

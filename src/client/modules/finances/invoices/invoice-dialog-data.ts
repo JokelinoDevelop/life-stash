@@ -4,8 +4,10 @@ import { useQuery } from "@tanstack/react-query";
 import { emptyToNull } from "@/lib/form-schemas";
 import { todayIso } from "@/lib/partial-date";
 
+import { businessProfileQuery } from "../business-profile/business-profile.queries";
 import { clientsQuery } from "../clients/clients.queries";
 import { projectsQuery } from "../projects/projects.queries";
+import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import {
   duplicateToFormValues,
   invoiceFormDefaults,
@@ -15,22 +17,31 @@ import type { InvoiceFormValues } from "./forms/invoice-form/schema";
 import type { InvoiceDetail } from "./invoices.queries";
 import { useConfirmIssue } from "./use-invoice-actions";
 
-/** Clients that can be invoiced (active ones, plus the invoice's own if archived). */
-export const useClientOptions = (keep: string | null) => {
+const DEFAULT_TERMS = 30;
+
+/**
+ * What the invoice editor needs besides the invoice: clients that can be invoiced (active,
+ * plus the invoice's own if archived), projects, default terms and your details.
+ */
+export const useEditorContext = (keepClient: string | null) => {
   const year = Number(todayIso().slice(0, 4));
   const clients = useQuery(clientsQuery(year));
+  const projects = useQuery(projectsQuery(null));
+  const settings = useQuery(financeSettingsQuery);
+  const profile = useQuery(businessProfileQuery);
 
   const options: InvoiceClientOption[] = (clients.data?.clients ?? []).filter(
-    (client) => !client.archived || client.id === keep
+    (client) => !client.archived || client.id === keepClient
   );
 
-  const projects = useQuery(projectsQuery(null));
-
-  // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
   return {
-    isPending: clients.isPending || projects.isPending,
-    options,
+    clients: options,
+    isPending: [clients, projects, settings, profile].some(
+      (query) => query.isPending
+    ),
+    profile: profile.data?.profile ?? null,
     projects: projects.data?.projects ?? [],
+    terms: settings.data?.defaultPaymentTermsDays ?? DEFAULT_TERMS,
   };
 };
 
@@ -41,6 +52,7 @@ export const newInvoiceDefaults = (context: {
   forClient: string | undefined;
   source: InvoiceDetail | undefined;
   terms: number;
+  defaultVatRateBp: number;
 }) =>
   context.source === undefined
     ? invoiceFormDefaults({
@@ -48,6 +60,7 @@ export const newInvoiceDefaults = (context: {
           (client) => client.id === context.forClient
         ),
         currency: context.currency,
+        defaultVatRateBp: context.defaultVatRateBp,
         termsDays: context.terms,
         today: todayIso(),
       })

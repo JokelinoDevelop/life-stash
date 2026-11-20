@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useConfirm } from "@/components/app/confirm/confirm-context";
 
 import { useLedgerMoney } from "../money";
+import { useStoreInvoicePdf } from "./invoice-document";
 import { useInvoiceNumber } from "./invoice-labels";
 import {
   useDeleteInvoice,
@@ -25,6 +26,8 @@ interface InvoiceRef {
   paidAt: string | null;
   amountMinor: number;
   currency: "MKD" | "EUR" | "USD";
+  /** Has lines: issuing also draws and keeps its PDF. */
+  itemised: boolean;
 }
 
 /** Asks "Issue invoice 2026-012?" with the number it will get; resolves whether confirmed. */
@@ -63,6 +66,7 @@ export const useInvoiceActions = () => {
   const unpaid = useMarkUnpaid();
   const voided = useVoidInvoice();
   const removed = useDeleteInvoice();
+  const storePdf = useStoreInvoicePdf();
 
   return {
     /** Issues a draft with the next number of its issue year. */
@@ -72,6 +76,10 @@ export const useInvoiceActions = () => {
       }
 
       const result = await issued.mutateAsync({ id: invoice.id, number: null });
+
+      if (invoice.itemised) {
+        await storePdf(result, { download: false });
+      }
 
       return result.number;
     },

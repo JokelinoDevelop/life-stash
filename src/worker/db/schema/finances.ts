@@ -163,6 +163,36 @@ export const financeInvoices = sqliteTable(
   ]
 );
 
+/** The lines of an itemised invoice; amounts are computed per line (half-up) and stored. */
+export const financeInvoiceLines = sqliteTable(
+  "finance_invoice_lines",
+  {
+    /** quantity × unit price, rounded half-up to the minor unit. */
+    amountMinor: integer("amount_minor").notNull(),
+    description: text("description").notNull(),
+    householdId: householdId(),
+    id: id(),
+    invoiceId: text("invoice_id")
+      .notNull()
+      .references(() => financeInvoices.id, { onDelete: "cascade" }),
+    position: integer("position").notNull(),
+    /** Thousandths: 1.5 hours is 1500. */
+    quantityMilli: integer("quantity_milli").notNull(),
+    /** Printed after the quantity ("hrs", "дена"); up to 12 characters. */
+    unit: text("unit"),
+    unitPriceMinor: integer("unit_price_minor").notNull(),
+    vatMinor: integer("vat_minor").notNull().default(0),
+    /** Basis points: 1800 = 18%. */
+    vatRateBp: integer("vat_rate_bp").notNull().default(0),
+  },
+  (table) => [
+    index("finance_invoice_lines_invoice_idx").on(
+      table.householdId,
+      table.invoiceId
+    ),
+  ]
+);
+
 /** Your details for invoices (one row per household, created on first save). */
 export const financeBusinessProfile = sqliteTable("finance_business_profile", {
   address: text("address").notNull().default(""),

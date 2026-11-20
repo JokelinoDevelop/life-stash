@@ -29,6 +29,17 @@ export interface GetInvoiceResponse {
     createdAt: string;
     attachments: number;
     firstAttachedAt: string | null;
+    itemised: boolean;
+    lines: {
+      id: string;
+      description: string;
+      quantityMilli: number;
+      unit: string | null;
+      unitPriceMinor: number;
+      vatRateBp: number;
+      amountMinor: number;
+      vatMinor: number;
+    }[];
     /** The income entry "mark paid" booked. */
     transaction: {
       id: string;
@@ -56,6 +67,17 @@ export const toGetInvoiceResponse = (
     id: detail.id,
     issueDate: detail.issueDate,
     issuedAt: detail.issuedAt,
+    itemised: detail.itemised,
+    lines: detail.lines.map((line) => ({
+      amountMinor: line.amountMinor,
+      description: line.description,
+      id: line.id,
+      quantityMilli: line.quantityMilli,
+      unit: line.unit,
+      unitPriceMinor: line.unitPriceMinor,
+      vatMinor: line.vatMinor,
+      vatRateBp: line.vatRateBp,
+    })),
     notes: detail.notes,
     number: detail.number,
     paidAt: detail.paidAt,

@@ -1,4 +1,4 @@
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 
 import { FieldErrors } from "./field-errors";
@@ -6,10 +6,12 @@ import { useFieldContext } from "./form-context";
 import { OptionalHint } from "./optional-hint";
 
 export const TextareaField = ({
+  description,
   label,
   optional,
   placeholder,
 }: {
+  description?: string;
   label: string;
   optional?: boolean;
   placeholder?: string;
@@ -35,6 +37,9 @@ export const TextareaField = ({
         rows={3}
         value={field.state.value}
       />
+      {description !== undefined && (
+        <FieldDescription>{description}</FieldDescription>
+      )}
       <FieldErrors errors={field.state.meta.errors} show={invalid} />
     </Field>
   );

@@ -48,8 +48,8 @@ function DialogContent({
   showCloseButton?: boolean;
   /** `bare`: no padding or gap; the content brings its own header, body and footer. */
   variant?: "default" | "bare";
-  /** Width of a `bare` dialog: `md` for quick entries, `lg` for longer forms. */
-  size?: "md" | "lg";
+  /** Width of a `bare` dialog: `md` for quick entries, `lg` for longer forms, `full` for editors with a preview. */
+  size?: "md" | "lg" | "full";
 }) {
   return (
     <DialogPortal>
@@ -63,6 +63,9 @@ function DialogContent({
             "bg-card flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden p-0",
           variant === "bare" && size === "md" && "sm:max-w-lg",
           variant === "bare" && size === "lg" && "sm:max-w-3xl",
+          variant === "bare" &&
+            size === "full" &&
+            "h-[calc(100dvh-4rem)] sm:max-w-[min(88rem,calc(100%-4rem))]",
           className
         )}
         {...props}

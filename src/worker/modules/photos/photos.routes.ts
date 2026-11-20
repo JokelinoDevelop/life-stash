@@ -78,7 +78,12 @@ export const photoRoutes = new Hono<AppEnv>()
 
     const [row] = await c.var.db
       .insert(photos)
-      .values({ ...input, fileName: input.fileName ?? null, householdId })
+      .values({
+        ...input,
+        fileName: input.fileName ?? null,
+        generated: input.generated ?? false,
+        householdId,
+      })
       .returning({ id: photos.id });
 
     const body: CreatePhotoResponse = { id: row?.id ?? "" };
@@ -109,6 +114,7 @@ export const photoRoutes = new Hono<AppEnv>()
           contentType: row.contentType,
           createdAt: row.createdAt,
           fileName: row.fileName,
+          generated: row.generated,
           id: row.id,
           sizeBytes: row.sizeBytes,
           url:

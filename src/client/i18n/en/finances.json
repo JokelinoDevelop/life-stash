@@ -315,7 +315,8 @@
       "tooBig": "{{name}} is larger than 10 MB",
       "uploaded": "File added",
       "removed": "File removed",
-      "uploading": "Uploading…"
+      "uploading": "Uploading…",
+      "generated": "Generated when issued · kept as sent"
     },
     "markPaidDialog": {
       "title": "Mark as paid",
@@ -349,7 +350,44 @@
     "notesSaved": "Notes saved",
     "deleteDraftTitle": "Delete this draft for {{client}}?",
     "deleteDraftDescription": "A draft of {{amount}}. It has no number yet, so nothing is skipped. You can undo this for a few seconds.",
-    "deleteDraftConfirm": "Delete draft"
+    "deleteDraftConfirm": "Delete draft",
+    "editor": {
+      "recordInstead": "Record an invoice made elsewhere",
+      "writeInstead": "Write the invoice here instead",
+      "recordedHint": "For an invoice you made in another tool: type its total and attach its PDF.",
+      "lines": "Lines",
+      "addLine": "Add line",
+      "description": "Description",
+      "quantity": "Qty",
+      "unit": "Unit",
+      "unitPrice": "Unit price",
+      "vatRate": "VAT",
+      "amount": "Amount",
+      "moveUp": "Move line up",
+      "moveDown": "Move line down",
+      "removeLine": "Remove line",
+      "subtotal": "Subtotal",
+      "vat": "VAT",
+      "total": "Total",
+      "note": "Note on the invoice",
+      "notePlaceholder": "Thank you for your business",
+      "noteHint": "Printed under the lines.",
+      "privateNotesHint": "Only you see these.",
+      "issueDownload": "Issue & download",
+      "preview": "Preview",
+      "previewLabel": "Invoice preview",
+      "previewFailed": "Couldn't draw the preview.",
+      "previewLoading": "Drawing the preview…",
+      "noProfile": "Add your details so the invoice says who it's from and where to pay.",
+      "addDetails": "Add your details",
+      "writtenIn": {
+        "en": "Written in English",
+        "mk": "Written in Macedonian"
+      },
+      "pdfFailed": "Invoice {{number}} is issued, but its PDF couldn't be saved. Download it from the invoice."
+    },
+    "downloadPdf": "Download PDF",
+    "downloadCommand": "Download invoice {{number}}"
   },
   "clients": {
     "title": "Clients",
@@ -567,5 +605,34 @@
     "preview": "Invoice header preview",
     "invoiceWord": "Invoice",
     "saved": "Your details saved"
+  },
+  "pdf": {
+    "invoice": "Invoice",
+    "draft": "Draft",
+    "number": "No.",
+    "issued": "Issued",
+    "due": "Due",
+    "period": "Period",
+    "billTo": "Bill to",
+    "description": "Description",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "vat": "VAT",
+    "amount": "Amount",
+    "subtotal": "Subtotal",
+    "vatAt": "VAT {{rate}}",
+    "amountDue": "Amount due",
+    "payment": "Payment",
+    "reference": "Reference: {{number}}",
+    "taxId": "Tax ID",
+    "companyId": "Company ID",
+    "bank": "Bank",
+    "iban": "IBAN",
+    "swift": "SWIFT/BIC",
+    "units": {
+      "hours": "hrs",
+      "days": "days",
+      "pieces": "pcs"
+    }
   }
 }

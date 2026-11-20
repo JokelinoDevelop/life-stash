@@ -1,5 +1,5 @@
 import { daysToGetPaid } from "@shared/domain/finances/invoices";
-import { Lock } from "lucide-react";
+import { Download, Lock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -14,6 +14,7 @@ import { useCategoryName } from "../categories/category-label";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { useLedgerMoney } from "../money";
 import { InvoiceNotesForm } from "./forms/invoice-notes-form/invoice-notes-form";
+import { useDownloadInvoicePdf } from "./invoice-document";
 import { useInvoiceFor } from "./invoice-labels";
 import { InvoiceStatusIcon } from "./invoice-status-icon";
 import type { InvoiceDetail } from "./invoices.queries";
@@ -102,6 +103,7 @@ const ViewFooter = ({
   const { t } = useTranslation("finances");
   const dialog = useFinanceDialog();
   const actions = useInvoiceActions();
+  const download = useDownloadInvoicePdf();
   const unpaid = invoice.status === "sent" || invoice.status === "overdue";
 
   return (
@@ -120,6 +122,18 @@ const ViewFooter = ({
         </Button>
       )}
       <span className="flex-1" />
+      {invoice.itemised && (
+        <Button
+          onClick={() => {
+            void download(invoice);
+          }}
+          size="compact"
+          variant="outline"
+        >
+          <Download />
+          {t("invoices.downloadPdf")}
+        </Button>
+      )}
       {invoice.status === "paid" && (
         <Button
           onClick={async () => {

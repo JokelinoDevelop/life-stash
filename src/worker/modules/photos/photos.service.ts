@@ -2,7 +2,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import type { Db } from "../../core/db";
 import type { Bindings } from "../../core/env";
-import { notFound } from "../../core/errors";
+import { conflict, notFound } from "../../core/errors";
 import { photoStorageFor } from "../../core/photo-storage";
 import { photos } from "../../db/schema/core";
 import { financeInvoices, financeTransactions } from "../../db/schema/finances";
@@ -133,9 +133,18 @@ export const deletePhoto = async (
   photoId: string
 ): Promise<void> => {
   const rows = await db
-    .select({ id: photos.id, objectKey: photos.objectKey })
+    .select({
+      generated: photos.generated,
+      id: photos.id,
+      objectKey: photos.objectKey,
+    })
     .from(photos)
     .where(and(eq(photos.id, photoId), eq(photos.householdId, householdId)));
+
+  // The PDF an issued invoice was sent as stays; it goes only with the invoice itself.
+  if (rows.some((row) => row.generated)) {
+    throw conflict("Generated invoice PDFs are kept as sent");
+  }
 
   if (rows.length === 0) {
     throw notFound();

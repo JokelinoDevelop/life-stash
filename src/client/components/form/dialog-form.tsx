@@ -12,10 +12,13 @@ const PORTALLED_POPUPS =
   "[data-slot=select-content], [data-slot=popover-content], [data-slot=dropdown-menu-content]";
 
 export const DialogForm = ({
+  aside,
   children,
   footer,
   onSubmit,
 }: {
+  /** Shown beside the scrolling body on desktop, e.g. a live preview. */
+  aside?: ReactNode;
   children: ReactNode;
   footer: ReactNode;
   onSubmit: () => void;
@@ -68,9 +71,18 @@ export const DialogForm = ({
       }}
       ref={formRef}
     >
-      <div className="divide-divider min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain">
-        {children}
-      </div>
+      {aside === undefined ? (
+        <div className="divide-divider min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain">
+          {children}
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1">
+          <div className="divide-divider min-h-0 min-w-0 flex-1 divide-y overflow-y-auto overscroll-contain md:w-[36rem] md:flex-none md:border-r">
+            {children}
+          </div>
+          {aside}
+        </div>
+      )}
       {footer}
     </form>
   );

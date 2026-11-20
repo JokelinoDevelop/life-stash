@@ -27,6 +27,8 @@ export interface ListInvoicesResponse {
     status: InvoiceStatus;
     daysOverdue: number;
     attachments: number;
+    /** Has lines: the app draws its PDF. */
+    itemised: boolean;
   }[];
   stats: {
     invoiced: MoneyTotal[];
@@ -55,6 +57,7 @@ export const toListInvoicesResponse = (
     id: row.id,
     issueDate: row.issueDate,
     issuedAt: row.issuedAt,
+    itemised: row.itemised,
     number: row.number,
     paidAt: row.paidAt,
     periodEnd: row.periodEnd,

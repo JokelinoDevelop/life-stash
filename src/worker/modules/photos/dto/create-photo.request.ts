@@ -2,16 +2,15 @@ import { z } from "zod";
 
 import { MAX_PDF_BYTES, MAX_PHOTO_BYTES } from "./upload-url.request";
 
+const PDF = "application/pdf";
+
 export const createPhotoRequest = z
   .object({
-    contentType: z.enum([
-      "image/jpeg",
-      "image/png",
-      "image/webp",
-      "application/pdf",
-    ]),
+    contentType: z.enum(["image/jpeg", "image/png", "image/webp", PDF]),
     /** The original name, shown next to documents. */
     fileName: z.string().trim().min(1).max(200).nullable().optional(),
+    /** An invoice PDF the app generated when issuing (kept as sent). */
+    generated: z.boolean().optional(),
     objectKey: z.string().min(1).max(300),
     ownerId: z.uuid(),
     ownerType: z.enum([
@@ -23,8 +22,12 @@ export const createPhotoRequest = z
     sizeBytes: z.number().int().min(1).max(MAX_PDF_BYTES),
   })
   .refine(
-    (input) =>
-      input.contentType === "application/pdf" ||
-      input.sizeBytes <= MAX_PHOTO_BYTES,
+    (input) => input.contentType === PDF || input.sizeBytes <= MAX_PHOTO_BYTES,
     { message: "Images are limited to 5 MB", path: ["sizeBytes"] }
+  )
+  .refine(
+    (input) =>
+      input.generated !== true ||
+      (input.ownerType === "finance_invoice" && input.contentType === PDF),
+    { message: "Only invoice PDFs can be generated", path: ["generated"] }
   );

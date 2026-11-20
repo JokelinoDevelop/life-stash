@@ -14,7 +14,7 @@ All ids are random UUIDs (text). Timestamps are ISO-8601 UTC strings. Calendar d
 | `auth_challenges` | id, challenge, purpose (`register`/`login`/`add-passkey`), user_id?, expires_at |
 | `recovery_codes` | id, user_id, code_hash, used_at |
 | `push_subscriptions` | id, user_id, endpoint (unique), p256dh, auth, created_at |
-| `photos` | id, household_id, object_key, content_type (images, or `application/pdf`), size_bytes, owner_type (`service_visit`/`expense`/`finance_invoice`/`finance_transaction`), owner_id, file_name?, created_at |
+| `photos` | id, household_id, object_key, content_type (images, or `application/pdf`), size_bytes, owner_type (`service_visit`/`expense`/`finance_invoice`/`finance_transaction`), owner_id, file_name?, generated (bool; an invoice PDF the app drew when issuing, kept as sent and not removable), created_at |
 
 ## Garage
 
@@ -80,15 +80,25 @@ Indexes: (household_id, date), (household_id, category_id), unique (invoice_id) 
 
 ### `finance_clients`
 
-id, household_id, name (unique per household, case-insensitive), kind (`client`/`employer`), currency, payment_terms_days (default 30), email?, notes?, archived_at?, created_at, updated_at
+id, household_id, name (unique per household, case-insensitive), kind (`client`/`employer`), currency, payment_terms_days (default 30), email?, address?, tax_id?, invoice_language (`en`/`mk`, defaults to the household language), notes?, archived_at?, created_at, updated_at
 
 A client with invoices or income is archived, not deleted (`finances.client_in_use`).
 
 ### `finance_invoices`
 
-id, household_id, client_id, project_id?, number, issue_date, due_date, period_start?, period_end? (the billed month), description?, amount_minor, currency, status (`draft`/`sent`/`paid`/`void`), sent_at? (date), paid_at? (date the money arrived), overdue_notified_at? (the one push heads-up; cleared when the due date changes), notes?, deleted_at?, created_at, updated_at
+id, household_id, client_id, project_id?, number? (null while a draft), number_year?, number_seq?, issue_date, due_date, period_start?, period_end? (the billed month), description? (recorded: what it was for; itemised: the note printed under the lines), amount_minor (itemised: the computed total), currency, status (`draft`/`sent`/`paid`/`void`), issued_at?, sent_at? (date), paid_at? (date the money arrived), voided_at?, issuer_snapshot? / client_snapshot? (JSON, frozen when issued), overdue_notified_at? (the one push heads-up; cleared when the due date changes), notes? (private, editable after issuing), deleted_at?, created_at, updated_at
 
-Unique: (household_id, number) among live rows. **Overdue is derived** (`sent` and `due_date` before today in the household's time zone), never stored. Marking paid inserts one income entry in the system "Invoices" category with `invoice_id`; a paid invoice is locked until marked unpaid. Deleting soft-deletes the invoice and its entry together (Undo restores both).
+Unique: (household_id, number) and (household_id, number_year, number_seq) among live numbered rows. The next number is `max(number_seq) + 1` of the issue year (`NNN` format: of all years); plain legacy numbers (`011`) count as a sequence of their issue year. **Overdue is derived** (`sent` and `due_date` before today in the household's time zone), never stored. Issuing assigns the number, freezes `issuer_snapshot` (your business profile) and `client_snapshot`, and locks everything but notes and files. Sent invoices are voided, never deleted; only drafts are soft-deleted (Undo). Marking paid inserts one income entry in the system "Invoices" category with `invoice_id`; a paid invoice is locked until marked unpaid.
+
+### `finance_invoice_lines`
+
+id, household_id, invoice_id (cascade), position, description, quantity_milli (1.5 → 1500), unit? (≤ 12 chars), unit_price_minor, vat_rate_bp (basis points), amount_minor, vat_minor
+
+An invoice with lines is _itemised_ (amount computed: each line rounded half-up, VAT per line); one without is _recorded_ (amount typed, PDF attached by hand). Index: (household_id, invoice_id).
+
+### `finance_business_profile` (one row per household, created on first save)
+
+household_id (pk), name, address, tax_id?, company_id?, email?, phone?, bank_name?, iban?, swift?, vat_registered (default false), default_vat_rate_bp (default 0), footer_note?, updated_at
 
 ### `finance_settings` (one row per household, created on first change)
 

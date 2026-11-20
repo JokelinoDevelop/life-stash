@@ -19,6 +19,8 @@ export interface AttachmentOwner {
 
 export const MAX_PDF_BYTES = 10 * 1024 * 1024;
 
+const PDF = "application/pdf" as const;
+
 export type Attachment = SuccessBody<
   Awaited<ReturnType<typeof api.photos.$get>>
 >["photos"][number];
@@ -33,8 +35,8 @@ export const attachmentsQuery = (owner: AttachmentOwner) =>
 
 /** PDFs go up as they are; images are resized and compressed first. */
 const prepare = async (file: File) => {
-  if (file.type === "application/pdf") {
-    return { blob: file, contentType: "application/pdf" as const };
+  if (file.type === PDF) {
+    return { blob: file, contentType: PDF };
   }
 
   return await compressPhoto(file);
@@ -65,6 +67,45 @@ const uploadOne = async (owner: AttachmentOwner, file: File): Promise<void> => {
         ...owner,
         contentType,
         fileName: file.name,
+        objectKey,
+        sizeBytes: blob.size,
+      },
+    })
+  );
+};
+
+/** Keeps the PDF the app drew when issuing an invoice, marked `generated` (not removable). */
+export const uploadGeneratedPdf = async (
+  invoiceId: string,
+  blob: Blob,
+  fileName: string
+): Promise<void> => {
+  const owner = { ownerId: invoiceId, ownerType: "finance_invoice" } as const;
+  const contentType = PDF;
+
+  const { objectKey, uploadUrl } = await unwrap(
+    api.photos["upload-url"].$post({
+      json: { ...owner, contentType, sizeBytes: blob.size },
+    })
+  );
+
+  const response = await fetch(uploadUrl, {
+    body: blob,
+    headers: { "Content-Type": contentType },
+    method: "PUT",
+  });
+
+  if (!response.ok) {
+    throw new Error(`Upload failed with ${response.status}`);
+  }
+
+  await unwrap(
+    api.photos.$post({
+      json: {
+        ...owner,
+        contentType,
+        fileName,
+        generated: true,
         objectKey,
         sizeBytes: blob.size,
       },

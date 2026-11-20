@@ -77,7 +77,7 @@ src/worker/modules/finances/
 ├─ finances.module.ts          builds repositories + services for one household
 ├─ finances.cron.ts            daily purge of soft-deleted records
 ├─ categories/ transactions/ clients/ invoices/ settings/ overview/
-│  projects/ recurring/ export/
+│  projects/ recurring/ export/ business-profile/
 │                              <feature>.controller.ts · .service.ts · .repository.ts · dto/
 ├─ attachments/                counts files per finance record (files live in `photos`)
 ├─ notifications/              overdue-invoice push heads-ups (used by the cron)
@@ -88,6 +88,7 @@ src/worker/modules/finances/
 - Controllers validate the DTO, call one service method and map the result to the response DTO; they never import Drizzle. Services hold the rules, take repositories by constructor and never import Hono. Repositories are constructed with `(db, householdId)` and scope every query.
 - Business errors use typed codes (`finances.category_in_use`, `finances.invoice_number_taken`, …) via `domainError(code, { field })`; the client translates them (`finances:errors.*`) and shows field errors on the matching input.
 - Deletes are soft (`deleted_at`) so the Undo toast can call `POST …/:id/restore`.
+- Invoices (F4): `InvoicesService` holds the write rules; `InvoiceReads` (list, detail, document), `InvoiceIssuing` (numbers, frozen snapshots) and `InvoicePayments` (mark paid / unpaid) sit beside it. Invoice PDFs are drawn in the browser with `@react-pdf/renderer` (`client/modules/finances/invoice-pdf`, Inter TTF with Cyrillic), loaded with `import()` only when previewing, issuing or downloading, and kept out of the service-worker precache. The same component draws the editor's live preview and the issued PDF, which is uploaded through the photos pipeline as a `generated` attachment.
 - `GET /finances/export.csv?year=&type=transactions|invoices` returns a UTF-8 CSV (with BOM) as a download; it is linked directly rather than called through the RPC client.
 - `GET /finances/overview` is one request for the overview page. Its "Car costs" line comes from Garage's spending service through `overview/garage-costs.ts` (service → service, read only), so car costs are never copied into the ledger.
 - Tests: services with in-memory fakes; controllers through `app.request()` against a real SQLite database (`src/worker/test/sqlite-d1.ts`, Node's built-in `node:sqlite` behind a D1 shim with all migrations applied), including household isolation.

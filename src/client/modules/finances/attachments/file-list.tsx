@@ -24,6 +24,7 @@ const FileRow = ({
   contentType,
   href,
   name,
+  note,
   onRemove,
   size,
 }: {
@@ -31,6 +32,8 @@ const FileRow = ({
   contentType: string;
   href?: string;
   name: string;
+  /** A second line, e.g. "Generated when issued". */
+  note?: string;
   onRemove?: () => void;
   size: number;
 }) => {
@@ -42,18 +45,23 @@ const FileRow = ({
       <span className="bg-muted text-subtle-foreground flex size-6 shrink-0 items-center justify-center rounded-sm border [&_svg]:size-3.5">
         {pdf ? <FileText /> : <ImageIcon />}
       </span>
-      {href === undefined ? (
-        <span className="min-w-0 flex-1 truncate text-sm">{name}</span>
-      ) : (
-        <a
-          className="hover:text-primary min-w-0 flex-1 truncate text-sm font-medium"
-          href={href}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {name}
-        </a>
-      )}
+      <span className="flex min-w-0 flex-1 flex-col">
+        {href === undefined ? (
+          <span className="truncate text-sm">{name}</span>
+        ) : (
+          <a
+            className="hover:text-primary truncate text-sm font-medium"
+            href={href}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {name}
+          </a>
+        )}
+        {note !== undefined && (
+          <span className="text-muted-foreground truncate text-xs">{note}</span>
+        )}
+      </span>
       <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
         {busy ? t("invoices.files.uploading") : formatFileSize(size)}
       </span>
@@ -203,16 +211,21 @@ export const FileList = ({
               href={file.url}
               key={file.id}
               name={file.fileName ?? file.id}
-              onRemove={() => {
-                remove.mutate(file.id, {
-                  onError: (error) => {
-                    toast.error(errorMessage(error));
-                  },
-                  onSuccess: () => {
-                    toast.success(t("invoices.files.removed"));
-                  },
-                });
-              }}
+              note={file.generated ? t("invoices.files.generated") : undefined}
+              onRemove={
+                file.generated
+                  ? undefined
+                  : () => {
+                      remove.mutate(file.id, {
+                        onError: (error) => {
+                          toast.error(errorMessage(error));
+                        },
+                        onSuccess: () => {
+                          toast.success(t("invoices.files.removed"));
+                        },
+                      });
+                    }
+              }
               size={file.sizeBytes}
             />
           ))}

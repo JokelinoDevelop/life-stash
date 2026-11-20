@@ -185,6 +185,15 @@ export default defineConfig({
       },
     },
     {
+      // The invoice PDF draws with @react-pdf/renderer primitives, which are styled with
+      // style objects (no DOM, no CSS), and the module is only ever loaded with `import()`.
+      files: ["src/client/modules/finances/invoice-pdf/**"],
+      rules: {
+        "react-doctor/prefer-dynamic-import": "off",
+        "shadcn/no-inline-styles": "off",
+      },
+    },
+    {
       files: ["**/*.test.ts", "**/*.test.tsx"],
       rules: { "max-lines-per-function": "off", "max-lines": "off" },
     },

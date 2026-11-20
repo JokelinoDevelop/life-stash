@@ -6,6 +6,9 @@ import { createInvoiceRequest } from "./dto/create-invoice.request";
 import type { CreateInvoiceResponse } from "./dto/create-invoice.response";
 import { deleteInvoiceParams } from "./dto/delete-invoice.request";
 import type { DeleteInvoiceResponse } from "./dto/delete-invoice.response";
+import { getInvoiceDocumentParams } from "./dto/get-invoice-document.request";
+import { toGetInvoiceDocumentResponse } from "./dto/get-invoice-document.response";
+import type { GetInvoiceDocumentResponse } from "./dto/get-invoice-document.response";
 import { getInvoiceParams } from "./dto/get-invoice.request";
 import { toGetInvoiceResponse } from "./dto/get-invoice.response";
 import type { GetInvoiceResponse } from "./dto/get-invoice.response";
@@ -57,6 +60,20 @@ export const invoicesController = new Hono<AppEnv>()
 
     return c.json(body);
   })
+  .get(
+    `${INVOICE_PATH}/document`,
+    validate("param", getInvoiceDocumentParams),
+    async (c) => {
+      const data = await c.var.container.finances.invoices.document(
+        c.req.valid("param").invoiceId
+      );
+
+      const body: GetInvoiceDocumentResponse =
+        toGetInvoiceDocumentResponse(data);
+
+      return c.json(body);
+    }
+  )
   .get(INVOICE_PATH, validate("param", getInvoiceParams), async (c) => {
     const detail = await c.var.container.finances.invoices.get(
       c.req.valid("param").invoiceId

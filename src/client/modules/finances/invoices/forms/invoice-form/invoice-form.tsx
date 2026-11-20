@@ -1,22 +1,24 @@
-import { useRef } from "react";
+import { useMemo } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import { DialogForm, FormSection } from "@/components/form/dialog-form";
-import { useAppForm } from "@/components/form/form-hook";
-import { Button } from "@/components/ui/button";
-import { useErrorMessage } from "@/lib/errors";
-import { formFieldOfError } from "@/lib/server-errors";
+import { DialogForm } from "@/components/form/dialog-form";
 
+import type { BusinessProfile } from "../../../business-profile/business-profile.queries";
+import { invoiceUnitPicks } from "../../../invoice-pdf/invoice-pdf-labels";
 import {
-  InvoiceAmountSection,
-  InvoiceClientSection,
-  InvoiceDatesSection,
-} from "./invoice-form-sections";
-import { INVOICE_SERVER_FIELDS } from "./mapper";
+  openPendingTab,
+  useInvoicePdfRenderer,
+} from "../../../invoice-pdf/use-invoice-pdf";
+import { InvoiceEditorBody, InvoiceEditorFooter } from "./invoice-editor-parts";
+import { InvoicePreview } from "./invoice-preview";
+import { newInvoiceLine } from "./mapper";
 import type { InvoiceClientOption, InvoiceProjectOption } from "./mapper";
-import { invoiceFormSchema } from "./schema";
+import { previewPdfData } from "./preview-data";
 import type { InvoiceFormValues } from "./schema";
+import { useInvoiceForm } from "./use-invoice-form";
+
+export type InvoiceMode = InvoiceFormValues["mode"];
 
 export interface InvoiceFormProps {
   defaultValues: InvoiceFormValues;
@@ -28,17 +30,52 @@ export interface InvoiceFormProps {
   /** The number it gets when issued with the field left empty. */
   nextNumber: string | null;
   defaultTermsDays: number;
-  /** The Files section (saved list, or files waiting to upload). */
+  /** Your details (null until filled in); itemised invoices print them. */
+  profile: BusinessProfile | null;
+  /** The Files section of a recorded invoice (saved list, or files waiting to upload). */
   files?: ReactNode;
   footerStart?: ReactNode;
   onCancel: () => void;
   /** Throws the API error on failure; field errors land on their input. */
   onSubmit: (values: InvoiceFormValues, issue: boolean) => Promise<void>;
+  /** The dialog widens for the preview while itemised. */
+  onModeChange?: (mode: InvoiceMode) => void;
 }
 
+/** The preview's data, kept stable until the content changes (see `InvoicePreview`). */
+const PreviewPane = ({
+  clients,
+  nextNumber,
+  profile,
+  values,
+}: {
+  clients: readonly InvoiceClientOption[];
+  nextNumber: string | null;
+  profile: BusinessProfile | null;
+  values: InvoiceFormValues;
+}) => {
+  const { i18n } = useTranslation();
+  const client = clients.find((row) => row.id === values.clientId);
+  const fallback = i18n.language === "mk" ? "mk" : "en";
+
+  const data = useMemo(
+    () =>
+      previewPdfData(values, {
+        client,
+        fallbackLanguage: fallback,
+        issuer: profile,
+        number: nextNumber,
+      }),
+    [values, client, fallback, profile, nextNumber]
+  );
+
+  return <InvoicePreview data={data} />;
+};
+
 /**
- * New / edit draft invoice (3.3): client, number, period, dates, amount, files, notes.
- * Save as draft, or Save & issue (⌘↵).
+ * New / edit draft invoice (3.3). Itemised: client, dates, lines and a live A4 preview;
+ * Save draft or Issue & download (⌘↵). "Record an invoice made elsewhere" switches to the
+ * amount + files flow.
  */
 export const InvoiceForm = ({
   clients,
@@ -48,90 +85,106 @@ export const InvoiceForm = ({
   footerStart,
   nextNumber,
   onCancel,
+  onModeChange,
   onSubmit,
   previousNumber,
+  profile,
   projects,
 }: InvoiceFormProps) => {
-  const { t } = useTranslation("finances");
-  const errorMessage = useErrorMessage();
-  const issue = useRef(true);
+  const { i18n } = useTranslation();
+  const render = useInvoicePdfRenderer();
+  const vatRegistered = profile?.vatRegistered === true;
+  const defaultVatRateBp = vatRegistered ? (profile?.defaultVatRateBp ?? 0) : 0;
 
   const termsOf = (clientId: string) =>
     clients.find((client) => client.id === clientId)?.paymentTermsDays ??
     defaultTermsDays;
 
-  const form = useAppForm({
-    defaultValues,
-    onSubmit: async ({ value }) => {
-      try {
-        await onSubmit(value, issue.current);
-      } catch (error) {
-        const field =
-          error instanceof Error
-            ? formFieldOfError(error, INVOICE_SERVER_FIELDS)
-            : null;
+  const { form, submit } = useInvoiceForm(defaultValues, onSubmit);
 
-        if (field !== null) {
-          form.setFieldMeta(field, (meta) => ({
-            ...meta,
-            errorMap: { ...meta.errorMap, onSubmit: errorMessage(error) },
-            isTouched: true,
-          }));
-        }
-      }
-    },
-    validators: { onSubmit: invoiceFormSchema },
-  });
+  const switchMode = (mode: InvoiceMode) => {
+    form.setFieldValue("mode", mode);
 
-  const submit = (issueNow: boolean) => {
-    issue.current = issueNow;
-    void form.handleSubmit();
+    if (mode === "itemised" && form.getFieldValue("lines").length === 0) {
+      form.setFieldValue("lines", [newInvoiceLine(defaultVatRateBp)]);
+    }
+
+    onModeChange?.(mode);
   };
 
+  const preview = async () => {
+    const show = openPendingTab();
+    const { values } = form.state;
+
+    show(
+      await render(
+        previewPdfData(values, {
+          client: clients.find((row) => row.id === values.clientId),
+          fallbackLanguage: i18n.language === "mk" ? "mk" : "en",
+          issuer: profile,
+          number: nextNumber,
+        })
+      )
+    );
+  };
+
+  const languageOf = (clientId: string) =>
+    clients.find((row) => row.id === clientId)?.invoiceLanguage ??
+    (i18n.language === "mk" ? "mk" : "en");
+
   return (
-    <DialogForm
-      footer={
-        <form.AppForm>
-          <form.FormFooter
-            onCancel={onCancel}
-            secondary={
-              <Button
-                onClick={() => {
-                  submit(false);
-                }}
-                size="compact"
-                type="button"
-                variant="outline"
-              >
-                {t("invoices.form.saveDraft")}
-              </Button>
-            }
-            start={footerStart}
-            submitLabel={t("invoices.form.saveIssue")}
-          />
-        </form.AppForm>
-      }
-      onSubmit={() => {
-        submit(true);
-      }}
-    >
-      <InvoiceClientSection
-        clients={clients}
-        form={form}
-        nextNumber={nextNumber}
-        previousNumber={previousNumber}
-        projects={projects}
-      />
-      <InvoiceDatesSection form={form} termsOf={termsOf} />
-      <InvoiceAmountSection form={form} />
-      {files !== undefined && (
-        <FormSection
-          description={t("invoices.files.hint")}
-          title={t("invoices.files.title")}
+    <form.Subscribe selector={(state) => state.values.mode}>
+      {(mode) => (
+        <DialogForm
+          aside={
+            mode === "itemised" ? (
+              <form.Subscribe selector={(state) => state.values}>
+                {(values) => (
+                  <PreviewPane
+                    clients={clients}
+                    nextNumber={nextNumber}
+                    profile={profile}
+                    values={values}
+                  />
+                )}
+              </form.Subscribe>
+            ) : undefined
+          }
+          footer={
+            <InvoiceEditorFooter
+              footerStart={footerStart}
+              form={form}
+              mode={mode}
+              onCancel={onCancel}
+              onPreview={preview}
+              onSaveDraft={() => {
+                submit(false);
+              }}
+            />
+          }
+          onSubmit={() => {
+            submit(true);
+          }}
         >
-          {files}
-        </FormSection>
+          <InvoiceEditorBody
+            clients={clients}
+            defaultVatRateBp={defaultVatRateBp}
+            files={files ?? null}
+            form={form}
+            hasProfile={profile !== null}
+            mode={mode}
+            nextNumber={nextNumber}
+            onSwitchMode={switchMode}
+            previousNumber={previousNumber}
+            projects={projects}
+            termsOf={termsOf}
+            unitsFor={(clientId) =>
+              invoiceUnitPicks(i18n, languageOf(clientId))
+            }
+            vatRegistered={vatRegistered}
+          />
+        </DialogForm>
       )}
-    </DialogForm>
+    </form.Subscribe>
   );
 };

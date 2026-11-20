@@ -3,11 +3,15 @@ import type { Currency } from "@shared/domain/money";
 
 import type { LedgerLinksPort } from "../transactions/ledger-links.repository";
 import type { TransactionRow } from "../transactions/transactions.repository";
+import type { InvoiceLineInput } from "./invoice-lines";
+import type { InvoiceLineRow } from "./invoice-lines.repository";
 import type { InvoiceStats } from "./invoice-selection";
 import type { InvoiceWithClient } from "./invoices.repository";
 
 /** What a draft holds; the number is only given when issuing. */
 export interface InvoiceInput {
+  /** Itemised invoices: the lines (the amount is computed from them). Empty = recorded. */
+  lines?: readonly InvoiceLineInput[];
   clientId: string;
   issueDate: string;
   dueDate: string;
@@ -24,6 +28,8 @@ export interface InvoiceListRow extends InvoiceWithClient {
   displayStatus: InvoiceStatus;
   daysOverdue: number;
   attachments: number;
+  /** Has lines: the app computes its amount and draws its PDF. */
+  itemised: boolean;
 }
 
 export interface InvoiceList {
@@ -34,6 +40,7 @@ export interface InvoiceList {
 export interface InvoiceDetail extends InvoiceListRow {
   transaction: TransactionRow | null;
   firstAttachedAt: string | null;
+  lines: InvoiceLineRow[];
 }
 
 /** What invoices need from the ledger: the linked entry, created and removed with the invoice. */

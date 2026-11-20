@@ -1,6 +1,6 @@
 # LifeStash — Invoice documents spec (F4)
 
-Status: **planned** · Written 2026-11-20 · Extends `docs/FINANCES-SPEC.md` (read it first).
+Status: **built** (F4a + F4b) · Written 2026-11-20 · Extends `docs/FINANCES-SPEC.md` (read it first).
 
 Today an invoice is a record: number, client, dates, amount, status and the PDF you made elsewhere (Wise's invoice generator). F4 lets you **write the invoice in LifeStash** — your details, the client's, line items — and get the PDF from it, so the record and the document are one thing.
 
@@ -144,6 +144,16 @@ New error codes: `finances.invoice_issued`, `finances.invoice_number_invalid`, `
 2. **F4b — Itemised invoices and PDF**: line items + domain totals; editor with live preview; PDF component; issue & download; stored generated PDF; seeders (a demo profile, client addresses, two itemised invoices).
 3. **F5 — Later**: email the invoice from the app (Cloudflare Email Service), credit notes (own series `CN-YYYY-NNN`), payment receipt, payment QR.
 
-## Open questions
+## Decisions made while building
 
-- Show the work period on the invoice by default, or only when filled? (Spec assumes only when filled.)
+- **Work period**: printed only when filled. The editor keeps today's month picker (period = first–last day of a month).
+- **Note on the PDF**: the invoice's `description` is printed under the lines ("Note on the invoice" in the editor). `notes` stay private: they are never printed, so they can still be edited after issuing without the PDF drifting from the frozen data.
+- **Profile requirement**: only _itemised_ invoices need a business profile to be issued (`finances.profile_incomplete`). Recorded invoices (made elsewhere) can be issued without one; they keep an issuer snapshot only if a profile exists.
+- **Number override**: a typed `YYYY-NNN` must be of the issue year (else `finances.invoice_number_invalid`); it is stored as typed. An empty number field takes the next number. With `NNN` the sequence counts across years.
+- **Migration**: existing drafts lose their number (they get one when issued). Numbers in other shapes keep their text but no sequence. If two legacy numbers mean the same sequence (`011` and `2026-011`), only the oldest keeps it.
+- **Void / paid on drafts**: a draft can't be voided or marked paid (`finances.invoice_not_issued`, a new code); delete it instead.
+- **VAT**: when not VAT registered, the server stores 0% on every line, whatever was sent.
+- **Generated PDF**: the stored file (`photos.generated`) can't be removed from the Files list; it goes only with the invoice. "Download PDF" opens the stored file, or draws it again from the frozen data when storage isn't set up (or for invoices issued before the PDF existed).
+- **Issuing from the list** (row "Issue" or ⌘K): an itemised draft also gets its PDF drawn and stored (no download).
+- **PDF**: no page numbers (react-pdf's dynamic `render` text didn't draw reliably); the column header repeats when lines run onto another page. The react-pdf chunk (~1.2 MB) is excluded from the PWA precache.
+- **Dialog size**: the editor is `size="full"` (desktop) / full-height sheet (phones) while itemised; recorded invoices and issued ones use the normal large dialog.

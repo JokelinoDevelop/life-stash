@@ -20,6 +20,7 @@ import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 
 import { useFinanceDialog } from "./dialogs/use-finance-dialog";
+import { useDownloadInvoicePdf } from "./invoices/invoice-document";
 import { useDueLabel, useInvoiceNumber } from "./invoices/invoice-labels";
 import { invoicesQuery } from "./invoices/invoices.queries";
 import { useLedgerMoney } from "./money";
@@ -114,9 +115,16 @@ export const FinanceInvoicesGroup = ({ run }: { run: Run }) => {
   const ledger = useLedgerMoney();
   const dueLabel = useDueLabel();
   const numberOf = useInvoiceNumber();
+  const download = useDownloadInvoicePdf();
   const year = Number(todayIso().slice(0, 4));
   const invoices = useQuery(invoicesQuery({ status: "all", year }));
   const rows = invoices.data?.invoices ?? [];
+
+  const downloadable = rows.flatMap((invoice) =>
+    invoice.itemised && invoice.number !== null
+      ? [{ id: invoice.id, number: invoice.number }]
+      : []
+  );
 
   if (rows.length === 0) {
     return null;
@@ -136,6 +144,19 @@ export const FinanceInvoicesGroup = ({ run }: { run: Run }) => {
               await (invoice.status === "sent" || invoice.status === "overdue"
                 ? dialog.open({ dialog: "mark-paid", id: invoice.id })
                 : dialog.open({ dialog: "invoice", id: invoice.id }));
+            });
+          }}
+        />
+      ))}
+      {downloadable.map((invoice) => (
+        <Item
+          icon={Download}
+          key={`download-${invoice.id}`}
+          keywords={[invoice.number]}
+          label={t("invoices.downloadCommand", { number: invoice.number })}
+          onSelect={() => {
+            run(async () => {
+              await download(invoice);
             });
           }}
         />

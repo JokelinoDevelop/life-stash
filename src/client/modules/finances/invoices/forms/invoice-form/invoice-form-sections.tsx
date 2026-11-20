@@ -1,6 +1,5 @@
 import { addMonths } from "@shared/domain/dates";
 import { defaultDueDate } from "@shared/domain/finances/invoices";
-import { CURRENCIES } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
 import { FormSection } from "@/components/form/dialog-form";
@@ -96,10 +95,15 @@ export const InvoiceClientSection = withForm({
                   description={
                     client === undefined
                       ? undefined
-                      : t("invoices.form.clientHint", {
-                          currency: client.currency,
-                          days: client.paymentTermsDays,
-                        })
+                      : [
+                          t("invoices.form.clientHint", {
+                            currency: client.currency,
+                            days: client.paymentTermsDays,
+                          }),
+                          t(
+                            `invoices.editor.writtenIn.${client.invoiceLanguage}`
+                          ),
+                        ].join(" · ")
                   }
                   label={t("invoices.form.client")}
                   options={clients.map((row) => ({
@@ -198,59 +202,6 @@ export const InvoiceDatesSection = withForm({
             )}
           </form.Subscribe>
         </div>
-      </FormSection>
-    );
-  },
-});
-
-export const InvoiceAmountSection = withForm({
-  defaultValues: INVOICE_FORM_TEMPLATE,
-  props: {},
-  render: function InvoiceAmountSectionRender({ form }) {
-    const { t } = useTranslation("finances");
-
-    return (
-      <FormSection>
-        <FieldGroup>
-          <form.AppField name="description">
-            {(field) => (
-              <field.TextField
-                label={t("invoices.form.description")}
-                optional
-              />
-            )}
-          </form.AppField>
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <form.AppField name="amount">
-              {(field) => (
-                <field.TextField
-                  inputMode="decimal"
-                  label={t("invoices.form.amount")}
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="currency">
-              {(field) => (
-                <field.SelectField
-                  label={t("invoices.form.currency")}
-                  options={CURRENCIES.map((code) => ({
-                    label: code,
-                    value: code,
-                  }))}
-                />
-              )}
-            </form.AppField>
-          </div>
-          <form.AppField name="notes">
-            {(field) => (
-              <field.TextareaField
-                label={t("invoices.form.notes")}
-                optional
-                placeholder={t("invoices.form.notesPlaceholder")}
-              />
-            )}
-          </form.AppField>
-        </FieldGroup>
       </FormSection>
     );
   },

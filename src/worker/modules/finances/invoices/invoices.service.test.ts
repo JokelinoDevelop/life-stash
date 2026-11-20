@@ -2,7 +2,12 @@ import { NO_RATES } from "@shared/domain/exchange";
 import type { InvoiceNumberFormat } from "@shared/domain/finances/invoices";
 import { describe, expect, it } from "vitest";
 
+import { domainError } from "../../../core/errors";
 import type { ClientRow } from "../clients/clients.repository";
+import type {
+  InvoiceLinesRepositoryPort,
+  NewInvoiceLine,
+} from "./invoice-lines.repository";
 import type {
   InvoicesRepositoryPort,
   InvoiceWithClient,
@@ -163,10 +168,46 @@ const fakeInvoices = (): FakeInvoices => {
   };
 };
 
+const fakeLines = (): InvoiceLinesRepositoryPort & {
+  rows: Map<string, NewInvoiceLine[]>;
+} => {
+  const rows = new Map<string, NewInvoiceLine[]>();
+
+  return {
+    countByInvoice: async (ids) =>
+      await Promise.resolve(
+        new Map(ids.map((id) => [id, rows.get(id)?.length ?? 0]))
+      ),
+    list: async (invoiceId) =>
+      await Promise.resolve(
+        (rows.get(invoiceId) ?? []).map((line, position) => ({
+          ...line,
+          householdId: "h1",
+          id: `${invoiceId}-${String(position)}`,
+          invoiceId,
+          position,
+          unit: line.unit ?? null,
+          vatMinor: line.vatMinor ?? 0,
+          vatRateBp: line.vatRateBp ?? 0,
+        }))
+      ),
+    replace: async (invoiceId, lines) => {
+      rows.set(invoiceId, [...lines]);
+      await Promise.resolve();
+    },
+    rows,
+  };
+};
+
 const setup = (
-  options: { format?: InvoiceNumberFormat; profile?: boolean } = {}
+  options: {
+    format?: InvoiceNumberFormat;
+    profile?: boolean;
+    vatRegistered?: boolean;
+  } = {}
 ) => {
   const repo = fakeInvoices();
+  const lines = fakeLines();
 
   const profile = {
     address: "Ulica 1",
@@ -180,7 +221,7 @@ const setup = (
     phone: null,
     swift: null,
     taxId: null,
-    vatRegistered: false,
+    vatRegistered: options.vatRegistered ?? false,
   };
 
   // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
@@ -193,6 +234,10 @@ const setup = (
       get: async () =>
         await Promise.resolve(options.profile === false ? null : profile),
       issuerSnapshot: async () => {
+        if (options.profile === false) {
+          throw domainError("finances.profile_incomplete");
+        }
+
         const { defaultVatRateBp: _rate, ...snapshot } = profile;
 
         return await Promise.resolve(snapshot);
@@ -201,8 +246,12 @@ const setup = (
     categories: {
       invoicesCategory: async () => await Promise.reject(new Error("unused")),
     },
-    clients: { requireForEntry: async () => await Promise.resolve(CLIENT) },
+    clients: {
+      get: async () => await Promise.resolve(CLIENT),
+      requireForEntry: async () => await Promise.resolve(CLIENT),
+    },
     clock: { now: () => NOW, today: async () => await Promise.resolve(TODAY) },
+    lines,
     household: {
       preferences: async () =>
         await Promise.resolve({
@@ -239,7 +288,7 @@ const setup = (
     },
   });
 
-  return { repo, service };
+  return { lines, repo, service };
 };
 
 const codeOf = async (promise: Promise<unknown>) => {
@@ -381,5 +430,94 @@ describe(InvoicesService, () => {
     await service.delete(id);
 
     expect(repo.rows[0]?.deletedAt).toBe(NOW.toISOString());
+  });
+
+  it("computes an itemised invoice's amount from its lines", async () => {
+    const { lines, repo, service } = setup({ vatRegistered: true });
+
+    const { id } = await service.create(
+      {
+        ...INPUT,
+        amountMinor: 1,
+        lines: [
+          {
+            description: "Development",
+            quantityMilli: 80_000,
+            unit: "hrs",
+            unitPriceMinor: 4000,
+            vatRateBp: 1800,
+          },
+          {
+            description: "Hosting",
+            quantityMilli: 1000,
+            unit: null,
+            unitPriceMinor: 2500,
+            vatRateBp: 0,
+          },
+        ],
+      },
+      null
+    );
+
+    expect(repo.rows[0]?.amountMinor).toBe(320_000 + 57_600 + 2500);
+    expect(lines.rows.get(id)?.map((line) => line.vatMinor)).toStrictEqual([
+      57_600, 0,
+    ]);
+
+    await service.update(id, { lines: [], amountMinor: 1000 });
+
+    expect(repo.rows[0]?.amountMinor).toBe(1000);
+    expect(lines.rows.get(id)).toStrictEqual([]);
+  });
+
+  it("drops VAT when not registered and locks the lines once issued", async () => {
+    const { lines, service } = setup();
+
+    const { id } = await service.create(
+      {
+        ...INPUT,
+        lines: [
+          {
+            description: "Development",
+            quantityMilli: 1500,
+            unit: "hrs",
+            unitPriceMinor: 33,
+            vatRateBp: 1800,
+          },
+        ],
+      },
+      { number: null }
+    );
+
+    expect(lines.rows.get(id)).toMatchObject([
+      { amountMinor: 50, vatMinor: 0, vatRateBp: 0 },
+    ]);
+    await expect(codeOf(service.update(id, { lines: [] }))).resolves.toBe(
+      "finances.invoice_issued"
+    );
+  });
+
+  it("needs a business profile to issue an itemised invoice", async () => {
+    const { service } = setup({ profile: false });
+
+    const { id } = await service.create(
+      {
+        ...INPUT,
+        lines: [
+          {
+            description: "Work",
+            quantityMilli: 1000,
+            unit: null,
+            unitPriceMinor: 100,
+            vatRateBp: 0,
+          },
+        ],
+      },
+      null
+    );
+
+    await expect(codeOf(service.issue(id, null))).resolves.toBe(
+      "finances.profile_incomplete"
+    );
   });
 });

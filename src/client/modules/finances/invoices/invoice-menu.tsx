@@ -1,6 +1,7 @@
 import {
   Ban,
   Copy,
+  Download,
   Eye,
   MoreHorizontal,
   Pencil,
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
+import { useDownloadInvoicePdf } from "./invoice-document";
 import type { InvoiceListItem } from "./invoices.queries";
 import { useInvoiceActions } from "./use-invoice-actions";
 
@@ -32,6 +34,7 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
   const { t: tc } = useTranslation();
   const dialog = useFinanceDialog();
   const actions = useInvoiceActions();
+  const download = useDownloadInvoicePdf();
   const draft = invoice.status === "draft";
   const unpaid = invoice.status === "sent" || invoice.status === "overdue";
 
@@ -65,6 +68,16 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
           >
             <Send />
             {t("invoices.issue")}
+          </DropdownMenuItem>
+        )}
+        {!draft && invoice.itemised && (
+          <DropdownMenuItem
+            onClick={() => {
+              void download(invoice);
+            }}
+          >
+            <Download />
+            {t("invoices.downloadPdf")}
           </DropdownMenuItem>
         )}
         {invoice.status === "paid" && (

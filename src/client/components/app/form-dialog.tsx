@@ -47,7 +47,8 @@ interface FormDialogProps {
   description?: string;
   /** Desktop crumb before the title, e.g. the car monogram and name. */
   crumb?: ReactNode;
-  size?: "md" | "lg";
+  /** `full`: a near-full-screen dialog on desktop and a full-height sheet on phones. */
+  size?: "md" | "lg" | "full";
   /** A `DialogForm` (scrolling body + pinned footer), a skeleton or an error. */
   children: ReactNode;
 }
@@ -109,10 +110,13 @@ const MobileFormDialog = ({
   description,
   onOpenChange,
   open,
+  size,
   title,
 }: FormDialogProps) => (
   <Drawer onOpenChange={onOpenChange} open={open} repositionInputs={false}>
-    <DrawerContent className="max-h-[92dvh]">
+    <DrawerContent
+      className={size === "full" ? "h-[96dvh] max-h-[96dvh]" : "max-h-[92dvh]"}
+    >
       <DrawerHeader align="start">
         <DrawerTitle>{title}</DrawerTitle>
         <DrawerDescription className="sr-only">

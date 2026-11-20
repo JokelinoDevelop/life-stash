@@ -12,6 +12,7 @@ import { ClientsService } from "./clients/clients.service";
 import { FinanceExportService } from "./export/export.service";
 import { FinanceClock } from "./household/clock";
 import { HouseholdRepository } from "./household/household.repository";
+import { InvoiceLinesRepository } from "./invoices/invoice-lines.repository";
 import { InvoicesRepository } from "./invoices/invoices.repository";
 import { InvoicesService } from "./invoices/invoices.service";
 import { OverdueRemindersService } from "./notifications/overdue-reminders.service";
@@ -109,6 +110,7 @@ export const createFinancesModule = ({
   const invoices = new InvoicesService({
     attachments,
     businessProfile,
+    lines: new InvoiceLinesRepository(db, householdId),
     categories,
     clients,
     clock,

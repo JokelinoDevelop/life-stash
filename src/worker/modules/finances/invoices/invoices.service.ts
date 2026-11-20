@@ -1,4 +1,3 @@
-import { invoiceStatus, receivables } from "@shared/domain/finances/invoices";
 import type { Receivables } from "@shared/domain/finances/invoices";
 
 import { domainError, notFound } from "../../../core/errors";
@@ -12,8 +11,12 @@ import type { ProjectsService } from "../projects/projects.service";
 import type { FinanceSettingsService } from "../settings/settings.service";
 import type { TransactionRow } from "../transactions/transactions.repository";
 import { InvoiceIssuing, guardNumberRace } from "./invoice-issuing";
+import { priceLines } from "./invoice-lines";
+import type { InvoiceLineInput, PricedLines } from "./invoice-lines";
+import type { InvoiceLinesRepositoryPort } from "./invoice-lines.repository";
 import { InvoicePayments } from "./invoice-payment";
-import { selectInvoices } from "./invoice-selection";
+import { InvoiceReads } from "./invoice-reads";
+import type { InvoiceDocumentData } from "./invoice-reads";
 import type { InvoiceStatusFilter } from "./invoice-selection";
 import type {
   InvoiceDetail,
@@ -44,23 +47,34 @@ export type {
   IssueRequest,
 } from "./invoice-types";
 
+export type { InvoiceLineInput } from "./invoice-lines";
+
+export type { InvoiceDocumentData } from "./invoice-reads";
+
 export type { InvoiceStatusFilter } from "./invoice-selection";
 
+/**
+ * Invoices: drafts (recorded or itemised), issuing with a per-year number, void, paid /
+ * unpaid. Reading lives in `InvoiceReads`, numbering in `InvoiceIssuing`.
+ */
 export class InvoicesService {
   readonly #repo: InvoicesRepositoryPort;
+  readonly #lines: InvoiceLinesRepositoryPort;
   readonly #transactions: InvoiceTransactionsPort;
   readonly #clients: Pick<ClientsService, "requireForEntry">;
   readonly #projects: Pick<ProjectsService, "requireForInvoice">;
-  readonly #attachments: AttachmentsRepositoryPort;
+  readonly #businessProfile: Pick<BusinessProfileService, "get">;
   readonly #clock: ClockPort;
   readonly #issuing: InvoiceIssuing;
   readonly #payments: InvoicePayments;
+  readonly #reads: InvoiceReads;
 
   constructor(deps: {
     repo: InvoicesRepositoryPort;
+    lines: InvoiceLinesRepositoryPort;
     transactions: InvoiceTransactionsPort;
     categories: Pick<CategoriesService, "invoicesCategory">;
-    clients: Pick<ClientsService, "requireForEntry">;
+    clients: Pick<ClientsService, "requireForEntry" | "get">;
     settings: Pick<FinanceSettingsService, "get">;
     projects: Pick<ProjectsService, "requireForInvoice">;
     attachments: AttachmentsRepositoryPort;
@@ -69,75 +83,38 @@ export class InvoicesService {
     businessProfile: Pick<BusinessProfileService, "get" | "issuerSnapshot">;
   }) {
     this.#repo = deps.repo;
+    this.#lines = deps.lines;
     this.#transactions = deps.transactions;
     this.#clients = deps.clients;
     this.#projects = deps.projects;
-    this.#attachments = deps.attachments;
+    this.#businessProfile = deps.businessProfile;
     this.#clock = deps.clock;
     this.#issuing = new InvoiceIssuing(deps);
     this.#payments = new InvoicePayments(deps);
+    this.#reads = new InvoiceReads(deps);
   }
 
-  async #withDerived(
-    invoices: readonly InvoiceWithClient[],
-    today: string
-  ): Promise<InvoiceListRow[]> {
-    const counts = await this.#attachments.countByOwner(
-      "finance_invoice",
-      invoices.map((invoice) => invoice.id)
-    );
-
-    return invoices.map((invoice) => {
-      const { daysOverdue, status } = invoiceStatus(invoice, today);
-
-      return {
-        ...invoice,
-        attachments: counts.get(invoice.id) ?? 0,
-        daysOverdue,
-        displayStatus: status,
-      };
-    });
-  }
-
-  /**
-   * Invoices for the list page. Unpaid ones always show (they need attention whatever their
-   * year); paid and void ones only for `year`. Stats describe `year`.
-   */
   async list(filter: {
     status: InvoiceStatusFilter;
     clientId: string | null;
     year: number;
   }): Promise<InvoiceList> {
-    const [today, all] = await Promise.all([
-      this.#clock.today(),
-      this.#repo.list(
-        filter.clientId === null ? {} : { clientId: filter.clientId }
-      ),
-    ]);
-
-    const { stats, visible } = selectInvoices(all, filter, today);
-
-    return { rows: await this.#withDerived(visible, today), stats };
+    return await this.#reads.list(filter);
   }
 
-  /** Sent, unpaid invoices oldest-due first (the overview's "Waiting for payment"). */
   async waiting(): Promise<{
     rows: InvoiceListRow[];
     receivables: Receivables;
   }> {
-    const [today, all] = await Promise.all([
-      this.#clock.today(),
-      this.#repo.list(),
-    ]);
+    return await this.#reads.waiting();
+  }
 
-    const sent = all
-      .filter((invoice) => invoice.status === "sent")
-      .toSorted((a, b) => a.dueDate.localeCompare(b.dueDate));
+  async get(invoiceId: string): Promise<InvoiceDetail> {
+    return await this.#reads.get(invoiceId);
+  }
 
-    return {
-      receivables: receivables(all, today),
-      rows: await this.#withDerived(sent, today),
-    };
+  async document(invoiceId: string): Promise<InvoiceDocumentData> {
+    return await this.#reads.document(invoiceId);
   }
 
   /** The suggested number for `year` (this year by default) and the one it continues from. */
@@ -148,77 +125,93 @@ export class InvoicesService {
   }
 
   async #find(invoiceId: string): Promise<InvoiceWithClient> {
-    const invoice = await this.#repo.findById(invoiceId);
-
-    if (!invoice) {
-      throw notFound();
-    }
-
-    return invoice;
+    return await this.#reads.find(invoiceId);
   }
 
-  async get(invoiceId: string): Promise<InvoiceDetail> {
-    const [invoice, today] = await Promise.all([
-      this.#find(invoiceId),
-      this.#clock.today(),
-    ]);
-
-    const [rows, transaction, firstAttachedAt] = await Promise.all([
-      this.#withDerived([invoice], today),
-      this.#transactions.findByInvoice(invoiceId),
-      this.#attachments.firstAttachedAt("finance_invoice", invoiceId),
-    ]);
-
-    const [row] = rows;
-
-    if (row === undefined) {
-      throw notFound();
+  /** Lines priced with today's VAT registration; null when there are none (recorded). */
+  async #price(
+    lines: readonly InvoiceLineInput[] | undefined
+  ): Promise<PricedLines | null> {
+    if (lines === undefined || lines.length === 0) {
+      return null;
     }
 
-    return { ...row, firstAttachedAt, transaction: transaction ?? null };
+    const profile = await this.#businessProfile.get();
+
+    return priceLines(lines, profile?.vatRegistered ?? false);
   }
 
-  /** A draft, or (with `issue`) an invoice issued straight away. */
+  async #checkRefs(
+    clientId: string,
+    projectId: string | null,
+    keptClient: string | null
+  ): Promise<void> {
+    await this.#clients.requireForEntry(clientId, keptClient);
+
+    if (projectId !== null) {
+      await this.#projects.requireForInvoice(projectId, clientId);
+    }
+  }
+
+  /** A draft, or (with `issue`) an invoice issued straight away. Itemised when it has lines. */
   async create(
-    input: InvoiceInput,
+    { lines, ...input }: InvoiceInput,
     issue: IssueRequest
   ): Promise<{ id: string; number: string | null }> {
-    await this.#clients.requireForEntry(input.clientId);
+    await this.#checkRefs(input.clientId, input.projectId, null);
+    const priced = await this.#price(lines);
 
-    if (input.projectId !== null) {
-      await this.#projects.requireForInvoice(input.projectId, input.clientId);
-    }
+    const values = {
+      ...input,
+      amountMinor: priced?.totals.totalMinor ?? input.amountMinor,
+    };
 
-    if (issue === null) {
-      const row = await this.#repo.insert({
-        ...input,
-        number: null,
-        status: "draft",
-      });
-
-      return { id: row.id, number: null };
-    }
-
-    const issued = await this.#issuing.issuedFields(
-      { ...input, itemised: false },
-      issue.number,
-      null
-    );
+    const issued =
+      issue === null
+        ? { number: null, status: "draft" as const }
+        : await this.#issuing.issuedFields(
+            { ...values, itemised: priced !== null },
+            issue.number,
+            null
+          );
 
     const row = await guardNumberRace(
-      async () => await this.#repo.insert({ ...input, ...issued })
+      async () => await this.#repo.insert({ ...values, ...issued })
     );
+
+    if (priced !== null) {
+      await this.#lines.replace(row.id, priced.rows);
+    }
 
     return { id: row.id, number: issued.number };
   }
 
+  /** Issued (sent or void) invoices only take notes. */
+  async #updateIssued(
+    invoice: InvoiceWithClient,
+    changes: Partial<InvoiceInput>,
+    issue: IssueRequest
+  ): Promise<string | null> {
+    const locked = Object.entries(changes).some(
+      ([key, value]) => value !== undefined && !EDITABLE_AFTER_ISSUE.has(key)
+    );
+
+    if (locked || issue !== null) {
+      throw domainError(ISSUED);
+    }
+
+    await this.#repo.update(invoice.id, { notes: changes.notes });
+
+    return invoice.number;
+  }
+
   /**
-   * Edits a draft (and optionally issues it). Issued invoices only take notes; paid ones are
-   * locked until marked unpaid.
+   * Edits a draft (and optionally issues it). `lines` replaces its lines (empty makes it a
+   * recorded invoice again). Issued invoices only take notes; paid ones are locked.
    */
   async update(
     invoiceId: string,
-    changes: Partial<InvoiceInput>,
+    { lines, ...changes }: Partial<InvoiceInput>,
     issue: IssueRequest = null
   ): Promise<string | null> {
     const invoice = await this.#find(invoiceId);
@@ -228,34 +221,21 @@ export class InvoicesService {
     }
 
     if (invoice.status !== "draft") {
-      const locked = Object.entries(changes).some(
-        ([key, value]) => value !== undefined && !EDITABLE_AFTER_ISSUE.has(key)
-      );
-
-      if (locked || issue !== null) {
-        throw domainError(ISSUED);
-      }
-
-      await this.#repo.update(invoiceId, { notes: changes.notes });
-
-      return invoice.number;
+      return await this.#updateIssued(invoice, { ...changes, lines }, issue);
     }
 
-    if (changes.clientId !== undefined) {
-      await this.#clients.requireForEntry(changes.clientId, invoice.clientId);
-    }
+    await this.#checkRefs(
+      changes.clientId ?? invoice.clientId,
+      changes.projectId === undefined ? invoice.projectId : changes.projectId,
+      invoice.clientId
+    );
 
-    const projectId =
-      changes.projectId === undefined ? invoice.projectId : changes.projectId;
-
-    if (projectId !== null) {
-      await this.#projects.requireForInvoice(
-        projectId,
-        changes.clientId ?? invoice.clientId
-      );
-    }
-
+    const priced = await this.#price(lines);
     const patch: InvoicePatch = { ...changes };
+
+    if (priced !== null) {
+      patch.amountMinor = priced.totals.totalMinor;
+    }
 
     // A new due date earns a fresh overdue heads-up.
     if (changes.dueDate !== undefined && changes.dueDate !== invoice.dueDate) {
@@ -264,16 +244,17 @@ export class InvoicesService {
 
     await this.#repo.update(invoiceId, patch);
 
-    if (issue === null) {
-      return null;
+    if (lines !== undefined) {
+      await this.#lines.replace(invoiceId, priced?.rows ?? []);
     }
 
-    return await this.issue(invoiceId, issue.number);
+    return issue === null ? null : await this.issue(invoiceId, issue.number);
   }
 
   /**
    * Gives a draft its number (typed, or the next of its issue year), freezes your details and
-   * the client's, and marks it sent. Returns the number.
+   * the client's, and marks it sent. Itemised drafts need your business profile. Returns the
+   * number.
    */
   async issue(invoiceId: string, typed: string | null): Promise<string> {
     const invoice = await this.#find(invoiceId);
@@ -282,8 +263,10 @@ export class InvoicesService {
       throw domainError(ISSUED);
     }
 
+    const lineCounts = await this.#lines.countByInvoice([invoiceId]);
+
     const issued = await this.#issuing.issuedFields(
-      { ...invoice, itemised: false },
+      { ...invoice, itemised: (lineCounts.get(invoiceId) ?? 0) > 0 },
       typed,
       invoiceId
     );
