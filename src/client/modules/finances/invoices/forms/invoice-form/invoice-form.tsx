@@ -25,25 +25,28 @@ export interface InvoiceFormProps {
   projects: readonly InvoiceProjectOption[];
   /** The number this one continues from, for the hint. */
   previousNumber: string | null;
-  /** Draft (or new): two saves, draft and "& mark sent". Sent: one Save. */
-  draftable: boolean;
+  /** The number it gets when issued with the field left empty. */
+  nextNumber: string | null;
   defaultTermsDays: number;
   /** The Files section (saved list, or files waiting to upload). */
   files?: ReactNode;
   footerStart?: ReactNode;
   onCancel: () => void;
   /** Throws the API error on failure; field errors land on their input. */
-  onSubmit: (values: InvoiceFormValues, markSent: boolean) => Promise<void>;
+  onSubmit: (values: InvoiceFormValues, issue: boolean) => Promise<void>;
 }
 
-/** New / edit invoice (3.3): client, number, period, dates, amount, files, notes. */
+/**
+ * New / edit draft invoice (3.3): client, number, period, dates, amount, files, notes.
+ * Save as draft, or Save & issue (⌘↵).
+ */
 export const InvoiceForm = ({
   clients,
   defaultTermsDays,
   defaultValues,
-  draftable,
   files,
   footerStart,
+  nextNumber,
   onCancel,
   onSubmit,
   previousNumber,
@@ -51,7 +54,7 @@ export const InvoiceForm = ({
 }: InvoiceFormProps) => {
   const { t } = useTranslation("finances");
   const errorMessage = useErrorMessage();
-  const markSent = useRef(true);
+  const issue = useRef(true);
 
   const termsOf = (clientId: string) =>
     clients.find((client) => client.id === clientId)?.paymentTermsDays ??
@@ -61,7 +64,7 @@ export const InvoiceForm = ({
     defaultValues,
     onSubmit: async ({ value }) => {
       try {
-        await onSubmit(value, markSent.current);
+        await onSubmit(value, issue.current);
       } catch (error) {
         const field =
           error instanceof Error
@@ -80,8 +83,8 @@ export const InvoiceForm = ({
     validators: { onSubmit: invoiceFormSchema },
   });
 
-  const submit = (sent: boolean) => {
-    markSent.current = sent;
+  const submit = (issueNow: boolean) => {
+    issue.current = issueNow;
     void form.handleSubmit();
   };
 
@@ -92,31 +95,30 @@ export const InvoiceForm = ({
           <form.FormFooter
             onCancel={onCancel}
             secondary={
-              draftable ? (
-                <Button
-                  onClick={() => {
-                    submit(false);
-                  }}
-                  size="compact"
-                  type="button"
-                  variant="outline"
-                >
-                  {t("invoices.form.saveDraft")}
-                </Button>
-              ) : undefined
+              <Button
+                onClick={() => {
+                  submit(false);
+                }}
+                size="compact"
+                type="button"
+                variant="outline"
+              >
+                {t("invoices.form.saveDraft")}
+              </Button>
             }
             start={footerStart}
-            submitLabel={draftable ? t("invoices.form.saveSent") : undefined}
+            submitLabel={t("invoices.form.saveIssue")}
           />
         </form.AppForm>
       }
       onSubmit={() => {
-        submit(draftable);
+        submit(true);
       }}
     >
       <InvoiceClientSection
         clients={clients}
         form={form}
+        nextNumber={nextNumber}
         previousNumber={previousNumber}
         projects={projects}
       />

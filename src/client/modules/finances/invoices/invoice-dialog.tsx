@@ -1,4 +1,3 @@
-import type { Currency } from "@shared/domain/money";
 import { useQuery } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -15,20 +14,20 @@ import { useConfig } from "@/lib/session";
 
 import { uploadFiles } from "../attachments/attachments.queries";
 import { FileList, PendingFileList } from "../attachments/file-list";
-import { clientsQuery } from "../clients/clients.queries";
-import { useLedgerMoney } from "../money";
-import { projectsQuery } from "../projects/projects.queries";
 import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { InvoiceForm } from "./forms/invoice-form/invoice-form";
 import {
   INVOICE_SERVER_FIELDS,
-  duplicateToFormValues,
-  invoiceFormDefaults,
   invoiceFormToCreateRequest,
   invoiceFormToUpdateRequest,
   invoiceToFormValues,
 } from "./forms/invoice-form/mapper";
-import type { InvoiceClientOption } from "./forms/invoice-form/mapper";
+import {
+  newInvoiceDefaults,
+  useClientOptions,
+  useIssueGate,
+} from "./invoice-dialog-data";
+import { useInvoiceNumber } from "./invoice-labels";
 import { InvoiceView } from "./invoice-view";
 import { useCreateInvoice, useUpdateInvoice } from "./invoices.mutations";
 import { invoiceQuery, nextInvoiceNumberQuery } from "./invoices.queries";
@@ -39,46 +38,6 @@ type Close = () => Promise<void>;
 
 const isFieldError = (error: Error) =>
   formFieldOfError(error, INVOICE_SERVER_FIELDS) !== null;
-
-/** Clients that can be invoiced (active ones, plus the invoice's own if archived). */
-const useClientOptions = (keep: string | null) => {
-  const year = Number(todayIso().slice(0, 4));
-  const clients = useQuery(clientsQuery(year));
-
-  const options: InvoiceClientOption[] = (clients.data?.clients ?? []).filter(
-    (client) => !client.archived || client.id === keep
-  );
-
-  const projects = useQuery(projectsQuery(null));
-
-  // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
-  return {
-    isPending: clients.isPending || projects.isPending,
-    options,
-    projects: projects.data?.projects ?? [],
-  };
-};
-
-/** A fresh invoice (for `forClient` if given), or a copy of `source` one month on. */
-const newInvoiceDefaults = (context: {
-  clients: readonly InvoiceClientOption[];
-  currency: Currency;
-  forClient: string | undefined;
-  number: string;
-  source: InvoiceDetail | undefined;
-  terms: number;
-}) =>
-  context.source === undefined
-    ? invoiceFormDefaults({
-        client: context.clients.find(
-          (client) => client.id === context.forClient
-        ),
-        currency: context.currency,
-        number: context.number,
-        termsDays: context.terms,
-        today: todayIso(),
-      })
-    : duplicateToFormValues(context.source, context.number);
 
 const NewInvoice = ({
   duplicateId,
@@ -95,7 +54,8 @@ const NewInvoice = ({
   const [pending, setPending] = useState<File[]>([]);
   const clients = useClientOptions(null);
   const settings = useQuery(financeSettingsQuery);
-  const next = useQuery(nextInvoiceNumberQuery);
+  const next = useQuery(nextInvoiceNumberQuery(Number(todayIso().slice(0, 4))));
+  const issueGate = useIssueGate();
 
   const source = useQuery({
     ...invoiceQuery(duplicateId ?? ""),
@@ -128,14 +88,12 @@ const NewInvoice = ({
     return <FormSkeleton fields={6} />;
   }
 
-  const number = next.data?.number ?? "";
   const terms = settings.data?.defaultPaymentTermsDays ?? 30;
 
   // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
   const defaults = newInvoiceDefaults({
     clients: clients.options,
     currency: format.currency,
-    number,
     source: source.data?.invoice,
     terms,
     forClient,
@@ -147,7 +105,6 @@ const NewInvoice = ({
       projects={clients.projects}
       defaultTermsDays={terms}
       defaultValues={defaults}
-      draftable
       files={
         photos ? (
           <PendingFileList files={pending} onChange={setPending} />
@@ -156,9 +113,14 @@ const NewInvoice = ({
       onCancel={() => {
         void onClose();
       }}
-      onSubmit={async (values, markSent) => {
+      nextNumber={next.data?.number ?? null}
+      onSubmit={async (values, issue) => {
+        if (!(await issueGate(values, issue))) {
+          return;
+        }
+
         const { id } = await create.mutateAsync(
-          invoiceFormToCreateRequest(values, markSent)
+          invoiceFormToCreateRequest(values, issue)
         );
 
         await uploadPending(id);
@@ -178,19 +140,13 @@ const DeleteButton = ({
   onClose: Close;
 }) => {
   const { t: tc } = useTranslation();
-  const ledger = useLedgerMoney();
   const actions = useInvoiceActions();
 
   return (
     <Button
       aria-label={tc("actions.delete")}
       onClick={async () => {
-        if (
-          await actions.remove(
-            invoice,
-            ledger.money(invoice.amountMinor, invoice.currency)
-          )
-        ) {
+        if (await actions.remove(invoice)) {
           await onClose();
         }
       }}
@@ -214,6 +170,11 @@ const EditInvoice = ({
   const clients = useClientOptions(invoice.clientId);
   const settings = useQuery(financeSettingsQuery);
   const update = useUpdateInvoice(isFieldError);
+  const issueGate = useIssueGate();
+
+  const next = useQuery(
+    nextInvoiceNumberQuery(Number(invoice.issueDate.slice(0, 4)))
+  );
 
   if (clients.isPending || settings.isPending) {
     return <FormSkeleton fields={6} />;
@@ -225,7 +186,6 @@ const EditInvoice = ({
       projects={clients.projects}
       defaultTermsDays={settings.data?.defaultPaymentTermsDays ?? 30}
       defaultValues={invoiceToFormValues(invoice)}
-      draftable={invoice.status === "draft"}
       files={
         photos ? (
           <FileList
@@ -237,23 +197,24 @@ const EditInvoice = ({
       onCancel={() => {
         void onClose();
       }}
-      onSubmit={async (values, markSent) => {
+      nextNumber={next.data?.number ?? null}
+      onSubmit={async (values, issue) => {
+        if (!(await issueGate(values, issue))) {
+          return;
+        }
+
         await update.mutateAsync({
           id: invoice.id,
-          json: invoiceFormToUpdateRequest(
-            values,
-            markSent && invoice.status === "draft"
-          ),
-          number: values.number,
+          json: invoiceFormToUpdateRequest(values, issue),
         });
         await onClose();
       }}
-      previousNumber={null}
+      previousNumber={next.data?.previous ?? null}
     />
   );
 };
 
-/** Loads the invoice; paid ones open the locked view, others the form. */
+/** Loads the invoice; drafts open the form, issued ones the locked view. */
 const ExistingInvoice = ({
   invoiceId,
   onClose,
@@ -281,10 +242,10 @@ const ExistingInvoice = ({
 
   const { invoice } = detail.data;
 
-  return invoice.status === "paid" ? (
-    <InvoiceView invoice={invoice} onClose={onClose} />
-  ) : (
+  return invoice.status === "draft" ? (
     <EditInvoice invoice={invoice} onClose={onClose} />
+  ) : (
+    <InvoiceView invoice={invoice} onClose={onClose} />
   );
 };
 
@@ -311,11 +272,14 @@ export const InvoiceDialog = ({
     enabled: invoiceId !== undefined,
   });
 
-  const number = detail.data?.invoice.number;
+  const numberOf = useInvoiceNumber();
   let title = t("invoices.newTitle");
 
   if (invoiceId !== undefined) {
-    title = number ?? t("invoices.editTitle");
+    title =
+      detail.data === undefined
+        ? t("invoices.editTitle")
+        : numberOf(detail.data.invoice);
   }
 
   return (

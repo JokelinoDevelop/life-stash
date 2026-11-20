@@ -38,12 +38,18 @@ export const invoiceQuery = (invoiceId: string) =>
     queryKey: financeKeys.invoice(invoiceId),
   });
 
-export const nextInvoiceNumberQuery = queryOptions({
-  queryFn: async () =>
-    await unwrap(api.finances.invoices["next-number"].$get()),
-  queryKey: financeKeys.nextInvoiceNumber,
-  staleTime: 0,
-});
+/** The number the next invoice issued in `year` gets, and the one it continues from. */
+export const nextInvoiceNumberQuery = (year: number) =>
+  queryOptions({
+    queryFn: async () =>
+      await unwrap(
+        api.finances.invoices["next-number"].$get({
+          query: { year: String(year) },
+        })
+      ),
+    queryKey: financeKeys.nextInvoiceNumber(year),
+    staleTime: 0,
+  });
 
 export type InvoiceList = SuccessBody<
   Awaited<ReturnType<typeof api.finances.invoices.$get>>

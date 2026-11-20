@@ -149,7 +149,7 @@ const MarkPaidForm = ({
         ...markPaidFormToRequest(value),
         currency: invoice.currency,
         id: invoice.id,
-        number: invoice.number,
+        label: invoice.number ?? "",
       });
       await onClose();
     },

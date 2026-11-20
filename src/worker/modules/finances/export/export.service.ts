@@ -104,10 +104,10 @@ export class FinanceExportService {
         .toSorted(
           (a, b) =>
             a.issueDate.localeCompare(b.issueDate) ||
-            a.number.localeCompare(b.number)
+            (a.number ?? "").localeCompare(b.number ?? "")
         )
         .map((row) => [
-          row.number,
+          row.number ?? "",
           row.clientName,
           row.projectName,
           row.issueDate,

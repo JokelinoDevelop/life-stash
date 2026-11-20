@@ -3,6 +3,7 @@ import type { TransactionFilter } from "./transactions/transaction-filter";
 /** Query keys for Finances. Every finance mutation invalidates `financeKeys.all`. */
 export const financeKeys = {
   all: ["finances"] as const,
+  businessProfile: ["finances", "business-profile"] as const,
   categories: ["finances", "categories"] as const,
   client: (clientId: string, year: number) =>
     ["finances", "client", clientId, year] as const,
@@ -12,7 +13,10 @@ export const financeKeys = {
   invoice: (invoiceId: string) => ["finances", "invoice", invoiceId] as const,
   invoices: (filter: { status: string; clientId?: string; year: number }) =>
     ["finances", "invoices", filter] as const,
-  nextInvoiceNumber: ["finances", "invoices", "next-number"] as const,
+  nextInvoiceNumber: (year: number) =>
+    ["finances", "invoices", "next-number", year] as const,
+  invoiceDocument: (invoiceId: string) =>
+    ["finances", "invoice", invoiceId, "document"] as const,
   projects: (clientId: string | null) =>
     ["finances", "projects", clientId] as const,
   recurring: ["finances", "recurring"] as const,

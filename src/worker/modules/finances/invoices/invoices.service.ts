@@ -1,13 +1,9 @@
-import {
-  invoiceStatus,
-  nextInvoiceNumber,
-  previousInvoiceNumber,
-  receivables,
-} from "@shared/domain/finances/invoices";
+import { invoiceStatus, receivables } from "@shared/domain/finances/invoices";
 import type { Receivables } from "@shared/domain/finances/invoices";
 
 import { domainError, notFound } from "../../../core/errors";
 import type { AttachmentsRepositoryPort } from "../attachments/attachments.repository";
+import type { BusinessProfileService } from "../business-profile/business-profile.service";
 import type { CategoriesService } from "../categories/categories.service";
 import type { ClientsService } from "../clients/clients.service";
 import type { ClockPort } from "../household/clock";
@@ -15,7 +11,8 @@ import type { HouseholdRepository } from "../household/household.repository";
 import type { ProjectsService } from "../projects/projects.service";
 import type { FinanceSettingsService } from "../settings/settings.service";
 import type { TransactionRow } from "../transactions/transactions.repository";
-import { bookInvoicePayment } from "./invoice-payment";
+import { InvoiceIssuing, guardNumberRace } from "./invoice-issuing";
+import { InvoicePayments } from "./invoice-payment";
 import { selectInvoices } from "./invoice-selection";
 import type { InvoiceStatusFilter } from "./invoice-selection";
 import type {
@@ -24,6 +21,7 @@ import type {
   InvoiceList,
   InvoiceListRow,
   InvoiceTransactionsPort,
+  IssueRequest,
 } from "./invoice-types";
 import type {
   InvoicePatch,
@@ -32,6 +30,10 @@ import type {
 } from "./invoices.repository";
 
 const ALREADY_PAID = "finances.invoice_already_paid";
+const ISSUED = "finances.invoice_issued";
+
+/** Fields an issued (sent or void) invoice still lets you change. */
+const EDITABLE_AFTER_ISSUE = new Set<string>(["notes"]);
 
 export type {
   InvoiceDetail,
@@ -39,6 +41,7 @@ export type {
   InvoiceList,
   InvoiceListRow,
   InvoiceTransactionsPort,
+  IssueRequest,
 } from "./invoice-types";
 
 export type { InvoiceStatusFilter } from "./invoice-selection";
@@ -46,13 +49,12 @@ export type { InvoiceStatusFilter } from "./invoice-selection";
 export class InvoicesService {
   readonly #repo: InvoicesRepositoryPort;
   readonly #transactions: InvoiceTransactionsPort;
-  readonly #categories: Pick<CategoriesService, "invoicesCategory">;
   readonly #clients: Pick<ClientsService, "requireForEntry">;
-  readonly #settings: Pick<FinanceSettingsService, "get">;
   readonly #projects: Pick<ProjectsService, "requireForInvoice">;
   readonly #attachments: AttachmentsRepositoryPort;
   readonly #clock: ClockPort;
-  readonly #household: Pick<HouseholdRepository, "preferences">;
+  readonly #issuing: InvoiceIssuing;
+  readonly #payments: InvoicePayments;
 
   constructor(deps: {
     repo: InvoicesRepositoryPort;
@@ -64,16 +66,16 @@ export class InvoicesService {
     attachments: AttachmentsRepositoryPort;
     clock: ClockPort;
     household: Pick<HouseholdRepository, "preferences">;
+    businessProfile: Pick<BusinessProfileService, "get" | "issuerSnapshot">;
   }) {
     this.#repo = deps.repo;
     this.#transactions = deps.transactions;
-    this.#categories = deps.categories;
     this.#clients = deps.clients;
-    this.#settings = deps.settings;
     this.#projects = deps.projects;
     this.#attachments = deps.attachments;
     this.#clock = deps.clock;
-    this.#household = deps.household;
+    this.#issuing = new InvoiceIssuing(deps);
+    this.#payments = new InvoicePayments(deps);
   }
 
   async #withDerived(
@@ -138,23 +140,11 @@ export class InvoicesService {
     };
   }
 
-  async nextNumber(): Promise<{ number: string; previous: string | null }> {
-    const [numbers, settings, today] = await Promise.all([
-      this.#repo.numbers(),
-      this.#settings.get(),
-      this.#clock.today(),
-    ]);
-
-    const year = Number(today.slice(0, 4));
-
-    return {
-      number: nextInvoiceNumber(numbers, year, settings.invoiceNumberFormat),
-      previous: previousInvoiceNumber(
-        numbers,
-        year,
-        settings.invoiceNumberFormat
-      ),
-    };
+  /** The suggested number for `year` (this year by default) and the one it continues from. */
+  async nextNumber(
+    year?: number
+  ): Promise<{ number: string; previous: string | null }> {
+    return await this.#issuing.nextNumber(year);
   }
 
   async #find(invoiceId: string): Promise<InvoiceWithClient> {
@@ -188,50 +178,71 @@ export class InvoicesService {
     return { ...row, firstAttachedAt, transaction: transaction ?? null };
   }
 
-  async #assertNumberFree(
-    number: string,
-    exceptId: string | null
-  ): Promise<void> {
-    if (await this.#repo.numberTaken(number, exceptId)) {
-      throw domainError("finances.invoice_number_taken", { field: "number" });
-    }
-  }
-
-  async create(input: InvoiceInput, markSent: boolean): Promise<string> {
+  /** A draft, or (with `issue`) an invoice issued straight away. */
+  async create(
+    input: InvoiceInput,
+    issue: IssueRequest
+  ): Promise<{ id: string; number: string | null }> {
     await this.#clients.requireForEntry(input.clientId);
 
     if (input.projectId !== null) {
       await this.#projects.requireForInvoice(input.projectId, input.clientId);
     }
 
-    await this.#assertNumberFree(input.number, null);
-    const today = await this.#clock.today();
+    if (issue === null) {
+      const row = await this.#repo.insert({
+        ...input,
+        number: null,
+        status: "draft",
+      });
 
-    const row = await this.#repo.insert({
-      ...input,
-      sentAt: markSent ? today : null,
-      status: markSent ? "sent" : "draft",
-    });
+      return { id: row.id, number: null };
+    }
 
-    return row.id;
+    const issued = await this.#issuing.issuedFields(
+      { ...input, itemised: false },
+      issue.number,
+      null
+    );
+
+    const row = await guardNumberRace(
+      async () => await this.#repo.insert({ ...input, ...issued })
+    );
+
+    return { id: row.id, number: issued.number };
   }
 
+  /**
+   * Edits a draft (and optionally issues it). Issued invoices only take notes; paid ones are
+   * locked until marked unpaid.
+   */
   async update(
     invoiceId: string,
-    changes: Partial<InvoiceInput>
-  ): Promise<void> {
+    changes: Partial<InvoiceInput>,
+    issue: IssueRequest = null
+  ): Promise<string | null> {
     const invoice = await this.#find(invoiceId);
 
     if (invoice.status === "paid") {
       throw domainError(ALREADY_PAID);
     }
 
-    if (changes.clientId !== undefined) {
-      await this.#clients.requireForEntry(changes.clientId, invoice.clientId);
+    if (invoice.status !== "draft") {
+      const locked = Object.entries(changes).some(
+        ([key, value]) => value !== undefined && !EDITABLE_AFTER_ISSUE.has(key)
+      );
+
+      if (locked || issue !== null) {
+        throw domainError(ISSUED);
+      }
+
+      await this.#repo.update(invoiceId, { notes: changes.notes });
+
+      return invoice.number;
     }
 
-    if (changes.number !== undefined) {
-      await this.#assertNumberFree(changes.number, invoiceId);
+    if (changes.clientId !== undefined) {
+      await this.#clients.requireForEntry(changes.clientId, invoice.clientId);
     }
 
     const projectId =
@@ -252,21 +263,39 @@ export class InvoicesService {
     }
 
     await this.#repo.update(invoiceId, patch);
-  }
 
-  async markSent(invoiceId: string): Promise<void> {
-    const invoice = await this.#find(invoiceId);
-
-    if (invoice.status === "paid") {
-      throw domainError(ALREADY_PAID);
+    if (issue === null) {
+      return null;
     }
 
-    await this.#repo.update(invoiceId, {
-      sentAt: invoice.sentAt ?? (await this.#clock.today()),
-      status: "sent",
-    });
+    return await this.issue(invoiceId, issue.number);
   }
 
+  /**
+   * Gives a draft its number (typed, or the next of its issue year), freezes your details and
+   * the client's, and marks it sent. Returns the number.
+   */
+  async issue(invoiceId: string, typed: string | null): Promise<string> {
+    const invoice = await this.#find(invoiceId);
+
+    if (invoice.status !== "draft") {
+      throw domainError(ISSUED);
+    }
+
+    const issued = await this.#issuing.issuedFields(
+      { ...invoice, itemised: false },
+      typed,
+      invoiceId
+    );
+
+    await guardNumberRace(async () => {
+      await this.#repo.update(invoiceId, issued);
+    });
+
+    return issued.number;
+  }
+
+  /** Cancels a sent invoice: it stays listed (struck through) and its number stays used. */
   async markVoid(invoiceId: string): Promise<void> {
     const invoice = await this.#find(invoiceId);
 
@@ -274,7 +303,18 @@ export class InvoicesService {
       throw domainError(ALREADY_PAID);
     }
 
-    await this.#repo.update(invoiceId, { status: "void" });
+    if (invoice.status === "draft") {
+      throw domainError("finances.invoice_not_issued");
+    }
+
+    if (invoice.status === "void") {
+      return;
+    }
+
+    await this.#repo.update(invoiceId, {
+      status: "void",
+      voidedAt: this.#clock.now().toISOString(),
+    });
   }
 
   /** Books the money: one income entry in "Invoices", linked to the invoice. */
@@ -282,63 +322,24 @@ export class InvoicesService {
     invoiceId: string,
     payment: { paidDate: string; amountMinor: number }
   ): Promise<TransactionRow> {
-    const invoice = await this.#find(invoiceId);
-
-    if (invoice.status === "paid") {
-      throw domainError(ALREADY_PAID);
-    }
-
-    if (invoice.status === "void") {
-      throw domainError("finances.invoice_void");
-    }
-
-    // A linked entry without "paid" means an earlier attempt (or a parallel request) booked it
-    // but didn't finish; reuse it instead of booking twice.
-    // oxlint-disable-next-line react-doctor/server-sequential-independent-await -- only after the checks above passed
-    const transaction =
-      (await this.#transactions.findByInvoice(invoiceId)) ??
-      (await bookInvoicePayment(
-        {
-          categories: this.#categories,
-          household: this.#household,
-          transactions: this.#transactions,
-        },
-        invoice,
-        payment
-      ));
-
-    await this.#repo.update(invoiceId, {
-      paidAt: payment.paidDate,
-      sentAt: invoice.sentAt ?? invoice.issueDate,
-      status: "paid",
-    });
-
-    return transaction;
+    return await this.#payments.markPaid(await this.#find(invoiceId), payment);
   }
 
   /** Back to sent; removes the income entry. Returns the payment so Undo can re-book it. */
   async markUnpaid(
     invoiceId: string
   ): Promise<{ paidDate: string; amountMinor: number }> {
-    const invoice = await this.#find(invoiceId);
-
-    if (invoice.status !== "paid") {
-      throw domainError("finances.invoice_not_paid");
-    }
-
-    const transaction = await this.#transactions.findByInvoice(invoiceId);
-    await this.#transactions.deleteByInvoice(invoiceId);
-    await this.#repo.update(invoiceId, { paidAt: null, status: "sent" });
-
-    return {
-      amountMinor: transaction?.amountMinor ?? invoice.amountMinor,
-      paidDate: transaction?.date ?? invoice.paidAt ?? invoice.issueDate,
-    };
+    return await this.#payments.markUnpaid(await this.#find(invoiceId));
   }
 
-  /** Soft delete (with its ledger entry), so Undo can bring both back. */
+  /** Soft-deletes a draft, so Undo can bring it back. Issued invoices are voided instead. */
   async delete(invoiceId: string): Promise<void> {
-    await this.#find(invoiceId);
+    const invoice = await this.#find(invoiceId);
+
+    if (invoice.status !== "draft") {
+      throw domainError(ISSUED);
+    }
+
     const deletedAt = this.#clock.now().toISOString();
     await this.#transactions.setDeletedByInvoice(invoiceId, deletedAt);
     await this.#repo.setDeleted(invoiceId, deletedAt);
@@ -353,7 +354,10 @@ export class InvoicesService {
       throw notFound();
     }
 
-    await this.#assertNumberFree(invoice.number, invoiceId);
+    if (invoice.number !== null) {
+      await this.#issuing.assertNumberFree(invoice.number, invoiceId);
+    }
+
     await this.#repo.setDeleted(invoiceId, null);
     await this.#transactions.setDeletedByInvoice(invoiceId, null);
   }

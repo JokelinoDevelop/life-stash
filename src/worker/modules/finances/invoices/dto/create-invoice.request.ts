@@ -13,11 +13,12 @@ export const createInvoiceRequest = z.object({
   currency: currencyCode,
   description: optionalText(300),
   dueDate: isoDate,
+  /** Issue it now ("Issue") instead of saving a draft. */
+  issue: z.boolean(),
   issueDate: isoDate,
-  /** "Save & mark sent" instead of "Save as draft". */
-  markSent: z.boolean(),
   notes: optionalText(2000),
-  number: shortText(40),
+  /** The number to issue with (`YYYY-NNN` or a plain `NNN`); null takes the next one. */
+  number: shortText(40).nullable().default(null),
   periodEnd: isoDate.nullable(),
   periodStart: isoDate.nullable(),
   projectId: z.uuid().nullable().default(null),

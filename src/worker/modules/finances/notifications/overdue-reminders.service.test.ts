@@ -9,6 +9,7 @@ const invoice = (overrides: Partial<InvoiceWithClient>): InvoiceWithClient => ({
   amountMinor: 320_000,
   clientId: "c1",
   clientName: "Brightside Studio",
+  clientSnapshot: null,
   createdAt: "2026-10-21T10:00:00Z",
   currency: "EUR",
   deletedAt: null,
@@ -17,8 +18,12 @@ const invoice = (overrides: Partial<InvoiceWithClient>): InvoiceWithClient => ({
   householdId: "h1",
   id: crypto.randomUUID(),
   issueDate: "2026-10-22",
+  issuedAt: "2026-10-22T10:00:00Z",
+  issuerSnapshot: null,
   notes: null,
   number: "2026-013",
+  numberSeq: 13,
+  numberYear: 2026,
   overdueNotifiedAt: null,
   paidAt: null,
   periodEnd: null,
@@ -28,6 +33,7 @@ const invoice = (overrides: Partial<InvoiceWithClient>): InvoiceWithClient => ({
   sentAt: "2026-10-22",
   status: "sent",
   updatedAt: "2026-10-22T10:00:00Z",
+  voidedAt: null,
   ...overrides,
 });
 

@@ -1,6 +1,6 @@
 import {
   INVOICE_NUMBER_FORMATS,
-  nextInvoiceNumber,
+  formatInvoiceNumber,
 } from "@shared/domain/finances/invoices";
 import type { InvoiceNumberFormat } from "@shared/domain/finances/invoices";
 import { CURRENCIES } from "@shared/domain/money";
@@ -163,7 +163,7 @@ export const FinanceDefaults = () => {
         <Row id="invoice-numbers" label={t("defaults.numbers")}>
           <Select
             items={INVOICE_NUMBER_FORMATS.map((format) => ({
-              label: nextInvoiceNumber([], year, format),
+              label: formatInvoiceNumber(year, 1, format),
               value: format,
             }))}
             onValueChange={(value) => {
@@ -179,7 +179,7 @@ export const FinanceDefaults = () => {
             <SelectContent>
               {INVOICE_NUMBER_FORMATS.map((format) => (
                 <SelectItem key={format} value={format}>
-                  {nextInvoiceNumber([], year, format)}
+                  {formatInvoiceNumber(year, 1, format)}
                 </SelectItem>
               ))}
             </SelectContent>

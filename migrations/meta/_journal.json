@@ -43,6 +43,13 @@
       "when": 1795122655786,
       "tag": "0005_bumpy_madripoor",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1795174037670,
+      "tag": "0006_heavy_franklin_storm",
+      "breakpoints": true
     }
   ]
 }

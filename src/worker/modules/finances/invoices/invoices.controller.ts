@@ -9,15 +9,19 @@ import type { DeleteInvoiceResponse } from "./dto/delete-invoice.response";
 import { getInvoiceParams } from "./dto/get-invoice.request";
 import { toGetInvoiceResponse } from "./dto/get-invoice.response";
 import type { GetInvoiceResponse } from "./dto/get-invoice.response";
+import {
+  issueInvoiceParams,
+  issueInvoiceRequest,
+} from "./dto/issue-invoice.request";
+import type { IssueInvoiceResponse } from "./dto/issue-invoice.response";
 import { listInvoicesQuery } from "./dto/list-invoices.request";
 import { toListInvoicesResponse } from "./dto/list-invoices.response";
 import type { ListInvoicesResponse } from "./dto/list-invoices.response";
 import { markPaidParams, markPaidRequest } from "./dto/mark-paid.request";
 import type { MarkPaidResponse } from "./dto/mark-paid.response";
-import { markSentParams } from "./dto/mark-sent.request";
-import type { MarkSentResponse } from "./dto/mark-sent.response";
 import { markUnpaidParams } from "./dto/mark-unpaid.request";
 import type { MarkUnpaidResponse } from "./dto/mark-unpaid.response";
+import { nextInvoiceNumberQuery } from "./dto/next-invoice-number.request";
 import type { NextInvoiceNumberResponse } from "./dto/next-invoice-number.response";
 import { restoreInvoiceParams } from "./dto/restore-invoice.request";
 import type { RestoreInvoiceResponse } from "./dto/restore-invoice.response";
@@ -45,9 +49,11 @@ export const invoicesController = new Hono<AppEnv>()
 
     return c.json(body);
   })
-  .get("/next-number", async (c) => {
+  .get("/next-number", validate("query", nextInvoiceNumberQuery), async (c) => {
     const body: NextInvoiceNumberResponse =
-      await c.var.container.finances.invoices.nextNumber();
+      await c.var.container.finances.invoices.nextNumber(
+        c.req.valid("query").year
+      );
 
     return c.json(body);
   })
@@ -61,9 +67,13 @@ export const invoicesController = new Hono<AppEnv>()
     return c.json(body);
   })
   .post("/", validate("json", createInvoiceRequest), async (c) => {
-    const { markSent, ...input } = c.req.valid("json");
-    const id = await c.var.container.finances.invoices.create(input, markSent);
-    const body: CreateInvoiceResponse = { id };
+    const { issue, number, ...input } = c.req.valid("json");
+
+    const body: CreateInvoiceResponse =
+      await c.var.container.finances.invoices.create(
+        input,
+        issue ? { number } : null
+      );
 
     return c.json(body, 201);
   })
@@ -73,15 +83,15 @@ export const invoicesController = new Hono<AppEnv>()
     validate("json", updateInvoiceRequest),
     async (c) => {
       const { invoiceId } = c.req.valid("param");
-      const { markSent, ...changes } = c.req.valid("json");
-      const { invoices } = c.var.container.finances;
-      await invoices.update(invoiceId, changes);
+      const { issue, number, ...changes } = c.req.valid("json");
 
-      if (markSent === true) {
-        await invoices.markSent(invoiceId);
-      }
+      const after = await c.var.container.finances.invoices.update(
+        invoiceId,
+        changes,
+        issue === true ? { number: number ?? null } : null
+      );
 
-      const body: UpdateInvoiceResponse = { id: invoiceId };
+      const body: UpdateInvoiceResponse = { id: invoiceId, number: after };
 
       return c.json(body);
     }
@@ -107,13 +117,18 @@ export const invoicesController = new Hono<AppEnv>()
     }
   )
   .post(
-    `${INVOICE_PATH}/mark-sent`,
-    validate("param", markSentParams),
+    `${INVOICE_PATH}/issue`,
+    validate("param", issueInvoiceParams),
+    validate("json", issueInvoiceRequest),
     async (c) => {
-      await c.var.container.finances.invoices.markSent(
-        c.req.valid("param").invoiceId
+      const { invoiceId } = c.req.valid("param");
+
+      const number = await c.var.container.finances.invoices.issue(
+        invoiceId,
+        c.req.valid("json").number
       );
-      const body: MarkSentResponse = { ok: true };
+
+      const body: IssueInvoiceResponse = { id: invoiceId, number };
 
       return c.json(body);
     }

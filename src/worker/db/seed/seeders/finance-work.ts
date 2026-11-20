@@ -1,6 +1,4 @@
 import { addDays, addMonths } from "@shared/domain/dates";
-import { toMinor } from "@shared/domain/money";
-import type { Currency } from "@shared/domain/money";
 import { and, eq, like } from "drizzle-orm";
 
 import {
@@ -11,24 +9,12 @@ import {
 import type { SeedContext } from "../context";
 import { insertRows } from "../insert-rows";
 import type { Seeder } from "../seeder";
+import { invoiceNumberer, toInvoiceRow } from "./finance-invoice-rows";
+import type { PlannedInvoice } from "./finance-invoice-rows";
 
 type InvoiceRow = typeof financeInvoices.$inferInsert;
 
 type TransactionRow = typeof financeTransactions.$inferInsert;
-
-interface PlannedInvoice {
-  clientId: string;
-  issueDate: string;
-  termsDays: number;
-  amount: number;
-  currency: Currency;
-  description: string;
-  periodStart: string | null;
-  periodEnd: string | null;
-  /** Days after issue it was paid; null = still open. */
-  paidAfterDays: number | null;
-  draft?: boolean;
-}
 
 const monthStart = (date: string) => `${date.slice(0, 7)}-01`;
 const monthEnd = (date: string) => addDays(addMonths(monthStart(date), 1), -1);
@@ -230,7 +216,6 @@ export const financeWorkSeeder: Seeder = {
 
     const planned = planInvoices(ctx, ids, lastYear);
 
-    const sequence = new Map<string, number>();
     const invoices: InvoiceRow[] = [];
     const income: TransactionRow[] = [];
     const invoicesCategory = ctx.finance.categoryIds.get("Invoices");
@@ -241,63 +226,16 @@ export const financeWorkSeeder: Seeder = {
       );
     }
 
+    const numberFor = invoiceNumberer();
+
     for (const plan of planned.toSorted((a, b) =>
       a.issueDate.localeCompare(b.issueDate)
     )) {
-      const year = plan.issueDate.slice(0, 4);
-      const seq = (sequence.get(year) ?? 0) + 1;
-      sequence.set(year, seq);
-      const number = `${year}-${String(seq).padStart(3, "0")}`;
-      const id = crypto.randomUUID();
+      const { invoice, payment } = toInvoiceRow(ctx, plan, numberFor(plan));
+      invoices.push(invoice);
 
-      const paidAt =
-        plan.paidAfterDays === null
-          ? null
-          : addDays(plan.issueDate, plan.paidAfterDays);
-
-      const paid = paidAt !== null && paidAt <= ctx.today;
-      const amountMinor = toMinor(plan.amount);
-
-      const periodLabel =
-        plan.periodStart === null ? "" : ` — ${plan.periodStart.slice(0, 7)}`;
-
-      // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
-      invoices.push({
-        amountMinor,
-        clientId: plan.clientId,
-        createdAt: `${addDays(plan.issueDate, -1)}T10:00:00.000Z`,
-        currency: plan.currency,
-        description: `${plan.description}${periodLabel}`,
-        dueDate: addDays(plan.issueDate, plan.termsDays),
-        householdId: ctx.householdId,
-        id,
-        issueDate: plan.issueDate,
-        number,
-        paidAt: paid ? paidAt : null,
-        periodEnd: plan.periodEnd,
-        periodStart: plan.periodStart,
-        sentAt: plan.draft === true ? null : plan.issueDate,
-        status: (() => {
-          if (plan.draft === true) {
-            return "draft";
-          }
-
-          return paid ? "paid" : "sent";
-        })(),
-      });
-
-      if (paid) {
-        income.push({
-          amountMinor,
-          categoryId: invoicesCategory,
-          clientId: plan.clientId,
-          currency: plan.currency,
-          date: paidAt,
-          description: `Invoice ${number}`,
-          householdId: ctx.householdId,
-          invoiceId: id,
-          kind: "income",
-        });
+      if (payment !== null) {
+        income.push({ ...payment, categoryId: invoicesCategory });
       }
     }
 

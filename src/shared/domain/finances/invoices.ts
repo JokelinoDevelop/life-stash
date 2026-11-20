@@ -38,55 +38,66 @@ export const invoiceStatus = (
 
 const SEQ_DIGITS = 3;
 
-const PATTERNS: Record<InvoiceNumberFormat, RegExp> = {
-  NNN: /^(?<seq>\d+)$/u,
-  "YYYY-NNN": /^(?<year>\d{4})-(?<seq>\d+)$/u,
-  "YYYY/NNN": /^(?<year>\d{4})\/(?<seq>\d+)$/u,
-};
+export interface InvoiceNumberParts {
+  year: number;
+  seq: number;
+}
+
+const FULL_NUMBER = /^(?<year>\d{4})[-/](?<seq>\d{1,9})$/u;
+const PLAIN_NUMBER = /^(?<seq>\d{1,9})$/u;
 
 /**
- * The suggested next number: the highest sequence of `year` (any year for `NNN`) plus one,
- * zero-padded to three digits, e.g. `2026-015`. Numbers in other shapes are ignored.
+ * Reads a typed invoice number: `YYYY-NNN`, `YYYY/NNN` or a plain `NNN` (which counts as a
+ * sequence of `issueYear`, e.g. the Wise invoice `011`). A year must be the issue year.
+ * Returns null for anything else, including sequence 0.
  */
-export const nextInvoiceNumber = (
-  existing: readonly string[],
-  year: number,
-  format: InvoiceNumberFormat = "YYYY-NNN"
-): string => {
-  const pattern = PATTERNS[format];
-  let highest = 0;
+export const parseInvoiceNumber = (
+  text: string,
+  issueYear: number
+): InvoiceNumberParts | null => {
+  const trimmed = text.trim();
+  const full = FULL_NUMBER.exec(trimmed)?.groups;
 
-  for (const number of existing) {
-    const groups = pattern.exec(number.trim())?.groups;
-    const sameYear = format === "NNN" || groups?.year === String(year);
+  if (full?.year !== undefined && full.seq !== undefined) {
+    const year = Number(full.year);
+    const seq = Number(full.seq);
 
-    if (groups?.seq !== undefined && sameYear) {
-      highest = Math.max(highest, Number(groups.seq));
-    }
+    return year === issueYear && seq > 0 ? { seq, year } : null;
   }
 
-  const seq = String(highest + 1).padStart(SEQ_DIGITS, "0");
+  const plain = PLAIN_NUMBER.exec(trimmed)?.groups;
 
-  if (format === "NNN") {
-    return seq;
+  if (plain?.seq !== undefined && Number(plain.seq) > 0) {
+    return { seq: Number(plain.seq), year: issueYear };
   }
 
-  return `${year}${format === "YYYY-NNN" ? "-" : "/"}${seq}`;
+  return null;
 };
 
-/** The latest number of `year` in the format, for the "Next after …" hint. */
-export const previousInvoiceNumber = (
-  existing: readonly string[],
+/** `2026-012`; the sequence is at least three digits wide (`999` is followed by `1000`). */
+export const formatInvoiceNumber = (
   year: number,
+  seq: number,
   format: InvoiceNumberFormat = "YYYY-NNN"
-): string | null => {
-  const next = nextInvoiceNumber(existing, year, format);
+): string => {
+  const padded = String(seq).padStart(SEQ_DIGITS, "0");
 
-  return (
-    existing.find(
-      (number) => nextInvoiceNumber([number], year, format) === next
-    ) ?? null
-  );
+  if (format === "NNN") {
+    return padded;
+  }
+
+  return `${year}${format === "YYYY-NNN" ? "-" : "/"}${padded}`;
+};
+
+/** The sequence after the highest one used (1 when none). */
+export const nextInvoiceSeq = (usedSeqs: readonly number[]): number => {
+  let highest = 0;
+
+  for (const seq of usedSeqs) {
+    highest = Math.max(highest, seq);
+  }
+
+  return highest + 1;
 };
 
 export const defaultDueDate = (

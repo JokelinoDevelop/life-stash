@@ -25,6 +25,20 @@ const invoiceBody = z.object({
   }),
 });
 
+const numberBody = z.object({
+  number: z.string(),
+  previous: z.string().nullable(),
+});
+
+const detailBody = z.object({
+  invoice: z.object({
+    clientSnapshot: z.unknown().optional(),
+    issuedAt: z.string().nullable(),
+    number: z.string().nullable(),
+    status: z.string(),
+  }),
+});
+
 const listBody = z.object({
   invoices: z.array(z.object({ id: z.string(), status: z.string() })),
   stats: z.object({ overdueCount: z.number(), unpaidCount: z.number() }),
@@ -87,7 +101,7 @@ describe("invoices controller", () => {
   const createInvoice = async (
     session: Session,
     client: string,
-    invoiceNumber: string
+    invoiceNumber: string | null
   ) =>
     await request(session, "POST", "/invoices", {
       amountMinor: 480_000,
@@ -95,8 +109,8 @@ describe("invoices controller", () => {
       currency: "EUR",
       description: "Software development",
       dueDate: "2020-01-31",
+      issue: invoiceNumber !== null,
       issueDate: "2020-01-01",
-      markSent: true,
       notes: null,
       number: invoiceNumber,
       periodEnd: null,
@@ -263,5 +277,127 @@ describe("invoices controller", () => {
     await expect(read(removed, errorBody)).resolves.toMatchObject({
       error: { code: "finances.client_in_use" },
     });
+  });
+
+  it("keeps drafts unnumbered and numbers them per year when issued", async () => {
+    const { clientId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const draft = await read(
+      await request(alice, "GET", `/invoices/${draftId}`),
+      detailBody
+    );
+
+    const next = await read(
+      await request(alice, "GET", "/invoices/next-number?year=2020"),
+      numberBody
+    );
+
+    const issued = await request(alice, "POST", `/invoices/${draftId}/issue`, {
+      number: null,
+    });
+
+    expect(draft.invoice).toMatchObject({ issuedAt: null, number: null });
+    expect(next).toStrictEqual({ number: "2020-002", previous: "2020-001" });
+    await expect(
+      read(issued, numberBody.pick({ number: true }))
+    ).resolves.toStrictEqual({ number: "2020-002" });
+    await expect(
+      read(await request(alice, "GET", `/invoices/${draftId}`), detailBody)
+    ).resolves.toMatchObject({
+      invoice: { number: "2020-002", status: "overdue" },
+    });
+  });
+
+  it("counts a plain legacy number as a sequence of its issue year", async () => {
+    const { clientId } = await setup();
+    await createInvoice(alice, clientId, "011");
+
+    const clash = await createInvoice(alice, clientId, "2020-011");
+    const otherYear = await createInvoice(alice, clientId, "2019-012");
+
+    await expect(
+      read(
+        await request(alice, "GET", "/invoices/next-number?year=2020"),
+        numberBody
+      )
+    ).resolves.toStrictEqual({ number: "2020-012", previous: "011" });
+    await expect(read(clash, errorBody)).resolves.toStrictEqual({
+      error: { code: "finances.invoice_number_taken", field: "number" },
+    });
+    await expect(read(otherYear, errorBody)).resolves.toStrictEqual({
+      error: { code: "finances.invoice_number_invalid", field: "number" },
+    });
+  });
+
+  it("locks issued invoices: notes only, void instead of delete", async () => {
+    const { invoiceId } = await setup();
+
+    const edit = await request(alice, "PATCH", `/invoices/${invoiceId}`, {
+      amountMinor: 1,
+    });
+
+    const notes = await request(alice, "PATCH", `/invoices/${invoiceId}`, {
+      notes: "Paid in two parts",
+    });
+
+    const removed = await request(alice, "DELETE", `/invoices/${invoiceId}`);
+    const voided = await request(alice, "POST", `/invoices/${invoiceId}/void`);
+
+    await expect(read(edit, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_issued" },
+    });
+    expect(notes.status).toBe(200);
+    await expect(read(removed, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_issued" },
+    });
+    expect(voided.status).toBe(200);
+    await expect(
+      read(
+        await request(alice, "GET", "/invoices/next-number?year=2020"),
+        numberBody
+      )
+    ).resolves.toMatchObject({ number: "2020-002" });
+  });
+
+  it("deletes drafts and refuses to void them", async () => {
+    const { clientId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const voided = await request(alice, "POST", `/invoices/${draftId}/void`);
+    const removed = await request(alice, "DELETE", `/invoices/${draftId}`);
+
+    await expect(read(voided, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_not_issued" },
+    });
+    expect(removed.status).toBe(200);
+  });
+
+  it("keeps issuing, voiding and editing inside the household", async () => {
+    const { clientId, invoiceId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const statuses = await Promise.all([
+      request(bob, "POST", `/invoices/${draftId}/issue`, { number: null }),
+      request(bob, "POST", `/invoices/${invoiceId}/void`),
+      request(bob, "PATCH", `/invoices/${draftId}`, { notes: "x" }),
+      request(bob, "DELETE", `/invoices/${draftId}`),
+    ]);
+
+    expect(statuses.map((response) => response.status)).toStrictEqual([
+      404, 404, 404, 404,
+    ]);
   });
 });

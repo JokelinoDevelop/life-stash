@@ -6,9 +6,9 @@ import type { TransactionRow } from "../transactions/transactions.repository";
 import type { InvoiceStats } from "./invoice-selection";
 import type { InvoiceWithClient } from "./invoices.repository";
 
+/** What a draft holds; the number is only given when issuing. */
 export interface InvoiceInput {
   clientId: string;
-  number: string;
   issueDate: string;
   dueDate: string;
   periodStart: string | null;
@@ -44,3 +44,6 @@ export type InvoiceTransactionsPort = Pick<
   | "deleteByInvoice"
   | "setDeletedByInvoice"
 >;
+
+/** Issue now (with a typed number, or the next one when null) or keep it a draft. */
+export type IssueRequest = { number: string | null } | null;

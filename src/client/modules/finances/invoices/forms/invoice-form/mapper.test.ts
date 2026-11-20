@@ -20,6 +20,7 @@ const DETAIL = {
   id: "i1",
   issueDate: "2026-09-30",
   notes: null,
+  issuedAt: "2026-09-30T10:00:00Z",
   number: "2026-012",
   paidAt: "2026-10-28",
   periodEnd: "2026-09-30",
@@ -29,18 +30,19 @@ const DETAIL = {
   sentAt: "2026-09-30",
   status: "paid",
   transaction: null,
+  voidedAt: null,
 } as const;
 
 describe(duplicateToFormValues, () => {
-  it("moves period, issue and due date one month on with the new number", () => {
-    const values = duplicateToFormValues(DETAIL, "2026-015");
+  it("moves period, issue and due date one month on, as a draft without a number", () => {
+    const values = duplicateToFormValues(DETAIL);
 
     expect([
       values.period,
       values.issueDate,
       values.dueDate,
       values.number,
-    ]).toStrictEqual(["2026-10", "2026-10-31", "2026-11-30", "2026-015"]);
+    ]).toStrictEqual(["2026-10", "2026-10-31", "2026-11-30", ""]);
   });
 });
 
@@ -48,8 +50,9 @@ describe(invoiceFormToCreateRequest, () => {
   it("turns the period into its first and last day and the amount into minor units", () => {
     const body = invoiceFormToCreateRequest(
       {
-        ...duplicateToFormValues(DETAIL, "2026-015"),
+        ...duplicateToFormValues(DETAIL),
         amount: "4,800.50".replace(",", ""),
+        number: " 011 ",
         period: "2026-02",
       },
       true
@@ -59,8 +62,20 @@ describe(invoiceFormToCreateRequest, () => {
       body.periodStart,
       body.periodEnd,
       body.amountMinor,
-      body.markSent,
-    ]).toStrictEqual(["2026-02-01", "2026-02-28", 480_050, true]);
+      body.issue,
+      body.number,
+    ]).toStrictEqual(["2026-02-01", "2026-02-28", 480_050, true, "011"]);
     expect(periodBounds("none")).toBeNull();
+  });
+});
+
+describe("drafts", () => {
+  it("send no number until issued", () => {
+    const values = { ...duplicateToFormValues(DETAIL), number: "2026-099" };
+
+    expect(invoiceFormToCreateRequest(values, false).number).toBeNull();
+    expect(
+      invoiceFormToCreateRequest({ ...values, number: "" }, true).number
+    ).toBeNull();
   });
 });

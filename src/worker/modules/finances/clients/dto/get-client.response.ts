@@ -1,3 +1,4 @@
+import type { InvoiceLanguage } from "@shared/domain/finances/invoice-document";
 import type { InvoiceStatus } from "@shared/domain/finances/invoices";
 import type { Currency, MoneyTotal } from "@shared/domain/money";
 
@@ -13,6 +14,9 @@ export interface GetClientResponse {
     paymentTermsDays: number;
     email: string | null;
     notes: string | null;
+    address: string | null;
+    taxId: string | null;
+    invoiceLanguage: InvoiceLanguage;
     archived: boolean;
     since: string | null;
     earnedThisYear: MoneyTotal[];
@@ -24,7 +28,7 @@ export interface GetClientResponse {
   };
   invoices: {
     id: string;
-    number: string;
+    number: string | null;
     issueDate: string;
     dueDate: string;
     paidAt: string | null;
@@ -42,6 +46,7 @@ export const toGetClientResponse = (
   detail: ClientDetail
 ): GetClientResponse => ({
   client: {
+    address: detail.address,
     archived: detail.archivedAt !== null,
     averageDaysToGetPaid: detail.averageDaysToGetPaid,
     currency: detail.currency,
@@ -50,12 +55,14 @@ export const toGetClientResponse = (
     earnedThisYear: detail.earnedThisYear,
     email: detail.email,
     id: detail.id,
+    invoiceLanguage: detail.invoiceLanguage,
     kind: detail.kind,
     late: detail.late,
     name: detail.name,
     notes: detail.notes,
     paymentTermsDays: detail.paymentTermsDays,
     since: detail.since,
+    taxId: detail.taxId,
     unpaid: detail.unpaid,
   },
   invoices: detail.invoices.map((invoice) => ({

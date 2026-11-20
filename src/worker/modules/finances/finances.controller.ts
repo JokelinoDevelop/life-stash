@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 
 import type { AppEnv } from "../../core/app-env";
+import { businessProfileController } from "./business-profile/business-profile.controller";
 import { categoriesController } from "./categories/categories.controller";
 import { clientsController } from "./clients/clients.controller";
 import { exportController } from "./export/export.controller";
@@ -19,6 +20,7 @@ export const financesController = new Hono<AppEnv>()
   .route("/clients", clientsController)
   .route("/invoices", invoicesController)
   .route("/settings", financeSettingsController)
+  .route("/business-profile", businessProfileController)
   .route("/projects", projectsController)
   .route("/recurring", recurringController)
   .route("/export.csv", exportController);

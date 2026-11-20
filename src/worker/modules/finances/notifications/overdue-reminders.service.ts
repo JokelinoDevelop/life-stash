@@ -76,7 +76,7 @@ export class OverdueRemindersService {
       due.map(async (invoice) => {
         await this.#send({
           body: text.body(
-            invoice.number,
+            invoice.number ?? "",
             invoice.clientName,
             money(invoice.amountMinor, invoice.currency, prefs.locale),
             formatShortDate(invoice.dueDate)

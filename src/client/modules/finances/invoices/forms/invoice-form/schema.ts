@@ -6,7 +6,6 @@ import {
   optionalText,
   parseAmount,
   requiredAmount,
-  requiredText,
 } from "@/lib/form-schemas";
 
 export const invoiceFormSchema = z.object({
@@ -20,7 +19,8 @@ export const invoiceFormSchema = z.object({
   dueDate: isoDateField,
   issueDate: isoDateField,
   notes: optionalText(2000),
-  number: requiredText(40),
+  /** Empty takes the next number when issuing; drafts have none. */
+  number: optionalText(40),
   /** `YYYY-MM` of the billed month, or "none". */
   period: z.string(),
   /** A project of the chosen client, or "none". */

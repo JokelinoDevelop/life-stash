@@ -20,7 +20,7 @@ import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 
 import { useFinanceDialog } from "./dialogs/use-finance-dialog";
-import { useDueLabel } from "./invoices/invoice-labels";
+import { useDueLabel, useInvoiceNumber } from "./invoices/invoice-labels";
 import { invoicesQuery } from "./invoices/invoices.queries";
 import { useLedgerMoney } from "./money";
 import { exportUrl } from "./settings/export-url";
@@ -113,6 +113,7 @@ export const FinanceInvoicesGroup = ({ run }: { run: Run }) => {
   const dialog = useFinanceDialog();
   const ledger = useLedgerMoney();
   const dueLabel = useDueLabel();
+  const numberOf = useInvoiceNumber();
   const year = Number(todayIso().slice(0, 4));
   const invoices = useQuery(invoicesQuery({ status: "all", year }));
   const rows = invoices.data?.invoices ?? [];
@@ -127,8 +128,8 @@ export const FinanceInvoicesGroup = ({ run }: { run: Run }) => {
         <Item
           icon={FileText}
           key={invoice.id}
-          keywords={[invoice.number, invoice.clientName]}
-          label={`${invoice.number} · ${invoice.clientName}`}
+          keywords={[numberOf(invoice), invoice.clientName]}
+          label={`${numberOf(invoice)} · ${invoice.clientName}`}
           meta={`${ledger.money(invoice.amountMinor, invoice.currency)} · ${dueLabel(invoice)}`}
           onSelect={() => {
             run(async () => {

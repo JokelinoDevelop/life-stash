@@ -1,3 +1,4 @@
+import type { InvoiceLanguage } from "@shared/domain/finances/invoice-document";
 import {
   averageDaysToGetPaid,
   invoiceStatus,
@@ -8,6 +9,7 @@ import type { Currency, MoneyTotal } from "@shared/domain/money";
 
 import { domainError, notFound } from "../../../core/errors";
 import type { ClockPort } from "../household/clock";
+import type { HouseholdRepository } from "../household/household.repository";
 import type {
   InvoicesRepositoryPort,
   InvoiceWithClient,
@@ -26,6 +28,9 @@ export interface ClientInput {
   paymentTermsDays: number;
   email: string | null;
   notes: string | null;
+  address: string | null;
+  taxId: string | null;
+  invoiceLanguage: InvoiceLanguage;
 }
 
 export interface ClientInvoice extends InvoiceWithClient {
@@ -38,7 +43,7 @@ export interface ClientSummary extends ClientRow {
   unpaid: MoneyTotal[];
   late: MoneyTotal[];
   lastInvoice: {
-    number: string;
+    number: string | null;
     status: InvoiceStatus;
     issueDate: string;
   } | null;
@@ -102,17 +107,20 @@ export class ClientsService {
   readonly #invoices: Pick<InvoicesRepositoryPort, "list">;
   readonly #transactions: Pick<LedgerLinksPort, "incomeByClient">;
   readonly #clock: ClockPort;
+  readonly #household: Pick<HouseholdRepository, "preferences">;
 
-  constructor(
-    repo: ClientsRepositoryPort,
-    invoices: Pick<InvoicesRepositoryPort, "list">,
-    transactions: Pick<LedgerLinksPort, "incomeByClient">,
-    clock: ClockPort
-  ) {
-    this.#repo = repo;
-    this.#invoices = invoices;
-    this.#transactions = transactions;
-    this.#clock = clock;
+  constructor(deps: {
+    repo: ClientsRepositoryPort;
+    invoices: Pick<InvoicesRepositoryPort, "list">;
+    transactions: Pick<LedgerLinksPort, "incomeByClient">;
+    clock: ClockPort;
+    household: Pick<HouseholdRepository, "preferences">;
+  }) {
+    this.#repo = deps.repo;
+    this.#invoices = deps.invoices;
+    this.#transactions = deps.transactions;
+    this.#clock = deps.clock;
+    this.#household = deps.household;
   }
 
   async get(clientId: string): Promise<ClientRow> {
@@ -208,10 +216,22 @@ export class ClientsService {
     return { daysOverdue, displayStatus: status };
   }
 
-  async create(input: ClientInput): Promise<ClientRow> {
+  /** A new client; invoices are written in the household's language unless chosen. */
+  async create(
+    input: Omit<ClientInput, "address" | "invoiceLanguage" | "taxId"> &
+      Partial<Pick<ClientInput, "address" | "invoiceLanguage" | "taxId">>
+  ): Promise<ClientRow> {
     await this.#assertNameFree(input.name, null);
 
-    return await this.#repo.insert(input);
+    const preferences = await this.#household.preferences();
+    const invoiceLanguage = input.invoiceLanguage ?? preferences.locale;
+
+    return await this.#repo.insert({
+      ...input,
+      address: input.address ?? null,
+      invoiceLanguage,
+      taxId: input.taxId ?? null,
+    });
   }
 
   async update(

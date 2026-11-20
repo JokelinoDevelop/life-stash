@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 import { FinanceDialogLink } from "../dialogs/finance-dialog-link";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
-import { useInvoiceFor } from "../invoices/invoice-labels";
+import { useInvoiceFor, useInvoiceNumber } from "../invoices/invoice-labels";
 import { InvoiceStatusIcon } from "../invoices/invoice-status-icon";
 import { useLedgerMoney } from "../money";
 import { OverviewSection } from "./overview-section";
@@ -41,6 +41,7 @@ export const WaitingList = ({ overview }: { overview: FinanceOverview }) => {
   const dialog = useFinanceDialog();
   const ledger = useLedgerMoney();
   const forLabel = useInvoiceFor();
+  const numberOf = useInvoiceNumber();
   const when = useWhen();
   const focused = useRef<string | null>(null);
 
@@ -82,7 +83,7 @@ export const WaitingList = ({ overview }: { overview: FinanceOverview }) => {
           >
             <InvoiceStatusIcon status={invoice.status} />
             <span className="text-muted-foreground hidden w-18 tabular-nums md:block">
-              {invoice.number}
+              {numberOf(invoice)}
             </span>
             <div className="flex min-w-0 flex-1 flex-col md:flex-row md:items-baseline md:gap-2">
               <FinanceDialogLink
@@ -92,7 +93,7 @@ export const WaitingList = ({ overview }: { overview: FinanceOverview }) => {
                 {invoice.clientName}
               </FinanceDialogLink>
               <span className="text-muted-foreground truncate text-xs md:text-sm">
-                <span className="md:hidden">{invoice.number} · </span>
+                <span className="md:hidden">{numberOf(invoice)} · </span>
                 <span className="hidden md:inline">{forLabel(invoice)}</span>
                 <span
                   className={cn(

@@ -39,7 +39,7 @@ const Row = ({ client }: { client: ClientListItem }) => {
         ? t("invoices.status.draft").toLocaleLowerCase()
         : formatShortDate(last.issueDate);
 
-    lastLabel = `${last.number} · ${when}`;
+    lastLabel = `${last.number ?? t("invoices.draftNumber")} · ${when}`;
   }
 
   return (

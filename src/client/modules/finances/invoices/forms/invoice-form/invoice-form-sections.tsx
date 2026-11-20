@@ -30,7 +30,7 @@ const periodOptions = (issueDate: string, current: string): string[] => {
 
 const NO_CLIENTS: readonly InvoiceClientOption[] = [];
 
-const noPrevious = (): string | null => null;
+const noNumber = (): string | null => null;
 
 const NO_PROJECTS: readonly InvoiceProjectOption[] = [];
 
@@ -40,12 +40,14 @@ export const InvoiceClientSection = withForm({
   defaultValues: INVOICE_FORM_TEMPLATE,
   props: {
     clients: NO_CLIENTS,
-    previousNumber: noPrevious(),
+    nextNumber: noNumber(),
+    previousNumber: noNumber(),
     projects: NO_PROJECTS,
   },
   render: function InvoiceClientSectionRender({
     clients,
     form,
+    nextNumber,
     previousNumber,
     projects,
   }) {
@@ -115,10 +117,14 @@ export const InvoiceClientSection = withForm({
                 <field.TextField
                   description={
                     previousNumber === null
-                      ? undefined
-                      : t("invoices.form.nextAfter", { number: previousNumber })
+                      ? t("invoices.form.numberHintFirst")
+                      : t("invoices.form.numberHint", {
+                          number: previousNumber,
+                        })
                   }
                   label={t("invoices.form.number")}
+                  optional
+                  placeholder={nextNumber ?? undefined}
                 />
               )}
             </form.AppField>

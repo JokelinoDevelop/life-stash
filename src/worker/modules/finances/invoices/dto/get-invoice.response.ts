@@ -6,7 +6,8 @@ import type { InvoiceDetail } from "../invoices.service";
 export interface GetInvoiceResponse {
   invoice: {
     id: string;
-    number: string;
+    /** Null while a draft. */
+    number: string | null;
     clientId: string;
     clientName: string;
     projectId: string | null;
@@ -22,6 +23,8 @@ export interface GetInvoiceResponse {
     status: InvoiceStatus;
     daysOverdue: number;
     sentAt: string | null;
+    issuedAt: string | null;
+    voidedAt: string | null;
     paidAt: string | null;
     createdAt: string;
     attachments: number;
@@ -52,6 +55,7 @@ export const toGetInvoiceResponse = (
     firstAttachedAt: detail.firstAttachedAt,
     id: detail.id,
     issueDate: detail.issueDate,
+    issuedAt: detail.issuedAt,
     notes: detail.notes,
     number: detail.number,
     paidAt: detail.paidAt,
@@ -61,6 +65,7 @@ export const toGetInvoiceResponse = (
     projectName: detail.projectName,
     sentAt: detail.sentAt,
     status: detail.displayStatus,
+    voidedAt: detail.voidedAt,
     transaction:
       detail.transaction === null
         ? null

@@ -3,6 +3,8 @@ import { sendPushToHousehold } from "../../core/push";
 import { deletePhotosOfOwners } from "../photos/photos.service";
 import { AttachmentsRepository } from "./attachments/attachments.repository";
 import type { AttachmentOwnerType } from "./attachments/attachments.repository";
+import { BusinessProfileRepository } from "./business-profile/business-profile.repository";
+import { BusinessProfileService } from "./business-profile/business-profile.service";
 import { CategoriesRepository } from "./categories/categories.repository";
 import { CategoriesService } from "./categories/categories.service";
 import { ClientsRepository } from "./clients/clients.repository";
@@ -26,6 +28,7 @@ import { TransactionsRepository } from "./transactions/transactions.repository";
 import { TransactionsService } from "./transactions/transactions.service";
 
 export interface FinancesModule {
+  businessProfile: BusinessProfileService;
   categories: CategoriesService;
   clients: ClientsService;
   invoices: InvoicesService;
@@ -70,11 +73,16 @@ export const createFinancesModule = ({
 
   const clientsRepo = new ClientsRepository(db, householdId);
 
-  const clients = new ClientsService(
-    clientsRepo,
-    invoicesRepo,
-    ledgerLinks,
-    clock
+  const clients = new ClientsService({
+    clock,
+    household,
+    invoices: invoicesRepo,
+    repo: clientsRepo,
+    transactions: ledgerLinks,
+  });
+
+  const businessProfile = new BusinessProfileService(
+    new BusinessProfileRepository(db, householdId)
   );
 
   const transactions = new TransactionsService({
@@ -100,6 +108,7 @@ export const createFinancesModule = ({
 
   const invoices = new InvoicesService({
     attachments,
+    businessProfile,
     categories,
     clients,
     clock,
@@ -138,6 +147,7 @@ export const createFinancesModule = ({
   });
 
   return {
+    businessProfile,
     categories,
     clients,
     exports,

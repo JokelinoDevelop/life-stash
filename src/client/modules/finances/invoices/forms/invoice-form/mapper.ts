@@ -53,7 +53,6 @@ export const periodBounds = (
 export const invoiceFormDefaults = (context: {
   client?: InvoiceClientOption;
   currency: Currency;
-  number: string;
   today: string;
   termsDays: number;
 }): InvoiceFormValues => ({
@@ -67,7 +66,7 @@ export const invoiceFormDefaults = (context: {
   ),
   issueDate: context.today,
   notes: "",
-  number: context.number,
+  number: "",
   period: context.today.slice(0, 7),
   projectId: NO_PERIOD,
 });
@@ -82,18 +81,17 @@ export const invoiceToFormValues = (
   dueDate: invoice.dueDate,
   issueDate: invoice.issueDate,
   notes: invoice.notes ?? "",
-  number: invoice.number,
+  number: "",
   period: invoice.periodStart?.slice(0, 7) ?? NO_PERIOD,
   projectId: invoice.projectId ?? NO_PERIOD,
 });
 
 /**
- * "Duplicate for next month": the same invoice one month on (period, issue and due dates),
- * with the next free number. Files are not copied.
+ * "Duplicate for next month": a new draft one month on (period, issue and due dates). It gets
+ * its number when issued. Files are not copied.
  */
 export const duplicateToFormValues = (
-  invoice: InvoiceDetail,
-  number: string
+  invoice: InvoiceDetail
 ): InvoiceFormValues => {
   const values = invoiceToFormValues(invoice);
 
@@ -101,7 +99,6 @@ export const duplicateToFormValues = (
     ...values,
     dueDate: addMonthsKeepingMonthEnd(invoice.dueDate, 1),
     issueDate: addMonthsKeepingMonthEnd(invoice.issueDate, 1),
-    number,
     period:
       values.period === NO_PERIOD
         ? NO_PERIOD
@@ -120,22 +117,29 @@ const toBody = (values: InvoiceFormValues) => {
     dueDate: values.dueDate,
     issueDate: values.issueDate,
     notes: emptyToNull(values.notes),
-    number: values.number.trim(),
     periodEnd: bounds?.end ?? null,
     periodStart: bounds?.start ?? null,
     projectId: values.projectId === NO_PERIOD ? null : values.projectId,
   };
 };
 
+/** The typed number to issue with; null takes the next one (and drafts send none). */
+const numberFor = (values: InvoiceFormValues, issue: boolean) =>
+  issue ? emptyToNull(values.number) : null;
+
 export const invoiceFormToCreateRequest = (
   values: InvoiceFormValues,
-  markSent: boolean
-): CreateBody => ({ ...toBody(values), markSent });
+  issue: boolean
+): CreateBody => ({
+  ...toBody(values),
+  issue,
+  number: numberFor(values, issue),
+});
 
 export const invoiceFormToUpdateRequest = (
   values: InvoiceFormValues,
-  markSent: boolean
-): UpdateBody => ({ ...toBody(values), markSent });
+  issue: boolean
+): UpdateBody => invoiceFormToCreateRequest(values, issue);
 
 /** API field → form field for errors the server pins on a field. */
 export const INVOICE_SERVER_FIELDS = {
@@ -147,7 +151,6 @@ export const INVOICE_SERVER_FIELDS = {
 /** Shape-only defaults for `withForm` sections. */
 export const INVOICE_FORM_TEMPLATE: InvoiceFormValues = invoiceFormDefaults({
   currency: "EUR",
-  number: "",
   termsDays: 30,
   today: "2000-01-01",
 });

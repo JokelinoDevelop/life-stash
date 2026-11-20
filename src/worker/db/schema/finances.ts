@@ -1,4 +1,9 @@
 import type { ExchangeRates } from "@shared/domain/exchange";
+import { INVOICE_LANGUAGES } from "@shared/domain/finances/invoice-document";
+import type {
+  InvoiceClientSnapshot,
+  InvoiceIssuerSnapshot,
+} from "@shared/domain/finances/invoice-document";
 import { sql } from "drizzle-orm";
 import {
   index,
@@ -58,15 +63,22 @@ export const financeClients = sqliteTable(
   "finance_clients",
   {
     ...timestamps,
+    /** Billing address (multi-line), printed under "Bill to". */
+    address: text("address"),
     archivedAt: text("archived_at"),
     currency: currency("currency").notNull(),
     email: text("email"),
     householdId: householdId(),
     id: id(),
+    /** The language their invoices are written in. */
+    invoiceLanguage: text("invoice_language", { enum: INVOICE_LANGUAGES })
+      .notNull()
+      .default("en"),
     kind: text("kind", { enum: ["client", "employer"] }).notNull(),
     name: text("name").notNull(),
     notes: text("notes"),
     paymentTermsDays: integer("payment_terms_days").notNull().default(30),
+    taxId: text("tax_id"),
   },
   (table) => [index("finance_clients_household_idx").on(table.householdId)]
 );
@@ -99,16 +111,30 @@ export const financeInvoices = sqliteTable(
     clientId: text("client_id")
       .notNull()
       .references(() => financeClients.id),
+    /** The client's billing details, frozen when the invoice is issued. */
+    clientSnapshot: text("client_snapshot", {
+      mode: "json",
+    }).$type<InvoiceClientSnapshot>(),
     currency: currency("currency").notNull(),
-    /** Soft delete for Undo; purged by the daily cron after 7 days. */
+    /** Soft delete for Undo (drafts only); purged by the daily cron after 7 days. */
     deletedAt: text("deleted_at"),
     description: text("description"),
     dueDate: text("due_date").notNull(),
     householdId: householdId(),
     id: id(),
     issueDate: text("issue_date").notNull(),
+    /** When it was issued (ISO timestamp); drafts have none. */
+    issuedAt: text("issued_at"),
+    /** Your business profile, frozen when the invoice is issued. */
+    issuerSnapshot: text("issuer_snapshot", {
+      mode: "json",
+    }).$type<InvoiceIssuerSnapshot>(),
     notes: text("notes"),
-    number: text("number").notNull(),
+    /** The number as the client received it; null while a draft. */
+    number: text("number"),
+    /** The parsed sequence and its year (plain legacy numbers use the issue year). */
+    numberSeq: integer("number_seq"),
+    numberYear: integer("number_year"),
     /** When the one overdue push heads-up went out (cleared when the due date moves). */
     overdueNotifiedAt: text("overdue_notified_at"),
     /** The day the money arrived (YYYY-MM-DD), set by "mark paid". */
@@ -121,14 +147,45 @@ export const financeInvoices = sqliteTable(
     status: text("status", { enum: ["draft", "sent", "paid", "void"] })
       .notNull()
       .default("draft"),
+    /** When it was voided (ISO timestamp). */
+    voidedAt: text("voided_at"),
   },
   (table) => [
     uniqueIndex("finance_invoices_number_idx")
       .on(table.householdId, table.number)
-      .where(sql`${table.deletedAt} IS NULL`),
+      .where(sql`${table.deletedAt} IS NULL AND ${table.number} IS NOT NULL`),
+    uniqueIndex("finance_invoices_seq_idx")
+      .on(table.householdId, table.numberYear, table.numberSeq)
+      .where(
+        sql`${table.deletedAt} IS NULL AND ${table.numberSeq} IS NOT NULL`
+      ),
     index("finance_invoices_client_idx").on(table.householdId, table.clientId),
   ]
 );
+
+/** Your details for invoices (one row per household, created on first save). */
+export const financeBusinessProfile = sqliteTable("finance_business_profile", {
+  address: text("address").notNull().default(""),
+  bankName: text("bank_name"),
+  companyId: text("company_id"),
+  /** Basis points: 1800 = 18%. */
+  defaultVatRateBp: integer("default_vat_rate_bp").notNull().default(0),
+  email: text("email"),
+  /** Printed at the bottom of every invoice, e.g. "Not a VAT payer". */
+  footerNote: text("footer_note"),
+  householdId: text("household_id")
+    .primaryKey()
+    .references(() => households.id, { onDelete: "cascade" }),
+  iban: text("iban"),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  swift: text("swift"),
+  taxId: text("tax_id"),
+  updatedAt: text("updated_at").notNull().$defaultFn(now).$onUpdateFn(now),
+  vatRegistered: integer("vat_registered", { mode: "boolean" })
+    .notNull()
+    .default(false),
+});
 
 export const financeSettings = sqliteTable("finance_settings", {
   defaultPaymentTermsDays: integer("default_payment_terms_days")

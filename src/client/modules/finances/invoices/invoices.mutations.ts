@@ -16,8 +16,11 @@ type UpdateBody = InferRequestType<
 
 const invalidate = [financeKeys.all] as const;
 
+const ISSUED_TOAST = "invoices.issuedToast";
+
 const invoiceApi = (_invoiceId: string) => api.finances.invoices[":invoiceId"];
 
+/** Saves a draft, or issues it straight away (`issue: true`); the toast names the number. */
 export const useCreateInvoice = (onFieldError?: (error: Error) => boolean) => {
   const { t } = useTranslation("finances");
 
@@ -27,49 +30,56 @@ export const useCreateInvoice = (onFieldError?: (error: Error) => boolean) => {
       await unwrap(api.finances.invoices.$post({ json })),
     onError: onFieldError,
     success: false,
-    successFor: (_data, json) =>
-      json.markSent
-        ? t("invoices.createdSent", { number: json.number })
-        : t("invoices.created", { number: json.number }),
+    successFor: (data) =>
+      data.number === null
+        ? t("invoices.draftSaved")
+        : t(ISSUED_TOAST, { number: data.number }),
   });
 };
 
+/** Edits a draft (optionally issuing it) or an issued invoice's notes. */
 export const useUpdateInvoice = (onFieldError?: (error: Error) => boolean) => {
   const { t } = useTranslation("finances");
 
   return useAppMutation({
     invalidate,
-    mutationFn: async ({
-      id,
-      json,
-    }: {
-      id: string;
-      json: UpdateBody;
-      number: string;
-    }) =>
+    mutationFn: async ({ id, json }: { id: string; json: UpdateBody }) =>
       await unwrap(invoiceApi(id).$patch({ json, param: { invoiceId: id } })),
     onError: onFieldError,
     success: false,
-    successFor: (_data, { number }) => t("invoices.updated", { number }),
+    successFor: (data, { json }) => {
+      if (data.number !== null && json.issue === true) {
+        return t(ISSUED_TOAST, { number: data.number });
+      }
+
+      return data.number === null
+        ? t("invoices.draftUpdated")
+        : t("invoices.updated", { number: data.number });
+    },
   });
 };
 
 interface InvoiceRef {
   id: string;
-  number: string;
+  /** How the toast names it ("2026-012", or "Draft"). */
+  label: string;
 }
 
-export const useMarkSent = () => {
+/** Gives a draft its number (`number` null takes the next one). */
+export const useIssueInvoice = () => {
   const { t } = useTranslation("finances");
 
   return useAppMutation({
     invalidate,
-    mutationFn: async ({ id }: InvoiceRef) =>
+    mutationFn: async ({ id, number }: { id: string; number: string | null }) =>
       await unwrap(
-        invoiceApi(id)["mark-sent"].$post({ param: { invoiceId: id } })
+        invoiceApi(id).issue.$post({
+          json: { number },
+          param: { invoiceId: id },
+        })
       ),
     success: false,
-    successFor: (_data, { number }) => t("invoices.sent", { number }),
+    successFor: (data) => t(ISSUED_TOAST, { number: data.number }),
   });
 };
 
@@ -81,10 +91,11 @@ export const useVoidInvoice = () => {
     mutationFn: async ({ id }: InvoiceRef) =>
       await unwrap(invoiceApi(id).void.$post({ param: { invoiceId: id } })),
     success: false,
-    successFor: (_data, { number }) => t("invoices.voided", { number }),
+    successFor: (_data, { label }) => t("invoices.voided", { number: label }),
   });
 };
 
+/** Deletes a draft; Undo restores it. */
 export const useDeleteInvoice = () => {
   const { t } = useTranslation("finances");
 
@@ -92,8 +103,7 @@ export const useDeleteInvoice = () => {
     invalidate,
     mutationFn: async ({ id }: InvoiceRef) =>
       await unwrap(invoiceApi(id).$delete({ param: { invoiceId: id } })),
-    success: false,
-    successFor: (_data, { number }) => t("invoices.deleted", { number }),
+    success: t("invoices.draftDeleted"),
     undo: async (_data, { id }) =>
       await unwrap(invoiceApi(id).restore.$post({ param: { invoiceId: id } })),
   });
@@ -126,7 +136,7 @@ export const useMarkPaid = (onView: () => void) => {
     successFor: (_data, payment) =>
       t("invoices.paidToast", {
         amount: ledger.money(payment.amountMinor, payment.currency),
-        number: payment.number,
+        number: payment.label,
       }),
   });
 };
@@ -142,7 +152,8 @@ export const useMarkUnpaid = () => {
         invoiceApi(id)["mark-unpaid"].$post({ param: { invoiceId: id } })
       ),
     success: false,
-    successFor: (_data, { number }) => t("invoices.unpaidToast", { number }),
+    successFor: (_data, { label }) =>
+      t("invoices.unpaidToast", { number: label }),
     undo: async (payment, { id }) =>
       await unwrap(
         invoiceApi(id)["mark-paid"].$post({

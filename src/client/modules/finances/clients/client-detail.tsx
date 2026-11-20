@@ -13,7 +13,11 @@ import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 import { FinanceDialogLink } from "../dialogs/finance-dialog-link";
-import { useDueLabel, useInvoiceFor } from "../invoices/invoice-labels";
+import {
+  useDueLabel,
+  useInvoiceFor,
+  useInvoiceNumber,
+} from "../invoices/invoice-labels";
 import { InvoiceStatusIcon } from "../invoices/invoice-status-icon";
 import { useLedgerMoney } from "../money";
 import { ProjectsSection } from "../projects/projects-section";
@@ -45,6 +49,7 @@ const InvoicesList = ({ data }: { data: ClientDetailBody }) => {
   const ledger = useLedgerMoney();
   const dueLabel = useDueLabel();
   const forLabel = useInvoiceFor();
+  const numberOf = useInvoiceNumber();
 
   const inYear = data.invoices.filter((invoice) =>
     invoice.issueDate.startsWith(`${data.year}-`)
@@ -85,14 +90,14 @@ const InvoicesList = ({ data }: { data: ClientDetailBody }) => {
           >
             <InvoiceStatusIcon status={invoice.status} />
             <span className="text-muted-foreground hidden tabular-nums md:block">
-              {invoice.number}
+              {numberOf(invoice)}
             </span>
             <FinanceDialogLink
               className="truncate outline-none after:absolute after:inset-0 focus-visible:underline"
               entry={{ dialog: "invoice", id: invoice.id }}
             >
               <span className="text-muted-foreground tabular-nums md:hidden">
-                {invoice.number} ·{" "}
+                {numberOf(invoice)} ·{" "}
               </span>
               {forLabel(invoice)}
             </FinanceDialogLink>
