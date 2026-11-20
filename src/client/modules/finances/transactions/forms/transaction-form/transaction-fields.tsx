@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { AmountInput } from "@/components/form/amount-input";
 import { DatePicker } from "@/components/form/date-picker";
 import { FieldErrors } from "@/components/form/field-errors";
 import { withForm } from "@/components/form/form-hook";
@@ -7,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 import { useCategoryName } from "../../../categories/category-label";
-import { AmountInput } from "./amount-input";
 import { CategoryPicker } from "./category-picker";
 import { ClientPicker } from "./client-picker";
 import type { ClientOption } from "./client-picker";

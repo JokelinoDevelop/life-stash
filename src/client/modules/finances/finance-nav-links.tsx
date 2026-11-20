@@ -6,7 +6,7 @@ import { todayIso } from "@/lib/partial-date";
 
 import { invoicesQuery } from "./invoices/invoices.queries";
 
-/** The Finances pages under the module in the sidebar; Invoices shows the overdue count. */
+/** The Finances pages under the module in the sidebar (the module name opens the overview); Invoices shows the overdue count. */
 export const FinanceNavLinks = ({
   activeClassName,
   className,
@@ -21,14 +21,6 @@ export const FinanceNavLinks = ({
 
   return (
     <>
-      <Link
-        activeOptions={{ exact: true, includeSearch: false }}
-        activeProps={{ className: activeClassName }}
-        className={className}
-        to="/finances"
-      >
-        {t("nav.overview")}
-      </Link>
       <Link
         activeProps={{ className: activeClassName }}
         className={className}

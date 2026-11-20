@@ -26,7 +26,7 @@ Read `docs/ARCHITECTURE.md`, `docs/DATA-MODEL.md` and `docs/DESIGN-LANGUAGE.md` 
 
 ## Rules
 
-- **Amounts** are integer minor units plus a currency (`MKD` | `EUR` | `USD`), as in Garage. Totals are grouped per currency and never converted (`sumByCurrency`). The overview shows the user's preferred currency first; others appear as a second line.
+- **Amounts** are integer minor units plus a currency (`MKD` | `EUR` | `USD`), as in Garage. Totals are grouped per currency (`sumByCurrency`). When the user has entered exchange rates (Settings › Finances › Exchange rates), the overview KPIs add every currency up in the main currency (`totalInCurrency`) and list the other currencies as "incl. €53,750"; without a rate they show the main currency first and others as a second line.
 - **Invoice status** is stored as `draft` | `sent` | `paid` | `void`. **Overdue** is derived, never stored: `sent` and `due_date < today` (in the user's time zone).
 - **Marking an invoice paid** asks for the paid date and the amount received (defaults: today, the invoice amount), then creates one income transaction linked to the invoice (`invoice_id`) in the category "Invoices". Un-marking deletes that transaction. A paid invoice can't be edited until it is un-marked.
 - **Invoice numbers**: the next number is suggested as `<year>-<seq>` (`2026-014`), using the highest number from the same year + 1. It stays editable and must be unique per household.
@@ -172,7 +172,7 @@ Each phase is one branch and PR, `pnpm check` green, seeders extended (`src/work
 
 ## Out of scope
 
-Bank sync, budgets, invoice PDF generation, tax calculations, currency conversion, importing the existing spreadsheet (entered by hand), multi-user splitting.
+Bank sync, budgets, invoice PDF generation, tax calculations, live exchange rates (rates are entered by hand), importing the existing spreadsheet (entered by hand), multi-user splitting.
 
 ## Open questions
 

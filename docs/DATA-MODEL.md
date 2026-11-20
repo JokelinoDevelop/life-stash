@@ -92,7 +92,7 @@ Unique: (household_id, number) among live rows. **Overdue is derived** (`sent` a
 
 ### `finance_settings` (one row per household, created on first change)
 
-household_id (pk), default_payment_terms_days (30), invoice_number_format (`YYYY-NNN` / `YYYY/NNN` / `NNN`), overdue_reminders (bool, default true), updated_at. The main currency stays in `user_preferences.currency`.
+household_id (pk), default_payment_terms_days (30), invoice_number_format (`YYYY-NNN` / `YYYY/NNN` / `NNN`), overdue_reminders (bool, default true), exchange_rates? (JSON `{ base, rates }`: "1 EUR = 61.5 MKD" is `{ base: "MKD", rates: { EUR: 61.5 } }`; hand-entered, no live feed; see `shared/domain/exchange.ts`), updated_at. The main currency stays in `user_preferences.currency`.
 
 ### `finance_projects`
 

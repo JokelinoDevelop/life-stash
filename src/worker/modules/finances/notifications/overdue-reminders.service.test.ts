@@ -1,3 +1,4 @@
+import { NO_RATES } from "@shared/domain/exchange";
 import { describe, expect, it } from "vitest";
 
 import type { PushMessage } from "../../../core/push";
@@ -62,6 +63,7 @@ const setup = (rows: InvoiceWithClient[], overdueReminders = true) => {
       get: async () =>
         await Promise.resolve({
           defaultPaymentTermsDays: 30,
+          exchangeRates: NO_RATES,
           invoiceNumberFormat: "YYYY-NNN" as const,
           overdueReminders,
         }),

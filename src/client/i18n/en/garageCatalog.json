@@ -12,8 +12,8 @@
   "newMenu": "New",
   "items": {
     "title": "Items",
-    "add": "New item",
-    "createTitle": "New item",
+    "add": "Add item",
+    "createTitle": "Add item",
     "editTitle": "Edit item",
     "name": "Name",
     "namePlaceholder": "e.g. Spark plugs",
@@ -38,8 +38,8 @@
   },
   "packages": {
     "title": "Packages",
-    "add": "New package",
-    "createTitle": "New package",
+    "add": "Add package",
+    "createTitle": "Add package",
     "editTitle": "Edit package",
     "name": "Name",
     "namePlaceholder": "e.g. Big service",

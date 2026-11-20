@@ -6,10 +6,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./app/app";
+import { applyDensity, readDensity } from "./app/density";
 import { RouteError } from "./components/app/route-error";
 import { RoutePending } from "./components/app/route-pending";
 import { ApiClientError } from "./lib/api";
 import { routeTree } from "./routeTree.gen";
+
+applyDensity(readDensity());
 
 const queryClient = new QueryClient({
   defaultOptions: {

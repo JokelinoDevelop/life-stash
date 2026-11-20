@@ -1,0 +1,1 @@
+ALTER TABLE `finance_settings` ADD `exchange_rates` text;

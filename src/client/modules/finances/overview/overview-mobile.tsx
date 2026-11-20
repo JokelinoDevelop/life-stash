@@ -1,3 +1,5 @@
+import { NO_RATES } from "@shared/domain/exchange";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -5,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
-import { percentChange, splitTotals, subtractTotals } from "./money-split";
+import { financeSettingsQuery } from "../settings/finance-settings.queries";
+import { headline, percentChange, subtractTotals } from "./money-split";
 import type { FinanceOverview } from "./overview.queries";
 
 /** Phone: quick actions and the "Net this year" card with monthly bars (5.1). */
@@ -18,21 +21,24 @@ export const OverviewMobileTop = ({
   const format = useFormat();
   const dialog = useFinanceDialog();
 
-  const net = splitTotals(
+  const rates = useQuery(financeSettingsQuery).data?.exchangeRates ?? NO_RATES;
+  const main = format.currency;
+
+  const net = headline(
     subtractTotals(overview.earned, overview.spent),
-    format.currency
+    main,
+    rates
   );
 
-  const earned = splitTotals(overview.earned, format.currency);
-  const spent = splitTotals(overview.spent, format.currency);
-  const currency = net.primary?.currency ?? format.currency;
-
-  const lastYear = overview.earnedLastYear.find(
-    (total) => total.currency === currency
-  );
+  const earned = headline(overview.earned, main, rates);
+  const spent = headline(overview.spent, main, rates);
+  const lastYear = headline(overview.earnedLastYear, main, rates).primary;
+  const currency = net.primary?.currency ?? main;
 
   const change =
-    earned.primary === null || lastYear === undefined
+    earned.primary === null ||
+    lastYear === null ||
+    lastYear.currency !== earned.primary.currency
       ? null
       : percentChange(earned.primary.amountMinor, lastYear.amountMinor);
 

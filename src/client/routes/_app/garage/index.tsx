@@ -5,7 +5,7 @@ import { CarFront, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { HouseholdMenu } from "@/components/app/app-shell";
+import { HouseholdName } from "@/components/app/app-shell";
 import { useCommandMenu } from "@/components/app/command-menu-context";
 import { ListSection } from "@/components/app/list-section";
 import { PageHeader, PageStack } from "@/components/app/page-header";
@@ -31,10 +31,7 @@ import {
 import { HouseholdStats } from "@/modules/garage/household/household-stats";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import type { HouseholdOverview } from "@/modules/garage/household/household.queries";
-import {
-  NeedsAttention,
-  ReminderGroups,
-} from "@/modules/garage/household/reminder-groups";
+import { DueReminders } from "@/modules/garage/household/reminder-groups";
 
 const useSummary = (cars: CarListItem[] | undefined): string | undefined => {
   const { t } = useTranslation("garage");
@@ -132,12 +129,7 @@ const GarageContent = ({
         overdue={overdue}
         year={year}
       />
-      <div className="md:hidden" data-bleed="">
-        <NeedsAttention cars={cars} reminders={overview.reminders} />
-      </div>
-      <div className="hidden md:contents">
-        <ReminderGroups cars={cars} reminders={overview.reminders} />
-      </div>
+      <DueReminders cars={cars} reminders={overview.reminders} />
       <ListSection count={cars.length} title={t("cars.title")}>
         {cars.map((car) => {
           const spent = money.carTotals.get(car.id);
@@ -165,7 +157,6 @@ const GarageContent = ({
 
 const GarageHome = () => {
   const { t } = useTranslation("garage");
-  const { t: tc } = useTranslation();
   const [showArchived, setShowArchived] = useState(false);
 
   // Keep the current list on screen while the archived toggle refetches.
@@ -189,8 +180,7 @@ const GarageHome = () => {
       <PageHeader
         actions={<HeaderActions />}
         description={summary}
-        desktopTitle={tc("nav.overview")}
-        mobileTop={<HouseholdMenu className="-ml-1" />}
+        mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />
       {(cars.isPending || overview.isPending) && <LoadingState />}

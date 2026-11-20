@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 import { cn } from "@/lib/utils";
@@ -114,7 +113,6 @@ export const WaitingList = ({ overview }: { overview: FinanceOverview }) => {
                 variant="outline"
               >
                 {t("invoices.markPaid")}
-                <Kbd>{FINANCE_SHORTCUTS.markPaid.toUpperCase()}</Kbd>
               </Button>
             </span>
             <span

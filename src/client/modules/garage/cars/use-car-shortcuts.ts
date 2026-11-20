@@ -15,7 +15,7 @@ export const useCarShortcuts = (carId: string, enabled: boolean): void => {
     void navigate({
       params: { carId },
       replace: true,
-      search: { log: true, tab: "mileage" },
+      search: { log: true, tab: "timeline" },
       to: "/garage/cars/$carId",
     });
   };

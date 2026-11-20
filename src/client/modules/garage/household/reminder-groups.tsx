@@ -1,9 +1,4 @@
-import {
-  REMINDER_HORIZONS,
-  reminderHorizon,
-  reminderProgress,
-} from "@shared/domain/reminders";
-import type { ReminderHorizon } from "@shared/domain/reminders";
+import { reminderHorizon } from "@shared/domain/reminders";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -17,12 +12,11 @@ import { STATUS_TEXT_TONE } from "@/components/app/status-tone";
 import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-import { CarMonogram } from "../cars/car-monogram";
 import type { CarListItem } from "../cars/car-row";
 import { describeDue } from "../cars/describe-due";
 import type { HouseholdReminder } from "./household.queries";
 
-const ReminderRow = ({
+export const ReminderRow = ({
   car,
   reminder,
 }: {
@@ -42,25 +36,8 @@ const ReminderRow = ({
         />
       }
     >
-      <StatusRing
-        progress={reminderProgress(reminder)}
-        status={reminder.status}
-      />
-      <ListRowText
-        meta={
-          car === undefined ? undefined : (
-            <span className="inline-flex items-center gap-1.5">
-              <CarMonogram
-                className="hidden md:flex"
-                name={car.name}
-                size="xs"
-              />
-              {car.name}
-            </span>
-          )
-        }
-        title={reminder.title}
-      />
+      <StatusRing status={reminder.status} />
+      <ListRowText meta={car?.name} title={reminder.title} />
       <span
         className={cn(
           "shrink-0 text-sm font-medium tabular-nums md:font-normal",
@@ -73,57 +50,8 @@ const ReminderRow = ({
   );
 };
 
-const byHorizon = (reminders: readonly HouseholdReminder[]) => {
-  const groups = new Map<ReminderHorizon, HouseholdReminder[]>();
-
-  for (const reminder of reminders) {
-    const horizon = reminderHorizon(reminder);
-    groups.set(horizon, [...(groups.get(horizon) ?? []), reminder]);
-  }
-
-  return groups;
-};
-
-/** Reminders across the household as Overdue / Next 30 days / Later groups. */
-export const ReminderGroups = ({
-  cars,
-  horizons = REMINDER_HORIZONS,
-  reminders,
-}: {
-  cars: readonly CarListItem[];
-  horizons?: readonly ReminderHorizon[];
-  reminders: readonly HouseholdReminder[];
-}) => {
-  const { t } = useTranslation("garage");
-  const groups = byHorizon(reminders);
-
-  return (
-    <>
-      {horizons.map((horizon) => {
-        const group = groups.get(horizon) ?? [];
-
-        return group.length === 0 ? null : (
-          <ListSection
-            count={group.length}
-            key={horizon}
-            title={t(`home.horizons.${horizon}`)}
-          >
-            {group.map((reminder) => (
-              <ReminderRow
-                car={cars.find((car) => car.id === reminder.carId)}
-                key={reminder.id}
-                reminder={reminder}
-              />
-            ))}
-          </ListSection>
-        );
-      })}
-    </>
-  );
-};
-
-/** Phones: overdue and next-30-day reminders in one "Needs attention" list. */
-export const NeedsAttention = ({
+/** Overdue and next-30-day reminders in one list; everything else is on Today. */
+export const DueReminders = ({
   cars,
   reminders,
 }: {
@@ -131,13 +59,22 @@ export const NeedsAttention = ({
   reminders: readonly HouseholdReminder[];
 }) => {
   const { t } = useTranslation("garage");
+  const { t: tc } = useTranslation();
 
   const urgent = reminders.filter(
     (reminder) => reminderHorizon(reminder) !== "later"
   );
 
   return (
-    <ListSection count={urgent.length} title={t("home.needsAttention")}>
+    <ListSection
+      action={
+        <Link className="text-primary text-xs font-medium" to="/">
+          {tc("nav.today")}
+        </Link>
+      }
+      count={urgent.length}
+      title={t("home.reminders")}
+    >
       {urgent.length === 0 ? (
         <ListRow className="text-muted-foreground">
           {t("home.allClear")}

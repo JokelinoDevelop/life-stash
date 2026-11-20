@@ -60,7 +60,7 @@ const SpentPanel = ({
           <Link
             className="text-primary text-sm font-medium"
             params={{ carId }}
-            search={{ tab: "spending" }}
+            search={{ tab: "details" }}
             to="/garage/cars/$carId"
           >
             {t("overview.breakdown")}

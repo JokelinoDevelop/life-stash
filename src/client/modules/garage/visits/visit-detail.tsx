@@ -49,7 +49,7 @@ export const VisitActions = ({ visit }: { visit: Visit }) => {
             toast.success(t("detail.deleted"));
             await navigate({
               params: { carId: visit.carId },
-              search: { tab: "history" },
+              search: { tab: "timeline" },
               to: "/garage/cars/$carId",
             });
           } catch (error) {

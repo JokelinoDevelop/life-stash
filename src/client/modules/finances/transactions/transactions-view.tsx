@@ -4,8 +4,10 @@ import type {
   UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import { ReceiptText, SearchX } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+import { PagedList } from "@/components/app/list-pagination";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -17,49 +19,14 @@ import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { groupByMonth } from "./group-by-month";
 import { MonthBand } from "./month-band";
 import { TransactionRow } from "./transaction-row";
-import {
-  ALL_YEARS,
-  filterFromSearch,
-  hasActiveFilters,
-} from "./transactions-search";
+import { filterFromSearch, hasActiveFilters } from "./transactions-search";
 import type { SearchPatch, TransactionsSearch } from "./transactions-search";
 import { SearchBox, TransactionsToolbar } from "./transactions-toolbar";
-import { transactionsQuery } from "./transactions.queries";
+import {
+  TRANSACTIONS_PAGE_SIZE,
+  transactionsQuery,
+} from "./transactions.queries";
 import type { TransactionPage } from "./transactions.queries";
-
-const Footer = ({
-  hasMore,
-  loading,
-  onMore,
-  shown,
-  total,
-  year,
-}: {
-  hasMore: boolean;
-  loading: boolean;
-  onMore: () => void;
-  shown: number;
-  total: number;
-  year: number | undefined;
-}) => {
-  const { t } = useTranslation("finances");
-
-  return (
-    <div className="text-muted-foreground flex items-center gap-3 px-0.5 py-3 text-xs tabular-nums md:h-11 md:px-5 md:py-0">
-      <span>
-        {year === undefined
-          ? t("transactions.showing", { shown, total })
-          : t("transactions.showingYear", { shown, total, year })}
-      </span>
-      <span className="flex-1" />
-      {hasMore && (
-        <Button disabled={loading} onClick={onMore} size="xs" variant="ghost">
-          {t("transactions.loadMore")}
-        </Button>
-      )}
-    </div>
-  );
-};
 
 const Empty = ({
   filtered,
@@ -108,23 +75,35 @@ const Empty = ({
   );
 };
 
-/** Loading, error, empty or the month groups with the footer. */
+/** Loading, error, empty, or one page of month groups with the pager. */
 const LedgerContent = ({
   list,
   onClear,
+  onPageChange,
+  page,
   search,
-  year,
 }: {
   list: UseInfiniteQueryResult<InfiniteData<TransactionPage>>;
   onClear: () => void;
+  onPageChange: (page: number) => void;
+  page: number;
   search: TransactionsSearch;
-  year: number | undefined;
 }) => {
   const pages = list.data?.pages ?? [];
   const [first] = pages;
-  const rows = pages.flatMap((page) => page.transactions);
+  const total = first?.total ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / TRANSACTIONS_PAGE_SIZE));
+  const current = Math.min(Math.max(1, page), pageCount);
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = list;
 
-  if (list.isPending) {
+  // Pages load on demand: a deep link or "Older" fetches up to the one shown.
+  useEffect(() => {
+    if (current > pages.length && hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [current, fetchNextPage, hasNextPage, isFetchingNextPage, pages.length]);
+
+  if (list.isPending || current > pages.length) {
     return <LoadingState rows={6} sections={2} />;
   }
 
@@ -139,12 +118,25 @@ const LedgerContent = ({
     );
   }
 
+  const rows = pages[current - 1]?.transactions ?? [];
+
   if (rows.length === 0) {
     return <Empty filtered={hasActiveFilters(search)} onClear={onClear} />;
   }
 
+  const start = (current - 1) * TRANSACTIONS_PAGE_SIZE + 1;
+
   return (
-    <>
+    <PagedList
+      onPageChange={onPageChange}
+      slice={{
+        end: start + rows.length - 1,
+        page: current,
+        pageCount,
+        start,
+        total,
+      }}
+    >
       {groupByMonth(rows, first?.months ?? []).map((group) => (
         <section
           className="flex flex-col md:gap-0"
@@ -159,21 +151,11 @@ const LedgerContent = ({
           </ul>
         </section>
       ))}
-      <Footer
-        hasMore={list.hasNextPage}
-        loading={list.isFetchingNextPage}
-        onMore={() => {
-          void list.fetchNextPage();
-        }}
-        shown={rows.length}
-        total={first?.total ?? rows.length}
-        year={year}
-      />
-    </>
+    </PagedList>
   );
 };
 
-/** The ledger: filters, month groups with totals and "Load more" (1.2, 5.2). */
+/** Transactions: filters, month groups with totals, and the pager (1.2, 5.2). */
 export const TransactionsView = ({
   currentYear,
   onSearchChange,
@@ -191,9 +173,6 @@ export const TransactionsView = ({
   const list = useInfiniteQuery(
     transactionsQuery(filterFromSearch(search, currentYear))
   );
-
-  const year =
-    search.year === ALL_YEARS ? undefined : (search.year ?? currentYear);
 
   const clear = () => {
     onSearchChange({
@@ -226,8 +205,11 @@ export const TransactionsView = ({
         <LedgerContent
           list={list}
           onClear={clear}
+          onPageChange={(page) => {
+            onSearchChange({ page: page <= 1 ? null : page });
+          }}
+          page={search.page ?? 1}
           search={search}
-          year={year}
         />
       </div>
     </div>

@@ -3,12 +3,13 @@
   "nav": {
     "garage": "Garage",
     "settings": "Settings",
-    "overview": "Overview",
-    "reminders": "Reminders",
-    "history": "History",
+    "history": "Service history",
     "catalog": "Service catalog",
     "cars": "Cars",
-    "finances": "Finances"
+    "finances": "Finances",
+    "today": "Today",
+    "expand": "Expand {{name}}",
+    "collapse": "Collapse {{name}}"
   },
   "actions": {
     "save": "Save",
@@ -25,8 +26,8 @@
     "done": "Done",
     "markDone": "Mark done",
     "markDoneOf": "Mark {{title}} done",
-    "logEntry": "Log entry",
-    "log": "Log",
+    "logEntry": "Add entry",
+    "log": "Add",
     "more": "More actions",
     "view": "View",
     "undo": "Undo"
@@ -59,7 +60,8 @@
     "pick": "Pick a date",
     "clear": "Clear",
     "type": "Type a date",
-    "typePlaceholder": "dd.mm.yyyy"
+    "typePlaceholder": "dd.mm.yyyy",
+    "notExact": "Only know the month or year?"
   },
   "validation": {
     "required": "Required",
@@ -107,7 +109,8 @@
     "reload": "Reload"
   },
   "form": {
-    "escToCancel": "to cancel"
+    "escToCancel": "to cancel",
+    "tapToChange": "tap to change"
   },
   "discard": {
     "title": "Discard changes?",

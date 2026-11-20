@@ -61,7 +61,6 @@ const HeaderActions = ({
       <span className="hidden gap-1.5 md:flex">
         <Button onClick={onNewPackage} size="compact" variant="outline">
           {t("packages.add")}
-          <Kbd>{CATALOG_SHORTCUTS.newPackage.toUpperCase()}</Kbd>
         </Button>
         <Button onClick={onNewItem} size="compact">
           <Plus />

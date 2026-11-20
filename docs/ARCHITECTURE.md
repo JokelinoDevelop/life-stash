@@ -92,7 +92,7 @@ src/worker/modules/finances/
 - `GET /finances/overview` is one request for the overview page. Its "Car costs" line comes from Garage's spending service through `overview/garage-costs.ts` (service → service, read only), so car costs are never copied into the ledger.
 - Tests: services with in-memory fakes; controllers through `app.request()` against a real SQLite database (`src/worker/test/sqlite-d1.ts`, Node's built-in `node:sqlite` behind a D1 shim with all migrations applied), including household isolation.
 
-On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar shows Garage and Finances as module groups (the active one expanded); phones get Garage / Finances / Reminders / Settings.
+On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar starts with **Today** (`/`, everything that needs action across modules), then Garage and Finances as always-open module groups; phones get Today / Garage / Finances / Settings.
 
 ## Reminders and notifications
 

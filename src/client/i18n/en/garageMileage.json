@@ -1,6 +1,6 @@
 {
-  "log": "Log odometer",
-  "logTitle": "Log odometer reading",
+  "log": "Add reading",
+  "logTitle": "Add odometer reading",
   "editTitle": "Edit reading",
   "logDescription": "Enter what the odometer shows now. Mileage reminders are checked right away.",
   "odometer": "Odometer",
@@ -35,6 +35,7 @@
   "inline": {
     "addNote": "Add a note…",
     "sinceLast": "since {{distance}} on {{date}}",
-    "dialogTitle": "Log odometer reading"
-  }
+    "dialogTitle": "Add odometer reading"
+  },
+  "timelineTitle": "Odometer reading"
 }

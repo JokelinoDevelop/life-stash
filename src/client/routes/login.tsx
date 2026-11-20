@@ -32,7 +32,7 @@ const LoginPage = () => {
     queryClient.removeQueries();
     await queryClient.invalidateQueries({ queryKey: queryKeys.authStatus });
     await navigate({
-      to: redirectTo?.startsWith("/") === true ? redirectTo : "/garage",
+      to: redirectTo?.startsWith("/") === true ? redirectTo : "/",
     });
   };
 
@@ -87,7 +87,7 @@ export const Route = createFileRoute("/login")({
     }
 
     if (status.user !== null) {
-      throw redirect({ to: "/garage" });
+      throw redirect({ to: "/" });
     }
   },
   component: LoginPage,

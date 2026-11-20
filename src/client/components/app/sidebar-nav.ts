@@ -1,5 +1,3 @@
-import { useRouterState } from "@tanstack/react-router";
-
 import { cn } from "@/lib/utils";
 
 export const navLinkClass =
@@ -7,17 +5,5 @@ export const navLinkClass =
 
 export const activeNavLinkClass =
   "bg-sidebar-accent text-sidebar-accent-foreground [&_svg]:text-sidebar-accent-foreground";
-
-type ModuleId = "garage" | "finances";
-
-/** Finances pages (and their settings tab) belong to Finances; everything else to Garage. */
-export const useActiveModule = (): ModuleId =>
-  useRouterState({
-    select: (state) =>
-      state.location.pathname.startsWith("/finances") ||
-      state.location.pathname.startsWith("/settings/finances")
-        ? "finances"
-        : "garage",
-  });
 
 export const subLinkClass = cn(navLinkClass, "pl-7.5");

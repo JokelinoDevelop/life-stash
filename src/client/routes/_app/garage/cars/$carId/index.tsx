@@ -1,26 +1,45 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PageHeader, PageStack } from "@/components/app/page-header";
+import { PageHeader } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CarActions } from "@/modules/garage/cars/car-actions";
 import { CarHeading } from "@/modules/garage/cars/car-heading";
-import { CAR_TABS } from "@/modules/garage/cars/car-tabs";
+import {
+  CAR_TABS,
+  legacyCarTab,
+  LEGACY_TAB_NAMES,
+} from "@/modules/garage/cars/car-tabs";
 import type { CarTab } from "@/modules/garage/cars/car-tabs";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
-import { DetailsTab } from "@/modules/garage/cars/details-tab";
+import { DetailsStatsTab } from "@/modules/garage/cars/details-stats-tab";
 import { OverviewTab } from "@/modules/garage/cars/overview-tab";
 import { useCarShortcuts } from "@/modules/garage/cars/use-car-shortcuts";
-import { ExpensesTab } from "@/modules/garage/expenses/expenses-tab";
-import { MileageTab } from "@/modules/garage/mileage/mileage-tab";
 import { RemindersTab } from "@/modules/garage/reminders/reminders-tab";
-import { SpendingTab } from "@/modules/garage/spending/spending-tab";
-import { HistoryTab } from "@/modules/garage/visits/history-tab";
+import { TIMELINE_FILTERS } from "@/modules/garage/timeline/build-timeline";
+import { TimelineTab } from "@/modules/garage/timeline/timeline-tab";
+
+const searchSchema = z.object({
+  /** Opens the odometer dialog; push notifications send `log=1`. */
+  log: z
+    .union([z.boolean(), z.literal(1), z.enum(["1", "true"])])
+    .transform((value) => value !== false)
+    .optional()
+    .catch(undefined),
+  /** Page of the tab's long list (timeline); 1 when absent. */
+  page: z.number().int().min(2).optional().catch(undefined),
+  /** Timeline filter; all when absent. */
+  show: z.enum(TIMELINE_FILTERS).optional().catch(undefined),
+  tab: z
+    .enum([...CAR_TABS, ...LEGACY_TAB_NAMES])
+    .catch("overview")
+    .default("overview"),
+});
 
 const isCarTab = (value: string): value is CarTab =>
   CAR_TABS.some((tab) => tab === value);
@@ -95,25 +114,14 @@ const CarPage = () => {
         <TabsContent value="overview">
           <OverviewTab car={car} carId={carId} readOnly={readOnly} />
         </TabsContent>
-        <TabsContent value="history">
-          <HistoryTab carId={carId} readOnly={readOnly} />
+        <TabsContent value="timeline">
+          <TimelineTab carId={carId} readOnly={readOnly} />
         </TabsContent>
         <TabsContent value="reminders">
           <RemindersTab carId={carId} readOnly={readOnly} />
         </TabsContent>
-        <TabsContent value="mileage">
-          <MileageTab carId={carId} readOnly={readOnly} />
-        </TabsContent>
-        <TabsContent value="expenses">
-          <ExpensesTab carId={carId} readOnly={readOnly} />
-        </TabsContent>
-        <TabsContent value="spending">
-          <SpendingTab carId={carId} readOnly={readOnly} />
-        </TabsContent>
         <TabsContent value="details">
-          <PageStack>
-            <DetailsTab car={car} />
-          </PageStack>
+          <DetailsStatsTab car={car} carId={carId} />
         </TabsContent>
       </Tabs>
     </>
@@ -121,12 +129,23 @@ const CarPage = () => {
 };
 
 export const Route = createFileRoute("/_app/garage/cars/$carId/")({
-  validateSearch: z.object({
-    log: z.boolean().optional(),
-    /** Page of the tab's long list (history, mileage, expenses); 1 when absent. */
-    page: z.number().int().min(2).optional().catch(undefined),
-    tab: z.enum(CAR_TABS).catch("overview").default("overview"),
-  }),
+  validateSearch: searchSchema,
+  beforeLoad: ({ params, search }) => {
+    const legacy = legacyCarTab(search.tab);
+
+    if (legacy !== undefined) {
+      throw redirect({
+        params,
+        replace: true,
+        search: {
+          ...search,
+          show: search.show ?? legacy.show,
+          tab: legacy.tab,
+        },
+        to: "/garage/cars/$carId",
+      });
+    }
+  },
   loader: async ({ context, params }) => {
     await context.queryClient.query(carQuery(params.carId));
   },

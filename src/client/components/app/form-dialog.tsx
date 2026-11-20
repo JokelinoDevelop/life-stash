@@ -73,7 +73,7 @@ const DesktopFormDialog = ({
         size={size}
         variant="bare"
       >
-        <div className="flex h-11 shrink-0 items-center justify-between pr-2 pl-4">
+        <div className="flex h-11 shrink-0 items-center justify-between pr-2 pl-4 md:h-13 md:pr-3 md:pl-6">
           <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
             {crumb !== undefined && (
               <>

@@ -39,7 +39,8 @@
     "created": "Service saved",
     "updated": "Service updated",
     "nextScheduled": "Reminder done — the next one is scheduled.",
-    "reminderDone": "Reminder marked as done."
+    "reminderDone": "Reminder marked as done.",
+    "moreDetails": "More details"
   },
   "detail": {
     "title": "Service",

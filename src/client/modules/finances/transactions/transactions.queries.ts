@@ -10,6 +10,9 @@ import type { SuccessBody } from "@/lib/api";
 import { financeKeys } from "../finance-keys";
 import type { TransactionFilter } from "./transaction-filter";
 
+/** Rows per page; matches the API (`TRANSACTIONS_PAGE_SIZE` in the worker). */
+export const TRANSACTIONS_PAGE_SIZE = 25;
+
 export type TransactionPage = SuccessBody<
   Awaited<ReturnType<typeof api.finances.transactions.$get>>
 >;
@@ -18,7 +21,7 @@ export type TransactionListItem = TransactionPage["transactions"][number];
 
 export type TransactionMonth = TransactionPage["months"][number];
 
-/** Newest first, a page at a time ("Load more"); the first page carries totals and month bands. */
+/** Newest first, a page at a time (pager); the first page carries totals and month bands. */
 export const transactionsQuery = (filter: TransactionFilter) =>
   infiniteQueryOptions({
     getNextPageParam: (last: TransactionPage) => last.nextCursor ?? undefined,

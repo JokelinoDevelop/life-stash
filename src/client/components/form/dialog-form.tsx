@@ -88,7 +88,12 @@ export const FormSection = ({
   description?: ReactNode;
   title?: ReactNode;
 }) => (
-  <section className={cn("flex flex-col gap-4 px-4 py-4", className)}>
+  <section
+    className={cn(
+      "flex flex-col gap-4 px-4 py-4 md:gap-5 md:px-6 md:py-5",
+      className
+    )}
+  >
     {title !== undefined && (
       <div className="flex flex-col gap-0.5">
         <h3 className="text-subtle-foreground text-xs font-medium">{title}</h3>
@@ -109,7 +114,7 @@ export const FormNotice = ({
   children: ReactNode;
   icon?: ReactNode;
 }) => (
-  <div className="bg-background text-subtle-foreground flex items-center gap-2 px-4 py-2.5 text-xs [&_svg]:size-3.5 [&_svg]:shrink-0">
+  <div className="bg-background text-subtle-foreground flex items-center gap-2 px-4 py-2.5 text-xs md:px-6 [&_svg]:size-3.5 [&_svg]:shrink-0">
     {icon}
     <span className="min-w-0">{children}</span>
   </div>

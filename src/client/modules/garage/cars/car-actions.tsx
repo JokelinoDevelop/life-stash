@@ -220,7 +220,7 @@ export const CarActions = ({
             render={
               <Link
                 params={{ carId: car.id }}
-                search={{ log: true, tab: "mileage" }}
+                search={{ log: true, tab: "timeline" }}
                 to="/garage/cars/$carId"
               />
             }

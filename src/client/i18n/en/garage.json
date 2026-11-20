@@ -42,11 +42,8 @@
   "car": {
     "tabs": {
       "overview": "Overview",
-      "history": "History",
-      "reminders": "Upcoming",
-      "mileage": "Mileage",
-      "expenses": "Expenses",
-      "spending": "Spending",
+      "timeline": "Timeline",
+      "reminders": "Reminders",
       "details": "Details"
     },
     "archive": "Archive car",
@@ -72,7 +69,7 @@
     "otherCosts": "Other costs",
     "nothingSpent": "Nothing yet",
     "viewAll": "View all",
-    "logOdometer": "Log odometer",
+    "logOdometer": "Add reading",
     "addService": "Add service",
     "previousOwner": "Previous owner",
     "odometer": "Odometer",
@@ -91,9 +88,9 @@
     "spentIn": "Spent in {{year}}",
     "perMonthAmount": "{{amount}} / month",
     "remindersTitle": "Reminders",
-    "historyTitle": "History",
-    "dueNextShort": "Due next",
-    "lastDoneShort": "Last done",
+    "historyTitle": "Recent services",
+    "dueNextShort": "Reminders",
+    "lastDoneShort": "Recent services",
     "all": "All",
     "breakdown": "Breakdown",
     "every": "every {{interval}}",
@@ -113,18 +110,10 @@
     "reminder": "Reminder"
   },
   "home": {
-    "upcoming": "Upcoming across all cars",
     "allClear": "All clear — nothing due soon.",
     "catalog": "Service catalog",
-    "needsAttention": "Needs attention",
     "summary": "{{overdue}} overdue · {{dueSoon}} due soon",
     "summaryClear": "Nothing due soon",
-    "horizons": {
-      "overdue": "Overdue",
-      "next30": "Next 30 days",
-      "later": "Later"
-    },
-    "remindersEmpty": "Nothing scheduled across your cars.",
     "historyEmpty": "No service history yet.",
     "spentThisYear": "Spent in {{year}}",
     "vsLastYear": "{{change}} vs {{year}}",
@@ -138,6 +127,27 @@
     "addCar": "Add car",
     "browse": "Browse",
     "historyDescription": "Every service across your cars",
-    "catalogDescription": "Parts, jobs and packages"
+    "catalogDescription": "Parts, jobs and packages",
+    "reminders": "Reminders"
+  },
+  "timeline": {
+    "filterLabel": "Show",
+    "filters": {
+      "all": "All",
+      "services": "Services",
+      "expenses": "Expenses",
+      "odometer": "Odometer"
+    },
+    "empty": {
+      "all": "Nothing logged yet. Add a service, an expense or an odometer reading.",
+      "services": "No services logged yet.",
+      "expenses": "No expenses logged yet.",
+      "odometer": "No odometer readings yet."
+    }
+  },
+  "detailsTab": {
+    "car": "Car",
+    "mileage": "Mileage",
+    "costs": "Costs"
   }
 }

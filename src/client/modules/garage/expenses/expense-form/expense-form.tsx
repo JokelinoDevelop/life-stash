@@ -1,16 +1,50 @@
 import { EXPENSE_CATEGORIES } from "@shared/domain/garage-kinds";
-import { CURRENCIES } from "@shared/domain/money";
+import type { ExpenseCategory } from "@shared/domain/garage-kinds";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AmountInput } from "@/components/form/amount-input";
+import { DatePicker } from "@/components/form/date-picker";
 import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { useAppForm } from "@/components/form/form-hook";
+import { Button } from "@/components/ui/button";
 import { FieldGroup } from "@/components/ui/field";
 import { useFormat } from "@/lib/format";
 
 import { expenseFormSchema } from "./schema";
 import type { ExpenseFormValues } from "./schema";
 
+const CategoryChips = ({
+  onChange,
+  value,
+}: {
+  onChange: (category: ExpenseCategory) => void;
+  value: ExpenseCategory;
+}) => {
+  const { t } = useTranslation("garageExpenses");
+
+  return (
+    <fieldset className="mt-4 flex flex-wrap gap-1.5">
+      <legend className="sr-only">{t("fields.category")}</legend>
+      {EXPENSE_CATEGORIES.map((category) => (
+        <Button
+          aria-pressed={value === category}
+          key={category}
+          onClick={() => {
+            onChange(category);
+          }}
+          size="xs"
+          type="button"
+          variant="chip"
+        >
+          {t(`categories.${category}`)}
+        </Button>
+      ))}
+    </fieldset>
+  );
+};
+
+/** Amount first, then what it was for and when (same order as Finances › Add transaction), then car details. */
 export const ExpenseForm = ({
   defaultValues,
   footerStart,
@@ -51,43 +85,52 @@ export const ExpenseForm = ({
     >
       {notice}
       <FormSection>
-        <FieldGroup>
-          <form.AppField name="category">
+        <form.Subscribe selector={(state) => state.values.currency}>
+          {(currency) => (
+            <form.Field name="amount">
+              {(field) => (
+                <AmountInput
+                  amount={field.state.value}
+                  currency={currency}
+                  errors={field.state.meta.errors}
+                  income={false}
+                  invalid={
+                    field.state.meta.isTouched && !field.state.meta.isValid
+                  }
+                  onAmountBlur={field.handleBlur}
+                  onAmountChange={field.handleChange}
+                  onCurrencyChange={(value) => {
+                    form.setFieldValue("currency", value);
+                  }}
+                />
+              )}
+            </form.Field>
+          )}
+        </form.Subscribe>
+        <form.Field name="category">
+          {(field) => (
+            <CategoryChips
+              onChange={field.handleChange}
+              value={field.state.value}
+            />
+          )}
+        </form.Field>
+        <div className="mt-3 flex items-center gap-1.5">
+          <form.Field name="date">
             {(field) => (
-              <field.SelectField
-                label={t("fields.category")}
-                options={EXPENSE_CATEGORIES.map((category) => ({
-                  label: t(`categories.${category}`),
-                  value: category,
-                }))}
+              <DatePicker
+                aria-label={t("fields.date")}
+                onBlur={field.handleBlur}
+                onChange={field.handleChange}
+                value={field.state.value}
+                variant="chip"
               />
             )}
-          </form.AppField>
-          <div className="grid grid-cols-[1fr_auto] gap-3">
-            <form.AppField name="amount">
-              {(field) => (
-                <field.TextField
-                  autoFocus
-                  inputMode="decimal"
-                  label={t("fields.amount")}
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="currency">
-              {(field) => (
-                <field.SelectField
-                  label={t("fields.currency")}
-                  options={CURRENCIES.map((code) => ({
-                    label: code,
-                    value: code,
-                  }))}
-                />
-              )}
-            </form.AppField>
-          </div>
-          <form.AppField name="date">
-            {(field) => <field.DateField label={t("fields.date")} />}
-          </form.AppField>
+          </form.Field>
+        </div>
+      </FormSection>
+      <FormSection>
+        <FieldGroup>
           <div className="grid gap-4 sm:grid-cols-2">
             <form.AppField name="odometer">
               {(field) => (

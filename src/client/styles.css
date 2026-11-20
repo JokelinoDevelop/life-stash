@@ -73,8 +73,8 @@
   --secondary: oklch(0.97 0.003 260);
   --secondary-foreground: oklch(0.21 0.012 265);
   --muted: oklch(0.97 0.003 260);
-  --muted-foreground: oklch(0.53 0.012 265);
-  --subtle-foreground: oklch(0.42 0.012 265);
+  --muted-foreground: oklch(0.49 0.012 265);
+  --subtle-foreground: oklch(0.38 0.012 265);
   --accent: oklch(0.955 0.004 260);
   --accent-foreground: oklch(0.21 0.012 265);
   --destructive: oklch(0.58 0.2 27);
@@ -116,8 +116,8 @@
   --secondary: oklch(0.235 0.007 265);
   --secondary-foreground: oklch(0.95 0.004 260);
   --muted: oklch(0.235 0.007 265);
-  --muted-foreground: oklch(0.68 0.01 265);
-  --subtle-foreground: oklch(0.78 0.008 265);
+  --muted-foreground: oklch(0.72 0.01 265);
+  --subtle-foreground: oklch(0.82 0.008 265);
   --accent: oklch(0.25 0.008 265);
   --accent-foreground: oklch(0.95 0.004 260);
   --destructive: oklch(0.66 0.19 25);
@@ -168,6 +168,24 @@
 @media (min-width: 48rem) {
   :root {
     --text-sm: 0.8125rem;
+  }
+}
+
+/* "Comfortable" size (the default): larger type and ~12% roomier spacing.
+   Every size utility reads these at runtime, so components scale untouched. */
+:root[data-density="comfortable"] {
+  --spacing: 0.28125rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 1rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.625rem;
+}
+
+@media (min-width: 48rem) {
+  :root[data-density="comfortable"] {
+    --text-sm: 0.9375rem;
   }
 }
 

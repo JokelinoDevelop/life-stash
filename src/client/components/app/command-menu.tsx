@@ -5,9 +5,12 @@ import {
   CarFront,
   Fuel,
   Gauge,
+  History,
   ListChecks,
   Plus,
+  ALargeSmall,
   Settings,
+  Sun,
   Wrench,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -15,6 +18,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { readDensity, toggleDensity } from "@/app/density";
 import {
   CommandDialog,
   CommandEmpty,
@@ -73,7 +77,7 @@ const ActionsGroup = ({
     await (action === "logOdometer"
       ? navigate({
           params: { carId },
-          search: { log: true, tab: "mileage" },
+          search: { log: true, tab: "timeline" },
           to: "/garage/cars/$carId",
         })
       : entryDialog.open({
@@ -150,39 +154,45 @@ const CarsGroup = ({ cars, run }: { cars: CarListItem[]; run: Run }) => {
   );
 };
 
+type PagePath =
+  | "/"
+  | "/garage"
+  | "/garage/history"
+  | "/garage/catalog"
+  | "/settings";
+
+const PAGES: readonly {
+  icon: LucideIcon;
+  label: PageLabel;
+  to: PagePath;
+}[] = [
+  { icon: Sun, label: "today", to: "/" },
+  { icon: CarFront, label: "garage", to: "/garage" },
+  { icon: History, label: "history", to: "/garage/history" },
+  { icon: ListChecks, label: "catalog", to: "/garage/catalog" },
+  { icon: Settings, label: "settings", to: "/settings" },
+];
+
+type PageLabel = "today" | "garage" | "history" | "catalog" | "settings";
+
 const PagesGroup = ({ run }: { run: Run }) => {
   const { t } = useTranslation("command");
   const navigate = useNavigate();
 
   return (
     <CommandGroup heading={t("groups.goTo")}>
-      <Item
-        icon={CarFront}
-        label={t("pages.garage")}
-        onSelect={() => {
-          run(async () => {
-            await navigate({ to: "/garage" });
-          });
-        }}
-      />
-      <Item
-        icon={ListChecks}
-        label={t("pages.catalog")}
-        onSelect={() => {
-          run(async () => {
-            await navigate({ to: "/garage/catalog" });
-          });
-        }}
-      />
-      <Item
-        icon={Settings}
-        label={t("pages.settings")}
-        onSelect={() => {
-          run(async () => {
-            await navigate({ to: "/settings" });
-          });
-        }}
-      />
+      {PAGES.map((page) => (
+        <Item
+          icon={page.icon}
+          key={page.to}
+          label={t(`pages.${page.label}`)}
+          onSelect={() => {
+            run(async () => {
+              await navigate({ to: page.to });
+            });
+          }}
+        />
+      ))}
     </CommandGroup>
   );
 };
@@ -240,6 +250,20 @@ const CommandMenuDialog = ({
         <ActionsGroup current={current} run={run} />
         <CarsGroup cars={list} run={run} />
         <PagesGroup run={run} />
+        <CommandGroup heading={t("groups.view")}>
+          <Item
+            icon={ALargeSmall}
+            label={t(
+              readDensity() === "comfortable"
+                ? "view.compact"
+                : "view.comfortable"
+            )}
+            onSelect={() => {
+              onOpenChange(false);
+              toggleDensity();
+            }}
+          />
+        </CommandGroup>
         {!onFinances && <FinanceActionsGroup run={run} />}
         {!onFinances && <FinancePagesGroup run={run} />}
       </CommandList>

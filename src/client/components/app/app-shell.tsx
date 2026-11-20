@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
 import {
-  Bell,
   CarFront,
   ChevronsUpDown,
   LogOut,
   Search,
   Settings,
+  Sun,
   Wallet,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -16,26 +16,24 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Kbd } from "@/components/ui/kbd";
+import { usePreferences } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
 import { FinanceDialogHost } from "@/modules/finances/dialogs/finance-dialog-host";
 import { FinanceNavLinks } from "@/modules/finances/finance-nav-links";
 import { EntryDialogHost } from "@/modules/garage/entry-dialogs/entry-dialog-host";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
+import { useTodayCount } from "@/modules/today/today-view";
 
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
-import {
-  activeNavLinkClass,
-  navLinkClass,
-  subLinkClass,
-  useActiveModule,
-} from "./sidebar-nav";
+import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
@@ -45,26 +43,48 @@ const mobileLinkClass =
 
 const activeMobileLinkClass = "text-foreground";
 
-/** The household's mark and name; a menu with Settings and Sign out. */
-export const HouseholdMenu = ({ className }: { className?: string }) => {
+const Initial = ({ name }: { name: string }) => (
+  <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
+    {name.slice(0, 1).toLocaleUpperCase()}
+  </span>
+);
+
+/** The household's mark and name (a label, not a menu). */
+export const HouseholdName = ({ className }: { className?: string }) => {
+  const { t } = useTranslation();
+  const household = useQuery(householdOverviewQuery);
+  const name = household.data?.householdName ?? t("appName");
+
+  return (
+    <div
+      className={cn(
+        "flex h-8 min-w-0 items-center gap-2 px-2 text-sm font-semibold",
+        className
+      )}
+    >
+      <Initial name={name} />
+      <span className="min-w-0 flex-1 truncate">{name}</span>
+    </div>
+  );
+};
+
+/** Bottom of the sidebar: who is signed in; opens Settings and Log out. */
+const AccountMenu = () => {
   const { t } = useTranslation();
   const { t: ta } = useTranslation("auth");
-  const household = useQuery(householdOverviewQuery);
+  const preferences = usePreferences();
   const handleSignOut = useSignOut();
-  const name = household.data?.householdName ?? t("appName");
+  const name = preferences.data?.displayName ?? "";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
           <button
-            className={cn(
-              "hover:bg-sidebar-accent flex h-8 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-semibold outline-none",
-              className
-            )}
+            className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent flex h-9 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-medium outline-none"
             type="button"
           >
-            <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
+            <span className="bg-muted text-subtle-foreground flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold">
               {name.slice(0, 1).toLocaleUpperCase()}
             </span>
             <span className="min-w-0 flex-1 truncate">{name}</span>
@@ -72,11 +92,12 @@ export const HouseholdMenu = ({ className }: { className?: string }) => {
           </button>
         }
       />
-      <DropdownMenuContent align="start" className="w-52">
+      <DropdownMenuContent align="start" className="w-52" side="top">
         <DropdownMenuItem render={<Link to={SETTINGS} />}>
           <Settings />
           {t(SETTINGS_LABEL)}
         </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={() => {
             void handleSignOut();
@@ -96,75 +117,81 @@ const SearchButton = () => {
 
   return (
     <button
-      className="bg-card text-muted-foreground hover:text-foreground mt-1.5 mb-2.5 flex h-7 w-full items-center gap-2 rounded-md border pr-1.5 pl-2 text-left text-sm transition-colors"
+      className="bg-card text-muted-foreground hover:text-foreground mt-1.5 mb-2.5 flex h-8 w-full items-center gap-2 rounded-md border pr-1.5 pl-2 text-left text-sm whitespace-nowrap transition-colors"
       onClick={handleOpenMenu}
       type="button"
     >
-      <Search className="size-3.5" />
-      <span className="flex-1">{t("searchOrRun")}</span>
-      <Kbd>⌘K</Kbd>
+      <Search className="size-3.5 shrink-0" />
+      <span className="min-w-0 flex-1 truncate">{t("searchOrRun")}</span>
+      <Kbd className="shrink-0">⌘K</Kbd>
     </button>
   );
 };
 
-const NavCount = ({ children }: { children: ReactNode }) => (
-  <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+const NavCount = ({
+  children,
+  tone = "muted",
+}: {
+  children: ReactNode;
+  tone?: "muted" | "destructive";
+}) => (
+  <span
+    className={cn(
+      "ml-auto text-xs tabular-nums",
+      tone === "destructive"
+        ? "text-destructive font-medium"
+        : "text-muted-foreground"
+    )}
+  >
     {children}
   </span>
 );
 
 const Sidebar = () => {
   const { t } = useTranslation();
-  const household = useQuery(householdOverviewQuery);
-  const active = useActiveModule();
-
-  const attention = (household.data?.reminders ?? []).filter(
-    (reminder) => reminder.status !== "upcoming"
-  ).length;
+  const today = useTodayCount();
 
   return (
-    <aside className="bg-sidebar sticky top-0 hidden h-dvh w-56 shrink-0 flex-col gap-px overflow-y-auto px-2 py-2.5 md:flex">
-      <HouseholdMenu />
+    <aside className="bg-sidebar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-px overflow-y-auto px-2 py-2.5 md:flex">
+      <HouseholdName />
       <SearchButton />
       <nav aria-label={t("appName")} className="flex flex-col gap-px">
+        <Link
+          activeOptions={{ exact: true, includeSearch: false }}
+          activeProps={{ className: activeNavLinkClass }}
+          className={navLinkClass}
+          to="/"
+        >
+          <Sun />
+          {t("nav.today")}
+          {today.count > 0 && (
+            <NavCount tone={today.overdue ? "destructive" : "muted"}>
+              {today.count}
+            </NavCount>
+          )}
+        </Link>
         <ModuleGroup
-          active={active === "garage"}
           icon={<CarFront />}
+          id="garage"
           label={t("nav.garage")}
           to="/garage"
         >
           <GarageLinks />
         </ModuleGroup>
         <ModuleGroup
-          active={active === "finances"}
           icon={<Wallet />}
+          id="finances"
           label={t("nav.finances")}
           to="/finances"
         >
           <FinanceNavLinks
-            className={subLinkClass}
             activeClassName={activeNavLinkClass}
+            className={subLinkClass}
           />
         </ModuleGroup>
       </nav>
       <div className="mt-auto flex flex-col gap-px pt-6">
-        <Link
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
-          to="/garage/reminders"
-        >
-          <Bell />
-          {t("nav.reminders")}
-          {attention > 0 && <NavCount>{attention}</NavCount>}
-        </Link>
-        <Link
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
-          to={SETTINGS}
-        >
-          <Settings />
-          {t(SETTINGS_LABEL)}
-        </Link>
+        <AccountMenu />
       </div>
     </aside>
   );
@@ -172,12 +199,34 @@ const Sidebar = () => {
 
 const MobileNav = () => {
   const { t } = useTranslation();
+  const today = useTodayCount();
 
   return (
     <nav
       aria-label={t("appName")}
       className="bg-card pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden"
     >
+      <Link
+        activeOptions={{ exact: true, includeSearch: false }}
+        activeProps={{ className: activeMobileLinkClass }}
+        className={mobileLinkClass}
+        to="/"
+      >
+        <span className="relative flex">
+          <Sun className="size-5" />
+          {today.count > 0 && (
+            <span
+              className={cn(
+                "text-primary-foreground absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs leading-none font-semibold tabular-nums",
+                today.overdue ? "bg-destructive" : "bg-muted-foreground"
+              )}
+            >
+              {today.count}
+            </span>
+          )}
+        </span>
+        {t("nav.today")}
+      </Link>
       <Link
         activeOptions={{ exact: false }}
         activeProps={{ className: activeMobileLinkClass }}
@@ -195,14 +244,6 @@ const MobileNav = () => {
       >
         <Wallet className="size-5" />
         {t("nav.finances")}
-      </Link>
-      <Link
-        activeProps={{ className: activeMobileLinkClass }}
-        className={mobileLinkClass}
-        to="/garage/reminders"
-      >
-        <Bell className="size-5" />
-        {t("nav.reminders")}
       </Link>
       <Link
         activeProps={{ className: activeMobileLinkClass }}

@@ -2,16 +2,16 @@ import { CURRENCIES } from "@shared/domain/money";
 import type { Currency } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
-import { FieldErrors } from "@/components/form/field-errors";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { useCurrencySymbol } from "@/lib/currency-symbol";
 import { cn } from "@/lib/utils";
 
-import { useCurrencySymbol } from "../../../money";
+import { FieldErrors } from "./field-errors";
 
 interface AmountInputProps {
   amount: string;
@@ -28,7 +28,7 @@ interface AmountInputProps {
 const isCurrency = (value: string): value is Currency =>
   CURRENCIES.some((code) => code === value);
 
-/** The big amount of the log dialog: symbol, a borderless number and the currency. */
+/** The big amount at the top of a money dialog: symbol, a borderless number and the currency. */
 export const AmountInput = ({
   amount,
   centered = false,
@@ -40,7 +40,7 @@ export const AmountInput = ({
   onAmountChange,
   onCurrencyChange,
 }: AmountInputProps) => {
-  const { t } = useTranslation("finances");
+  const { t } = useTranslation();
   const symbol = useCurrencySymbol()(currency);
 
   const currencySelect = (
@@ -53,7 +53,7 @@ export const AmountInput = ({
       value={currency}
     >
       <SelectTrigger
-        aria-label={t("form.currency")}
+        aria-label={t("fields.currency")}
         size={centered ? "default" : "chip"}
         variant={centered ? "ghost" : "default"}
       >
@@ -78,7 +78,7 @@ export const AmountInput = ({
         )}
         htmlFor="amount"
       >
-        {t("form.amount")}
+        {t("fields.amount")}
       </label>
       <div
         className={cn(

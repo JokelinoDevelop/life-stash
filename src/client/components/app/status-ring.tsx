@@ -5,9 +5,6 @@ import { cn } from "@/lib/utils";
 
 export type RingStatus = ReminderStatus | "done";
 
-/** Circumference of the inner pie circle (r = 2.5 in a 16-unit box). */
-const PIE_CIRCUMFERENCE = 2 * Math.PI * 2.5;
-
 const TONE: Record<RingStatus, string> = {
   "due-soon": "text-warning",
   done: "text-success",
@@ -16,20 +13,18 @@ const TONE: Record<RingStatus, string> = {
 };
 
 /**
- * Reminder status as a shape: a ring that fills as the interval is used up,
- * a solid "!" disc when overdue and a check when done. Colour is the second cue.
+ * Reminder status as one of four shapes: an empty ring (later), a ring with a
+ * dot (due soon), a solid "!" disc (overdue) and a check (done). Colour is the
+ * second cue.
  */
 export const StatusRing = ({
   className,
   label,
-  progress = 0,
   status,
 }: {
   className?: string;
   /** Overrides the default status label; pass `null` when nearby text already says it. */
   label?: string | null;
-  /** Share of the interval used, 0–1 (see `reminderProgress`). */
-  progress?: number;
   status: RingStatus;
 }) => {
   const { t } = useTranslation();
@@ -39,8 +34,6 @@ export const StatusRing = ({
     accessibleLabel === null
       ? { "aria-hidden": true }
       : { "aria-label": accessibleLabel, role: "img" };
-
-  const filled = Math.min(1, Math.max(0, progress)) * PIE_CIRCUMFERENCE;
 
   return (
     <svg
@@ -75,26 +68,17 @@ export const StatusRing = ({
         </>
       )}
       {(status === "due-soon" || status === "upcoming") && (
-        <>
-          <circle
-            cx="8"
-            cy="8"
-            fill="none"
-            r="6.25"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          />
-          <circle
-            cx="8"
-            cy="8"
-            fill="none"
-            r="2.5"
-            stroke="currentColor"
-            strokeDasharray={`${filled} ${PIE_CIRCUMFERENCE}`}
-            strokeWidth="5"
-            transform="rotate(-90 8 8)"
-          />
-        </>
+        <circle
+          cx="8"
+          cy="8"
+          fill="none"
+          r="6.25"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        />
+      )}
+      {status === "due-soon" && (
+        <circle cx="8" cy="8" fill="currentColor" r="3" />
       )}
     </svg>
   );

@@ -1,4 +1,3 @@
-import { reminderProgress } from "@shared/domain/reminders";
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
@@ -124,10 +123,7 @@ export const CarReminders = ({
 
           return (
             <ListRow className="pr-1 md:pr-5" key={reminder.id}>
-              <StatusRing
-                progress={reminderProgress(reminder)}
-                status={reminder.status}
-              />
+              <StatusRing status={reminder.status} />
               <ListRowText
                 meta={
                   <>
@@ -193,7 +189,7 @@ export const CarHistory = ({
         <ViewAll
           carId={carId}
           mobileLabel={t("overview.historyTitle")}
-          tab="history"
+          tab="timeline"
         />
       }
       count={visits.length}

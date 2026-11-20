@@ -13,6 +13,7 @@ import enGarageReminders from "./en/garageReminders.json";
 import enGarageSpending from "./en/garageSpending.json";
 import enGarageVisits from "./en/garageVisits.json";
 import enSettings from "./en/settings.json";
+import enToday from "./en/today.json";
 import mkAuth from "./mk/auth.json";
 import mkCommand from "./mk/command.json";
 import mkCommon from "./mk/common.json";
@@ -25,6 +26,7 @@ import mkGarageReminders from "./mk/garageReminders.json";
 import mkGarageSpending from "./mk/garageSpending.json";
 import mkGarageVisits from "./mk/garageVisits.json";
 import mkSettings from "./mk/settings.json";
+import mkToday from "./mk/today.json";
 
 export const resources = {
   en: {
@@ -40,6 +42,7 @@ export const resources = {
     garageSpending: enGarageSpending,
     garageVisits: enGarageVisits,
     settings: enSettings,
+    today: enToday,
   },
   mk: {
     auth: mkAuth,
@@ -54,6 +57,7 @@ export const resources = {
     garageSpending: mkGarageSpending,
     garageVisits: mkGarageVisits,
     settings: mkSettings,
+    today: mkToday,
   },
 } as const;
 

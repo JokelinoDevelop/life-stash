@@ -3,7 +3,6 @@ import { Wallet } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { useFormat } from "@/lib/format";
 
@@ -17,12 +16,8 @@ const SpendingChart = lazy(async () => {
   return { default: module.SpendingChart };
 });
 
-export const SpendingTab = ({
-  carId,
-}: {
-  carId: string;
-  readOnly: boolean;
-}) => {
+/** Costs per year: chart and table (inside the car's Details tab). */
+export const SpendingSection = ({ carId }: { carId: string }) => {
   const { t } = useTranslation("garageSpending");
   const format = useFormat();
   const spending = useQuery(carSpendingQuery(carId));
@@ -45,11 +40,7 @@ export const SpendingTab = ({
   const { years } = spending.data;
 
   if (years.length === 0) {
-    return (
-      <PageStack>
-        <EmptyState icon={<Wallet />} message={t("empty")} />
-      </PageStack>
-    );
+    return <EmptyState icon={<Wallet />} message={t("empty")} />;
   }
 
   const currency = mainCurrency(years, format.currency);
@@ -59,7 +50,7 @@ export const SpendingTab = ({
   );
 
   return (
-    <PageStack>
+    <>
       <Suspense fallback={<LoadingState variant="block" />}>
         <SpendingChart currency={currency} years={years} />
       </Suspense>
@@ -70,6 +61,6 @@ export const SpendingTab = ({
       )}
       <SpendingTable years={years} />
       <p className="text-muted-foreground text-xs">{t("previousOwnerNote")}</p>
-    </PageStack>
+    </>
   );
 };

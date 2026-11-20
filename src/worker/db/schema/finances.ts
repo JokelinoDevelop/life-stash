@@ -1,3 +1,4 @@
+import type { ExchangeRates } from "@shared/domain/exchange";
 import { sql } from "drizzle-orm";
 import {
   index,
@@ -133,6 +134,10 @@ export const financeSettings = sqliteTable("finance_settings", {
   defaultPaymentTermsDays: integer("default_payment_terms_days")
     .notNull()
     .default(30),
+  /** Hand-entered rates for showing totals in the main currency; null until set. */
+  exchangeRates: text("exchange_rates", {
+    mode: "json",
+  }).$type<ExchangeRates>(),
   householdId: text("household_id")
     .primaryKey()
     .references(() => households.id, { onDelete: "cascade" }),

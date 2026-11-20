@@ -8,7 +8,10 @@ export type FinanceSettingsRow = typeof financeSettings.$inferSelect;
 export type FinanceSettingsPatch = Partial<
   Pick<
     FinanceSettingsRow,
-    "defaultPaymentTermsDays" | "invoiceNumberFormat" | "overdueReminders"
+    | "defaultPaymentTermsDays"
+    | "exchangeRates"
+    | "invoiceNumberFormat"
+    | "overdueReminders"
   >
 >;
 
