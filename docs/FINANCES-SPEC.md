@@ -29,7 +29,7 @@ Read `docs/ARCHITECTURE.md`, `docs/DATA-MODEL.md` and `docs/DESIGN-LANGUAGE.md` 
 - **Amounts** are integer minor units plus a currency (`MKD` | `EUR` | `USD`), as in Garage. Totals are grouped per currency (`sumByCurrency`). When the user has entered exchange rates (Settings › Finances › Exchange rates), the overview KPIs add every currency up in the main currency (`totalInCurrency`) and list the other currencies as "incl. €53,750"; without a rate they show the main currency first and others as a second line.
 - **Invoice status** is stored as `draft` | `sent` | `paid` | `void`. **Overdue** is derived, never stored: `sent` and `due_date < today` (in the user's time zone).
 - **Marking an invoice paid** asks for the paid date and the amount received (defaults: today, the invoice amount), then creates one income transaction linked to the invoice (`invoice_id`) in the category "Invoices". Un-marking deletes that transaction. A paid invoice can't be edited until it is un-marked.
-- **Invoice numbers**: the next number is suggested as `<year>-<seq>` (`2026-014`), using the highest number from the same year + 1. It stays editable and must be unique per household.
+- **Invoice numbers**: the next number is suggested as `<year>-<seq>` (`2026-014`), using the highest number from the same year + 1. It stays editable and must be unique per household. F4 changes this (counter per year, drafts without numbers, void instead of delete): see `docs/INVOICE-DOCUMENTS-SPEC.md`.
 - **Due date** defaults to issue date + the client's payment terms (default 30 days).
 - **Garage costs are not copied** into the ledger. The overview shows a read-only "Car costs" line, read from Garage's spending service (service → service), so nothing is counted twice.
 - **Deleting**: a category or client that's in use is archived, not deleted. Deleting a transaction or invoice uses `confirm()` and then an Undo toast.
@@ -42,7 +42,7 @@ Reuse the existing photo pipeline (B2, presigned URLs, `photos` table, `modules/
 - **Changes to `photos`**: `owner_type` gains `finance_invoice` and `finance_transaction`; add `file_name?` (original name, shown in the UI). Upload DTOs accept `application/pdf` next to the image types; PDFs up to 10 MB (images stay at 5 MB). PDFs are uploaded as-is; only images are resized/compressed in the browser.
 - **Viewing**: images open in the existing viewer; PDFs open in a new tab from a 1-hour presigned GET URL (`Content-Disposition: inline; filename=…`).
 - **Rules**: the owner is authorised like everything else (the invoice/transaction must belong to the household). Deleting an invoice or transaction deletes its files from B2 (same as Garage). Files on a paid invoice can still be added or removed (they're evidence, not invoice data). If B2 isn't configured, the attach controls are hidden.
-- **Not included**: reading data out of the PDF (OCR / auto-fill), generating invoice PDFs.
+- **Not included**: reading data out of the PDF (OCR / auto-fill). Generating invoice PDFs is F4 (`docs/INVOICE-DOCUMENTS-SPEC.md`).
 
 ## Data model (`src/worker/db/schema/finances.ts`)
 
@@ -169,10 +169,11 @@ Each phase is one branch and PR, `pnpm check` green, seeders extended (`src/work
 1. **F1 — Ledger**: categories (with seeded defaults), transactions CRUD, Transactions page, Log transaction dialog, sidebar module switch.
 2. **F2 — Work**: clients, invoices with status flow and mark paid/unpaid, Invoices and Clients pages, Overview page with `GET /finances/overview`, attachments (invoice PDFs + transaction receipts, PDF support in the photo pipeline).
 3. **F3 — Extras**: recurring income (salary) with a "Confirm this month's salary" row on the overview, projects, overdue-invoice push heads-up via the daily cron, CSV export.
+4. **F4 — Invoice documents** (planned): business profile, per-year numbering with gap-free issuing, itemised invoices, PDF generation. Spec: `docs/INVOICE-DOCUMENTS-SPEC.md`.
 
 ## Out of scope
 
-Bank sync, budgets, invoice PDF generation, tax calculations, live exchange rates (rates are entered by hand), importing the existing spreadsheet (entered by hand), multi-user splitting.
+Bank sync, budgets, tax calculations, live exchange rates (rates are entered by hand), importing the existing spreadsheet (entered by hand), multi-user splitting.
 
 ## Open questions
 

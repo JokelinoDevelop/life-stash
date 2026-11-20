@@ -1,6 +1,6 @@
 # LifeStash — notes for coding agents
 
-Read `docs/ARCHITECTURE.md` and `docs/DATA-MODEL.md` first. Code standards are in `AGENTS.md`. UI follows `docs/DESIGN-LANGUAGE.md`. Planned rework (phases, scope, UX rules): `docs/IMPLEMENTATION-PLAN.md`.
+Read `docs/ARCHITECTURE.md` and `docs/DATA-MODEL.md` first. Code standards are in `AGENTS.md`. UI follows `docs/DESIGN-LANGUAGE.md`. Planned rework (phases, scope, UX rules): `docs/IMPLEMENTATION-PLAN.md`. Finances: `docs/FINANCES-SPEC.md`; invoice documents (F4, planned): `docs/INVOICE-DOCUMENTS-SPEC.md`.
 
 ## Non-negotiable rules
 
