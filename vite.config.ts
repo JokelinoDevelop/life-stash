@@ -46,9 +46,10 @@ export default defineConfig({
       },
       injectManifest: {
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        // The invoice PDF renderer (~1.2 MB) loads only when previewing or issuing an
-        // invoice; don't make every install download it up front.
-        globIgnores: ["**/render-invoice-pdf-*.js"],
+        // The invoice PDF renderer (~1.2 MB) and the preview's pdf.js (~0.4 MB, plus its
+        // .mjs worker) load only when previewing or issuing an invoice; don't make every
+        // install download them up front.
+        globIgnores: ["**/render-invoice-pdf-*.js", "**/draw-pdf-pages-*.js"],
       },
       devOptions: { enabled: false, type: "module" },
     }),

@@ -6,6 +6,8 @@ import {
   financeInvoices,
   financeProjects,
 } from "../../../db/schema/finances";
+import { replaceLinesStatements } from "./invoice-lines.repository";
+import type { NewInvoiceLine } from "./invoice-lines.repository";
 
 export type InvoiceRow = typeof financeInvoices.$inferSelect;
 
@@ -173,11 +175,27 @@ export class InvoicesRepository {
     return row !== undefined;
   }
 
-  async insert(values: NewInvoice): Promise<InvoiceRow> {
-    const [row] = await this.#db
+  /** Inserts an invoice, with its lines (itemised) in the same batch. */
+  async insert(
+    values: NewInvoice,
+    lines: readonly NewInvoiceLine[] = []
+  ): Promise<InvoiceRow> {
+    const id = crypto.randomUUID();
+
+    const insert = this.#db
       .insert(financeInvoices)
-      .values({ ...values, householdId: this.#householdId })
+      .values({ ...values, householdId: this.#householdId, id })
       .returning();
+
+    const [rows] =
+      lines.length === 0
+        ? [await insert]
+        : await this.#db.batch([
+            insert,
+            ...replaceLinesStatements(this.#db, this.#householdId, id, lines),
+          ]);
+
+    const [row] = rows;
 
     if (!row) {
       throw new Error("Invoice insert returned no row");
@@ -186,11 +204,30 @@ export class InvoicesRepository {
     return row;
   }
 
-  async update(invoiceId: string, patch: InvoicePatch): Promise<void> {
-    await this.#db
+  /**
+   * Updates a live invoice. With `lines`, they replace its lines in the same batch, so the
+   * amount and the lines change together or not at all.
+   */
+  async update(
+    invoiceId: string,
+    patch: InvoicePatch,
+    lines?: readonly NewInvoiceLine[]
+  ): Promise<void> {
+    const update = this.#db
       .update(financeInvoices)
       .set(patch)
       .where(and(eq(financeInvoices.id, invoiceId), this.#live()));
+
+    if (lines === undefined) {
+      await update;
+
+      return;
+    }
+
+    await this.#db.batch([
+      update,
+      ...replaceLinesStatements(this.#db, this.#householdId, invoiceId, lines),
+    ]);
   }
 
   /** Records the overdue heads-up (the cron sends one per invoice). */

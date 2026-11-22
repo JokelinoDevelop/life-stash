@@ -12,6 +12,9 @@ export interface InvoiceIssuerSnapshot {
   companyId: string | null;
   email: string | null;
   phone: string | null;
+  /** Absent on invoices issued before bank addresses were added. */
+  bankAddress?: string | null;
+  bankCountry?: string | null;
   bankName: string | null;
   iban: string | null;
   swift: string | null;
@@ -88,12 +91,18 @@ export interface InvoiceTotals {
   /** One entry per rate in use, lowest rate first. */
   vatByRate: VatGroup[];
   vatMinor: number;
+  /** Added after VAT, untaxed. */
+  shippingMinor: number;
   totalMinor: number;
 }
 
-/** Sums already-rounded line amounts and VAT (per line, then summed), grouped per rate. */
+/**
+ * Sums already-rounded line amounts and VAT (per line, then summed), grouped per rate, then
+ * adds shipping (untaxed).
+ */
 export const invoiceTotals = (
-  lines: readonly (LineAmounts & { vatRateBp: number })[]
+  lines: readonly (LineAmounts & { vatRateBp: number })[],
+  shippingMinor = 0
 ): InvoiceTotals => {
   const groups = new Map<number, VatGroup>();
   let subtotalMinor = 0;
@@ -114,13 +123,13 @@ export const invoiceTotals = (
     groups.set(line.vatRateBp, group);
   }
 
-  const totalMinor = subtotalMinor + vatMinor;
+  const totalMinor = subtotalMinor + vatMinor + shippingMinor;
 
   const vatByRate = [...groups.values()].toSorted(
     (a, b) => a.rateBp - b.rateBp
   );
 
-  return { subtotalMinor, totalMinor, vatByRate, vatMinor };
+  return { shippingMinor, subtotalMinor, totalMinor, vatByRate, vatMinor };
 };
 
 const FILE_PREFIX: Record<InvoiceLanguage, string> = {

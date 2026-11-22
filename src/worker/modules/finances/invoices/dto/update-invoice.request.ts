@@ -40,4 +40,7 @@ export const updateInvoiceRequest = z.object({
   periodEnd: isoDate.nullable().optional(),
   periodStart: isoDate.nullable().optional(),
   projectId: z.uuid().nullable().optional(),
+  purchaseOrder: optionalText(60).optional(),
+  /** Itemised invoices: shipping, added after VAT (the amount is recomputed). */
+  shippingMinor: z.number().int().min(0).max(10_000_000_000).optional(),
 });

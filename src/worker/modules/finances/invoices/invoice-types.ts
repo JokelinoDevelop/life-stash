@@ -22,6 +22,9 @@ export interface InvoiceInput {
   currency: Currency;
   notes: string | null;
   projectId: string | null;
+  purchaseOrder: string | null;
+  /** Itemised only: added after VAT. */
+  shippingMinor: number;
 }
 
 export interface InvoiceListRow extends InvoiceWithClient {

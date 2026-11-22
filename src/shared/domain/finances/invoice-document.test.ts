@@ -44,6 +44,7 @@ describe(invoiceTotals, () => {
     ];
 
     expect(invoiceTotals(lines)).toStrictEqual({
+      shippingMinor: 0,
       subtotalMinor: 17_000,
       totalMinor: 19_410,
       vatByRate: [
@@ -56,10 +57,21 @@ describe(invoiceTotals, () => {
 
   it("is zero without lines", () => {
     expect(invoiceTotals([])).toStrictEqual({
+      shippingMinor: 0,
       subtotalMinor: 0,
       totalMinor: 0,
       vatByRate: [],
       vatMinor: 0,
+    });
+  });
+
+  it("adds shipping after VAT, untaxed", () => {
+    const lines = [{ amountMinor: 10_000, vatMinor: 1800, vatRateBp: 1800 }];
+
+    expect(invoiceTotals(lines, 1500)).toMatchObject({
+      shippingMinor: 1500,
+      totalMinor: 13_300,
+      vatMinor: 1800,
     });
   });
 });

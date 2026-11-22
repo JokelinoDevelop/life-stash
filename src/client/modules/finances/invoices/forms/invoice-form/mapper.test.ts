@@ -40,6 +40,8 @@ const DETAIL: InvoiceDetail = {
   periodEnd: "2026-09-30",
   periodStart: "2026-09-01",
   projectId: null,
+  purchaseOrder: null,
+  shippingMinor: 0,
   projectName: null,
   sentAt: "2026-09-30",
   status: "paid",

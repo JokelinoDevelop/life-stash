@@ -1,8 +1,9 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Eye, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useFormDialog } from "@/components/app/form-dialog-context";
 import { FormNotice, FormSection } from "@/components/form/dialog-form";
 import { withForm } from "@/components/form/form-hook";
 import { Button } from "@/components/ui/button";
@@ -53,13 +54,33 @@ export const InvoiceEditorBody = withForm({
   render: function InvoiceEditorBodyRender(props) {
     const { form, mode } = props;
     const { t } = useTranslation("finances");
+    const dialog = useFormDialog();
+    const navigate = useNavigate();
 
     return (
       <>
         {mode === "itemised" && !props.hasProfile && (
           <FormNotice icon={<UserRound />}>
             {t("invoices.editor.noProfile")}{" "}
-            <Link className="text-primary underline" to="/settings/finances">
+            <Link
+              className="text-primary underline"
+              hash="your-details"
+              onClick={(event) => {
+                if (dialog === null) {
+                  return;
+                }
+
+                // Leaving closes the editor: ask before dropping what was typed.
+                event.preventDefault();
+                dialog.requestLeave(() => {
+                  void navigate({
+                    hash: "your-details",
+                    to: "/settings/finances",
+                  });
+                });
+              }}
+              to="/settings/finances"
+            >
               {t("invoices.editor.addDetails")}
             </Link>
           </FormNotice>
@@ -160,7 +181,7 @@ export const InvoiceEditorFooter = withForm({
               {footerStart}
               {mode === "itemised" && (
                 <Button
-                  className="md:hidden"
+                  className="lg:hidden"
                   onClick={() => {
                     void onPreview();
                   }}
@@ -169,11 +190,16 @@ export const InvoiceEditorFooter = withForm({
                   variant="ghost"
                 >
                   <Eye />
-                  {t("invoices.editor.preview")}
+                  {/* Phones: just the eye, so Save draft and Issue fit on one row. */}
+                  <span className="max-sm:sr-only">
+                    {t("invoices.editor.preview")}
+                  </span>
                 </Button>
               )}
             </span>
           }
+          // Phones: the sheet closes by swiping down, so no Cancel; Issue takes the room.
+          stretchOnMobile
           submitLabel={
             mode === "itemised"
               ? t("invoices.editor.issueDownload")

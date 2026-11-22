@@ -93,6 +93,9 @@ export const invoiceFormSchema = z
     period: z.string(),
     /** A project of the chosen client, or "none". */
     projectId: z.string(),
+    purchaseOrder: optionalText(60),
+    /** Itemised only: added after VAT; empty is none. */
+    shipping: z.string().trim(),
   })
   .superRefine((values, ctx) => {
     if (values.mode === "recorded") {
@@ -101,6 +104,10 @@ export const invoiceFormSchema = z
       }
 
       return;
+    }
+
+    if (values.shipping !== "" && !AMOUNT.test(compact(values.shipping))) {
+      ctx.addIssue({ code: "custom", message: NUMBER, path: ["shipping"] });
     }
 
     if (values.lines.length === 0) {

@@ -79,6 +79,10 @@ export const parseVatRate = (value: string): number =>
     ? 0
     : Math.round(decimal(value) * (BASIS_POINTS / PERCENT));
 
+/** "12,50" → 1250 (empty, or not a number yet, is 0). */
+export const parseShipping = (value: string): number =>
+  toMinor(parseAmount(value) ?? 0);
+
 const formatRate = (bp: number): string =>
   bp === 0 ? "" : String(bp / (BASIS_POINTS / PERCENT));
 
@@ -114,6 +118,8 @@ export const invoiceFormDefaults = (context: {
   number: "",
   period: context.today.slice(0, 7),
   projectId: NO_PERIOD,
+  purchaseOrder: "",
+  shipping: "",
 });
 
 export const invoiceToFormValues = (
@@ -138,6 +144,9 @@ export const invoiceToFormValues = (
   number: "",
   period: invoice.periodStart?.slice(0, 7) ?? NO_PERIOD,
   projectId: invoice.projectId ?? NO_PERIOD,
+  purchaseOrder: invoice.purchaseOrder ?? "",
+  shipping:
+    invoice.shippingMinor === 0 ? "" : String(toMajor(invoice.shippingMinor)),
 });
 
 /**
@@ -175,7 +184,8 @@ const linesToRequest = (lines: readonly InvoiceFormLine[]) =>
 /** Line amounts and totals as the server will compute them (for the editor and preview). */
 export const formLineTotals = (
   lines: readonly InvoiceFormLine[],
-  vatRegistered: boolean
+  vatRegistered: boolean,
+  shippingMinor = 0
 ) => {
   const priced = linesToRequest(lines).map((line, index) => {
     const vatRateBp = vatRegistered ? line.vatRateBp : 0;
@@ -188,7 +198,7 @@ export const formLineTotals = (
     };
   });
 
-  return { lines: priced, totals: invoiceTotals(priced) };
+  return { lines: priced, totals: invoiceTotals(priced, shippingMinor) };
 };
 
 const toBody = (values: InvoiceFormValues) => {
@@ -211,6 +221,8 @@ const toBody = (values: InvoiceFormValues) => {
     periodEnd: bounds?.end ?? null,
     periodStart: bounds?.start ?? null,
     projectId: values.projectId === NO_PERIOD ? null : values.projectId,
+    purchaseOrder: emptyToNull(values.purchaseOrder),
+    shippingMinor: itemised ? parseShipping(values.shipping) : 0,
   };
 };
 

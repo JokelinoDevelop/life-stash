@@ -11,7 +11,7 @@ import type { ProjectsService } from "../projects/projects.service";
 import type { FinanceSettingsService } from "../settings/settings.service";
 import type { TransactionRow } from "../transactions/transactions.repository";
 import { InvoiceIssuing, guardNumberRace } from "./invoice-issuing";
-import { priceLines } from "./invoice-lines";
+import { priceLines, toLineInputs } from "./invoice-lines";
 import type { InvoiceLineInput, PricedLines } from "./invoice-lines";
 import type { InvoiceLinesRepositoryPort } from "./invoice-lines.repository";
 import { InvoicePayments } from "./invoice-payment";
@@ -130,7 +130,8 @@ export class InvoicesService {
 
   /** Lines priced with today's VAT registration; null when there are none (recorded). */
   async #price(
-    lines: readonly InvoiceLineInput[] | undefined
+    lines: readonly InvoiceLineInput[] | undefined,
+    shippingMinor: number
   ): Promise<PricedLines | null> {
     if (lines === undefined || lines.length === 0) {
       return null;
@@ -138,7 +139,20 @@ export class InvoicesService {
 
     const profile = await this.#businessProfile.get();
 
-    return priceLines(lines, profile?.vatRegistered ?? false);
+    return priceLines(lines, profile?.vatRegistered ?? false, shippingMinor);
+  }
+
+  /** The lines to price on an edit: the new ones, or (new shipping alone) the saved ones. */
+  async #linesToPrice(
+    invoiceId: string,
+    lines: readonly InvoiceLineInput[] | undefined,
+    changes: Partial<InvoiceInput>
+  ): Promise<readonly InvoiceLineInput[] | undefined> {
+    if (lines !== undefined || changes.shippingMinor === undefined) {
+      return lines;
+    }
+
+    return toLineInputs(await this.#lines.list(invoiceId));
   }
 
   async #checkRefs(
@@ -159,7 +173,7 @@ export class InvoicesService {
     issue: IssueRequest
   ): Promise<{ id: string; number: string | null }> {
     await this.#checkRefs(input.clientId, input.projectId, null);
-    const priced = await this.#price(lines);
+    const priced = await this.#price(lines, input.shippingMinor);
 
     const values = {
       ...input,
@@ -175,13 +189,11 @@ export class InvoicesService {
             null
           );
 
+    // The invoice and its lines go in one batch: never an amount without its lines.
     const row = await guardNumberRace(
-      async () => await this.#repo.insert({ ...values, ...issued })
+      async () =>
+        await this.#repo.insert({ ...values, ...issued }, priced?.rows ?? [])
     );
-
-    if (priced !== null) {
-      await this.#lines.replace(row.id, priced.rows);
-    }
 
     return { id: row.id, number: issued.number };
   }
@@ -230,7 +242,13 @@ export class InvoicesService {
       invoice.clientId
     );
 
-    const priced = await this.#price(lines);
+    const lineInputs = await this.#linesToPrice(invoiceId, lines, changes);
+
+    const priced = await this.#price(
+      lineInputs,
+      changes.shippingMinor ?? invoice.shippingMinor
+    );
+
     const patch: InvoicePatch = { ...changes };
 
     if (priced !== null) {
@@ -242,11 +260,12 @@ export class InvoicesService {
       patch.overdueNotifiedAt = null;
     }
 
-    await this.#repo.update(invoiceId, patch);
-
-    if (lines !== undefined) {
-      await this.#lines.replace(invoiceId, priced?.rows ?? []);
-    }
+    // `lines` replaces the lines in the same batch as the amount (empty: recorded again).
+    await this.#repo.update(
+      invoiceId,
+      patch,
+      lineInputs === undefined ? undefined : (priced?.rows ?? [])
+    );
 
     return issue === null ? null : await this.issue(invoiceId, issue.number);
   }
@@ -263,16 +282,33 @@ export class InvoicesService {
       throw domainError(ISSUED);
     }
 
-    const lineCounts = await this.#lines.countByInvoice([invoiceId]);
+    const lines = toLineInputs(await this.#lines.list(invoiceId));
 
     const issued = await this.#issuing.issuedFields(
-      { ...invoice, itemised: (lineCounts.get(invoiceId) ?? 0) > 0 },
+      { ...invoice, itemised: lines.length > 0 },
       typed,
       invoiceId
     );
 
+    // Priced again with the VAT registration being frozen, so the PDF (which shows VAT only
+    // when registered) and the amount due always agree.
+    const priced =
+      lines.length === 0
+        ? null
+        : priceLines(
+            lines,
+            issued.issuerSnapshot?.vatRegistered === true,
+            invoice.shippingMinor
+          );
+
     await guardNumberRace(async () => {
-      await this.#repo.update(invoiceId, issued);
+      await this.#repo.update(
+        invoiceId,
+        priced === null
+          ? issued
+          : { ...issued, amountMinor: priced.totals.totalMinor },
+        priced?.rows
+      );
     });
 
     return issued.number;
@@ -337,11 +373,11 @@ export class InvoicesService {
       throw notFound();
     }
 
-    if (invoice.number !== null) {
-      await this.#issuing.assertNumberFree(invoice.number, invoiceId);
-    }
+    await this.#issuing.assertNumberingFree(invoice, invoiceId);
 
-    await this.#repo.setDeleted(invoiceId, null);
+    await guardNumberRace(async () => {
+      await this.#repo.setDeleted(invoiceId, null);
+    });
     await this.#transactions.setDeletedByInvoice(invoiceId, null);
   }
 

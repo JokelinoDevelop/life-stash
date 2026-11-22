@@ -7,6 +7,8 @@ const MAX_VAT_PERCENT = 100;
 
 export const businessProfileFormSchema = z.object({
   address: optionalText(500),
+  bankAddress: optionalText(200),
+  bankCountry: optionalText(80),
   bankName: optionalText(120),
   companyId: optionalText(40),
   /** Percent, e.g. "18". */

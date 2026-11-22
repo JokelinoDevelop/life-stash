@@ -14,6 +14,8 @@ export interface InvoicePdfData {
   dueDate: string;
   periodStart: string | null;
   periodEnd: string | null;
+  /** The client's purchase order number. */
+  purchaseOrder: string | null;
   /** Printed under the lines. */
   note: string | null;
   issuer: {
@@ -24,6 +26,8 @@ export interface InvoicePdfData {
     email: string | null;
     phone: string | null;
     bankName: string | null;
+    bankAddress: string | null;
+    bankCountry: string | null;
     iban: string | null;
     swift: string | null;
     vatRegistered: boolean;
@@ -58,6 +62,16 @@ export interface InvoicePdfLabels {
   due: string;
   period: string;
   billTo: string;
+  /** "From": you, beside "Billed to". */
+  from: string;
+  /** "Account owner" in the bank details. */
+  accountOwner: string;
+  /** "Account owner address" (your address, on one line). */
+  ownerAddress: string;
+  purchaseOrder: string;
+  shipping: string;
+  bankAddress: string;
+  country: string;
   description: string;
   quantity: string;
   unitPrice: string;
@@ -66,9 +80,15 @@ export interface InvoicePdfLabels {
   subtotal: string;
   /** "VAT 18%" */
   vatAt: (rate: string) => string;
-  amountDue: string;
+  /** "(Tax rate)" beside the single rate, or 0 %. */
+  taxRate: string;
+  tax: string;
+  invoiceTotal: string;
   payment: string;
-  reference: (number: string) => string;
+  /** "Reference" (a row label beside the number). */
+  referenceLabel: string;
+  /** "Note" above the note printed under the lines. */
+  note: string;
   taxId: string;
   companyId: string;
   bank: string;

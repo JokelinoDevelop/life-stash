@@ -16,6 +16,8 @@ const fakeProfiles = (): BusinessProfileRepositoryPort => {
     upsert: async (values) => {
       row = {
         address: values.address ?? "",
+        bankAddress: values.bankAddress ?? null,
+        bankCountry: values.bankCountry ?? null,
         bankName: values.bankName ?? null,
         companyId: values.companyId ?? null,
         defaultVatRateBp: values.defaultVatRateBp ?? 0,
@@ -37,6 +39,8 @@ const fakeProfiles = (): BusinessProfileRepositoryPort => {
 
 const INPUT: BusinessProfileInput = {
   address: "Ulica 1\n1000 Skopje",
+  bankAddress: "Orce Nikolov 3, Skopje",
+  bankCountry: "North Macedonia",
   bankName: "Komercijalna banka",
   companyId: null,
   defaultVatRateBp: 1800,
@@ -81,6 +85,8 @@ describe(BusinessProfileService, () => {
 
     expect(snapshot).toStrictEqual({
       address: INPUT.address,
+      bankAddress: INPUT.bankAddress,
+      bankCountry: INPUT.bankCountry,
       bankName: INPUT.bankName,
       companyId: null,
       email: INPUT.email,

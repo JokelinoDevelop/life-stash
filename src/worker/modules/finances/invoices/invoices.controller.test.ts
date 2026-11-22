@@ -424,6 +424,8 @@ describe("invoices controller", () => {
 
   const PROFILE = {
     address: "Ulica 1",
+    bankAddress: null,
+    bankCountry: null,
     bankName: null,
     companyId: null,
     defaultVatRateBp: 0,
@@ -514,31 +516,39 @@ describe("invoices controller", () => {
     const { clientId } = await setup();
     const { id } = await read(await createItemised(alice, clientId), idBody);
 
-    const bobDocument = await request(bob, "GET", `/invoices/${id}/document`);
-
-    const photo = await app.request(
-      `${ORIGIN}/api/photos`,
-      {
-        body: JSON.stringify({
-          contentType: "application/pdf",
-          fileName: "Invoice-2020-002.pdf",
-          generated: true,
-          objectKey: `${alice.householdId}/finance_invoice/${id}/x.pdf`,
-          ownerId: id,
-          ownerType: "finance_invoice",
-          sizeBytes: 1000,
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie: alice.cookie,
-          origin: ORIGIN,
+    const storeGenerated = async (session: Session, householdId: string) =>
+      await app.request(
+        `${ORIGIN}/api/photos`,
+        {
+          body: JSON.stringify({
+            contentType: "application/pdf",
+            fileName: "Invoice-2020-001.pdf",
+            generated: true,
+            objectKey: `${householdId}/finance_invoice/${id}/x.pdf`,
+            ownerId: id,
+            ownerType: "finance_invoice",
+            sizeBytes: 1000,
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie: session.cookie,
+            origin: ORIGIN,
+          },
+          method: "POST",
         },
-        method: "POST",
-      },
-      env
-    );
+        env
+      );
 
-    const { id: photoId } = await read(photo, idBody);
+    const bobDocument = await request(bob, "GET", `/invoices/${id}/document`);
+    const onDraft = await storeGenerated(alice, alice.householdId);
+
+    await request(alice, "PUT", "/business-profile", PROFILE);
+    await request(alice, "POST", `/invoices/${id}/issue`, { number: null });
+
+    const bobStores = await storeGenerated(bob, bob.householdId);
+    const stored = await storeGenerated(alice, alice.householdId);
+    const second = await storeGenerated(alice, alice.householdId);
+    const { id: photoId } = await read(stored, idBody);
 
     const removed = await app.request(
       `${ORIGIN}/api/photos/${photoId}`,
@@ -550,6 +560,10 @@ describe("invoices controller", () => {
     );
 
     expect(bobDocument.status).toBe(404);
-    expect(removed.status).toBe(409);
+    expect(bobStores.status).toBe(404);
+    // Not on a draft; once issued, one generated PDF that can't be removed.
+    expect(
+      [onDraft, stored, second, removed].map((r) => r.status)
+    ).toStrictEqual([409, 201, 409, 409]);
   });
 });

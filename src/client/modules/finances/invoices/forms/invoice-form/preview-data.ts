@@ -1,5 +1,5 @@
 import type { InvoicePdfData } from "../../../invoice-pdf/invoice-pdf-data";
-import { formLineTotals, periodBounds } from "./mapper";
+import { formLineTotals, parseShipping, periodBounds } from "./mapper";
 import type { InvoiceClientOption } from "./mapper";
 import type { InvoiceFormValues } from "./schema";
 
@@ -38,7 +38,8 @@ export const previewPdfData = (
 ): InvoicePdfData => {
   const priced = formLineTotals(
     values.lines,
-    context.issuer?.vatRegistered === true
+    context.issuer?.vatRegistered === true,
+    parseShipping(values.shipping)
   );
 
   const bounds = periodBounds(values.period);
@@ -64,6 +65,7 @@ export const previewPdfData = (
     number: emptyToNull(values.number) ?? context.number,
     periodEnd: bounds?.end ?? null,
     periodStart: bounds?.start ?? null,
+    purchaseOrder: emptyToNull(values.purchaseOrder),
     totals: priced.totals,
   };
 };

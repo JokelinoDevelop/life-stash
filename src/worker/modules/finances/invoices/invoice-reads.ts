@@ -214,7 +214,7 @@ export class InvoiceReads {
       issuer,
       language: client.language,
       lines,
-      totals: invoiceTotals(lines),
+      totals: invoiceTotals(lines, invoice.shippingMinor),
     };
   }
 }

@@ -13,6 +13,8 @@ import {
 import { financeKeys } from "../finance-keys";
 import type { InvoicePdfData } from "../invoice-pdf/invoice-pdf-data";
 import {
+  RendererUnavailableError,
+  openPendingTab,
   pdfFileName,
   saveBlob,
   useInvoicePdfRenderer,
@@ -40,6 +42,7 @@ export const toPdfData = (document: InvoiceDocument): InvoicePdfData => ({
   number: document.number,
   periodEnd: document.periodEnd,
   periodStart: document.periodStart,
+  purchaseOrder: document.purchaseOrder,
   totals: document.totals,
 });
 
@@ -83,37 +86,59 @@ export const useStoreInvoicePdf = () => {
       }
     } catch (error) {
       console.error("Invoice PDF failed", error);
-      toast.error(t("invoices.editor.pdfFailed", { number: invoice.number }));
+
+      // A renderer that didn't load already asked for a reload.
+      if (!(error instanceof RendererUnavailableError)) {
+        toast.error(t("invoices.editor.pdfFailed", { number: invoice.number }));
+      }
     }
   };
 };
 
 /**
- * "Download PDF": the file stored when it was issued, or (without storage, or for invoices
- * issued before) the same PDF drawn again from the frozen data.
+ * "Download PDF": the file stored when it was issued (opened in a tab made before any
+ * request, so phones don't block it), or (without storage, or for invoices issued before) the
+ * same PDF drawn again from the frozen data and saved.
  */
 export const useDownloadInvoicePdf = () => {
+  const { t } = useTranslation("finances");
   const queryClient = useQueryClient();
   const render = useInvoicePdfRenderer();
   const storage = useConfig().data?.photosEnabled === true;
 
   return async (invoice: { id: string }): Promise<void> => {
-    if (storage) {
-      const { photos } = await queryClient.query(
-        attachmentsQuery({ ownerId: invoice.id, ownerType: "finance_invoice" })
-      );
+    const tab = storage ? openPendingTab() : null;
 
-      const stored = photos.find((file) => file.generated);
+    try {
+      if (tab !== null) {
+        const { photos } = await queryClient.query(
+          attachmentsQuery({
+            ownerId: invoice.id,
+            ownerType: "finance_invoice",
+          })
+        );
 
-      if (stored !== undefined) {
-        window.open(stored.url, "_blank", "noopener,noreferrer");
+        const stored = photos.find((file) => file.generated);
 
-        return;
+        if (stored !== undefined) {
+          tab.showUrl(stored.url);
+
+          return;
+        }
+
+        tab.close();
+      }
+
+      const { document } = await queryClient.query(documentQuery(invoice.id));
+      const data = toPdfData(document);
+      saveBlob(await render(data), pdfFileName(data));
+    } catch (error) {
+      tab?.close();
+      console.error("Invoice PDF download failed", error);
+
+      if (!(error instanceof RendererUnavailableError)) {
+        toast.error(t("invoices.editor.downloadFailed"));
       }
     }
-
-    const { document } = await queryClient.query(documentQuery(invoice.id));
-    const data = toPdfData(document);
-    saveBlob(await render(data), pdfFileName(data));
   };
 };

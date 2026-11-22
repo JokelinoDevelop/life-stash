@@ -13,17 +13,26 @@ const PERCENT = 100;
 const QUANTITY: Record<InvoiceLanguage, Intl.NumberFormat> = {
   en: new Intl.NumberFormat(LOCALE.en, {
     maximumFractionDigits: 3,
-    minimumFractionDigits: 2,
   }),
   mk: new Intl.NumberFormat(LOCALE.mk, {
     maximumFractionDigits: 3,
-    minimumFractionDigits: 2,
   }),
 };
 
 const RATE: Record<InvoiceLanguage, Intl.NumberFormat> = {
   en: new Intl.NumberFormat(LOCALE.en, { maximumFractionDigits: 2 }),
   mk: new Intl.NumberFormat(LOCALE.mk, { maximumFractionDigits: 2 }),
+};
+
+const AMOUNT: Record<InvoiceLanguage, Intl.NumberFormat> = {
+  en: new Intl.NumberFormat(LOCALE.en, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }),
+  mk: new Intl.NumberFormat(LOCALE.mk, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }),
 };
 
 const MONEY = new Map<string, Intl.NumberFormat>();
@@ -59,6 +68,8 @@ const date = (iso: string): string =>
 /** Formatting for the printed invoice: always in the invoice's language, never the UI's. */
 export const invoicePdfFormat = (language: InvoiceLanguage) => ({
   date,
+  /** A line's price or amount, without the currency: "2,000.00". */
+  amount: (minor: number): string => AMOUNT[language].format(toMajor(minor)),
   money: (minor: number, currency: Currency): string =>
     moneyFormat(language, currency).format(toMajor(minor)),
   /** 01.11–30.11.2026 within a year, both dates in full across years. */
@@ -71,7 +82,7 @@ export const invoicePdfFormat = (language: InvoiceLanguage) => ({
 
     return `${sameYear ? date(start).slice(0, 5) : date(start)}–${date(end)}`;
   },
-  /** "80.00 hrs", "1.00". */
+  /** "80 hrs", "1.5", "1". */
   quantity: (milli: number, unit: string | null): string => {
     const value = QUANTITY[language].format(milli / QUANTITY_SCALE);
 

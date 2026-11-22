@@ -28,6 +28,8 @@ export const percentToBp = (value: string): number => {
 
 const EMPTY_PROFILE: BusinessProfile = {
   address: "",
+  bankAddress: null,
+  bankCountry: null,
   bankName: null,
   companyId: null,
   defaultVatRateBp: 0,
@@ -50,6 +52,8 @@ export const businessProfileToFormValues = (
 
   return {
     address: profile.address,
+    bankAddress: text(profile.bankAddress),
+    bankCountry: text(profile.bankCountry),
     bankName: text(profile.bankName),
     companyId: text(profile.companyId),
     defaultVatRate: bpToPercent(profile.defaultVatRateBp),
@@ -68,6 +72,8 @@ export const businessProfileFormToRequest = (
   values: BusinessProfileFormValues
 ): SaveBody => ({
   address: values.address.trim(),
+  bankAddress: emptyToNull(values.bankAddress),
+  bankCountry: emptyToNull(values.bankCountry),
   bankName: emptyToNull(values.bankName),
   companyId: emptyToNull(values.companyId),
   defaultVatRateBp: values.vatRegistered

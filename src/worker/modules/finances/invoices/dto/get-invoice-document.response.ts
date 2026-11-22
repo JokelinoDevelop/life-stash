@@ -17,6 +17,7 @@ export interface GetInvoiceDocumentResponse {
     dueDate: string;
     periodStart: string | null;
     periodEnd: string | null;
+    purchaseOrder: string | null;
     /** Printed under the lines. */
     note: string | null;
     issuer: {
@@ -27,6 +28,8 @@ export interface GetInvoiceDocumentResponse {
       email: string | null;
       phone: string | null;
       bankName: string | null;
+      bankAddress: string | null;
+      bankCountry: string | null;
       iban: string | null;
       swift: string | null;
       vatRegistered: boolean;
@@ -51,6 +54,7 @@ export interface GetInvoiceDocumentResponse {
       subtotalMinor: number;
       vatByRate: { rateBp: number; baseMinor: number; vatMinor: number }[];
       vatMinor: number;
+      shippingMinor: number;
       totalMinor: number;
     };
   };
@@ -81,6 +85,8 @@ export const toGetInvoiceDocumentResponse = ({
         ? null
         : {
             address: issuer.address,
+            bankAddress: issuer.bankAddress ?? null,
+            bankCountry: issuer.bankCountry ?? null,
             bankName: issuer.bankName,
             companyId: issuer.companyId,
             email: issuer.email,
@@ -106,8 +112,10 @@ export const toGetInvoiceDocumentResponse = ({
     number: invoice.number,
     periodEnd: invoice.periodEnd,
     periodStart: invoice.periodStart,
+    purchaseOrder: invoice.purchaseOrder,
     status: invoice.status,
     totals: {
+      shippingMinor: totals.shippingMinor,
       subtotalMinor: totals.subtotalMinor,
       totalMinor: totals.totalMinor,
       vatByRate: totals.vatByRate.map((group) => ({

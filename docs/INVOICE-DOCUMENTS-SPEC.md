@@ -33,32 +33,37 @@ Logo, emailing invoices (F5), credit notes (F5), payment QR code, "PAID" stamp /
 A4, one page for typical invoices (lines flow onto a second page with the header repeated). Language follows the client (`en` / `mk`), amounts in the invoice currency, formatted for that language.
 
 ```
-Business name                                  INVOICE
-        Address line 1                          No.       2026-012
-        Address line 2                          Issued    20.11.2026
-        Tax ID · email · phone                  Due       20.12.2026
-                                                Period    01.11–30.11.2026
-Bill to
-Client name
-Address · Tax ID
+Invoice
 
-Description                         Qty     Unit price      VAT     Amount
-Development — November           80.00 hrs  €40.00          0%      €3,200.00
-Hosting                              1.00     €25.00          0%         €25.00
-──────────────────────────────────────────────────────────────────────────
-                                            Subtotal                €3,225.00
-                                            VAT                         €0.00
-                                            Amount due              €3,225.00
+INVOICE NUMBER      DATE OF ISSUE       DUE DATE            PERIOD
+2026-012            20.11.2026          20.12.2026          01.11–30.11.2026
 
-Payment                                 Reference: 2026-012
-Bank · IBAN · SWIFT/BIC
-
-Notes (per invoice) · footer (from your profile, e.g. "Not a VAT payer")
+BILLED TO           FROM
+Client name         Business name
+Address             Address
+Tax ID · email      Tax ID · Company ID · email · phone
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  (tinted band, edge to edge)
+░ #   Description                   Qty      Unit price     VAT       Amount  ░  (repeats on each page)
+░ 01  Development — November   80.00 hrs         €40.00      0%    €3,200.00  ░
+░ 02  Hosting                       1.00         €25.00      0%       €25.00  ░
+░                                         SUBTOTAL                 €3,225.00  ░
+░                                         VAT 0%                       €0.00  ░
+░                                         ────────────────────────────────── ░
+░                                                                AMOUNT DUE  ░
+░                                                                 €3,225.00  ░
+░                                                       Due date 20.12.2026  ░
+░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
+BANK DETAILS                                NOTE
+Account owner  Business name                Thank you for your business
+Bank / IBAN / SWIFT/BIC
+Reference      2026-012
+────────────────────────────────────────────────────────────────────────────
+Footer note ("Not a VAT payer")                  Business name · Invoice 2026-012
 ```
 
 - Text-only header (no logo in v1; can be added later as a profile field).
 - The **Period** line (the dates the invoice bills for, from `period_start`/`period_end`) only appears when it is filled.
-- Typography follows the app (Inter, embedded with Cyrillic glyphs), greyscale with the one accent for "Amount due".
+- Modelled on the layout of the Wise invoices used so far, made cleaner: Inter (embedded with Cyrillic glyphs), monochrome slate, a large title, a grid of details, and one tinted band from edge to edge that holds the numbered lines and the amount due. Bank details and the note sit under the band; a running footer carries your footer note and the invoice number.
 - When the business is **not VAT registered**, the VAT column and VAT total are hidden and the footer shows the configured note.
 - The VAT total is grouped per rate when lines use different rates.
 - File name: `Invoice-2026-012.pdf` / `Faktura-2026-012.pdf`.
@@ -78,7 +83,7 @@ Notes (per invoice) · footer (from your profile, e.g. "Not a VAT payer")
 
 ### `finance_business_profile` (new, one row per household)
 
-household_id (pk), name, address (multi-line text), tax_id?, company_id?, email?, phone?, bank_name?, iban?, swift?, vat_registered (bool, default false), default_vat_rate_bp (basis points, default 0), footer_note?, updated_at
+household_id (pk), name, address (multi-line text), tax_id?, company_id?, email?, phone?, bank_name?, bank_address?, bank_country?, iban?, swift?, vat_registered (bool, default false), default_vat_rate_bp (basis points, default 0), footer_note?, updated_at
 
 ### `finance_clients` (new columns)
 
@@ -86,7 +91,7 @@ address?, tax_id?, invoice_language (`en` | `mk`, default from the household loc
 
 ### `finance_invoices` (new / changed columns)
 
-number becomes nullable (drafts), number_year?, number_seq?, issuer_snapshot? (JSON text), client_snapshot? (JSON text), voided_at?, issued_at?
+number becomes nullable (drafts), number_year?, number_seq?, issuer_snapshot? (JSON text), client_snapshot? (JSON text), voided_at?, issued_at?, purchase_order? (printed beside the parties), shipping_minor (default 0; added after VAT, untaxed — the total is subtotal + VAT + shipping)
 
 Unique: (household_id, number_year, number_seq) where not null; (household_id, number) where not null.
 
@@ -148,12 +153,13 @@ New error codes: `finances.invoice_issued`, `finances.invoice_number_invalid`, `
 
 - **Work period**: printed only when filled. The editor keeps today's month picker (period = first–last day of a month).
 - **Note on the PDF**: the invoice's `description` is printed under the lines ("Note on the invoice" in the editor). `notes` stay private: they are never printed, so they can still be edited after issuing without the PDF drifting from the frozen data.
-- **Profile requirement**: only _itemised_ invoices need a business profile to be issued (`finances.profile_incomplete`). Recorded invoices (made elsewhere) can be issued without one; they keep an issuer snapshot only if a profile exists.
+- **Profile requirement**: only _itemised_ invoices need a business profile to be issued (`finances.profile_incomplete`). Recorded invoices (made elsewhere) can be issued without one; they keep an issuer snapshot only if a profile exists. The editor shows an "Add your details" notice while there is no profile; the refusal itself is a toast, since the profile isn't a field of the invoice form. Following the notice's link asks before discarding unsaved changes.
 - **Number override**: a typed `YYYY-NNN` must be of the issue year (else `finances.invoice_number_invalid`); it is stored as typed. An empty number field takes the next number. With `NNN` the sequence counts across years.
 - **Migration**: existing drafts lose their number (they get one when issued). Numbers in other shapes keep their text but no sequence. If two legacy numbers mean the same sequence (`011` and `2026-011`), only the oldest keeps it.
 - **Void / paid on drafts**: a draft can't be voided or marked paid (`finances.invoice_not_issued`, a new code); delete it instead.
-- **VAT**: when not VAT registered, the server stores 0% on every line, whatever was sent.
-- **Generated PDF**: the stored file (`photos.generated`) can't be removed from the Files list; it goes only with the invoice. "Download PDF" opens the stored file, or draws it again from the frozen data when storage isn't set up (or for invoices issued before the PDF existed).
+- **VAT**: when not VAT registered, the server stores 0% on every line, whatever was sent. Issuing prices the lines again with the registration it freezes, so the amount due always matches what the PDF shows. Without VAT registration the PDF shows only "Amount due" (no subtotal, VAT column or VAT total).
+- **Saving lines**: the invoice row and its lines are written in one D1 batch, a few lines per statement (D1 binds at most 100 values per statement), so the amount and the lines never disagree.
+- **Generated PDF**: the stored file (`photos.generated`) can't be removed from the Files list; it goes only with the invoice. The server accepts it only for an issued invoice that doesn't have one yet. The seeded issued invoice has no stored file, so its Download draws it again. "Download PDF" opens the stored file, or draws it again from the frozen data when storage isn't set up (or for invoices issued before the PDF existed).
 - **Issuing from the list** (row "Issue" or ⌘K): an itemised draft also gets its PDF drawn and stored (no download).
 - **PDF**: no page numbers (react-pdf's dynamic `render` text didn't draw reliably); the column header repeats when lines run onto another page. The react-pdf chunk (~1.2 MB) is excluded from the PWA precache.
-- **Dialog size**: the editor is `size="full"` (desktop) / full-height sheet (phones) while itemised; recorded invoices and issued ones use the normal large dialog.
+- **Dialog size**: the editor is `size="full"` (desktop) / full-height sheet (phones) while itemised; recorded invoices and issued ones use the normal large dialog. The live preview shows from the `lg` breakpoint; narrower screens get the "Preview" button, which opens the PDF in a tab.

@@ -169,21 +169,35 @@ const DiscardConfirm = ({
 /**
  * Create/edit forms: a dialog on desktop (crumb › title, close) and a bottom
  * sheet on phones. The form brings its own scrolling body and footer.
- * Closing with unsaved changes (Esc, ×, outside click, Cancel) asks first.
+ * Closing with unsaved changes (Esc, ×, outside click, Cancel, or a link via `requestLeave`)
+ * asks first.
  */
 export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
   const isDesktop = useIsDesktop();
   const dirty = useRef(false);
+
+  const pendingLeave = useRef<() => void>(() => {
+    onOpenChange(false);
+  });
+
   const [confirming, setConfirming] = useState(false);
+
+  const askBeforeLeaving = (leave: () => void) => {
+    if (dirty.current) {
+      pendingLeave.current = leave;
+      setConfirming(true);
+    } else {
+      leave();
+    }
+  };
 
   const controls: FormDialogControls = {
     requestClose: () => {
-      if (dirty.current) {
-        setConfirming(true);
-      } else {
+      askBeforeLeaving(() => {
         onOpenChange(false);
-      }
+      });
     },
+    requestLeave: askBeforeLeaving,
     setDirty: (next) => {
       dirty.current = next;
     },
@@ -206,7 +220,7 @@ export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
         onDiscard={() => {
           setConfirming(false);
           dirty.current = false;
-          onOpenChange(false);
+          pendingLeave.current();
         }}
         onKeep={() => {
           setConfirming(false);

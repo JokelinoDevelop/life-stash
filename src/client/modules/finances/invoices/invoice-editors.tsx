@@ -28,7 +28,7 @@ import {
 } from "./invoice-dialog-data";
 import { useStoreInvoicePdf } from "./invoice-document";
 import { useCreateInvoice, useUpdateInvoice } from "./invoices.mutations";
-import { invoiceQuery, nextInvoiceNumberQuery } from "./invoices.queries";
+import { invoiceQuery } from "./invoices.queries";
 import type { InvoiceDetail } from "./invoices.queries";
 import { useInvoiceActions } from "./use-invoice-actions";
 
@@ -36,8 +36,6 @@ type Close = () => Promise<void>;
 
 const isFieldError = (error: Error) =>
   formFieldOfError(error, INVOICE_SERVER_FIELDS) !== null;
-
-const yearOf = (date: string) => Number(date.slice(0, 4));
 
 /** Defaults for a new invoice once its context (and the invoice it duplicates) has loaded. */
 const useNewInvoiceDefaults = (
@@ -107,11 +105,7 @@ export const NewInvoice = ({
   const create = useCreateInvoice(isFieldError);
   const defaults = useNewInvoiceDefaults(context, duplicateId, forClient);
 
-  const next = useQuery(
-    nextInvoiceNumberQuery(yearOf(defaults?.issueDate ?? "2000-01-01"))
-  );
-
-  if (defaults === null || next.isPending) {
+  if (defaults === null) {
     return <FormSkeleton fields={6} />;
   }
 
@@ -136,7 +130,6 @@ export const NewInvoice = ({
           <PendingFileList files={pending} onChange={setPending} />
         ) : undefined
       }
-      nextNumber={next.data?.number ?? null}
       onCancel={() => {
         void onClose();
       }}
@@ -157,7 +150,6 @@ export const NewInvoice = ({
         await afterSave(values, saved);
         await onClose();
       }}
-      previousNumber={next.data?.previous ?? null}
       profile={context.profile}
       projects={context.projects}
     />
@@ -205,7 +197,6 @@ export const EditDraft = ({
   const update = useUpdateInvoice(isFieldError);
   const issueGate = useIssueGate();
   const afterSave = useAfterSave();
-  const next = useQuery(nextInvoiceNumberQuery(yearOf(invoice.issueDate)));
 
   if (context.isPending) {
     return <FormSkeleton fields={6} />;
@@ -224,7 +215,6 @@ export const EditDraft = ({
         ) : undefined
       }
       footerStart={<DeleteButton invoice={invoice} onClose={onClose} />}
-      nextNumber={next.data?.number ?? null}
       onCancel={() => {
         void onClose();
       }}
@@ -242,7 +232,6 @@ export const EditDraft = ({
         await afterSave(values, saved);
         await onClose();
       }}
-      previousNumber={next.data?.previous ?? null}
       profile={context.profile}
       projects={context.projects}
     />

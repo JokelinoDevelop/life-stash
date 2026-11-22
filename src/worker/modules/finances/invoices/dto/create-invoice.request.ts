@@ -39,6 +39,9 @@ export const createInvoiceRequest = z
     periodEnd: isoDate.nullable(),
     periodStart: isoDate.nullable(),
     projectId: z.uuid().nullable().default(null),
+    purchaseOrder: optionalText(60).default(null),
+    /** Itemised invoices: shipping, added after VAT. */
+    shippingMinor: z.number().int().min(0).max(10_000_000_000).default(0),
   })
   .refine((input) => input.lines.length > 0 || input.amountMinor > 0, {
     message: "A recorded invoice needs an amount",

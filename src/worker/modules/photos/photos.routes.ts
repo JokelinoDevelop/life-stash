@@ -15,7 +15,11 @@ import { listPhotosQuery } from "./dto/list-photos.request";
 import type { ListPhotosResponse } from "./dto/list-photos.response";
 import { uploadUrlRequest } from "./dto/upload-url.request";
 import type { UploadUrlResponse } from "./dto/upload-url.response";
-import { assertPhotoOwner, deletePhoto } from "./photos.service";
+import {
+  assertGeneratedPdfAllowed,
+  assertPhotoOwner,
+  deletePhoto,
+} from "./photos.service";
 
 const UPLOAD_URL_TTL = 600;
 const VIEW_URL_TTL = 3600;
@@ -75,6 +79,10 @@ export const photoRoutes = new Hono<AppEnv>()
     }
 
     await assertPhotoOwner(c.var.db, householdId, input);
+
+    if (input.generated === true) {
+      await assertGeneratedPdfAllowed(c.var.db, householdId, input.ownerId);
+    }
 
     const [row] = await c.var.db
       .insert(photos)

@@ -67,15 +67,30 @@ export class CategoriesRepository {
     return row;
   }
 
-  async insertMany(rows: readonly NewCategory[]): Promise<CategoryRow[]> {
-    if (rows.length === 0) {
-      return [];
+  async insert(row: NewCategory): Promise<CategoryRow> {
+    const [created] = await this.#db
+      .insert(financeCategories)
+      .values({ ...row, householdId: this.#householdId })
+      .returning();
+
+    if (!created) {
+      throw new Error("Category insert returned no row");
     }
 
-    return await this.#db
-      .insert(financeCategories)
-      .values(rows.map((row) => ({ ...row, householdId: this.#householdId })))
-      .returning();
+    return created;
+  }
+
+  /** One statement per row, batched: D1 caps a statement at 100 bound values. */
+  async insertMany(rows: readonly NewCategory[]): Promise<void> {
+    const [first, ...rest] = rows.map((row) =>
+      this.#db
+        .insert(financeCategories)
+        .values({ ...row, householdId: this.#householdId })
+    );
+
+    if (first) {
+      await this.#db.batch([first, ...rest]);
+    }
   }
 
   async update(categoryId: string, patch: CategoryPatch): Promise<void> {
@@ -188,6 +203,7 @@ export type CategoriesRepositoryPort = Pick<
   | "list"
   | "find"
   | "findBySystemKey"
+  | "insert"
   | "insertMany"
   | "update"
   | "setPositions"

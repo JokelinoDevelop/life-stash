@@ -16,6 +16,8 @@ export interface GetInvoiceResponse {
     dueDate: string;
     periodStart: string | null;
     periodEnd: string | null;
+    purchaseOrder: string | null;
+    shippingMinor: number;
     description: string | null;
     amountMinor: number;
     currency: Currency;
@@ -85,7 +87,9 @@ export const toGetInvoiceResponse = (
     periodStart: detail.periodStart,
     projectId: detail.projectId,
     projectName: detail.projectName,
+    purchaseOrder: detail.purchaseOrder,
     sentAt: detail.sentAt,
+    shippingMinor: detail.shippingMinor,
     status: detail.displayStatus,
     voidedAt: detail.voidedAt,
     transaction:

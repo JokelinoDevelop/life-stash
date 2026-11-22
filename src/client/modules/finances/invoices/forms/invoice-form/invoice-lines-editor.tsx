@@ -11,6 +11,7 @@ import { useFormat } from "@/lib/format";
 import {
   INVOICE_FORM_TEMPLATE,
   formLineTotals,
+  parseShipping,
   newInvoiceLine,
 } from "./mapper";
 
@@ -160,25 +161,38 @@ const LineTotals = withForm({
         selector={(state) => ({
           currency: state.values.currency,
           lines: state.values.lines,
+          shipping: state.values.shipping,
         })}
       >
-        {({ currency, lines }) => {
-          const { totals } = formLineTotals(lines, vatRegistered);
+        {({ currency, lines, shipping }) => {
+          const { totals } = formLineTotals(
+            lines,
+            vatRegistered,
+            parseShipping(shipping)
+          );
+
           const money = (minor: number) => format.money(minor, currency);
+          const shipped = totals.shippingMinor > 0;
 
           return (
             <dl className="ml-auto flex w-full max-w-xs flex-col gap-1 text-sm tabular-nums">
+              {(vatRegistered || shipped) && (
+                <div className="text-muted-foreground flex justify-between">
+                  <dt>{t("invoices.editor.subtotal")}</dt>
+                  <dd>{money(totals.subtotalMinor)}</dd>
+                </div>
+              )}
               {vatRegistered && (
-                <>
-                  <div className="text-muted-foreground flex justify-between">
-                    <dt>{t("invoices.editor.subtotal")}</dt>
-                    <dd>{money(totals.subtotalMinor)}</dd>
-                  </div>
-                  <div className="text-muted-foreground flex justify-between">
-                    <dt>{t("invoices.editor.vat")}</dt>
-                    <dd>{money(totals.vatMinor)}</dd>
-                  </div>
-                </>
+                <div className="text-muted-foreground flex justify-between">
+                  <dt>{t("invoices.editor.vat")}</dt>
+                  <dd>{money(totals.vatMinor)}</dd>
+                </div>
+              )}
+              {shipped && (
+                <div className="text-muted-foreground flex justify-between">
+                  <dt>{t("invoices.editor.shipping")}</dt>
+                  <dd>{money(totals.shippingMinor)}</dd>
+                </div>
               )}
               <div className="flex justify-between font-semibold">
                 <dt>{t("invoices.editor.total")}</dt>
@@ -260,18 +274,32 @@ export const InvoiceLinesEditor = withForm({
           }}
         </form.Field>
         <div className="flex items-end justify-between gap-4">
-          <div className="w-28">
-            <form.AppField name="currency">
-              {(field) => (
-                <field.SelectField
-                  label={t("invoices.form.currency")}
-                  options={CURRENCIES.map((code) => ({
-                    label: code,
-                    value: code,
-                  }))}
-                />
-              )}
-            </form.AppField>
+          <div className="flex items-end gap-3">
+            <div className="w-28">
+              <form.AppField name="currency">
+                {(field) => (
+                  <field.SelectField
+                    label={t("invoices.form.currency")}
+                    options={CURRENCIES.map((code) => ({
+                      label: code,
+                      value: code,
+                    }))}
+                  />
+                )}
+              </form.AppField>
+            </div>
+            <div className="w-32">
+              <form.AppField name="shipping">
+                {(field) => (
+                  <field.TextField
+                    inputMode="decimal"
+                    label={t("invoices.editor.shipping")}
+                    optional
+                    placeholder="0"
+                  />
+                )}
+              </form.AppField>
+            </div>
           </div>
           <LineTotals form={form} vatRegistered={vatRegistered} />
         </div>

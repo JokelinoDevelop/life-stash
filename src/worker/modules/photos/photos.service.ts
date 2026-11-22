@@ -1,4 +1,4 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { Db } from "../../core/db";
 import type { Bindings } from "../../core/env";
@@ -37,6 +37,53 @@ export const assertPhotoOwner = async (
 
   if (!row) {
     throw notFound();
+  }
+};
+
+/**
+ * A generated PDF is the file an issued invoice was sent as, so it can't be removed: only an
+ * issued invoice may get one, and only one.
+ */
+export const assertGeneratedPdfAllowed = async (
+  db: Db,
+  householdId: string,
+  invoiceId: string
+): Promise<void> => {
+  const [invoice] = await db
+    .select({ status: financeInvoices.status })
+    .from(financeInvoices)
+    .where(
+      and(
+        eq(financeInvoices.id, invoiceId),
+        eq(financeInvoices.householdId, householdId),
+        isNull(financeInvoices.deletedAt)
+      )
+    )
+    .limit(1);
+
+  if (!invoice) {
+    throw notFound();
+  }
+
+  if (invoice.status === "draft") {
+    throw conflict("Only issued invoices get a generated PDF");
+  }
+
+  const [existing] = await db
+    .select({ id: photos.id })
+    .from(photos)
+    .where(
+      and(
+        eq(photos.householdId, householdId),
+        eq(photos.ownerType, "finance_invoice"),
+        eq(photos.ownerId, invoiceId),
+        eq(photos.generated, true)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    throw conflict("This invoice already has its generated PDF");
   }
 };
 

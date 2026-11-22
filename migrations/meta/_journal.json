@@ -57,6 +57,13 @@
       "when": 1795175457387,
       "tag": "0007_fair_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1795200018297,
+      "tag": "0008_opposite_dragon_man",
+      "breakpoints": true
     }
   ]
 }

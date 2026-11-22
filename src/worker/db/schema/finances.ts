@@ -142,8 +142,12 @@ export const financeInvoices = sqliteTable(
     periodEnd: text("period_end"),
     periodStart: text("period_start"),
     projectId: text("project_id").references(() => financeProjects.id),
+    /** The client's purchase order number, printed beside the parties. */
+    purchaseOrder: text("purchase_order"),
     /** The day it was marked sent (YYYY-MM-DD). */
     sentAt: text("sent_at"),
+    /** Itemised invoices: shipping added after VAT (untaxed). */
+    shippingMinor: integer("shipping_minor").notNull().default(0),
     status: text("status", { enum: ["draft", "sent", "paid", "void"] })
       .notNull()
       .default("draft"),
@@ -196,6 +200,9 @@ export const financeInvoiceLines = sqliteTable(
 /** Your details for invoices (one row per household, created on first save). */
 export const financeBusinessProfile = sqliteTable("finance_business_profile", {
   address: text("address").notNull().default(""),
+  /** The bank's address and country, printed with the bank details. */
+  bankAddress: text("bank_address"),
+  bankCountry: text("bank_country"),
   bankName: text("bank_name"),
   companyId: text("company_id"),
   /** Basis points: 1800 = 18%. */

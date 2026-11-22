@@ -46,6 +46,8 @@ const INPUT: InvoiceInput = {
   periodEnd: null,
   periodStart: null,
   projectId: null,
+  purchaseOrder: null,
+  shippingMinor: 0,
 };
 
 interface FakeInvoices extends InvoicesRepositoryPort {
@@ -54,7 +56,10 @@ interface FakeInvoices extends InvoicesRepositoryPort {
   failNextWrite: () => void;
 }
 
-const fakeInvoices = (): FakeInvoices => {
+/** Lines per invoice, shared by both fakes (the real repositories write them in one batch). */
+type LineStore = Map<string, NewInvoiceLine[]>;
+
+const fakeInvoices = (lineStore: LineStore): FakeInvoices => {
   const rows: InvoiceWithClient[] = [];
   let failWrite = false;
 
@@ -79,7 +84,7 @@ const fakeInvoices = (): FakeInvoices => {
           (row) => row.id === id
         )
       ),
-    insert: async (values) => {
+    insert: async (values, lines) => {
       guard();
 
       const row: InvoiceWithClient = {
@@ -107,9 +112,15 @@ const fakeInvoices = (): FakeInvoices => {
         periodEnd: values.periodEnd ?? null,
         periodStart: values.periodStart ?? null,
         projectId: values.projectId ?? null,
+        purchaseOrder: values.purchaseOrder ?? null,
+        shippingMinor: values.shippingMinor ?? 0,
       };
 
       rows.push(row);
+
+      if (lines !== undefined && lines.length > 0) {
+        lineStore.set(row.id, [...lines]);
+      }
 
       return await Promise.resolve(row);
     },
@@ -154,7 +165,7 @@ const fakeInvoices = (): FakeInvoices => {
 
       await Promise.resolve();
     },
-    update: async (id, patch) => {
+    update: async (id, patch, lines) => {
       guard();
 
       for (const [index, row] of rows.entries()) {
@@ -163,41 +174,37 @@ const fakeInvoices = (): FakeInvoices => {
         }
       }
 
+      if (lines !== undefined) {
+        lineStore.set(id, [...lines]);
+      }
+
       await Promise.resolve();
     },
   };
 };
 
-const fakeLines = (): InvoiceLinesRepositoryPort & {
-  rows: Map<string, NewInvoiceLine[]>;
-} => {
-  const rows = new Map<string, NewInvoiceLine[]>();
-
-  return {
-    countByInvoice: async (ids) =>
-      await Promise.resolve(
-        new Map(ids.map((id) => [id, rows.get(id)?.length ?? 0]))
-      ),
-    list: async (invoiceId) =>
-      await Promise.resolve(
-        (rows.get(invoiceId) ?? []).map((line, position) => ({
-          ...line,
-          householdId: "h1",
-          id: `${invoiceId}-${String(position)}`,
-          invoiceId,
-          position,
-          unit: line.unit ?? null,
-          vatMinor: line.vatMinor ?? 0,
-          vatRateBp: line.vatRateBp ?? 0,
-        }))
-      ),
-    replace: async (invoiceId, lines) => {
-      rows.set(invoiceId, [...lines]);
-      await Promise.resolve();
-    },
-    rows,
-  };
-};
+const fakeLines = (
+  rows: LineStore
+): InvoiceLinesRepositoryPort & { rows: LineStore } => ({
+  countByInvoice: async (ids) =>
+    await Promise.resolve(
+      new Map(ids.map((id) => [id, rows.get(id)?.length ?? 0]))
+    ),
+  list: async (invoiceId) =>
+    await Promise.resolve(
+      (rows.get(invoiceId) ?? []).map((line, position) => ({
+        ...line,
+        householdId: "h1",
+        id: `${invoiceId}-${String(position)}`,
+        invoiceId,
+        position,
+        unit: line.unit ?? null,
+        vatMinor: line.vatMinor ?? 0,
+        vatRateBp: line.vatRateBp ?? 0,
+      }))
+    ),
+  rows,
+});
 
 const setup = (
   options: {
@@ -206,11 +213,14 @@ const setup = (
     vatRegistered?: boolean;
   } = {}
 ) => {
-  const repo = fakeInvoices();
-  const lines = fakeLines();
+  const lineStore: LineStore = new Map();
+  const repo = fakeInvoices(lineStore);
+  const lines = fakeLines(lineStore);
 
   const profile = {
     address: "Ulica 1",
+    bankAddress: null,
+    bankCountry: null,
     bankName: null,
     companyId: null,
     defaultVatRateBp: 0,
@@ -288,7 +298,7 @@ const setup = (
     },
   });
 
-  return { lines, repo, service };
+  return { lines, profile, repo, service };
 };
 
 const codeOf = async (promise: Promise<unknown>) => {
@@ -470,6 +480,33 @@ describe(InvoicesService, () => {
     expect(lines.rows.get(id)).toStrictEqual([]);
   });
 
+  it("adds shipping after VAT and reprices when only shipping changes", async () => {
+    const { repo, service } = setup({ vatRegistered: true });
+
+    const { id } = await service.create(
+      {
+        ...INPUT,
+        lines: [
+          {
+            description: "Desk",
+            quantityMilli: 1000,
+            unit: null,
+            unitPriceMinor: 10_000,
+            vatRateBp: 1800,
+          },
+        ],
+        shippingMinor: 1500,
+      },
+      null
+    );
+
+    expect(repo.rows[0]?.amountMinor).toBe(10_000 + 1800 + 1500);
+
+    await service.update(id, { shippingMinor: 0 });
+
+    expect(repo.rows[0]?.amountMinor).toBe(11_800);
+  });
+
   it("drops VAT when not registered and locks the lines once issued", async () => {
     const { lines, service } = setup();
 
@@ -494,6 +531,54 @@ describe(InvoicesService, () => {
     ]);
     await expect(codeOf(service.update(id, { lines: [] }))).resolves.toBe(
       "finances.invoice_issued"
+    );
+  });
+
+  it("prices the lines again on issue with the VAT registration it freezes", async () => {
+    const { lines, profile, repo, service } = setup({ vatRegistered: true });
+
+    const { id } = await service.create(
+      {
+        ...INPUT,
+        lines: [
+          {
+            description: "Development",
+            quantityMilli: 1000,
+            unit: null,
+            unitPriceMinor: 10_000,
+            vatRateBp: 1800,
+          },
+        ],
+      },
+      null
+    );
+
+    expect(repo.rows[0]?.amountMinor).toBe(11_800);
+
+    profile.vatRegistered = false;
+    await service.issue(id, null);
+
+    expect(repo.rows[0]).toMatchObject({
+      amountMinor: 10_000,
+      issuerSnapshot: { vatRegistered: false },
+    });
+    expect(lines.rows.get(id)).toMatchObject([{ vatMinor: 0, vatRateBp: 0 }]);
+  });
+
+  it("won't restore an invoice whose sequence another one now uses", async () => {
+    const { repo, service } = setup();
+    const { id: legacy } = await service.create(INPUT, { number: "005" });
+    await service.create(INPUT, null);
+    const deleted = repo.rows.find((row) => row.id === legacy);
+
+    if (deleted !== undefined) {
+      deleted.deletedAt = NOW.toISOString();
+    }
+
+    await service.create(INPUT, { number: "2026-005" });
+
+    await expect(codeOf(service.restore(legacy))).resolves.toBe(
+      "finances.invoice_number_taken"
     );
   });
 

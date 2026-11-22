@@ -86,7 +86,7 @@ A client with invoices or income is archived, not deleted (`finances.client_in_u
 
 ### `finance_invoices`
 
-id, household_id, client_id, project_id?, number? (null while a draft), number_year?, number_seq?, issue_date, due_date, period_start?, period_end? (the billed month), description? (recorded: what it was for; itemised: the note printed under the lines), amount_minor (itemised: the computed total), currency, status (`draft`/`sent`/`paid`/`void`), issued_at?, sent_at? (date), paid_at? (date the money arrived), voided_at?, issuer_snapshot? / client_snapshot? (JSON, frozen when issued), overdue_notified_at? (the one push heads-up; cleared when the due date changes), notes? (private, editable after issuing), deleted_at?, created_at, updated_at
+id, household_id, client_id, project_id?, number? (null while a draft), number_year?, number_seq?, issue_date, due_date, period_start?, period_end? (the billed month), purchase_order? (the client's PO number), shipping_minor (itemised: added after VAT, untaxed; default 0), description? (recorded: what it was for; itemised: the note printed under the lines), amount_minor (itemised: the computed total), currency, status (`draft`/`sent`/`paid`/`void`), issued_at?, sent_at? (date), paid_at? (date the money arrived), voided_at?, issuer_snapshot? / client_snapshot? (JSON, frozen when issued), overdue_notified_at? (the one push heads-up; cleared when the due date changes), notes? (private, editable after issuing), deleted_at?, created_at, updated_at
 
 Unique: (household_id, number) and (household_id, number_year, number_seq) among live numbered rows. The next number is `max(number_seq) + 1` of the issue year (`NNN` format: of all years); plain legacy numbers (`011`) count as a sequence of their issue year. **Overdue is derived** (`sent` and `due_date` before today in the household's time zone), never stored. Issuing assigns the number, freezes `issuer_snapshot` (your business profile) and `client_snapshot`, and locks everything but notes and files. Sent invoices are voided, never deleted; only drafts are soft-deleted (Undo). Marking paid inserts one income entry in the system "Invoices" category with `invoice_id`; a paid invoice is locked until marked unpaid.
 
@@ -98,7 +98,7 @@ An invoice with lines is _itemised_ (amount computed: each line rounded half-up,
 
 ### `finance_business_profile` (one row per household, created on first save)
 
-household_id (pk), name, address, tax_id?, company_id?, email?, phone?, bank_name?, iban?, swift?, vat_registered (default false), default_vat_rate_bp (default 0), footer_note?, updated_at
+household_id (pk), name, address, tax_id?, company_id?, email?, phone?, bank_name?, bank_address?, bank_country?, iban?, swift?, vat_registered (default false), default_vat_rate_bp (default 0), footer_note?, updated_at
 
 ### `finance_settings` (one row per household, created on first change)
 

@@ -4,6 +4,8 @@ import { domainError } from "../../../core/errors";
 import type { BusinessProfileRepositoryPort } from "./business-profile.repository";
 
 export interface BusinessProfile extends InvoiceIssuerSnapshot {
+  bankAddress: string | null;
+  bankCountry: string | null;
   defaultVatRateBp: number;
 }
 
@@ -27,6 +29,8 @@ export class BusinessProfileService {
 
     return {
       address: row.address,
+      bankAddress: row.bankAddress,
+      bankCountry: row.bankCountry,
       bankName: row.bankName,
       companyId: row.companyId,
       defaultVatRateBp: row.defaultVatRateBp,

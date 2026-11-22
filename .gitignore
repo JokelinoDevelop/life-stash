@@ -9,3 +9,6 @@ coverage
 
 # TanStack Router generator temp files
 .tanstack/
+
+# Production secrets for `wrangler secret bulk`. Never commit.
+secrets.json

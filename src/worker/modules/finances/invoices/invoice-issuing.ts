@@ -105,6 +105,31 @@ export class InvoiceIssuing {
     }
   }
 
+  /** Refuses when another live invoice uses this one's number or its sequence (restoring). */
+  async assertNumberingFree(
+    invoice: {
+      number: string | null;
+      numberYear: number | null;
+      numberSeq: number | null;
+    },
+    exceptId: string
+  ): Promise<void> {
+    if (invoice.number !== null) {
+      await this.assertNumberFree(invoice.number, exceptId);
+    }
+
+    if (
+      invoice.numberSeq !== null &&
+      (await this.#repo.seqTaken(
+        invoice.numberYear,
+        invoice.numberSeq,
+        exceptId
+      ))
+    ) {
+      throw takenError();
+    }
+  }
+
   /**
    * The number an invoice issued on `issueDate` gets: the typed one (must parse and be free)
    * or the next of its year.

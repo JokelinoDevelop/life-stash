@@ -33,6 +33,23 @@ const fakeCategories = (): FakeCategories => {
       await Promise.resolve(rows.find((row) => row.id === id)),
     findBySystemKey: async (key) =>
       await Promise.resolve(rows.find((row) => row.systemKey === key)),
+    insert: async (row) => {
+      const created = {
+        archivedAt: null,
+        createdAt: NOW.toISOString(),
+        householdId: "h1",
+        icon: row.icon ?? null,
+        id: crypto.randomUUID(),
+        kind: row.kind,
+        name: row.name,
+        position: row.position ?? 0,
+        systemKey: row.systemKey ?? null,
+      };
+
+      rows.push(created);
+
+      return await Promise.resolve(created);
+    },
     insertMany: async (input) => {
       const created = input.map((row) => ({
         archivedAt: null,
@@ -47,8 +64,7 @@ const fakeCategories = (): FakeCategories => {
       }));
 
       rows.push(...created);
-
-      return await Promise.resolve(created);
+      await Promise.resolve();
     },
     list: async () =>
       await Promise.resolve(rows.toSorted((a, b) => a.position - b.position)),

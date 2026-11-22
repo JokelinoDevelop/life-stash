@@ -300,7 +300,8 @@
       "saveDraft": "Save as draft",
       "numberHint": "Next after {{number}} · empty uses the next number",
       "numberHintFirst": "Empty uses the next number",
-      "saveIssue": "Save & issue"
+      "saveIssue": "Save & issue",
+      "purchaseOrder": "Purchase order"
     },
     "files": {
       "title": "Files",
@@ -384,7 +385,10 @@
         "en": "Written in English",
         "mk": "Written in Macedonian"
       },
-      "pdfFailed": "Invoice {{number}} is issued, but its PDF couldn't be saved. Download it from the invoice."
+      "downloadFailed": "Couldn't make the PDF. Try again.",
+      "rendererUnavailable": "LifeStash was updated. Save your draft, then reload to make invoice PDFs.",
+      "pdfFailed": "Invoice {{number}} is issued, but its PDF couldn't be saved. Download it from the invoice.",
+      "shipping": "Shipping"
     },
     "downloadPdf": "Download PDF",
     "downloadCommand": "Download invoice {{number}}"
@@ -604,35 +608,47 @@
     "footerNotePlaceholder": "Not a VAT payer",
     "preview": "Invoice header preview",
     "invoiceWord": "Invoice",
-    "saved": "Your details saved"
+    "saved": "Your details saved",
+    "bankAddress": "Bank address",
+    "bankCountry": "Bank country"
   },
   "pdf": {
+    "from": "From",
+    "accountOwner": "Account owner",
     "invoice": "Invoice",
     "draft": "Draft",
-    "number": "No.",
-    "issued": "Issued",
-    "due": "Due",
+    "number": "Invoice number",
+    "issued": "Date of issue",
+    "due": "Due date",
     "period": "Period",
-    "billTo": "Bill to",
+    "billTo": "Billed to",
     "description": "Description",
-    "quantity": "Qty",
-    "unitPrice": "Unit price",
+    "quantity": "QTY",
+    "unitPrice": "Unit cost",
     "vat": "VAT",
     "amount": "Amount",
     "subtotal": "Subtotal",
-    "vatAt": "VAT {{rate}}",
-    "amountDue": "Amount due",
-    "payment": "Payment",
-    "reference": "Reference: {{number}}",
+    "vatAt": "Tax ({{rate}})",
+    "payment": "Bank account details",
+    "note": "Note",
+    "referenceLabel": "Reference",
     "taxId": "Tax ID",
     "companyId": "Company ID",
-    "bank": "Bank",
+    "bank": "Bank name",
     "iban": "IBAN",
-    "swift": "SWIFT/BIC",
+    "swift": "Swift",
     "units": {
       "hours": "hrs",
       "days": "days",
       "pieces": "pcs"
-    }
+    },
+    "taxRate": "(Tax rate)",
+    "tax": "Tax",
+    "invoiceTotal": "Invoice total",
+    "ownerAddress": "Account owner address",
+    "purchaseOrder": "Purchase order",
+    "shipping": "Shipping",
+    "bankAddress": "Bank address",
+    "country": "Country"
   }
 }

@@ -14,15 +14,16 @@ describe(invoicePdfFormat, () => {
   });
 
   it("prints quantities with their unit and VAT rates as percent", () => {
-    expect(invoicePdfFormat("en").quantity(80_000, "hrs")).toBe("80.00 hrs");
-    expect(invoicePdfFormat("mk").quantity(1500, "ч.")).toBe("1,50 ч.");
-    expect(invoicePdfFormat("en").quantity(1000, null)).toBe("1.00");
+    expect(invoicePdfFormat("en").quantity(80_000, "hrs")).toBe("80 hrs");
+    expect(invoicePdfFormat("mk").quantity(1500, "ч.")).toBe("1,5 ч.");
+    expect(invoicePdfFormat("en").quantity(1000, null)).toBe("1");
     expect(invoicePdfFormat("en").rate(1800)).toBe("18%");
     expect(invoicePdfFormat("en").rate(550)).toBe("5.5%");
   });
 
   it("prints money in the invoice language with two decimals", () => {
     expect(invoicePdfFormat("en").money(322_500, "EUR")).toBe("€3,225.00");
+    expect(invoicePdfFormat("en").amount(200_000)).toBe("2,000.00");
     expect(invoicePdfFormat("en").date("2026-11-20")).toBe("20.11.2026");
   });
 });

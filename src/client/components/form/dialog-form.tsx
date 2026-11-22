@@ -77,7 +77,7 @@ export const DialogForm = ({
         </div>
       ) : (
         <div className="flex min-h-0 flex-1">
-          <div className="divide-divider min-h-0 min-w-0 flex-1 divide-y overflow-y-auto overscroll-contain md:w-[36rem] md:flex-none md:border-r">
+          <div className="divide-divider min-h-0 min-w-0 flex-1 divide-y overflow-y-auto overscroll-contain lg:w-[36rem] lg:flex-none lg:border-r">
             {children}
           </div>
           {aside}

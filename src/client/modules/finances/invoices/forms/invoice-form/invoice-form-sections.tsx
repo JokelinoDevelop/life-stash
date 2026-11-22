@@ -35,6 +35,22 @@ const NO_PROJECTS: readonly InvoiceProjectOption[] = [];
 
 const defaultTerms = (_clientId: string): number => 30;
 
+/** The client's purchase order number, printed on the invoice. */
+const InvoicePurchaseOrderField = withForm({
+  defaultValues: INVOICE_FORM_TEMPLATE,
+  render: function InvoicePurchaseOrderFieldRender({ form }) {
+    const { t } = useTranslation("finances");
+
+    return (
+      <form.AppField name="purchaseOrder">
+        {(field) => (
+          <field.TextField label={t("invoices.form.purchaseOrder")} optional />
+        )}
+      </form.AppField>
+    );
+  },
+});
+
 export const InvoiceClientSection = withForm({
   defaultValues: INVOICE_FORM_TEMPLATE,
   props: {
@@ -156,6 +172,7 @@ export const InvoiceClientSection = withForm({
               )}
             </form.Subscribe>
           </div>
+          <InvoicePurchaseOrderField form={form} />
           <InvoiceProjectField form={form} projects={projects} />
         </FieldGroup>
       </FormSection>

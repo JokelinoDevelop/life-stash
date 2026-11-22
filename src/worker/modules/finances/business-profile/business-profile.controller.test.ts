@@ -35,6 +35,8 @@ interface Session {
 
 const PROFILE = {
   address: "Ulica 1\n1000 Skopje",
+  bankAddress: null,
+  bankCountry: null,
   bankName: "Komercijalna banka",
   companyId: null,
   defaultVatRateBp: 1800,

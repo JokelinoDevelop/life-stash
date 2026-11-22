@@ -11,7 +11,7 @@ import type {
   CategoryPatch,
   CategoryRow,
 } from "./categories.repository";
-import { DEFAULT_CATEGORIES } from "./default-categories";
+import { defaultCategoryRows } from "./default-categories";
 
 export interface CategoryWithUsage extends CategoryRow {
   /** Every entry using it (decides archive vs delete). */
@@ -45,7 +45,7 @@ export class CategoriesService {
     this.#now = now;
   }
 
-  /** Seeds the default categories (in the household's language) the first time they're needed. */
+  /** Fallback for households created before setup seeded categories. */
   async ensureDefaults(): Promise<CategoryRow[]> {
     const existing = await this.#repo.list();
 
@@ -54,22 +54,7 @@ export class CategoriesService {
     }
 
     const { locale } = await this.#household.preferences();
-    const positions = { expense: 0, income: 0 };
-
-    await this.#repo.insertMany(
-      DEFAULT_CATEGORIES.map((category) => {
-        const nextPosition = positions[category.kind];
-        positions[category.kind] += 1;
-
-        return {
-          icon: category.icon,
-          kind: category.kind,
-          name: category.name[locale],
-          position: nextPosition,
-          systemKey: category.systemKey ?? null,
-        };
-      })
-    );
+    await this.#repo.insertMany(defaultCategoryRows(locale));
 
     return await this.#repo.list();
   }
@@ -125,15 +110,7 @@ export class CategoriesService {
     await this.ensureDefaults();
     const position = (await this.#repo.maxPosition(input.kind)) + 1;
 
-    const [row] = await this.#repo.insertMany([
-      { ...input, position, systemKey: null },
-    ]);
-
-    if (!row) {
-      throw new Error("Category insert returned no row");
-    }
-
-    return row;
+    return await this.#repo.insert({ ...input, position, systemKey: null });
   }
 
   async update(categoryId: string, changes: CategoryChanges): Promise<void> {

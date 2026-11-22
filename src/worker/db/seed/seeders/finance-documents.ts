@@ -26,6 +26,8 @@ import type { Seeder } from "../seeder";
 /** The demo's own details, printed on every itemised invoice. */
 const ISSUER: InvoiceIssuerSnapshot = {
   address: "Ulica Makedonija 12\n1000 Skopje\nNorth Macedonia",
+  bankAddress: "Orce Nikolov 3, 1000 Skopje",
+  bankCountry: "North Macedonia",
   bankName: "Komercijalna banka AD Skopje",
   companyId: "7712345",
   email: "hello@demo-dev.example",
@@ -226,6 +228,7 @@ const issueHourlyInvoice = async (ctx: SeedContext): Promise<number> => {
       numberYear: year,
       periodEnd: addDays(addMonths(`${issueDate.slice(0, 7)}-01`, 1), -1),
       periodStart: `${issueDate.slice(0, 7)}-01`,
+      purchaseOrder: "PO-2041",
       sentAt: issueDate,
       status: "sent",
     },

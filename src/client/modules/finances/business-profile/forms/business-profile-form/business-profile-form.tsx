@@ -143,6 +143,18 @@ export const BusinessProfileForm = ({
           )}
         </form.AppField>
         <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <form.AppField name="bankAddress">
+            {(field) => (
+              <field.TextField label={t("profile.bankAddress")} optional />
+            )}
+          </form.AppField>
+          <form.AppField name="bankCountry">
+            {(field) => (
+              <field.TextField label={t("profile.bankCountry")} optional />
+            )}
+          </form.AppField>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <form.AppField name="iban">
             {(field) => <field.TextField label={t("profile.iban")} optional />}
           </form.AppField>

@@ -10,6 +10,8 @@ export interface GetBusinessProfileResponse {
     email: string | null;
     phone: string | null;
     bankName: string | null;
+    bankAddress: string | null;
+    bankCountry: string | null;
     iban: string | null;
     swift: string | null;
     vatRegistered: boolean;
@@ -26,6 +28,8 @@ export const toGetBusinessProfileResponse = (
       ? null
       : {
           address: profile.address,
+          bankAddress: profile.bankAddress,
+          bankCountry: profile.bankCountry,
           bankName: profile.bankName,
           companyId: profile.companyId,
           defaultVatRateBp: profile.defaultVatRateBp,
