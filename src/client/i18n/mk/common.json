@@ -3,12 +3,13 @@
   "nav": {
     "garage": "Гаража",
     "settings": "Поставки",
-    "overview": "Преглед",
-    "reminders": "Потсетници",
-    "history": "Историја",
+    "history": "Историја на сервиси",
     "catalog": "Каталог",
     "cars": "Возила",
-    "finances": "Финансии"
+    "finances": "Финансии",
+    "today": "Денес",
+    "expand": "Отвори {{name}}",
+    "collapse": "Затвори {{name}}"
   },
   "actions": {
     "save": "Зачувај",
@@ -25,8 +26,8 @@
     "done": "Готово",
     "markDone": "Означи како готово",
     "markDoneOf": "Означи „{{title}}“ како готово",
-    "logEntry": "Внеси",
-    "log": "Внеси",
+    "logEntry": "Додај",
+    "log": "Додај",
     "more": "Повеќе дејства",
     "view": "Види",
     "undo": "Врати"
@@ -59,7 +60,8 @@
     "pick": "Избери датум",
     "clear": "Исчисти",
     "type": "Внеси датум",
-    "typePlaceholder": "дд.мм.гггг"
+    "typePlaceholder": "дд.мм.гггг",
+    "notExact": "Ги знаеш само месецот или годината?"
   },
   "validation": {
     "required": "Задолжително",
@@ -107,7 +109,8 @@
     "reload": "Освежи"
   },
   "form": {
-    "escToCancel": "за откажување"
+    "escToCancel": "за откажување",
+    "tapToChange": "допри за промена"
   },
   "discard": {
     "title": "Да се отфрлат промените?",

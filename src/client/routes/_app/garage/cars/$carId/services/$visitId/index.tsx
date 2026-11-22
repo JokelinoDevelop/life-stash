@@ -28,7 +28,7 @@ const VisitPage = () => {
         back={
           <BackLink
             params={{ carId }}
-            search={{ tab: "history" }}
+            search={{ tab: "timeline" }}
             to="/garage/cars/$carId"
           />
         }

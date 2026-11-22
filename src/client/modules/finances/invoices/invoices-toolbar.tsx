@@ -1,7 +1,6 @@
 import { CalendarDays, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Kbd } from "@/components/ui/kbd";
 import {
   Select,
   SelectContent,
@@ -9,7 +8,6 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 
 import type { ClientListItem } from "../clients/clients.queries";
 import type { InvoicesSearch, InvoicesSearchPatch } from "./invoices-search";
@@ -104,11 +102,6 @@ export const InvoicesToolbar = ({
           ))}
         </SelectContent>
       </Select>
-      <span className="hidden flex-1 md:block" />
-      <span className="text-muted-foreground hidden items-center gap-1.5 text-xs md:flex">
-        <Kbd>{FINANCE_SHORTCUTS.markPaid.toUpperCase()}</Kbd>
-        {t("invoices.pHint")}
-      </span>
     </div>
   );
 };

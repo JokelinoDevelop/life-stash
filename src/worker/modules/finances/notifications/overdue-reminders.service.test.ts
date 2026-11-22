@@ -1,3 +1,4 @@
+import { NO_RATES } from "@shared/domain/exchange";
 import { describe, expect, it } from "vitest";
 
 import type { PushMessage } from "../../../core/push";
@@ -8,6 +9,7 @@ const invoice = (overrides: Partial<InvoiceWithClient>): InvoiceWithClient => ({
   amountMinor: 320_000,
   clientId: "c1",
   clientName: "Brightside Studio",
+  clientSnapshot: null,
   createdAt: "2026-10-21T10:00:00Z",
   currency: "EUR",
   deletedAt: null,
@@ -16,17 +18,24 @@ const invoice = (overrides: Partial<InvoiceWithClient>): InvoiceWithClient => ({
   householdId: "h1",
   id: crypto.randomUUID(),
   issueDate: "2026-10-22",
+  issuedAt: "2026-10-22T10:00:00Z",
+  issuerSnapshot: null,
   notes: null,
   number: "2026-013",
+  numberSeq: 13,
+  numberYear: 2026,
   overdueNotifiedAt: null,
   paidAt: null,
   periodEnd: null,
   periodStart: null,
   projectId: null,
   projectName: null,
+  purchaseOrder: null,
   sentAt: "2026-10-22",
+  shippingMinor: 0,
   status: "sent",
   updatedAt: "2026-10-22T10:00:00Z",
+  voidedAt: null,
   ...overrides,
 });
 
@@ -62,6 +71,7 @@ const setup = (rows: InvoiceWithClient[], overdueReminders = true) => {
       get: async () =>
         await Promise.resolve({
           defaultPaymentTermsDays: 30,
+          exchangeRates: NO_RATES,
           invoiceNumberFormat: "YYYY-NNN" as const,
           overdueReminders,
         }),

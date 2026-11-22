@@ -7,18 +7,21 @@
   "groups": {
     "actions": "Actions",
     "cars": "Cars",
-    "goTo": "Go to"
+    "goTo": "Go to",
+    "view": "View"
   },
   "actions": {
-    "logOdometer": "Log odometer reading",
-    "addService": "Log service",
-    "addExpense": "Log expense",
+    "logOdometer": "Add odometer reading",
+    "addService": "Add service",
+    "addExpense": "Add expense",
     "addReminder": "Add reminder",
     "addCar": "Add car"
   },
   "inCar": "in {{car}}",
   "pages": {
+    "today": "Today",
     "garage": "Garage",
+    "history": "Service history",
     "catalog": "Service catalog",
     "settings": "Settings"
   },
@@ -28,5 +31,9 @@
     "close": "close"
   },
   "searchOrRun": "Search or run…",
-  "in": "in"
+  "in": "in",
+  "view": {
+    "compact": "Switch to compact size",
+    "comfortable": "Switch to comfortable size"
+  }
 }

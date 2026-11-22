@@ -22,7 +22,7 @@ import { InvoicesToolbar } from "./invoices-toolbar";
 import { invoicesQuery } from "./invoices.queries";
 import type { InvoiceListItem } from "./invoices.queries";
 
-/** Paid invoices pile up; show this many before "Show N more". */
+/** Paid invoices pile up; show this many before "Show all N". */
 const PAID_PREVIEW = 8;
 
 const ColumnHeader = () => {
@@ -57,6 +57,7 @@ const Group = ({
   year: number;
 }) => {
   const { t } = useTranslation("finances");
+  const { t: tc } = useTranslation();
   const format = useFormat();
   const [expanded, setExpanded] = useState(false);
 
@@ -87,18 +88,18 @@ const Group = ({
         {rows.map((invoice) => (
           <InvoiceRow invoice={invoice} key={invoice.id} onFocus={onFocus} />
         ))}
-        {capped && (
-          <li className="flex min-h-11 items-center px-3.5 md:min-h-10 md:pl-33">
+        {(capped || expanded) && (
+          <li className="flex min-h-11 items-center px-1.5 md:min-h-10 md:px-3.5">
             <Button
               onClick={() => {
-                setExpanded(true);
+                setExpanded((value) => !value);
               }}
               size="xs"
-              variant="link"
+              variant="ghost"
             >
-              {t("invoices.showMore", {
-                count: group.rows.length - PAID_PREVIEW,
-              })}
+              {expanded
+                ? tc("pagination.showLess")
+                : tc("pagination.showAll", { count: group.rows.length })}
             </Button>
           </li>
         )}

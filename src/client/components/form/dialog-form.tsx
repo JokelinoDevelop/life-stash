@@ -12,10 +12,13 @@ const PORTALLED_POPUPS =
   "[data-slot=select-content], [data-slot=popover-content], [data-slot=dropdown-menu-content]";
 
 export const DialogForm = ({
+  aside,
   children,
   footer,
   onSubmit,
 }: {
+  /** Shown beside the scrolling body on desktop, e.g. a live preview. */
+  aside?: ReactNode;
   children: ReactNode;
   footer: ReactNode;
   onSubmit: () => void;
@@ -68,9 +71,18 @@ export const DialogForm = ({
       }}
       ref={formRef}
     >
-      <div className="divide-divider min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain">
-        {children}
-      </div>
+      {aside === undefined ? (
+        <div className="divide-divider min-h-0 flex-1 divide-y overflow-y-auto overscroll-contain">
+          {children}
+        </div>
+      ) : (
+        <div className="flex min-h-0 flex-1">
+          <div className="divide-divider min-h-0 min-w-0 flex-1 divide-y overflow-y-auto overscroll-contain lg:w-[36rem] lg:flex-none lg:border-r">
+            {children}
+          </div>
+          {aside}
+        </div>
+      )}
       {footer}
     </form>
   );
@@ -88,7 +100,12 @@ export const FormSection = ({
   description?: ReactNode;
   title?: ReactNode;
 }) => (
-  <section className={cn("flex flex-col gap-4 px-4 py-4", className)}>
+  <section
+    className={cn(
+      "flex flex-col gap-4 px-4 py-4 md:gap-5 md:px-6 md:py-5",
+      className
+    )}
+  >
     {title !== undefined && (
       <div className="flex flex-col gap-0.5">
         <h3 className="text-subtle-foreground text-xs font-medium">{title}</h3>
@@ -109,7 +126,7 @@ export const FormNotice = ({
   children: ReactNode;
   icon?: ReactNode;
 }) => (
-  <div className="bg-background text-subtle-foreground flex items-center gap-2 px-4 py-2.5 text-xs [&_svg]:size-3.5 [&_svg]:shrink-0">
+  <div className="bg-background text-subtle-foreground flex items-center gap-2 px-4 py-2.5 text-xs md:px-6 [&_svg]:size-3.5 [&_svg]:shrink-0">
     {icon}
     <span className="min-w-0">{children}</span>
   </div>

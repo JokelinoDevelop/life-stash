@@ -10,6 +10,8 @@ export const transactionsSearchSchema = z.object({
   category: z.string().min(1).optional().catch(undefined),
   client: z.string().min(1).optional().catch(undefined),
   kind: z.enum(TRANSACTION_KINDS).optional().catch(undefined),
+  /** Page of the list; 1 when absent. */
+  page: z.coerce.number().int().min(2).optional().catch(undefined),
   q: z.string().max(100).optional().catch(undefined),
   year: z
     .union([z.literal(ALL_YEARS), z.coerce.number().int().min(1990).max(2200)])
@@ -24,14 +26,13 @@ export type SearchPatch = {
   [K in keyof TransactionsSearch]?: TransactionsSearch[K] | null;
 };
 
-/** Applies a patch; keys set to null are dropped from the URL. */
 /** The patched value: null clears, undefined keeps the current one. */
 const patched = <T>(
   next: T | null | undefined,
   current: T | undefined
 ): T | undefined => (next === null ? undefined : (next ?? current));
 
-/** Applies a patch; keys set to null are dropped from the URL. */
+/** Applies a patch; keys set to null are dropped from the URL. Changing a filter goes back to page 1. */
 export const applySearchPatch = (
   search: TransactionsSearch,
   patch: SearchPatch
@@ -39,6 +40,7 @@ export const applySearchPatch = (
   category: patched(patch.category, search.category),
   client: patched(patch.client, search.client),
   kind: patched(patch.kind, search.kind),
+  page: patch.page === undefined ? undefined : patched(patch.page, search.page),
   q: patched(patch.q, search.q),
   year: patched(patch.year, search.year),
 });

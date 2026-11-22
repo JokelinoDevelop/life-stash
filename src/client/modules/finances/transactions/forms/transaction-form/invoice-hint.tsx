@@ -43,7 +43,7 @@ export const InvoiceHint = ({ clientId }: { clientId: string }) => {
           className="text-primary font-medium"
           entry={{ dialog: "mark-paid", id: invoice.id }}
         >
-          {t("invoices.hintAction", { number: invoice.number })}
+          {t("invoices.hintAction", { number: invoice.number ?? "" })}
         </FinanceDialogLink>
       </p>
     </div>

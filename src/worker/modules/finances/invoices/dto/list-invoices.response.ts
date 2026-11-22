@@ -7,7 +7,8 @@ export interface ListInvoicesResponse {
   year: number;
   invoices: {
     id: string;
-    number: string;
+    /** Null while a draft. */
+    number: string | null;
     clientId: string;
     clientName: string;
     projectId: string | null;
@@ -15,6 +16,8 @@ export interface ListInvoicesResponse {
     issueDate: string;
     dueDate: string;
     sentAt: string | null;
+    issuedAt: string | null;
+    voidedAt: string | null;
     paidAt: string | null;
     periodStart: string | null;
     periodEnd: string | null;
@@ -24,6 +27,8 @@ export interface ListInvoicesResponse {
     status: InvoiceStatus;
     daysOverdue: number;
     attachments: number;
+    /** Has lines: the app draws its PDF. */
+    itemised: boolean;
   }[];
   stats: {
     invoiced: MoneyTotal[];
@@ -51,6 +56,8 @@ export const toListInvoicesResponse = (
     dueDate: row.dueDate,
     id: row.id,
     issueDate: row.issueDate,
+    issuedAt: row.issuedAt,
+    itemised: row.itemised,
     number: row.number,
     paidAt: row.paidAt,
     periodEnd: row.periodEnd,
@@ -59,6 +66,7 @@ export const toListInvoicesResponse = (
     projectName: row.projectName,
     sentAt: row.sentAt,
     status: row.displayStatus,
+    voidedAt: row.voidedAt,
   })),
   stats: {
     averageDaysToGetPaid: list.stats.averageDaysToGetPaid,

@@ -1,3 +1,4 @@
+import { INVOICE_LANGUAGES } from "@shared/domain/finances/invoice-document";
 import { CURRENCIES } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
@@ -7,7 +8,11 @@ import { FieldGroup } from "@/components/ui/field";
 
 import { clientFormDefaults } from "./mapper";
 
-const TEMPLATE = clientFormDefaults({ currency: "EUR", termsDays: 30 });
+const TEMPLATE = clientFormDefaults({
+  currency: "EUR",
+  language: "en",
+  termsDays: 30,
+});
 
 /** Currency, payment terms, billing email and notes. */
 export const ClientTermsSection = withForm({
@@ -62,6 +67,60 @@ export const ClientTermsSection = withForm({
           </form.AppField>
         </FieldGroup>
       </FormSection>
+    );
+  },
+});
+
+/** What their invoices print under "Bill to", and in which language (clients only). */
+export const ClientBillingSection = withForm({
+  defaultValues: TEMPLATE,
+  render: function ClientBillingSectionRender({ form }) {
+    const { t } = useTranslation("finances");
+
+    return (
+      <form.Subscribe selector={(state) => state.values.kind}>
+        {(kind) =>
+          kind === "client" && (
+            <FormSection
+              description={t("clients.form.billingHint")}
+              title={t("clients.form.billing")}
+            >
+              <FieldGroup>
+                <form.AppField name="address">
+                  {(field) => (
+                    <field.TextareaField
+                      label={t("clients.form.address")}
+                      optional
+                      placeholder={t("clients.form.addressPlaceholder")}
+                    />
+                  )}
+                </form.AppField>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <form.AppField name="taxId">
+                    {(field) => (
+                      <field.TextField
+                        label={t("clients.form.taxId")}
+                        optional
+                      />
+                    )}
+                  </form.AppField>
+                  <form.AppField name="invoiceLanguage">
+                    {(field) => (
+                      <field.SelectField
+                        label={t("clients.form.invoiceLanguage")}
+                        options={INVOICE_LANGUAGES.map((language) => ({
+                          label: t(`clients.languages.${language}`),
+                          value: language,
+                        }))}
+                      />
+                    )}
+                  </form.AppField>
+                </div>
+              </FieldGroup>
+            </FormSection>
+          )
+        }
+      </form.Subscribe>
     );
   },
 });

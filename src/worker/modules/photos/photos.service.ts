@@ -1,8 +1,8 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 
 import type { Db } from "../../core/db";
 import type { Bindings } from "../../core/env";
-import { notFound } from "../../core/errors";
+import { conflict, notFound } from "../../core/errors";
 import { photoStorageFor } from "../../core/photo-storage";
 import { photos } from "../../db/schema/core";
 import { financeInvoices, financeTransactions } from "../../db/schema/finances";
@@ -37,6 +37,53 @@ export const assertPhotoOwner = async (
 
   if (!row) {
     throw notFound();
+  }
+};
+
+/**
+ * A generated PDF is the file an issued invoice was sent as, so it can't be removed: only an
+ * issued invoice may get one, and only one.
+ */
+export const assertGeneratedPdfAllowed = async (
+  db: Db,
+  householdId: string,
+  invoiceId: string
+): Promise<void> => {
+  const [invoice] = await db
+    .select({ status: financeInvoices.status })
+    .from(financeInvoices)
+    .where(
+      and(
+        eq(financeInvoices.id, invoiceId),
+        eq(financeInvoices.householdId, householdId),
+        isNull(financeInvoices.deletedAt)
+      )
+    )
+    .limit(1);
+
+  if (!invoice) {
+    throw notFound();
+  }
+
+  if (invoice.status === "draft") {
+    throw conflict("Only issued invoices get a generated PDF");
+  }
+
+  const [existing] = await db
+    .select({ id: photos.id })
+    .from(photos)
+    .where(
+      and(
+        eq(photos.householdId, householdId),
+        eq(photos.ownerType, "finance_invoice"),
+        eq(photos.ownerId, invoiceId),
+        eq(photos.generated, true)
+      )
+    )
+    .limit(1);
+
+  if (existing) {
+    throw conflict("This invoice already has its generated PDF");
   }
 };
 
@@ -133,9 +180,18 @@ export const deletePhoto = async (
   photoId: string
 ): Promise<void> => {
   const rows = await db
-    .select({ id: photos.id, objectKey: photos.objectKey })
+    .select({
+      generated: photos.generated,
+      id: photos.id,
+      objectKey: photos.objectKey,
+    })
     .from(photos)
     .where(and(eq(photos.id, photoId), eq(photos.householdId, householdId)));
+
+  // The PDF an issued invoice was sent as stays; it goes only with the invoice itself.
+  if (rows.some((row) => row.generated)) {
+    throw conflict("Generated invoice PDFs are kept as sent");
+  }
 
   if (rows.length === 0) {
     throw notFound();

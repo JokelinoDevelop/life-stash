@@ -1,17 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
-import {
-  Link,
-  Outlet,
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
-import { api, unwrap } from "@/lib/api";
 import { preferencesQuery } from "@/lib/session";
+import { useSignOut } from "@/lib/use-sign-out";
 
 const tabClass =
   "text-muted-foreground hover:text-foreground flex h-9 items-center rounded-md px-2.5 text-sm font-medium transition-colors md:h-7";
@@ -23,18 +17,17 @@ const SettingsLayout = () => {
   const { t } = useTranslation("settings");
   const { t: ta } = useTranslation("auth");
   const { t: tf } = useTranslation("finances");
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+  // Phones only: on desktop, Log out lives in the sidebar's account menu.
+  const handleSignOut = useSignOut();
 
   return (
     <>
       <PageHeader
         actions={
           <Button
-            onClick={async () => {
-              await unwrap(api.auth.logout.$post());
-              queryClient.clear();
-              await navigate({ to: "/login" });
+            className="md:hidden"
+            onClick={() => {
+              void handleSignOut();
             }}
             size="compact"
             variant="outline"

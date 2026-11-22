@@ -3,6 +3,8 @@ import { sendPushToHousehold } from "../../core/push";
 import { deletePhotosOfOwners } from "../photos/photos.service";
 import { AttachmentsRepository } from "./attachments/attachments.repository";
 import type { AttachmentOwnerType } from "./attachments/attachments.repository";
+import { BusinessProfileRepository } from "./business-profile/business-profile.repository";
+import { BusinessProfileService } from "./business-profile/business-profile.service";
 import { CategoriesRepository } from "./categories/categories.repository";
 import { CategoriesService } from "./categories/categories.service";
 import { ClientsRepository } from "./clients/clients.repository";
@@ -10,6 +12,7 @@ import { ClientsService } from "./clients/clients.service";
 import { FinanceExportService } from "./export/export.service";
 import { FinanceClock } from "./household/clock";
 import { HouseholdRepository } from "./household/household.repository";
+import { InvoiceLinesRepository } from "./invoices/invoice-lines.repository";
 import { InvoicesRepository } from "./invoices/invoices.repository";
 import { InvoicesService } from "./invoices/invoices.service";
 import { OverdueRemindersService } from "./notifications/overdue-reminders.service";
@@ -26,6 +29,7 @@ import { TransactionsRepository } from "./transactions/transactions.repository";
 import { TransactionsService } from "./transactions/transactions.service";
 
 export interface FinancesModule {
+  businessProfile: BusinessProfileService;
   categories: CategoriesService;
   clients: ClientsService;
   invoices: InvoicesService;
@@ -70,11 +74,16 @@ export const createFinancesModule = ({
 
   const clientsRepo = new ClientsRepository(db, householdId);
 
-  const clients = new ClientsService(
-    clientsRepo,
-    invoicesRepo,
-    ledgerLinks,
-    clock
+  const clients = new ClientsService({
+    clock,
+    household,
+    invoices: invoicesRepo,
+    repo: clientsRepo,
+    transactions: ledgerLinks,
+  });
+
+  const businessProfile = new BusinessProfileService(
+    new BusinessProfileRepository(db, householdId)
   );
 
   const transactions = new TransactionsService({
@@ -100,6 +109,8 @@ export const createFinancesModule = ({
 
   const invoices = new InvoicesService({
     attachments,
+    businessProfile,
+    lines: new InvoiceLinesRepository(db, householdId),
     categories,
     clients,
     clock,
@@ -138,6 +149,7 @@ export const createFinancesModule = ({
   });
 
   return {
+    businessProfile,
     categories,
     clients,
     exports,

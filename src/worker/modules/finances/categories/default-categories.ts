@@ -4,6 +4,10 @@ import type {
   TransactionKind,
 } from "@shared/domain/finances/kinds";
 
+import type { Db } from "../../../core/db";
+import { CategoriesRepository } from "./categories.repository";
+import type { NewCategory } from "./categories.repository";
+
 export interface DefaultCategory {
   kind: TransactionKind;
   icon: CategoryIcon;
@@ -11,7 +15,7 @@ export interface DefaultCategory {
   systemKey?: SystemCategoryKey;
 }
 
-/** Starter categories for a household's first visit to Finances; everything but Invoices is editable. */
+/** Starter categories every household gets at setup; everything but Invoices is editable. */
 export const DEFAULT_CATEGORIES: readonly DefaultCategory[] = [
   { icon: "house", kind: "expense", name: { en: "Rent", mk: "Кирија" } },
   {
@@ -65,3 +69,32 @@ export const DEFAULT_CATEGORIES: readonly DefaultCategory[] = [
     name: { en: "Other income", mk: "Друг приход" },
   },
 ];
+
+/** The defaults as rows, named in `locale` and numbered per kind. */
+export const defaultCategoryRows = (locale: "en" | "mk"): NewCategory[] => {
+  const positions = { expense: 0, income: 0 };
+
+  return DEFAULT_CATEGORIES.map((category) => {
+    const nextPosition = positions[category.kind];
+    positions[category.kind] += 1;
+
+    return {
+      icon: category.icon,
+      kind: category.kind,
+      name: category.name[locale],
+      position: nextPosition,
+      systemKey: category.systemKey ?? null,
+    };
+  });
+};
+
+/** Gives a new household its default categories (called from account setup). */
+export const seedDefaultCategories = async (
+  db: Db,
+  householdId: string,
+  locale: "en" | "mk" = "en"
+): Promise<void> => {
+  await new CategoriesRepository(db, householdId).insertMany(
+    defaultCategoryRows(locale)
+  );
+};

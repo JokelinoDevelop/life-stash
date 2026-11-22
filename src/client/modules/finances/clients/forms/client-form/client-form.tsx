@@ -7,7 +7,10 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useErrorMessage } from "@/lib/errors";
 import { formFieldOfError } from "@/lib/server-errors";
 
-import { ClientTermsSection } from "./client-form-sections";
+import {
+  ClientBillingSection,
+  ClientTermsSection,
+} from "./client-form-sections";
 import { CLIENT_SERVER_FIELDS } from "./mapper";
 import { clientFormSchema } from "./schema";
 import type { ClientFormValues } from "./schema";
@@ -100,6 +103,7 @@ export const ClientForm = ({
         </FieldGroup>
       </FormSection>
       <ClientTermsSection form={form} />
+      <ClientBillingSection form={form} />
     </DialogForm>
   );
 };

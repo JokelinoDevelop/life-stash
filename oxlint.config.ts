@@ -3,6 +3,7 @@ import antiSlop from "ultracite/oxlint/anti-slop";
 import core from "ultracite/oxlint/core";
 import drizzle from "ultracite/oxlint/drizzle";
 import { jsPluginSettings, selectJsPlugins } from "ultracite/oxlint/js-plugins";
+import landmines from "ultracite/oxlint/landmines";
 import react from "ultracite/oxlint/react";
 import shadcn from "ultracite/oxlint/shadcn";
 import tanstack from "ultracite/oxlint/tanstack";
@@ -79,6 +80,7 @@ export default defineConfig({
     tanstackJsPlugins,
     shadcn,
     antiSlop,
+    landmines,
   ],
   ignorePatterns: [
     ...core.ignorePatterns,
@@ -90,10 +92,18 @@ export default defineConfig({
     // Local-only developer scripts, not shipped with the app.
     "scripts/**",
   ],
-  jsPlugins: [...jsPlugins.jsPlugins, ...shadcn.jsPlugins],
+  jsPlugins: [
+    ...jsPlugins.jsPlugins,
+    ...shadcn.jsPlugins,
+    ...landmines.jsPlugins,
+  ],
   options: { typeAware: true },
   settings: jsPluginSettings,
   rules: {
+    // Landmines: keep its testing/structure rules, but we keep explanatory comments
+    // and explicit return types where they help.
+    "landmines-style/no-comments": "off",
+    "landmines-types/no-explicit-return-types": "off",
     // Keep files, functions and control flow small enough to review.
     "max-lines": [
       "error",
@@ -183,6 +193,21 @@ export default defineConfig({
         "anti-slop/no-unsafe-dictionary-type": "off",
         "typescript/no-unsafe-type-assertion": "off",
       },
+    },
+    {
+      // The invoice PDF draws with @react-pdf/renderer primitives, which are styled with
+      // style objects (no DOM, no CSS), and the module is only ever loaded with `import()`.
+      files: ["src/client/modules/finances/invoice-pdf/**"],
+      rules: {
+        "react-doctor/prefer-dynamic-import": "off",
+        "shadcn/no-inline-styles": "off",
+      },
+    },
+    {
+      // Controller tests drive a feature end to end through `app` on purpose; they belong
+      // with the feature, not beside app.ts.
+      files: ["src/worker/**/*.controller.test.ts"],
+      rules: { "landmines-structure/colocated-tests": "off" },
     },
     {
       files: ["**/*.test.ts", "**/*.test.tsx"],

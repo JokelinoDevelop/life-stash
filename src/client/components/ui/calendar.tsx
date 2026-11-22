@@ -15,25 +15,49 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/**
+ * `popover`: fills its container (the date picker's popover): month and year as quiet
+ * dropdowns on the left, arrows on the right, larger days, today marked with a dot.
+ */
+const POPOVER_CLASS_NAMES = {
+  root: "w-full",
+  month: "flex w-full flex-col gap-2",
+  nav: "absolute top-0 right-0 flex items-center gap-0.5",
+  month_caption: "flex h-(--cell-size) w-full items-center pr-18",
+  dropdowns: "flex h-(--cell-size) items-center gap-0.5 text-sm font-semibold",
+  dropdown_root:
+    "hover:bg-accent has-focus:ring-ring/50 relative rounded-md transition-colors has-focus:ring-[3px]",
+  caption_label:
+    "[&>svg]:text-muted-foreground flex h-8 items-center gap-1 rounded-md px-2 text-sm font-semibold select-none [&>svg]:size-3.5",
+  weekday:
+    "text-muted-foreground flex-1 pb-1 text-[0.6875rem] font-medium tracking-wide uppercase select-none",
+  week: "mt-0.5 flex w-full",
+  today: "",
+  outside: "text-muted-foreground/60 aria-selected:text-muted-foreground",
+} satisfies Partial<Record<string, string>>;
+
 function Calendar({
   className,
   classNames,
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
+  variant = "default",
   formatters,
   components,
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"];
+  variant?: "default" | "popover";
 }) {
   const defaultClassNames = getDefaultClassNames();
+  const popover = variant === "popover";
 
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "group/calendar bg-background p-3 [--cell-size:--spacing(8)] data-[variant=popover]:[--cell-size:--spacing(9)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
@@ -129,6 +153,17 @@ function Calendar({
           defaultClassNames.disabled
         ),
         hidden: cn("invisible", defaultClassNames.hidden),
+        ...(popover
+          ? Object.fromEntries(
+              Object.entries(POPOVER_CLASS_NAMES).map(([key, value]) => [
+                key,
+                cn(
+                  value,
+                  defaultClassNames[key as keyof typeof defaultClassNames]
+                ),
+              ])
+            )
+          : {}),
         ...classNames,
       }}
       components={{
@@ -136,6 +171,7 @@ function Calendar({
           return (
             <div
               data-slot="calendar"
+              data-variant={variant}
               ref={rootRef}
               className={cn(className)}
               {...props}
@@ -204,11 +240,14 @@ function CalendarDayButton({
         !modifiers.range_end &&
         !modifiers.range_middle
       }
+      data-today={modifiers.today}
       data-range-start={modifiers.range_start}
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
         "group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:bg-accent data-[range-middle=true]:text-accent-foreground data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-accent-foreground flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:ring-[3px] data-[range-end=true]:rounded-md data-[range-end=true]:rounded-r-md data-[range-middle=true]:rounded-none data-[range-start=true]:rounded-md data-[range-start=true]:rounded-l-md [&>span]:text-xs [&>span]:opacity-70",
+        // Popover variant: today in the accent with a dot below (white on the selected day).
+        "group-data-[variant=popover]/calendar:data-[today=true]:text-primary group-data-[variant=popover]/calendar:data-[today=true]:after:bg-primary group-data-[variant=popover]/calendar:data-[today=true]:data-[selected-single=true]:text-primary-foreground group-data-[variant=popover]/calendar:data-[today=true]:data-[selected-single=true]:after:bg-primary-foreground group-data-[variant=popover]/calendar:relative group-data-[variant=popover]/calendar:text-sm group-data-[variant=popover]/calendar:tabular-nums group-data-[variant=popover]/calendar:data-[today=true]:font-semibold group-data-[variant=popover]/calendar:data-[today=true]:after:absolute group-data-[variant=popover]/calendar:data-[today=true]:after:bottom-1 group-data-[variant=popover]/calendar:data-[today=true]:after:left-1/2 group-data-[variant=popover]/calendar:data-[today=true]:after:size-1 group-data-[variant=popover]/calendar:data-[today=true]:after:-translate-x-1/2 group-data-[variant=popover]/calendar:data-[today=true]:after:rounded-full",
         defaultClassNames.day,
         className
       )}

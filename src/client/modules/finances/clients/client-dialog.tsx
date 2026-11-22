@@ -26,6 +26,7 @@ const isFieldError = (error: Error) =>
 
 const NewClient = ({ onClose }: { onClose: Close }) => {
   const format = useFormat();
+  const { i18n } = useTranslation();
   const settings = useQuery(financeSettingsQuery);
   const create = useCreateClient(isFieldError);
 
@@ -37,6 +38,7 @@ const NewClient = ({ onClose }: { onClose: Close }) => {
     <ClientForm
       defaultValues={clientFormDefaults({
         currency: format.currency,
+        language: i18n.language === "mk" ? "mk" : "en",
         termsDays: settings.data?.defaultPaymentTermsDays ?? 30,
       })}
       isNew

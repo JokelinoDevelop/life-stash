@@ -24,6 +24,8 @@ export interface TextFieldProps {
   type?: ComponentProps<"input">["type"];
   autoComplete?: string;
   autoFocus?: boolean;
+  /** Id of a `<datalist>` with suggestions (quick picks that can still be typed over). */
+  list?: string;
 }
 
 export const TextField = ({

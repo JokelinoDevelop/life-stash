@@ -11,12 +11,13 @@ import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { FieldErrors } from "@/components/form/field-errors";
 import { useAppForm } from "@/components/form/form-hook";
 import { Button } from "@/components/ui/button";
+import { useCurrencySymbol } from "@/lib/currency-symbol";
 import { parseAmount } from "@/lib/form-schemas";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 
 import { useCategoryName } from "../categories/category-label";
-import { useCurrencySymbol, useLedgerMoney } from "../money";
+import { useLedgerMoney } from "../money";
 import {
   markPaidFormDefaults,
   markPaidFormToRequest,
@@ -148,7 +149,7 @@ const MarkPaidForm = ({
         ...markPaidFormToRequest(value),
         currency: invoice.currency,
         id: invoice.id,
-        number: invoice.number,
+        label: invoice.number ?? "",
       });
       await onClose();
     },

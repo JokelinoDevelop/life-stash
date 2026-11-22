@@ -42,11 +42,8 @@
   "car": {
     "tabs": {
       "overview": "Преглед",
-      "history": "Историја",
-      "reminders": "Претстојни",
-      "mileage": "Километража",
-      "expenses": "Трошоци",
-      "spending": "Потрошено",
+      "timeline": "Хронологија",
+      "reminders": "Потсетници",
       "details": "Детали"
     },
     "archive": "Архивирај возило",
@@ -72,7 +69,7 @@
     "otherCosts": "Други трошоци",
     "nothingSpent": "Сè уште ништо",
     "viewAll": "Види сè",
-    "logOdometer": "Внеси километража",
+    "logOdometer": "Додај километража",
     "addService": "Додај сервис",
     "previousOwner": "Претходен сопственик",
     "odometer": "Километража",
@@ -91,9 +88,9 @@
     "spentIn": "Потрошено во {{year}}",
     "perMonthAmount": "{{amount}} / месец",
     "remindersTitle": "Потсетници",
-    "historyTitle": "Историја",
-    "dueNextShort": "Следно",
-    "lastDoneShort": "Последно",
+    "historyTitle": "Последни сервиси",
+    "dueNextShort": "Потсетници",
+    "lastDoneShort": "Последни сервиси",
     "all": "Сите",
     "breakdown": "Распределба",
     "every": "на секои {{interval}}",
@@ -113,18 +110,10 @@
     "reminder": "Потсетник"
   },
   "home": {
-    "upcoming": "Претстојно за сите возила",
     "allClear": "Сè е во ред — ништо не следува наскоро.",
     "catalog": "Каталог",
-    "needsAttention": "Бара внимание",
     "summary": "{{overdue}} задоцнети · {{dueSoon}} наскоро",
     "summaryClear": "Ништо не доспева наскоро",
-    "horizons": {
-      "overdue": "Задоцнети",
-      "next30": "Следни 30 дена",
-      "later": "Подоцна"
-    },
-    "remindersEmpty": "Ништо не е закажано за вашите возила.",
     "historyEmpty": "Сè уште нема сервисна историја.",
     "spentThisYear": "Потрошено во {{year}}",
     "vsLastYear": "{{change}} во однос на {{year}}",
@@ -138,6 +127,27 @@
     "addCar": "Додај возило",
     "browse": "Прегледај",
     "historyDescription": "Сите сервиси за сите возила",
-    "catalogDescription": "Делови, работи и пакети"
+    "catalogDescription": "Делови, работи и пакети",
+    "reminders": "Потсетници"
+  },
+  "timeline": {
+    "filterLabel": "Прикажи",
+    "filters": {
+      "all": "Сè",
+      "services": "Сервиси",
+      "expenses": "Трошоци",
+      "odometer": "Километража"
+    },
+    "empty": {
+      "all": "Сè уште ништо не е внесено. Додај сервис, трошок или километража.",
+      "services": "Сè уште нема сервиси.",
+      "expenses": "Сè уште нема трошоци.",
+      "odometer": "Сè уште нема километража."
+    }
+  },
+  "detailsTab": {
+    "car": "Возило",
+    "mileage": "Километража",
+    "costs": "Трошоци"
   }
 }

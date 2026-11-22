@@ -47,7 +47,8 @@ interface FormDialogProps {
   description?: string;
   /** Desktop crumb before the title, e.g. the car monogram and name. */
   crumb?: ReactNode;
-  size?: "md" | "lg";
+  /** `full`: a near-full-screen dialog on desktop and a full-height sheet on phones. */
+  size?: "md" | "lg" | "full";
   /** A `DialogForm` (scrolling body + pinned footer), a skeleton or an error. */
   children: ReactNode;
 }
@@ -73,7 +74,7 @@ const DesktopFormDialog = ({
         size={size}
         variant="bare"
       >
-        <div className="flex h-11 shrink-0 items-center justify-between pr-2 pl-4">
+        <div className="flex h-11 shrink-0 items-center justify-between pr-2 pl-4 md:h-13 md:pr-3 md:pl-6">
           <div className="text-muted-foreground flex min-w-0 items-center gap-1.5 text-xs">
             {crumb !== undefined && (
               <>
@@ -109,10 +110,13 @@ const MobileFormDialog = ({
   description,
   onOpenChange,
   open,
+  size,
   title,
 }: FormDialogProps) => (
   <Drawer onOpenChange={onOpenChange} open={open} repositionInputs={false}>
-    <DrawerContent className="max-h-[92dvh]">
+    <DrawerContent
+      className={size === "full" ? "h-[96dvh] max-h-[96dvh]" : "max-h-[92dvh]"}
+    >
       <DrawerHeader align="start">
         <DrawerTitle>{title}</DrawerTitle>
         <DrawerDescription className="sr-only">
@@ -165,21 +169,35 @@ const DiscardConfirm = ({
 /**
  * Create/edit forms: a dialog on desktop (crumb › title, close) and a bottom
  * sheet on phones. The form brings its own scrolling body and footer.
- * Closing with unsaved changes (Esc, ×, outside click, Cancel) asks first.
+ * Closing with unsaved changes (Esc, ×, outside click, Cancel, or a link via `requestLeave`)
+ * asks first.
  */
 export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
   const isDesktop = useIsDesktop();
   const dirty = useRef(false);
+
+  const pendingLeave = useRef<() => void>(() => {
+    onOpenChange(false);
+  });
+
   const [confirming, setConfirming] = useState(false);
+
+  const askBeforeLeaving = (leave: () => void) => {
+    if (dirty.current) {
+      pendingLeave.current = leave;
+      setConfirming(true);
+    } else {
+      leave();
+    }
+  };
 
   const controls: FormDialogControls = {
     requestClose: () => {
-      if (dirty.current) {
-        setConfirming(true);
-      } else {
+      askBeforeLeaving(() => {
         onOpenChange(false);
-      }
+      });
     },
+    requestLeave: askBeforeLeaving,
     setDirty: (next) => {
       dirty.current = next;
     },
@@ -202,7 +220,7 @@ export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
         onDiscard={() => {
           setConfirming(false);
           dirty.current = false;
-          onOpenChange(false);
+          pendingLeave.current();
         }}
         onKeep={() => {
           setConfirming(false);

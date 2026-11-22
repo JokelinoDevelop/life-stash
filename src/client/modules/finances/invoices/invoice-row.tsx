@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { FinanceDialogLink } from "../dialogs/finance-dialog-link";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { useLedgerMoney } from "../money";
-import { useDueLabel, useInvoiceFor } from "./invoice-labels";
+import { useDueLabel, useInvoiceFor, useInvoiceNumber } from "./invoice-labels";
 import { InvoiceMenu } from "./invoice-menu";
 import { InvoiceStatusIcon } from "./invoice-status-icon";
 import type { InvoiceListItem } from "./invoices.queries";
@@ -32,12 +32,12 @@ const RowAction = ({ invoice }: { invoice: InvoiceListItem }) => {
     return (
       <Button
         onClick={() => {
-          actions.markSent(invoice);
+          void actions.issue(invoice);
         }}
         size="xs"
         variant="ghost"
       >
-        {t("invoices.send")}
+        {t("invoices.issue")}
       </Button>
     );
   }
@@ -59,6 +59,15 @@ const RowAction = ({ invoice }: { invoice: InvoiceListItem }) => {
   return null;
 };
 
+/** Drafts and void invoices are muted (void struck through); overdue shows it in the meta line. */
+const amountClass = (status: InvoiceListItem["status"]): string =>
+  cn(
+    "shrink-0 text-right tabular-nums",
+    status === "draft" || status === "void" ? MUTED : "font-medium",
+    status === "void" && "line-through",
+    status === "overdue" && "hidden md:block"
+  );
+
 /** One invoice: a grid row on desktop (actions on hover / focus), two lines on phones. */
 export const InvoiceRow = ({
   invoice,
@@ -71,19 +80,18 @@ export const InvoiceRow = ({
   const ledger = useLedgerMoney();
   const dueLabel = useDueLabel();
   const forLabel = useInvoiceFor();
+  const numberOf = useInvoiceNumber();
   const overdue = invoice.status === "overdue";
-  const muted = invoice.status === "draft" || invoice.status === "void";
+  const voided = invoice.status === "void";
   const amount = ledger.money(invoice.amountMinor, invoice.currency);
   const paid = invoice.status === "paid";
 
   const mobileMeta = [
-    invoice.number,
-    overdue ? amount : null,
-    overdue || paid ? null : forLabel(invoice),
+    numberOf(invoice),
+    ...(overdue ? [amount] : []),
+    ...(overdue || paid ? [] : [forLabel(invoice)]),
     dueLabel(invoice),
-  ]
-    .filter((part) => part !== null)
-    .join(" · ");
+  ].join(" · ");
 
   return (
     // Remembers the focused row for the P shortcut; its link and buttons are the interactive parts.
@@ -95,12 +103,20 @@ export const InvoiceRow = ({
       }}
     >
       <InvoiceStatusIcon status={invoice.status} />
-      <span className="text-muted-foreground hidden tabular-nums md:block">
-        {invoice.number}
+      <span
+        className={cn(
+          "text-muted-foreground hidden truncate tabular-nums md:block",
+          voided && "line-through"
+        )}
+      >
+        {numberOf(invoice)}
       </span>
       <div className="flex min-w-0 flex-1 flex-col md:contents">
         <FinanceDialogLink
-          className="truncate font-medium outline-none after:absolute after:inset-0 focus-visible:underline"
+          className={cn(
+            "truncate font-medium outline-none after:absolute after:inset-0 focus-visible:underline",
+            voided && "text-muted-foreground line-through"
+          )}
           entry={{ dialog: "invoice", id: invoice.id }}
         >
           {invoice.clientName}
@@ -137,15 +153,7 @@ export const InvoiceRow = ({
       >
         {dueLabel(invoice)}
       </span>
-      <span
-        className={cn(
-          "shrink-0 text-right tabular-nums",
-          muted ? MUTED : "font-medium",
-          overdue && "hidden md:block"
-        )}
-      >
-        {amount}
-      </span>
+      <span className={amountClass(invoice.status)}>{amount}</span>
       <span className="relative z-10 flex shrink-0 items-center justify-end gap-0.5 md:opacity-0 md:transition-opacity md:group-focus-within/row:opacity-100 md:group-hover/row:opacity-100 md:focus-within:opacity-100">
         <span className={cn(!overdue && "hidden md:inline-flex")}>
           <RowAction invoice={invoice} />

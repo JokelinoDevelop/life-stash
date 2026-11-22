@@ -1,4 +1,4 @@
-# LifeStash — design language (v0.3 "crisp")
+# LifeStash — design language (v0.4 "clear")
 
 Flat surfaces, hairlines, one accent, fast. The visual reference is the "LifeStash Design Language" canvas (Tokens board); this file is the source of truth for code.
 
@@ -7,9 +7,10 @@ Flat surfaces, hairlines, one accent, fast. The visual reference is the "LifeSta
 1. **Hairlines, not shadows.** Borders separate things. Only overlays (dialogs, menus, popovers) get a shadow.
 2. **One accent.** Blue (`primary`) marks the primary action, links and focus. Everything else is greyscale. Icons and avatars are neutral, not tinted.
 3. **Lists over cards.** Content is rows under a small heading (`ListSection`). Boxes (`Panel`) only frame charts, tables and form fields.
-4. **Status is a shape.** `StatusRing` fills as a reminder comes due; overdue is a solid "!" disc, done is a check. Colour is the second cue.
-5. **13px is the base on desktop, 14px on touch.** Hierarchy comes from weight and grey level, not size jumps.
-6. **Fast by default.** 100 ms hover, 150 ms dialogs, 120 ms menus, 100 ms exits, no bounce. Every frequent action has a key.
+4. **Status is a shape.** Four shapes only: an empty ring (later), a ring with a dot (due soon), a solid "!" disc (overdue), a check (done). No partial fills. Colour is the second cue.
+5. **15px is the base on desktop, 16px on touch** (the default "comfortable" size; ⌘K switches to "compact": 13/14px and tighter spacing, via `data-density` in `styles.css`). Hierarchy comes from weight and grey level, not size jumps.
+6. **Fast by default.** 100 ms hover, 150 ms dialogs, 120 ms menus, 100 ms exits, no bounce. Every frequent action has a key, but only the page's primary button shows its key hint; the rest are found in ⌘K.
+7. **One word per idea.** Creating anything is **Add …** (Add car, Add service, Add transaction, Add invoice). Things that come due are **Reminders**. Everything that needs you now is **Today**. Copy talks about what the user sees ("transactions"), never how it's stored ("ledger").
 
 ## Tokens (`src/client/styles.css`)
 
@@ -29,10 +30,12 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 ## Layout
 
-- **Desktop:** the sidebar (household menu, search, the **Garage** and **Finances** module groups — the active one expanded with its pages, the car list under Garage — then Reminders and Settings at the bottom) sits on the canvas; pages render inside one white bordered panel. `PageHeader` draws a 44px bar at the top of the panel (crumb › title, actions).
-- **Phones:** a Garage / Finances / Reminders / Settings bottom bar. `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (History, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
-- **Lists vs padded pages:** list pages (including the Service catalog) wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, max 4xl).
-- The Garage home and the household Reminders page read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
+- **Desktop:** the sidebar sits on the canvas: the household name (a label), search, **Today** (with its count: red when something is overdue), then the **Garage** (cars first, then Service history and Service catalog) and **Finances** (Transactions, Invoices, Clients) groups, always open; the group name opens the module's overview and its chevron collapses it by hand (remembered in `localStorage`). The account menu sits at the bottom (your name; opens Settings and Log out, which asks to confirm) — the only desktop way into Settings besides ⌘K. On phones Settings is the bottom-bar tab and Log out sits on the Settings page. Badges follow one rule: a number means "needs action", red only when overdue; a car with an overdue reminder shows a small red "!".
+- Pages render inside one white bordered panel; below the 44px `PageHeader` bar (crumb › title, actions) the content uses the full panel width (no centred column); a side panel such as the car details keeps a fixed width beside a flexible main column. Module home pages are titled with the module name, not "Overview".
+- **Phones:** a Today / Garage / Finances / Settings bottom bar (Today carries the count). `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (Service history, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
+- **Today** (`/`) lists what needs action across modules: recurring income to confirm, then Overdue / Next 30 days / Later, mixing reminders and unpaid invoices sorted by days left ("Later" shows 3 with "Show all"). Garage home shows only overdue and next-30-day reminders with a link to Today.
+- **Lists vs padded pages:** list pages (including the Service catalog) wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, full width).
+- The Garage home and Today read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
 
 ## Building blocks (`src/client/components/app`)
 
@@ -42,12 +45,14 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `SectionHeading` | a heading above a box when you build the box yourself |
 | `Panel` | a box for charts, tables, form fields; optional title and description |
 | `StatPanel`, `Stat` | exactly 2 or 4 figures side by side (odd counts leave a gap: use a list) |
-| `StatusRing` + `STATUS_TEXT_TONE` | reminder status; progress from `reminderProgress` (shared domain) |
+| `StatusRing` + `STATUS_TEXT_TONE` | reminder status (four shapes, see principle 4) |
 | `CarMonogram` (garage) | car initials in a neutral square |
 | `SettingsSection` (settings) | settings group: title/description left, box right |
 | `Kbd` (`components/ui`) | key hints; hide on touch with `hidden md:inline-flex` |
 | `DialogContent variant="bare"` | dialogs with their own header and footer; `size="lg"` for long forms |
 | `FormDialog` + `DialogForm` / `FormSection` / `FormNotice` | every create/edit form (see "Forms and dialogs") |
+| `AmountInput` (`components/form`) | the big amount at the top of every money dialog |
+| `FormDisclosure` (`components/form`) | "› More details": rare optional fields, open when editing a record that has them |
 | `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover, Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
 | `LoadingState` (`list` / `rows` / `block`), `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
@@ -61,6 +66,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 - Create and edit always open in a dialog over the current page (bottom sheet on phones), never a page. There are no `/new` or `/edit` routes.
 - The open dialog lives in the URL on the `_app` route: `?dialog=car|service|expense|reminder`, plus `car`, `id` (edit) and `reminder` (the reminder a new entry completes). Open one with `EntryDialogLink` (keeps ⌘-click / new tab) or `useEntryDialog().open(...)`; `EntryDialogHost` in the app shell renders it. Back closes a dialog opened in-app; a deep link closes by dropping the keys.
 - Layout: a 44px crumb bar (car monogram › title, ×), a scrolling body split into `FormSection`s by hairlines, and a pinned footer (`form.FormFooter`): `esc to cancel` or a slot such as Delete on the left, Cancel and Save `⌘↵` on the right. ⌘↵ / Ctrl+↵ submits from anywhere in the dialog.
+- **Money dialogs share one order:** amount (`AmountInput`) → what it was for (category chips) → when (date chip) → the rest. Finances › Add transaction and Garage › Add expense both follow it.
+- **Common case first.** Rare options sit behind a link or `FormDisclosure`: the date field shows "Only know the month or year?" instead of the Exact / Month / Year toggle; the service form keeps shop, previous owner and notes under "More details".
 - The dialog opens on the first field. Closing with unsaved changes asks "Discard changes?". After a save: one toast, close, stay on the page (a new service offers "View" in the toast; a new car opens its page).
 - Edit dialogs load their own data and show `FormSkeleton` meanwhile, or `ErrorState` with retry.
 - Native `<input type="date">` is not used anywhere.
@@ -76,7 +83,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 ## Long lists
 
-- Lists that grow with time (car History, Mileage readings, Expenses, the household History) show **12 rows a page** with `PagedList`. The page lives in the URL (`?page=2`, absent on page 1) so refresh and Back from a detail return to it; switching car tabs starts at page 1. Turning the page scrolls back to the top of the list.
+- Every long list uses the same pager (`PagedList`: "‹ Newer · 13–24 of 79 · Older ›"). Lists built on the client (car Timeline, the household history) show **12 rows a page**; Transactions pages through the API, 25 at a time. Short capped lists (Today's "Later", paid invoices, "Last done") use "Show all N" / "Show less". The page lives in the URL (`?page=2`, absent on page 1) so refresh and Back from a detail return to it; switching car tabs or the Timeline filter starts at page 1. Turning the page scrolls back to the top of the list.
+- **Car page tabs:** Overview · Timeline (services, expenses and odometer readings in one list, filter All / Services / Expenses / Odometer in `?show=`) · Reminders · Details (car facts, mileage, costs, last done per item). Old `?tab=history|mileage|expenses|spending` links redirect.
 - Paginate the flat, sorted list, then group the page (by year or month). A group heading's count and total describe the **whole** group, even when it continues on the next page.
 - Rows under a year or month heading use `format.shortDate` ("19.07"), so the meta line keeps room for the odometer and kind instead of repeating the year.
 - Summaries above a list stay compact: a strip (Expenses "This year by category") rather than a row per entry. Side lists cap at 8 with "Show all N".
@@ -85,7 +93,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 ## Keyboard
 
 - ⌘K / Ctrl+K or `/` opens the command menu (scoped to the car you are on) (`CommandMenuProvider` in the app shell; `useCommandMenu().open()` from buttons).
-- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer, S service, E expense, R reminder. Garage: C add car. Service catalog: N new item, P new package. Show the key with `Kbd` on the matching button.
+- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer (opens the reading dialog on Timeline), S service, E expense, R reminder. Garage: C add car. Service catalog: N add item, P add package. Show the key with `Kbd` on the page's primary button only.
 
 ## Rules of thumb
 

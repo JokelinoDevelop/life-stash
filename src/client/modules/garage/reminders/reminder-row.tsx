@@ -1,4 +1,3 @@
-import { reminderProgress } from "@shared/domain/reminders";
 import { CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -167,10 +166,7 @@ export const ReminderRow = ({
 
   return (
     <ListRow className="gap-2.5 py-2 md:gap-3 md:py-1">
-      <StatusRing
-        progress={reminderProgress(reminder)}
-        status={reminder.status}
-      />
+      <StatusRing status={reminder.status} />
       <ListRowText
         meta={
           <>

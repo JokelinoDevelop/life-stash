@@ -23,6 +23,7 @@ export const financeSettingsController = new Hono<AppEnv>()
 
     const body: UpdateFinanceSettingsResponse = {
       defaultPaymentTermsDays: settings.defaultPaymentTermsDays,
+      exchangeRates: settings.exchangeRates,
       invoiceNumberFormat: settings.invoiceNumberFormat,
       overdueReminders: settings.overdueReminders,
     };

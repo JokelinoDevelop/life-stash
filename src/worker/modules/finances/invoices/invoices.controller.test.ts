@@ -8,7 +8,15 @@ import { createTestD1 } from "../../../test/sqlite-d1";
 
 const ORIGIN = "http://localhost";
 
-type JsonBody = Record<string, string | number | boolean | null>;
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+type JsonBody = Record<string, JsonValue>;
 
 const idBody = z.object({ id: z.string() });
 
@@ -22,6 +30,32 @@ const invoiceBody = z.object({
     transaction: z
       .object({ amountMinor: z.number(), date: z.string() })
       .nullable(),
+  }),
+});
+
+const numberBody = z.object({
+  number: z.string(),
+  previous: z.string().nullable(),
+});
+
+const detailBody = z.object({
+  invoice: z.object({
+    clientSnapshot: z.unknown().optional(),
+    issuedAt: z.string().nullable(),
+    number: z.string().nullable(),
+    status: z.string(),
+  }),
+});
+
+const documentBody = z.object({
+  document: z.object({
+    client: z.object({ name: z.string() }),
+    issuer: z.object({ name: z.string() }).nullable(),
+    lines: z.array(
+      z.object({ amountMinor: z.number(), unit: z.string().nullable() })
+    ),
+    number: z.string().nullable(),
+    totals: z.object({ totalMinor: z.number() }),
   }),
 });
 
@@ -44,12 +78,13 @@ const read = async <T>(response: Response, schema: z.ZodType<T>) =>
 
 interface Session {
   cookie: string;
+  householdId: string;
 }
 
 describe("invoices controller", () => {
   let env = { DB: createTestD1().d1 };
-  let alice: Session = { cookie: "" };
-  let bob: Session = { cookie: "" };
+  let alice: Session = { cookie: "", householdId: "" };
+  let bob: Session = { cookie: "", householdId: "" };
 
   const request = async (
     session: Session,
@@ -87,7 +122,7 @@ describe("invoices controller", () => {
   const createInvoice = async (
     session: Session,
     client: string,
-    invoiceNumber: string
+    invoiceNumber: string | null
   ) =>
     await request(session, "POST", "/invoices", {
       amountMinor: 480_000,
@@ -95,8 +130,8 @@ describe("invoices controller", () => {
       currency: "EUR",
       description: "Software development",
       dueDate: "2020-01-31",
+      issue: invoiceNumber !== null,
       issueDate: "2020-01-01",
-      markSent: true,
       notes: null,
       number: invoiceNumber,
       periodEnd: null,
@@ -263,5 +298,272 @@ describe("invoices controller", () => {
     await expect(read(removed, errorBody)).resolves.toMatchObject({
       error: { code: "finances.client_in_use" },
     });
+  });
+
+  it("keeps drafts unnumbered and numbers them per year when issued", async () => {
+    const { clientId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const draft = await read(
+      await request(alice, "GET", `/invoices/${draftId}`),
+      detailBody
+    );
+
+    const next = await read(
+      await request(alice, "GET", "/invoices/next-number?year=2020"),
+      numberBody
+    );
+
+    const issued = await request(alice, "POST", `/invoices/${draftId}/issue`, {
+      number: null,
+    });
+
+    expect(draft.invoice).toMatchObject({ issuedAt: null, number: null });
+    expect(next).toStrictEqual({ number: "2020-002", previous: "2020-001" });
+    await expect(
+      read(issued, numberBody.pick({ number: true }))
+    ).resolves.toStrictEqual({ number: "2020-002" });
+    await expect(
+      read(await request(alice, "GET", `/invoices/${draftId}`), detailBody)
+    ).resolves.toMatchObject({
+      invoice: { number: "2020-002", status: "overdue" },
+    });
+  });
+
+  it("counts a plain legacy number as a sequence of its issue year", async () => {
+    const { clientId } = await setup();
+    await createInvoice(alice, clientId, "011");
+
+    const clash = await createInvoice(alice, clientId, "2020-011");
+    const otherYear = await createInvoice(alice, clientId, "2019-012");
+
+    await expect(
+      read(
+        await request(alice, "GET", "/invoices/next-number?year=2020"),
+        numberBody
+      )
+    ).resolves.toStrictEqual({ number: "2020-012", previous: "011" });
+    await expect(read(clash, errorBody)).resolves.toStrictEqual({
+      error: { code: "finances.invoice_number_taken", field: "number" },
+    });
+    await expect(read(otherYear, errorBody)).resolves.toStrictEqual({
+      error: { code: "finances.invoice_number_invalid", field: "number" },
+    });
+  });
+
+  it("locks issued invoices: notes only, void instead of delete", async () => {
+    const { invoiceId } = await setup();
+
+    const edit = await request(alice, "PATCH", `/invoices/${invoiceId}`, {
+      amountMinor: 1,
+    });
+
+    const notes = await request(alice, "PATCH", `/invoices/${invoiceId}`, {
+      notes: "Paid in two parts",
+    });
+
+    const removed = await request(alice, "DELETE", `/invoices/${invoiceId}`);
+    const voided = await request(alice, "POST", `/invoices/${invoiceId}/void`);
+
+    await expect(read(edit, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_issued" },
+    });
+    expect(notes.status).toBe(200);
+    await expect(read(removed, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_issued" },
+    });
+    expect(voided.status).toBe(200);
+    await expect(
+      read(
+        await request(alice, "GET", "/invoices/next-number?year=2020"),
+        numberBody
+      )
+    ).resolves.toMatchObject({ number: "2020-002" });
+  });
+
+  it("deletes drafts and refuses to void them", async () => {
+    const { clientId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const voided = await request(alice, "POST", `/invoices/${draftId}/void`);
+    const removed = await request(alice, "DELETE", `/invoices/${draftId}`);
+
+    await expect(read(voided, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_not_issued" },
+    });
+    expect(removed.status).toBe(200);
+  });
+
+  it("keeps issuing, voiding and editing inside the household", async () => {
+    const { clientId, invoiceId } = await setup();
+
+    const { id: draftId } = await read(
+      await createInvoice(alice, clientId, null),
+      idBody
+    );
+
+    const statuses = await Promise.all([
+      request(bob, "POST", `/invoices/${draftId}/issue`, { number: null }),
+      request(bob, "POST", `/invoices/${invoiceId}/void`),
+      request(bob, "PATCH", `/invoices/${draftId}`, { notes: "x" }),
+      request(bob, "DELETE", `/invoices/${draftId}`),
+    ]);
+
+    expect(statuses.map((response) => response.status)).toStrictEqual([
+      404, 404, 404, 404,
+    ]);
+  });
+
+  const PROFILE = {
+    address: "Ulica 1",
+    bankAddress: null,
+    bankCountry: null,
+    bankName: null,
+    companyId: null,
+    defaultVatRateBp: 0,
+    email: null,
+    footerNote: "Not a VAT payer",
+    iban: "MK07300000000042425",
+    name: "Jane Dev",
+    phone: null,
+    swift: null,
+    taxId: null,
+    vatRegistered: false,
+  } satisfies JsonBody;
+
+  const createItemised = async (session: Session, client: string) =>
+    await request(session, "POST", "/invoices", {
+      amountMinor: 0,
+      clientId: client,
+      currency: "EUR",
+      description: "Thank you!",
+      dueDate: "2020-01-31",
+      issue: false,
+      issueDate: "2020-01-01",
+      lines: [
+        {
+          description: "Development",
+          quantityMilli: 80_000,
+          unit: "hrs",
+          unitPriceMinor: 4000,
+          vatRateBp: 0,
+        },
+        {
+          description: "Hosting",
+          quantityMilli: 1000,
+          unit: null,
+          unitPriceMinor: 2500,
+          vatRateBp: 0,
+        },
+      ],
+      notes: null,
+      number: null,
+      periodEnd: null,
+      periodStart: null,
+    });
+
+  it("computes itemised invoices and freezes their document when issued", async () => {
+    const { clientId } = await setup();
+    const { id } = await read(await createItemised(alice, clientId), idBody);
+
+    const noProfile = await request(alice, "POST", `/invoices/${id}/issue`, {
+      number: null,
+    });
+
+    await request(alice, "PUT", "/business-profile", PROFILE);
+
+    const issued = await request(alice, "POST", `/invoices/${id}/issue`, {
+      number: null,
+    });
+
+    await request(alice, "PUT", "/business-profile", {
+      ...PROFILE,
+      name: "Renamed later",
+    });
+
+    await expect(read(noProfile, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.profile_incomplete" },
+    });
+    expect(issued.status).toBe(200);
+    await expect(
+      read(
+        await request(alice, "GET", `/invoices/${id}/document`),
+        documentBody
+      )
+    ).resolves.toStrictEqual({
+      document: {
+        client: { name: "Northwind Labs" },
+        issuer: { name: "Jane Dev" },
+        lines: [
+          { amountMinor: 320_000, unit: "hrs" },
+          { amountMinor: 2500, unit: null },
+        ],
+        number: "2020-002",
+        totals: { totalMinor: 322_500 },
+      },
+    });
+  });
+
+  it("keeps documents and generated PDFs inside the household", async () => {
+    const { clientId } = await setup();
+    const { id } = await read(await createItemised(alice, clientId), idBody);
+
+    const storeGenerated = async (session: Session, householdId: string) =>
+      await app.request(
+        `${ORIGIN}/api/photos`,
+        {
+          body: JSON.stringify({
+            contentType: "application/pdf",
+            fileName: "Invoice-2020-001.pdf",
+            generated: true,
+            objectKey: `${householdId}/finance_invoice/${id}/x.pdf`,
+            ownerId: id,
+            ownerType: "finance_invoice",
+            sizeBytes: 1000,
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie: session.cookie,
+            origin: ORIGIN,
+          },
+          method: "POST",
+        },
+        env
+      );
+
+    const bobDocument = await request(bob, "GET", `/invoices/${id}/document`);
+    const onDraft = await storeGenerated(alice, alice.householdId);
+
+    await request(alice, "PUT", "/business-profile", PROFILE);
+    await request(alice, "POST", `/invoices/${id}/issue`, { number: null });
+
+    const bobStores = await storeGenerated(bob, bob.householdId);
+    const stored = await storeGenerated(alice, alice.householdId);
+    const second = await storeGenerated(alice, alice.householdId);
+    const { id: photoId } = await read(stored, idBody);
+
+    const removed = await app.request(
+      `${ORIGIN}/api/photos/${photoId}`,
+      {
+        headers: { cookie: alice.cookie, origin: ORIGIN },
+        method: "DELETE",
+      },
+      env
+    );
+
+    expect(bobDocument.status).toBe(404);
+    expect(bobStores.status).toBe(404);
+    // Not on a draft; once issued, one generated PDF that can't be removed.
+    expect(
+      [onDraft, stored, second, removed].map((r) => r.status)
+    ).toStrictEqual([409, 201, 409, 409]);
   });
 });

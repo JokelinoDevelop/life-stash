@@ -73,5 +73,5 @@ export const odometerNudgeMessage = (
   body: TEXT[prefs.locale].nudgeBody,
   tag: `nudge-${car.id}`,
   title: TEXT[prefs.locale].nudgeTitle(car.name),
-  url: `/garage/cars/${car.id}?tab=mileage&log=1`,
+  url: `/garage/cars/${car.id}?tab=timeline&log=1`,
 });

@@ -12,8 +12,7 @@
     {
       "binding": "DB",
       "database_name": "lifestash",
-      // Replace with the id printed by `pnpm wrangler d1 create lifestash` before deploying.
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "707616e0-9e12-4d70-a5d7-4cf41a3098f2",
       "migrations_dir": "migrations",
     },
   ],

@@ -12,8 +12,8 @@
   "newMenu": "Ново",
   "items": {
     "title": "Делови",
-    "add": "Нов дел",
-    "createTitle": "Нов дел",
+    "add": "Додај дел",
+    "createTitle": "Додај дел",
     "editTitle": "Уреди дел",
     "name": "Име",
     "namePlaceholder": "пр. Свеќички",
@@ -38,8 +38,8 @@
   },
   "packages": {
     "title": "Пакети",
-    "add": "Нов пакет",
-    "createTitle": "Нов пакет",
+    "add": "Додај пакет",
+    "createTitle": "Додај пакет",
     "editTitle": "Уреди пакет",
     "name": "Име",
     "namePlaceholder": "пр. Голем сервис",

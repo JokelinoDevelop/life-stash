@@ -33,7 +33,7 @@ export interface FinanceOverviewResponse {
   }[];
   waiting: {
     id: string;
-    number: string;
+    number: string | null;
     clientName: string;
     description: string | null;
     periodStart: string | null;

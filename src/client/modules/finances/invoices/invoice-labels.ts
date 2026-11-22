@@ -30,6 +30,10 @@ export const useDueLabel = () => {
       return t("invoices.notSent");
     }
 
+    if (invoice.status === "void") {
+      return t("invoices.status.void").toLocaleLowerCase();
+    }
+
     return t("invoices.due", { date: formatShortDate(invoice.dueDate) });
   };
 };
@@ -55,4 +59,12 @@ export const useInvoiceFor = () => {
       ? what
       : `${project} · ${what}`;
   };
+};
+
+/** The invoice's number, or "Draft" until it is issued. */
+export const useInvoiceNumber = () => {
+  const { t } = useTranslation("finances");
+
+  return (invoice: { number: string | null }): string =>
+    invoice.number ?? t("invoices.draftNumber");
 };

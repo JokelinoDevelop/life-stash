@@ -156,3 +156,9 @@ export const LEDGER_SALARY = {
   day: 25,
   description: "Salary ACME d.o.o.",
 } as const;
+
+/** Hand-entered rates so the overview can show totals in MKD (MKD is pegged to the euro). */
+export const EXCHANGE_RATES = {
+  base: "MKD",
+  rates: { EUR: 61.5, USD: 56.5 },
+} as const;

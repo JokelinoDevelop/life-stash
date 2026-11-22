@@ -6,3 +6,9 @@ dev-dist
 *.local
 .DS_Store
 coverage
+
+# TanStack Router generator temp files
+.tanstack/
+
+# Production secrets for `wrangler secret bulk`. Never commit.
+secrets.json

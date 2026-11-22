@@ -6,7 +6,8 @@ import type { InvoiceDetail } from "../invoices.service";
 export interface GetInvoiceResponse {
   invoice: {
     id: string;
-    number: string;
+    /** Null while a draft. */
+    number: string | null;
     clientId: string;
     clientName: string;
     projectId: string | null;
@@ -15,6 +16,8 @@ export interface GetInvoiceResponse {
     dueDate: string;
     periodStart: string | null;
     periodEnd: string | null;
+    purchaseOrder: string | null;
+    shippingMinor: number;
     description: string | null;
     amountMinor: number;
     currency: Currency;
@@ -22,10 +25,23 @@ export interface GetInvoiceResponse {
     status: InvoiceStatus;
     daysOverdue: number;
     sentAt: string | null;
+    issuedAt: string | null;
+    voidedAt: string | null;
     paidAt: string | null;
     createdAt: string;
     attachments: number;
     firstAttachedAt: string | null;
+    itemised: boolean;
+    lines: {
+      id: string;
+      description: string;
+      quantityMilli: number;
+      unit: string | null;
+      unitPriceMinor: number;
+      vatRateBp: number;
+      amountMinor: number;
+      vatMinor: number;
+    }[];
     /** The income entry "mark paid" booked. */
     transaction: {
       id: string;
@@ -52,6 +68,18 @@ export const toGetInvoiceResponse = (
     firstAttachedAt: detail.firstAttachedAt,
     id: detail.id,
     issueDate: detail.issueDate,
+    issuedAt: detail.issuedAt,
+    itemised: detail.itemised,
+    lines: detail.lines.map((line) => ({
+      amountMinor: line.amountMinor,
+      description: line.description,
+      id: line.id,
+      quantityMilli: line.quantityMilli,
+      unit: line.unit,
+      unitPriceMinor: line.unitPriceMinor,
+      vatMinor: line.vatMinor,
+      vatRateBp: line.vatRateBp,
+    })),
     notes: detail.notes,
     number: detail.number,
     paidAt: detail.paidAt,
@@ -59,8 +87,11 @@ export const toGetInvoiceResponse = (
     periodStart: detail.periodStart,
     projectId: detail.projectId,
     projectName: detail.projectName,
+    purchaseOrder: detail.purchaseOrder,
     sentAt: detail.sentAt,
+    shippingMinor: detail.shippingMinor,
     status: detail.displayStatus,
+    voidedAt: detail.voidedAt,
     transaction:
       detail.transaction === null
         ? null

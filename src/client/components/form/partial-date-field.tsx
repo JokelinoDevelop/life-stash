@@ -1,7 +1,9 @@
 import { DATE_PRECISIONS } from "@shared/domain/dates";
 import type { DatePrecision } from "@shared/domain/dates";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -53,6 +55,9 @@ export const PartialDateField = ({
   const { t, i18n } = useTranslation();
   const { value } = field.state;
   const invalid = field.state.meta.isTouched && !field.state.meta.isValid;
+  // Most records have an exact date; month / year only stay one click away.
+  const [choosing, setChoosing] = useState(value.precision !== "day");
+  const showPrecision = allowPartial && choosing;
 
   const update = (patch: Partial<PartialDateValue>) => {
     field.handleChange({ ...value, ...patch });
@@ -61,7 +66,7 @@ export const PartialDateField = ({
   return (
     <Field data-invalid={invalid}>
       <FieldLabel htmlFor={`${field.name}-input`}>{label}</FieldLabel>
-      {allowPartial && (
+      {showPrecision && (
         <ToggleGroup
           className="w-full"
           onValueChange={([next = ""]) => {
@@ -94,6 +99,20 @@ export const PartialDateField = ({
           }}
           value={value.date}
         />
+      )}
+      {allowPartial && !choosing && (
+        <div>
+          <Button
+            onClick={() => {
+              setChoosing(true);
+            }}
+            size="xs"
+            type="button"
+            variant="link"
+          >
+            {t("date.notExact")}
+          </Button>
+        </div>
       )}
       {value.precision !== "day" && (
         <div className="flex gap-2">

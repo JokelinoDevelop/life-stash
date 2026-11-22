@@ -45,7 +45,7 @@ export const FormFooter = ({
   const { t } = useTranslation();
 
   return (
-    <div className="border-divider pb-safe-2.5 flex shrink-0 items-center gap-2 border-t px-3 pt-2.5">
+    <div className="border-divider pb-safe-2.5 flex shrink-0 items-center gap-2 border-t px-3 pt-2.5 md:px-5 md:py-3">
       <div
         className={cn(
           "flex min-w-0 flex-1 items-center",

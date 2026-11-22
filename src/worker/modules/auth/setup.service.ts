@@ -9,6 +9,7 @@ import {
   userPreferences,
   users,
 } from "../../db/schema/core";
+import { seedDefaultCategories } from "../finances/categories/default-categories";
 import { seedGarageCatalog } from "./catalog-seed";
 import { consumeChallenge, storeChallenge } from "./challenges";
 import {
@@ -63,7 +64,7 @@ interface NewAccount {
   passkey?: ReturnType<typeof passkeyRow>;
 }
 
-/** Creates the household, first user, preferences, starter catalog and recovery codes. */
+/** Creates the household, first user, preferences, starter catalog, finance categories and recovery codes. */
 const createAccount = async (
   db: Db,
   account: NewAccount
@@ -87,6 +88,7 @@ const createAccount = async (
   }
 
   await seedGarageCatalog(db, householdId);
+  await seedDefaultCategories(db, householdId);
 
   return await issueRecoveryCodes(db, userId);
 };

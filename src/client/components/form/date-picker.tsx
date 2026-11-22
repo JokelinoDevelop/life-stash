@@ -71,7 +71,7 @@ const TypedDateInput = ({ onPick }: { onPick: (iso: string) => void }) => {
     <Input
       aria-invalid={invalid}
       aria-label={t("date.type")}
-      className="h-7 min-w-0 flex-1"
+      className="h-8 w-full"
       onChange={(event) => {
         setText(event.target.value);
         setInvalid(false);
@@ -97,6 +97,27 @@ const TypedDateInput = ({ onPick }: { onPick: (iso: string) => void }) => {
     />
   );
 };
+
+/** A quick pick in the footer ("Today", "Yesterday"), pressed when it is the chosen date. */
+const QuickPick = ({
+  active,
+  label,
+  onPick,
+}: {
+  active: boolean;
+  label: string;
+  onPick: () => void;
+}) => (
+  <Button
+    aria-pressed={active}
+    onClick={onPick}
+    size="sm"
+    type="button"
+    variant="chip"
+  >
+    {label}
+  </Button>
+);
 
 export interface DatePickerProps {
   /** `YYYY-MM-DD`, or "" for no date. */
@@ -169,47 +190,17 @@ export const DatePicker = ({
         <CalendarDays />
         <span className="truncate tabular-nums">{text}</span>
       </PopoverTrigger>
-      <PopoverContent align="start" collisionPadding={8} variant="bare">
-        <div className="border-divider flex items-center gap-1 border-b p-2">
+      <PopoverContent
+        align="start"
+        className="w-[18.5rem]"
+        collisionPadding={8}
+        variant="bare"
+      >
+        <div className="border-divider border-b p-2">
           <TypedDateInput onPick={pick} />
-          <Button
-            onClick={() => {
-              pick(today);
-            }}
-            size="xs"
-            type="button"
-            variant="ghost"
-          >
-            {t("date.today")}
-          </Button>
-          {clearable ? (
-            <Button
-              disabled={value === ""}
-              onClick={() => {
-                pick("");
-              }}
-              size="xs"
-              type="button"
-              variant="ghost"
-            >
-              {t("date.clear")}
-            </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                pick(addDays(today, -1));
-              }}
-              size="xs"
-              type="button"
-              variant="ghost"
-            >
-              {t("date.yesterday")}
-            </Button>
-          )}
         </div>
         <Calendar
           autoFocus
-          className="[--cell-size:--spacing(7)]"
           captionLayout="dropdown"
           defaultMonth={selected ?? isoToDate(today)}
           endMonth={new Date(Number(today.slice(0, 4)) + YEARS_AHEAD, 11)}
@@ -222,7 +213,38 @@ export const DatePicker = ({
           }}
           selected={selected}
           startMonth={new Date(FIRST_YEAR, 0)}
+          variant="popover"
         />
+        <div className="border-divider flex items-center gap-1 border-t p-2">
+          <QuickPick
+            active={value === today}
+            label={t("date.today")}
+            onPick={() => {
+              pick(today);
+            }}
+          />
+          <QuickPick
+            active={value === addDays(today, -1)}
+            label={t("date.yesterday")}
+            onPick={() => {
+              pick(addDays(today, -1));
+            }}
+          />
+          {clearable && (
+            <Button
+              className="ml-auto"
+              disabled={value === ""}
+              onClick={() => {
+                pick("");
+              }}
+              size="xs"
+              type="button"
+              variant="ghost"
+            >
+              {t("date.clear")}
+            </Button>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   );

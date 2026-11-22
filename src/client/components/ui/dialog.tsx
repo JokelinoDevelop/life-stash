@@ -48,8 +48,8 @@ function DialogContent({
   showCloseButton?: boolean;
   /** `bare`: no padding or gap; the content brings its own header, body and footer. */
   variant?: "default" | "bare";
-  /** Width of a `bare` dialog: `md` for quick entries, `lg` for longer forms. */
-  size?: "md" | "lg";
+  /** Width of a `bare` dialog: `md` for quick entries, `lg` for longer forms, `full` for editors with a preview. */
+  size?: "md" | "lg" | "full";
 }) {
   return (
     <DialogPortal>
@@ -61,7 +61,11 @@ function DialogContent({
           "bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl p-6 text-sm ring-1 duration-100 outline-none sm:max-w-md",
           variant === "bare" &&
             "bg-card flex max-h-[calc(100dvh-4rem)] flex-col gap-0 overflow-hidden p-0",
-          variant === "bare" && size === "lg" && "sm:max-w-xl",
+          variant === "bare" && size === "md" && "sm:max-w-lg",
+          variant === "bare" && size === "lg" && "sm:max-w-3xl",
+          variant === "bare" &&
+            size === "full" &&
+            "h-[calc(100dvh-4rem)] sm:max-w-[min(88rem,calc(100%-4rem))]",
           className
         )}
         {...props}

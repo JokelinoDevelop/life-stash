@@ -4,8 +4,9 @@ import {
   averageDaysToGetPaid,
   defaultDueDate,
   invoiceStatus,
-  nextInvoiceNumber,
-  previousInvoiceNumber,
+  formatInvoiceNumber,
+  nextInvoiceSeq,
+  parseInvoiceNumber,
   receivables,
 } from "./invoices";
 
@@ -34,24 +35,49 @@ describe(invoiceStatus, () => {
   });
 });
 
-describe(nextInvoiceNumber, () => {
-  it("continues the highest number of the same year", () => {
-    expect(
-      nextInvoiceNumber(["2026-013", "2026-014", "2025-021", "custom"], 2026)
-    ).toBe("2026-015");
+describe(parseInvoiceNumber, () => {
+  it("reads YYYY-NNN and YYYY/NNN of the issue year", () => {
+    expect(parseInvoiceNumber("2026-012", 2026)).toStrictEqual({
+      seq: 12,
+      year: 2026,
+    });
+    expect(parseInvoiceNumber(" 2026/1000 ", 2026)).toStrictEqual({
+      seq: 1000,
+      year: 2026,
+    });
   });
 
-  it("starts each year at 001 and supports other formats", () => {
-    expect(nextInvoiceNumber(["2025-021"], 2026)).toBe("2026-001");
-    expect(nextInvoiceNumber(["2026/009"], 2026, "YYYY/NNN")).toBe("2026/010");
-    expect(nextInvoiceNumber(["041", "2026-003"], 2026, "NNN")).toBe("042");
+  it("counts a plain number as a sequence of the issue year", () => {
+    expect(parseInvoiceNumber("011", 2026)).toStrictEqual({
+      seq: 11,
+      year: 2026,
+    });
   });
 
-  it("finds the number it continues from", () => {
-    expect(previousInvoiceNumber(["2026-013", "2026-014"], 2026)).toBe(
-      "2026-014"
-    );
-    expect(previousInvoiceNumber([], 2026)).toBeNull();
+  it("refuses other years, zero and other shapes", () => {
+    expect(parseInvoiceNumber("2025-004", 2026)).toBeNull();
+    expect(parseInvoiceNumber("000", 2026)).toBeNull();
+    expect(parseInvoiceNumber("INV-7", 2026)).toBeNull();
+    expect(parseInvoiceNumber("", 2026)).toBeNull();
+  });
+});
+
+describe(formatInvoiceNumber, () => {
+  it("pads to three digits in each format", () => {
+    expect(formatInvoiceNumber(2026, 12)).toBe("2026-012");
+    expect(formatInvoiceNumber(2026, 9, "YYYY/NNN")).toBe("2026/009");
+    expect(formatInvoiceNumber(2026, 42, "NNN")).toBe("042");
+  });
+
+  it("grows past 999", () => {
+    expect(formatInvoiceNumber(2026, 1000)).toBe("2026-1000");
+  });
+});
+
+describe(nextInvoiceSeq, () => {
+  it("continues the highest sequence, with or without gaps", () => {
+    expect(nextInvoiceSeq([1, 2, 11, 5])).toBe(12);
+    expect(nextInvoiceSeq([])).toBe(1);
   });
 });
 

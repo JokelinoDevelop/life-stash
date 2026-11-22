@@ -39,7 +39,7 @@ const SetupPage = () => {
             await queryClient.invalidateQueries({
               queryKey: queryKeys.authStatus,
             });
-            await navigate({ to: "/garage" });
+            await navigate({ to: "/" });
           }}
         />
       )}

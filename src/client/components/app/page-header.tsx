@@ -66,11 +66,9 @@ export const PageHeader = ({
   </>
 );
 
-/** Padded content for form and settings pages (the desktop panel has no padding). */
+/** Padded, full-width content for form and settings pages (the desktop panel has no padding). */
 export const PageContent = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-col gap-6 md:max-w-4xl md:px-7 md:py-6">
-    {children}
-  </div>
+  <div className="flex flex-col gap-6 md:px-7 md:py-6">{children}</div>
 );
 
 /**

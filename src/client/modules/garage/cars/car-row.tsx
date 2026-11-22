@@ -1,4 +1,3 @@
-import { reminderProgress } from "@shared/domain/reminders";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -77,7 +76,6 @@ export const CarRow = ({
         <StatusRing
           className="md:hidden"
           label={[urgent.title, tc(`status.${urgent.status}`)].join(": ")}
-          progress={reminderProgress(urgent)}
           status={urgent.status}
         />
       )}

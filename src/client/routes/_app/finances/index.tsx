@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { HouseholdMenu } from "@/components/app/app-shell";
+import { HouseholdName } from "@/components/app/app-shell";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -99,7 +99,6 @@ const FinancesPage = () => {
               variant="outline"
             >
               {t("overview.newInvoice")}
-              <Kbd>{FINANCE_SHORTCUTS.newInvoice.toUpperCase()}</Kbd>
             </Button>
             <Button
               className="hidden md:inline-flex"
@@ -122,8 +121,7 @@ const FinancesPage = () => {
           </>
         }
         description={status}
-        desktopTitle={t("overview.title")}
-        mobileTop={<HouseholdMenu />}
+        mobileTop={<HouseholdName />}
         title={t("title")}
       />
       <OverviewView year={year} />

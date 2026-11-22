@@ -1,6 +1,7 @@
 import {
   Ban,
   Copy,
+  Download,
   Eye,
   MoreHorizontal,
   Pencil,
@@ -10,7 +11,6 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { useConfirm } from "@/components/app/confirm/confirm-context";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,20 +21,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
-import { useLedgerMoney } from "../money";
+import { useDownloadInvoicePdf } from "./invoice-document";
 import type { InvoiceListItem } from "./invoices.queries";
 import { useInvoiceActions } from "./use-invoice-actions";
 
-/** ⋯ on an invoice row: view / edit, send, mark unpaid, duplicate, void, delete. */
+/**
+ * ⋯ on an invoice row. Drafts: edit, issue, duplicate, delete. Issued: view, duplicate,
+ * mark unpaid (paid) or void (sent).
+ */
 export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
   const { t } = useTranslation("finances");
   const { t: tc } = useTranslation();
   const dialog = useFinanceDialog();
-  const confirm = useConfirm();
-  const ledger = useLedgerMoney();
   const actions = useInvoiceActions();
-  const paid = invoice.status === "paid";
-  const open = invoice.status !== "paid" && invoice.status !== "void";
+  const download = useDownloadInvoicePdf();
+  const draft = invoice.status === "draft";
+  const unpaid = invoice.status === "sent" || invoice.status === "overdue";
 
   return (
     <DropdownMenu>
@@ -55,20 +57,30 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
             void dialog.open({ dialog: "invoice", id: invoice.id });
           }}
         >
-          {paid ? <Eye /> : <Pencil />}
-          {paid ? t("invoices.viewAction") : tc("actions.edit")}
+          {draft ? <Pencil /> : <Eye />}
+          {draft ? tc("actions.edit") : t("invoices.viewAction")}
         </DropdownMenuItem>
-        {invoice.status === "draft" && (
+        {draft && (
           <DropdownMenuItem
             onClick={() => {
-              actions.markSent(invoice);
+              void actions.issue(invoice);
             }}
           >
             <Send />
-            {t("invoices.markSent")}
+            {t("invoices.issue")}
           </DropdownMenuItem>
         )}
-        {paid && (
+        {!draft && invoice.itemised && (
+          <DropdownMenuItem
+            onClick={() => {
+              void download(invoice);
+            }}
+          >
+            <Download />
+            {t("invoices.downloadPdf")}
+          </DropdownMenuItem>
+        )}
+        {invoice.status === "paid" && (
           <DropdownMenuItem
             onClick={() => {
               void actions.markUnpaid(invoice);
@@ -86,37 +98,34 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
           <Copy />
           {t("invoices.duplicate")}
         </DropdownMenuItem>
-        {open && (
-          <DropdownMenuItem
-            onClick={async () => {
-              const ok = await confirm({
-                confirmLabel: t("invoices.void"),
-                description: t("invoices.voidDescription"),
-                title: t("invoices.voidTitle", { number: invoice.number }),
-              });
-
-              if (ok) {
-                actions.markVoid(invoice);
-              }
-            }}
-          >
-            <Ban />
-            {t("invoices.void")}
-          </DropdownMenuItem>
+        {unpaid && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                void actions.markVoid(invoice);
+              }}
+              variant="destructive"
+            >
+              <Ban />
+              {t("invoices.void")}
+            </DropdownMenuItem>
+          </>
         )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            void actions.remove(
-              invoice,
-              ledger.money(invoice.amountMinor, invoice.currency)
-            );
-          }}
-          variant="destructive"
-        >
-          <Trash2 />
-          {tc("actions.delete")}
-        </DropdownMenuItem>
+        {draft && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={() => {
+                void actions.remove(invoice);
+              }}
+              variant="destructive"
+            >
+              <Trash2 />
+              {tc("actions.delete")}
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

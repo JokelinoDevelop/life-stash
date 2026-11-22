@@ -123,6 +123,10 @@ export const photos = sqliteTable(
     createdAt: createdAt(),
     /** Original file name, shown for documents (invoice PDFs, receipts). */
     fileName: text("file_name"),
+    /** An invoice PDF the app generated when issuing (kept as sent, not removable). */
+    generated: integer("generated", { mode: "boolean" })
+      .notNull()
+      .default(false),
     householdId: text("household_id")
       .notNull()
       .references(() => households.id, { onDelete: "cascade" }),

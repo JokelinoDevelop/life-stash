@@ -6,6 +6,8 @@ import {
   financeInvoices,
   financeProjects,
 } from "../../../db/schema/finances";
+import { replaceLinesStatements } from "./invoice-lines.repository";
+import type { NewInvoiceLine } from "./invoice-lines.repository";
 
 export type InvoiceRow = typeof financeInvoices.$inferSelect;
 
@@ -60,7 +62,11 @@ export class InvoicesRepository {
           ? this.#live()
           : and(this.#live(), eq(financeInvoices.clientId, filter.clientId))
       )
-      .orderBy(desc(financeInvoices.issueDate), desc(financeInvoices.number));
+      .orderBy(
+        desc(financeInvoices.issueDate),
+        desc(financeInvoices.numberSeq),
+        desc(financeInvoices.createdAt)
+      );
 
     return rows.map((row) => ({
       ...row.invoice,
@@ -104,13 +110,52 @@ export class InvoicesRepository {
         };
   }
 
-  async numbers(): Promise<string[]> {
+  /** Numbered live invoices of `year` (every year when null), highest sequence first. */
+  async numbered(
+    year: number | null
+  ): Promise<{ number: string; seq: number }[]> {
     const rows = await this.#db
-      .select({ number: financeInvoices.number })
+      .select({
+        number: financeInvoices.number,
+        seq: financeInvoices.numberSeq,
+      })
       .from(financeInvoices)
-      .where(this.#live());
+      .where(
+        and(
+          this.#live(),
+          isNotNull(financeInvoices.numberSeq),
+          year === null ? undefined : eq(financeInvoices.numberYear, year)
+        )
+      )
+      .orderBy(desc(financeInvoices.numberSeq));
 
-    return rows.map((row) => row.number);
+    return rows.flatMap((row) =>
+      row.number === null || row.seq === null
+        ? []
+        : [{ number: row.number, seq: row.seq }]
+    );
+  }
+
+  /** Whether another live invoice already uses sequence `seq` of `year` (of any year when null). */
+  async seqTaken(
+    year: number | null,
+    seq: number,
+    exceptId: string | null
+  ): Promise<boolean> {
+    const [row] = await this.#db
+      .select({ id: financeInvoices.id })
+      .from(financeInvoices)
+      .where(
+        and(
+          this.#live(),
+          eq(financeInvoices.numberSeq, seq),
+          year === null ? undefined : eq(financeInvoices.numberYear, year),
+          exceptId === null ? undefined : ne(financeInvoices.id, exceptId)
+        )
+      )
+      .limit(1);
+
+    return row !== undefined;
   }
 
   /** Whether another live invoice already uses `number`. */
@@ -130,11 +175,27 @@ export class InvoicesRepository {
     return row !== undefined;
   }
 
-  async insert(values: NewInvoice): Promise<InvoiceRow> {
-    const [row] = await this.#db
+  /** Inserts an invoice, with its lines (itemised) in the same batch. */
+  async insert(
+    values: NewInvoice,
+    lines: readonly NewInvoiceLine[] = []
+  ): Promise<InvoiceRow> {
+    const id = crypto.randomUUID();
+
+    const insert = this.#db
       .insert(financeInvoices)
-      .values({ ...values, householdId: this.#householdId })
+      .values({ ...values, householdId: this.#householdId, id })
       .returning();
+
+    const [rows] =
+      lines.length === 0
+        ? [await insert]
+        : await this.#db.batch([
+            insert,
+            ...replaceLinesStatements(this.#db, this.#householdId, id, lines),
+          ]);
+
+    const [row] = rows;
 
     if (!row) {
       throw new Error("Invoice insert returned no row");
@@ -143,11 +204,30 @@ export class InvoicesRepository {
     return row;
   }
 
-  async update(invoiceId: string, patch: InvoicePatch): Promise<void> {
-    await this.#db
+  /**
+   * Updates a live invoice. With `lines`, they replace its lines in the same batch, so the
+   * amount and the lines change together or not at all.
+   */
+  async update(
+    invoiceId: string,
+    patch: InvoicePatch,
+    lines?: readonly NewInvoiceLine[]
+  ): Promise<void> {
+    const update = this.#db
       .update(financeInvoices)
       .set(patch)
       .where(and(eq(financeInvoices.id, invoiceId), this.#live()));
+
+    if (lines === undefined) {
+      await update;
+
+      return;
+    }
+
+    await this.#db.batch([
+      update,
+      ...replaceLinesStatements(this.#db, this.#householdId, invoiceId, lines),
+    ]);
   }
 
   /** Records the overdue heads-up (the cron sends one per invoice). */
@@ -214,8 +294,9 @@ export type InvoicesRepositoryPort = Pick<
   InvoicesRepository,
   | "list"
   | "findById"
-  | "numbers"
+  | "numbered"
   | "numberTaken"
+  | "seqTaken"
   | "insert"
   | "update"
   | "setDeleted"
