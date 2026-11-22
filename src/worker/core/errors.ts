@@ -10,6 +10,8 @@ export type ApiErrorCode =
   | "not_found"
   | "not_configured"
   | "rate_limited"
+  /** The session is too old for this action: confirm it's you (sign in again) and retry. */
+  | "reauth_required"
   | "unauthorized"
   | "validation"
   | FinanceErrorCode;

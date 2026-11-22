@@ -10,4 +10,10 @@ export interface Secrets {
   VAPID_SUBJECT?: string;
 }
 
-export type Bindings = Env & Secrets;
+/** Bindings that only exist where configured (absent in tests and plain local dev). */
+export interface OptionalBindings {
+  /** Per-IP limit on sign-in endpoints (`ratelimits` in wrangler.jsonc). */
+  AUTH_LIMITER?: RateLimit;
+}
+
+export type Bindings = Env & Secrets & OptionalBindings;

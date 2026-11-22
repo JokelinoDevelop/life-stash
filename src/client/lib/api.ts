@@ -17,6 +17,7 @@ export type ApiErrorCode =
   | "not_configured"
   | "not_found"
   | "rate_limited"
+  | "reauth_required"
   | "unauthorized"
   | "validation"
   | FinanceErrorCode;
@@ -72,6 +73,7 @@ const ERROR_CODES: readonly ApiErrorCode[] = [
   "not_configured",
   "not_found",
   "rate_limited",
+  "reauth_required",
   "unauthorized",
   "validation",
   ...FINANCE_ERROR_CODES,

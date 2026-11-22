@@ -1,10 +1,12 @@
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { csrf } from "hono/csrf";
 import { secureHeaders } from "hono/secure-headers";
 
 import type { AppEnv, PublicEnv } from "./core/app-env";
-import { handleError } from "./core/errors";
-import { requireAuth, withDb } from "./core/middleware";
+import { ApiError, handleError } from "./core/errors";
+import { noStore, requireAuth, withDb } from "./core/middleware";
+import { authRateLimit } from "./core/rate-limit";
 import {
   accountPasswordRoutes,
   publicPasswordRoutes,
@@ -15,6 +17,8 @@ import { garageRoutes } from "./modules/garage/garage.routes";
 import { photoRoutes } from "./modules/photos/photos.routes";
 import { configRoutes } from "./modules/settings/config.routes";
 import { settingsRoutes } from "./modules/settings/settings.routes";
+
+const MAX_BODY_BYTES = 1024 * 1024;
 
 /** Everything behind a session. */
 const privateRoutes = new Hono<AppEnv>()
@@ -27,8 +31,20 @@ const privateRoutes = new Hono<AppEnv>()
 export const app = new Hono<PublicEnv>()
   .basePath("/api")
   .use(secureHeaders())
+  // Private data: never kept by the browser cache or a shared proxy.
+  .use(noStore)
   // Rejects cross-site form submissions (state-changing requests must come from our own origin).
   .use(csrf())
+  // Requests are small JSON (files go straight to storage); refuse anything large.
+  .use(
+    bodyLimit({
+      maxSize: MAX_BODY_BYTES,
+      onError: () => {
+        throw new ApiError(413, "bad_request", "Request too large");
+      },
+    })
+  )
+  .use("/auth/*", authRateLimit)
   .use(withDb)
   .route("/auth", publicAuthRoutes)
   .route("/auth", publicPasswordRoutes)

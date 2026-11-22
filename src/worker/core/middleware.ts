@@ -6,6 +6,11 @@ import { createDb } from "./db";
 import { unauthorized } from "./errors";
 import { readSession } from "./session";
 
+export const noStore = createMiddleware<PublicEnv>(async (c, next) => {
+  await next();
+  c.header("Cache-Control", "no-store");
+});
+
 export const withDb = createMiddleware<PublicEnv>(async (c, next) => {
   c.set("db", createDb(c.env.DB));
 

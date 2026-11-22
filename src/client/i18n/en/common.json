@@ -83,7 +83,8 @@
     "validation": "Some fields are invalid.",
     "rateLimited": "Too many attempts. Wait a few minutes and try again.",
     "loadFailed": "Couldn't load this",
-    "pageFailed": "This page couldn't be shown"
+    "pageFailed": "This page couldn't be shown",
+    "reauthRequired": "Confirm it's you to continue."
   },
   "confirmDelete": {
     "title": "Delete this?",

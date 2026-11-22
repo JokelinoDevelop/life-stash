@@ -1,4 +1,4 @@
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, ne } from "drizzle-orm";
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
@@ -23,11 +23,21 @@ const cookieOptions = (c: Context) => ({
 const expiryFromNow = () =>
   new Date(Date.now() + SESSION_DAYS * DAY_MS).toISOString();
 
+/**
+ * Signs in on this browser with a new session token. A session this browser already held is
+ * removed, so signing in again (or confirming it's you) never leaves the old token valid.
+ */
 export const createSession = async (
   c: Context,
   db: Db,
   userId: string
 ): Promise<void> => {
+  const previous = getCookie(c, SESSION_COOKIE);
+
+  if (previous !== undefined && previous !== "") {
+    await db.delete(sessions).where(eq(sessions.id, await sha256Hex(previous)));
+  }
+
   const token = randomToken();
   await db.insert(sessions).values({
     expiresAt: expiryFromNow(),
@@ -77,11 +87,25 @@ export const readSession = async (
     setCookie(c, SESSION_COOKIE, token, cookieOptions(c));
   }
 
+  // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
   return {
     householdId: row.householdId,
     sessionCreatedAt: row.createdAt,
+    sessionId,
     userId: row.userId,
   };
+};
+
+/** Signs the user out everywhere except this browser (after changing how they sign in). */
+export const endOtherSessions = async (
+  db: Db,
+  auth: { userId: string; sessionId: string }
+): Promise<void> => {
+  await db
+    .delete(sessions)
+    .where(
+      and(eq(sessions.userId, auth.userId), ne(sessions.id, auth.sessionId))
+    );
 };
 
 export const destroySession = async (c: Context, db: Db): Promise<void> => {

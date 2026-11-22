@@ -1,4 +1,4 @@
-import { and, count, eq, ne } from "drizzle-orm";
+import { and, count, eq, ne, sql } from "drizzle-orm";
 
 import type { AuthContext } from "../../core/app-env";
 import type { Db } from "../../core/db";
@@ -8,6 +8,7 @@ import {
   hashPassword,
   verifyPassword,
 } from "../../core/password";
+import { endOtherSessions } from "../../core/session";
 import { passkeys, users } from "../../db/schema/core";
 
 const MAX_FAILED_LOGINS = 5;
@@ -22,6 +23,31 @@ const tooManyAttempts = () =>
     "Too many attempts. Try again in a few minutes."
   );
 
+const lockedUntil = () =>
+  new Date(Date.now() + LOCK_MINUTES * MINUTE_MS).toISOString();
+
+/**
+ * Counts an attempt before checking the password, in one statement, so parallel requests can't
+ * all read the same count: at most `MAX_FAILED_LOGINS` guesses per lock window. Returns the
+ * count including this attempt.
+ */
+const countAttempt = async (db: Db, userId: string): Promise<number> => {
+  const [row] = await db
+    .update(users)
+    .set({ failedLoginCount: sql`${users.failedLoginCount} + 1` })
+    .where(eq(users.id, userId))
+    .returning({ attempts: users.failedLoginCount });
+
+  return row?.attempts ?? MAX_FAILED_LOGINS + 1;
+};
+
+const lock = async (db: Db, userId: string): Promise<void> => {
+  await db
+    .update(users)
+    .set({ failedLoginCount: 0, loginLockedUntil: lockedUntil() })
+    .where(eq(users.id, userId));
+};
+
 /** Checks email + password and returns the user id; locks the account after repeated failures. */
 export const signInWithPassword = async (
   db: Db,
@@ -34,45 +60,47 @@ export const signInWithPassword = async (
     .where(eq(users.email, email))
     .limit(1);
 
-  const nowIso = new Date().toISOString();
+  if (!user) {
+    // Same work as a real check, so timing doesn't reveal which emails exist.
+    await verifyPassword(password, DUMMY_PASSWORD_HASH);
+
+    throw unauthorized();
+  }
 
   if (
-    user?.loginLockedUntil !== null &&
-    user?.loginLockedUntil !== undefined &&
-    user.loginLockedUntil > nowIso
+    user.loginLockedUntil !== null &&
+    user.loginLockedUntil > new Date().toISOString()
   ) {
     throw tooManyAttempts();
   }
 
-  const valid = await verifyPassword(
+  const attempts = await countAttempt(db, user.id);
+
+  if (attempts > MAX_FAILED_LOGINS) {
+    await lock(db, user.id);
+
+    throw tooManyAttempts();
+  }
+
+  const matches = await verifyPassword(
     password,
-    user?.passwordHash ?? DUMMY_PASSWORD_HASH
+    user.passwordHash ?? DUMMY_PASSWORD_HASH
   );
 
-  if (!user || !valid) {
-    if (user) {
-      const failures = user.failedLoginCount + 1;
-      const locked = failures >= MAX_FAILED_LOGINS;
-      await db
-        .update(users)
-        .set({
-          failedLoginCount: locked ? 0 : failures,
-          loginLockedUntil: locked
-            ? new Date(Date.now() + LOCK_MINUTES * MINUTE_MS).toISOString()
-            : null,
-        })
-        .where(eq(users.id, user.id));
+  const valid = user.passwordHash !== null && matches;
+
+  if (!valid) {
+    if (attempts === MAX_FAILED_LOGINS) {
+      await lock(db, user.id);
     }
 
     throw unauthorized();
   }
 
-  if (user.failedLoginCount > 0 || user.loginLockedUntil !== null) {
-    await db
-      .update(users)
-      .set({ failedLoginCount: 0, loginLockedUntil: null })
-      .where(eq(users.id, user.id));
-  }
+  await db
+    .update(users)
+    .set({ failedLoginCount: 0, loginLockedUntil: null })
+    .where(eq(users.id, user.id));
 
   return user.id;
 };
@@ -80,6 +108,16 @@ export const signInWithPassword = async (
 const isRecent = (auth: AuthContext): boolean =>
   Date.now() - Date.parse(auth.sessionCreatedAt) <
   RECENT_SIGN_IN_MINUTES * MINUTE_MS;
+
+/**
+ * Actions that hand out lasting access (recovery codes, passkeys) need a sign-in from the last
+ * few minutes, so a stolen session cookie alone can't lock the owner out.
+ */
+export const requireRecentSignIn = (auth: AuthContext): void => {
+  if (!isRecent(auth)) {
+    throw new ApiError(403, "reauth_required", "Confirm it's you to continue");
+  }
+};
 
 export const getCredentials = async (db: Db, auth: AuthContext) => {
   const [[user], [keys]] = await Promise.all([
@@ -161,4 +199,9 @@ export const updateCredentials = async (
           : await hashPassword(update.newPassword),
     })
     .where(eq(users.id, user.id));
+
+  // New sign-in details: anyone signed in elsewhere (with the old ones) is signed out.
+  if (update.newPassword !== null || update.email !== user.email) {
+    await endOtherSessions(db, auth);
+  }
 };

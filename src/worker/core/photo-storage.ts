@@ -2,13 +2,22 @@ import { AwsClient } from "aws4fetch";
 
 import type { Bindings } from "./env";
 
+export interface SignedUrlOptions {
+  expiresInSeconds: number;
+  /** Extra signed query parameters, e.g. `response-content-disposition`. */
+  params?: Readonly<Record<string, string>>;
+  /**
+   * Headers the request must send exactly (signed), e.g. an upload's `content-type` and
+   * `content-length`, so the file can't be swapped for another type or size.
+   */
+  headers?: Readonly<Record<string, string>>;
+}
+
 export interface PhotoStorage {
   signedUrl: (
     method: "GET" | "PUT",
     key: string,
-    expiresInSeconds: number,
-    /** Extra signed query parameters, e.g. `response-content-disposition`. */
-    params?: Record<string, string>
+    options: SignedUrlOptions
   ) => Promise<string>;
   remove: (key: string) => Promise<void>;
 }
@@ -52,7 +61,14 @@ export const photoStorageFor = (env: Bindings): PhotoStorage | null => {
   });
 
   const objectUrl = (key: string) => {
-    const path = key.split("/").map(encodeURIComponent).join("/");
+    const segments = key.split("/");
+
+    // `.` and `..` would be resolved by the URL and reach outside the key's folder.
+    if (segments.some((part) => part === "" || part === "." || part === "..")) {
+      throw new Error("Invalid object key");
+    }
+
+    const path = segments.map(encodeURIComponent).join("/");
 
     return `${config.endpoint}/${config.bucket}/${path}`;
   };
@@ -65,7 +81,11 @@ export const photoStorageFor = (env: Bindings): PhotoStorage | null => {
         throw new Error(`B2 delete failed with ${response.status}`);
       }
     },
-    signedUrl: async (method, key, expiresInSeconds, params = {}) => {
+    signedUrl: async (
+      method,
+      key,
+      { expiresInSeconds, headers, params = {} }
+    ) => {
       const url = new URL(objectUrl(key));
       url.searchParams.set("X-Amz-Expires", String(expiresInSeconds));
 
@@ -74,7 +94,8 @@ export const photoStorageFor = (env: Bindings): PhotoStorage | null => {
       }
 
       const signed = await client.sign(url.toString(), {
-        aws: { signQuery: true },
+        aws: { allHeaders: headers !== undefined, signQuery: true },
+        headers,
         method,
       });
 

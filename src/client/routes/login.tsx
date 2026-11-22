@@ -31,9 +31,7 @@ const LoginPage = () => {
   const afterSignIn = async () => {
     queryClient.removeQueries();
     await queryClient.invalidateQueries({ queryKey: queryKeys.authStatus });
-    await navigate({
-      to: redirectTo?.startsWith("/") === true ? redirectTo : "/",
-    });
+    await navigate({ to: safeRedirect(redirectTo) });
   };
 
   const signInPasskey = async () => {
@@ -76,6 +74,10 @@ const LoginPage = () => {
     </AuthLayout>
   );
 };
+
+/** Only a path inside the app: never `//host` or `/\\host`, which browsers treat as another site. */
+const safeRedirect = (target: string | undefined): string =>
+  target !== undefined && /^\/(?![/\\])/u.test(target) ? target : "/";
 
 export const Route = createFileRoute("/login")({
   validateSearch: z.object({ redirect: z.string().optional() }),

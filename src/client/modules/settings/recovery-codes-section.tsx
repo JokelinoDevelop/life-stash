@@ -12,6 +12,8 @@ import { useErrorMessage } from "@/lib/errors";
 import { queryKeys } from "@/lib/query-keys";
 import { RecoveryCodesPanel } from "@/modules/auth/recovery-codes-panel";
 
+import { ReauthCancelledError, useReauth } from "./reauth/use-reauth";
+
 const LOW_CODES = 3;
 
 export const RecoveryCodesSection = () => {
@@ -19,6 +21,7 @@ export const RecoveryCodesSection = () => {
   const queryClient = useQueryClient();
   const errorMessage = useErrorMessage();
   const [codes, setCodes] = useState<string[] | null>(null);
+  const reauth = useReauth();
 
   const remaining = useQuery({
     queryFn: async () => await unwrap(api.account["recovery-codes"].$get()),
@@ -29,13 +32,19 @@ export const RecoveryCodesSection = () => {
 
   const regenerate = async () => {
     try {
-      const result = await unwrap(api.account["recovery-codes"].$post());
+      const result = await reauth.run(
+        async () => await unwrap(api.account["recovery-codes"].$post())
+      );
+
       setCodes(result.recoveryCodes);
       await queryClient.invalidateQueries({
         queryKey: queryKeys.recoveryCodes,
       });
     } catch (error) {
-      toast.error(errorMessage(error));
+      if (!(error instanceof ReauthCancelledError)) {
+        toast.error(errorMessage(error));
+      }
+
       throw error;
     }
   };
@@ -55,6 +64,7 @@ export const RecoveryCodesSection = () => {
 
   return (
     <div className="flex flex-col gap-3">
+      {reauth.dialog}
       <h3 className="text-sm font-medium">{t("security.recoveryCodes")}</h3>
       <p className="text-muted-foreground text-sm">
         {t("security.remaining", { count: remainingCount })}

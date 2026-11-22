@@ -12,7 +12,8 @@ type MessageKey =
   | "errors.unauthorized"
   | "errors.notConfigured"
   | "errors.validation"
-  | "errors.rateLimited";
+  | "errors.rateLimited"
+  | "errors.reauthRequired";
 
 const FINANCE_MESSAGES = {
   "finances.category_archived": "errors.categoryArchived",
@@ -50,6 +51,7 @@ const MESSAGE_FOR_CODE: Record<
   not_configured: "errors.notConfigured",
   not_found: "errors.notFound",
   rate_limited: "errors.rateLimited",
+  reauth_required: "errors.reauthRequired",
   unauthorized: "errors.unauthorized",
   validation: "errors.validation",
 };

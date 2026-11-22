@@ -3,6 +3,8 @@ import type { Db } from "./db";
 import type { Bindings } from "./env";
 
 export interface AuthContext {
+  /** The sessions row id (hash of the cookie token). */
+  sessionId: string;
   userId: string;
   householdId: string;
   /** When this session was created; recent sign-ins may change credentials without re-entry. */

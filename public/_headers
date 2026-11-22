@@ -1,0 +1,11 @@
+# Security headers for the app's pages and files (the API sets its own in src/worker/app.ts).
+# Photos and PDFs load from Backblaze B2 (*.backblazeb2.com) through signed URLs. `data:` in
+# connect-src: the PDF layout engine (yoga, in @react-pdf) loads its WebAssembly from a data URL.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.backblazeb2.com; font-src 'self' data:; connect-src 'self' data: https://*.backblazeb2.com; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin

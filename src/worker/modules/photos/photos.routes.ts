@@ -31,16 +31,47 @@ const EXTENSIONS = {
   "image/webp": "webp",
 } as const;
 
-/** PDFs open inline in a new tab under their original name. */
-const viewParams = (row: {
-  contentType: string;
-  fileName: string | null;
-}): Record<string, string> =>
-  row.contentType === "application/pdf"
-    ? {
-        "response-content-disposition": `inline; filename*=UTF-8''${encodeURIComponent(row.fileName ?? "document.pdf")}`,
-      }
-    : {};
+/** `<uuid>.<ext>`: the file name part of a key the server issued. */
+const ISSUED_FILE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(?<ext>jpg|png|webp|pdf)$/u;
+
+/** The only key an upload for this owner may have: `<household>/<type>/<owner>/<uuid>.<ext>`. */
+const isOwnObjectKey = (
+  key: string,
+  expected: {
+    householdId: string;
+    ownerType: string;
+    ownerId: string;
+    contentType: keyof typeof EXTENSIONS;
+  }
+): boolean => {
+  const prefix = `${expected.householdId}/${expected.ownerType}/${expected.ownerId}/`;
+
+  if (!key.startsWith(prefix)) {
+    return false;
+  }
+
+  const file = ISSUED_FILE.exec(key.slice(prefix.length));
+
+  return file?.groups?.ext === EXTENSIONS[expected.contentType];
+};
+
+/**
+ * Served as the type recorded at upload (never what the file claims). PDFs open inline in a
+ * new tab under their original name.
+ */
+const viewParams = (row: { contentType: string; fileName: string | null }) => {
+  const served = { "response-content-type": row.contentType };
+
+  if (row.contentType !== "application/pdf") {
+    return served;
+  }
+
+  return {
+    ...served,
+    "response-content-disposition": `inline; filename*=UTF-8''${encodeURIComponent(row.fileName ?? "document.pdf")}`,
+  };
+};
 
 const requireStorage = (storage: PhotoStorage | null): PhotoStorage => {
   if (!storage) {
@@ -64,7 +95,14 @@ export const photoRoutes = new Hono<AppEnv>()
 
     const body: UploadUrlResponse = {
       objectKey,
-      uploadUrl: await storage.signedUrl("PUT", objectKey, UPLOAD_URL_TTL),
+      // The upload must send exactly this type and size.
+      uploadUrl: await storage.signedUrl("PUT", objectKey, {
+        expiresInSeconds: UPLOAD_URL_TTL,
+        headers: {
+          "content-length": String(input.sizeBytes),
+          "content-type": input.contentType,
+        },
+      }),
     };
 
     return c.json(body);
@@ -72,9 +110,8 @@ export const photoRoutes = new Hono<AppEnv>()
   .post("/", validate("json", createPhotoRequest), async (c) => {
     const input = c.req.valid("json");
     const { householdId } = c.var.auth;
-    const expectedPrefix = `${householdId}/${input.ownerType}/${input.ownerId}/`;
 
-    if (!input.objectKey.startsWith(expectedPrefix)) {
+    if (!isOwnObjectKey(input.objectKey, { ...input, householdId })) {
       throw badRequest("Invalid object key");
     }
 
@@ -126,12 +163,10 @@ export const photoRoutes = new Hono<AppEnv>()
           id: row.id,
           sizeBytes: row.sizeBytes,
           url:
-            (await storage?.signedUrl(
-              "GET",
-              row.objectKey,
-              VIEW_URL_TTL,
-              viewParams(row)
-            )) ?? "",
+            (await storage?.signedUrl("GET", row.objectKey, {
+              expiresInSeconds: VIEW_URL_TTL,
+              params: viewParams(row),
+            })) ?? "",
         }))
       ),
     };

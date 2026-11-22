@@ -11,11 +11,14 @@ import { addPasskey } from "@/lib/passkeys";
 import { queryKeys } from "@/lib/query-keys";
 import { usePasskeyErrorMessage } from "@/modules/auth/use-passkey-error";
 
+import { ReauthCancelledError, useReauth } from "./reauth/use-reauth";
+
 export const PasskeysSection = () => {
   const { t } = useTranslation("settings");
   const queryClient = useQueryClient();
   const format = useFormat();
   const errorMessage = usePasskeyErrorMessage();
+  const reauth = useReauth();
 
   const passkeys = useQuery({
     queryFn: async () => await unwrap(api.account.passkeys.$get()),
@@ -33,8 +36,14 @@ export const PasskeysSection = () => {
   };
 
   const add = useMutation({
-    mutationFn: addPasskey,
-    onError: (error) => toast.error(errorMessage(error)),
+    mutationFn: async () => {
+      await reauth.run(addPasskey);
+    },
+    onError: (error) => {
+      if (!(error instanceof ReauthCancelledError)) {
+        toast.error(errorMessage(error));
+      }
+    },
     onSuccess: async () => {
       toast.success(t("security.added"));
       await refresh();
@@ -43,13 +52,19 @@ export const PasskeysSection = () => {
 
   const remove = async (passkeyId: string) => {
     try {
-      await unwrap(
-        api.account.passkeys[":passkeyId"].$delete({ param: { passkeyId } })
+      await reauth.run(
+        async () =>
+          await unwrap(
+            api.account.passkeys[":passkeyId"].$delete({ param: { passkeyId } })
+          )
       );
       toast.success(t("security.removed"));
       await refresh();
     } catch (error) {
-      toast.error(errorMessage(error));
+      if (!(error instanceof ReauthCancelledError)) {
+        toast.error(errorMessage(error));
+      }
+
       throw error;
     }
   };
@@ -58,6 +73,7 @@ export const PasskeysSection = () => {
 
   return (
     <div className="flex flex-col gap-3">
+      {reauth.dialog}
       <h3 className="text-sm font-medium">{t("security.passkeys")}</h3>
       <ul className="flex flex-col divide-y rounded-lg border">
         {list.map((passkey) => (

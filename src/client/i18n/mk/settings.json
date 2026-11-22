@@ -62,7 +62,13 @@
     "confirmPassword": "Потврди нова лозинка",
     "saveCredentials": "Зачувај",
     "credentialsSaved": "Податоците за најава се зачувани",
-    "email": "Е-пошта"
+    "email": "Е-пошта",
+    "reauthTitle": "Потврдете дека сте вие",
+    "reauthDescription": "За ваша безбедност, најавете се повторно пред да менувате passkey-и или кодови за враќање.",
+    "reauthPasskey": "Користи passkey",
+    "reauthOr": "или внесете ја лозинката",
+    "reauthConfirm": "Потврди",
+    "reauthWrongPassword": "Лозинката не е точна."
   },
   "export": {
     "title": "Резервна копија и извоз",

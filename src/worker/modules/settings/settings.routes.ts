@@ -57,11 +57,9 @@ export const settingsRoutes = new Hono<AppEnv>()
           endpoint,
         })
         .onConflictDoUpdate({
-          set: {
-            auth: keys.auth,
-            p256dh: keys.p256dh,
-            userId: c.var.auth.userId,
-          },
+          set: { auth: keys.auth, p256dh: keys.p256dh },
+          // Refreshes your own subscription; never takes over someone else's.
+          setWhere: eq(pushSubscriptions.userId, c.var.auth.userId),
           target: pushSubscriptions.endpoint,
         });
       const body: SubscribePushResponse = { ok: true };

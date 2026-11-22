@@ -62,7 +62,13 @@
     "confirmPassword": "Confirm new password",
     "saveCredentials": "Save",
     "credentialsSaved": "Sign-in details saved",
-    "email": "Email"
+    "email": "Email",
+    "reauthTitle": "Confirm it's you",
+    "reauthDescription": "For your security, sign in again before changing passkeys or recovery codes.",
+    "reauthPasskey": "Use a passkey",
+    "reauthOr": "or enter your password",
+    "reauthConfirm": "Confirm",
+    "reauthWrongPassword": "That password isn't right."
   },
   "export": {
     "title": "Backup & export",

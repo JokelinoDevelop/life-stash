@@ -524,7 +524,7 @@ describe("invoices controller", () => {
             contentType: "application/pdf",
             fileName: "Invoice-2020-001.pdf",
             generated: true,
-            objectKey: `${householdId}/finance_invoice/${id}/x.pdf`,
+            objectKey: `${householdId}/finance_invoice/${id}/${crypto.randomUUID()}.pdf`,
             ownerId: id,
             ownerType: "finance_invoice",
             sizeBytes: 1000,

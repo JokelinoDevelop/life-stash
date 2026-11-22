@@ -4,7 +4,12 @@ import { Hono } from "hono";
 import type { AppEnv, PublicEnv } from "../../core/app-env";
 import { badRequest, notFound, unauthorized } from "../../core/errors";
 import { requireAuth } from "../../core/middleware";
-import { createSession, destroySession, readSession } from "../../core/session";
+import {
+  createSession,
+  destroySession,
+  endOtherSessions,
+  readSession,
+} from "../../core/session";
 import { validate } from "../../core/validate";
 import { passkeys, users } from "../../db/schema/core";
 import { consumeChallenge, storeChallenge } from "./challenges";
@@ -35,6 +40,7 @@ import {
   verifyAuthentication,
   verifyRegistration,
 } from "./passkeys.service";
+import { requireRecentSignIn } from "./password.service";
 import {
   countRemainingCodes,
   issueRecoveryCodes,
@@ -150,6 +156,7 @@ export const accountRoutes = new Hono<AppEnv>()
     return c.json(body);
   })
   .post("/passkeys/options", async (c) => {
+    requireRecentSignIn(c.var.auth);
     const { userId } = c.var.auth;
 
     const [[user], existing] = await Promise.all([
@@ -180,6 +187,7 @@ export const accountRoutes = new Hono<AppEnv>()
     "/passkeys/verify",
     validate("json", addPasskeyVerifyRequest),
     async (c) => {
+      requireRecentSignIn(c.var.auth);
       const input = c.req.valid("json");
       const { userId } = c.var.auth;
 
@@ -219,6 +227,7 @@ export const accountRoutes = new Hono<AppEnv>()
     "/passkeys/:passkeyId",
     validate("param", deletePasskeyParams),
     async (c) => {
+      requireRecentSignIn(c.var.auth);
       const { passkeyId } = c.req.valid("param");
       const { userId } = c.var.auth;
 
@@ -246,6 +255,9 @@ export const accountRoutes = new Hono<AppEnv>()
         throw notFound();
       }
 
+      // A removed passkey may be how someone else got in: sign out everywhere else.
+      await endOtherSessions(c.var.db, c.var.auth);
+
       const body: DeletePasskeyResponse = { ok: true };
 
       return c.json(body);
@@ -259,9 +271,13 @@ export const accountRoutes = new Hono<AppEnv>()
     return c.json(body);
   })
   .post("/recovery-codes", async (c) => {
+    requireRecentSignIn(c.var.auth);
+
     const body: RegenerateRecoveryCodesResponse = {
       recoveryCodes: await issueRecoveryCodes(c.var.db, c.var.auth.userId),
     };
+
+    await endOtherSessions(c.var.db, c.var.auth);
 
     return c.json(body);
   });
