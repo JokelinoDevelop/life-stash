@@ -7,6 +7,8 @@ import type { AppEnv, PublicEnv } from "./core/app-env";
 import { ApiError, handleError } from "./core/errors";
 import { noStore, requireAuth, withDb } from "./core/middleware";
 import { authRateLimit } from "./core/rate-limit";
+import { adminController } from "./modules/admin/admin.controller";
+import { publicInvitesController } from "./modules/admin/invites.controller";
 import {
   accountPasswordRoutes,
   publicPasswordRoutes,
@@ -48,6 +50,8 @@ export const app = new Hono<PublicEnv>()
   .use(withDb)
   .route("/auth", publicAuthRoutes)
   .route("/auth", publicPasswordRoutes)
+  .route("/auth", publicInvitesController)
+  .route("/admin", adminController)
   .route("/account", accountRoutes)
   .route("/account", accountPasswordRoutes)
   .route("/config", configRoutes)

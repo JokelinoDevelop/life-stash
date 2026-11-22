@@ -29,8 +29,8 @@ const removeDemoHousehold = async (db: Db): Promise<void> => {
 };
 
 /**
- * The foundation every other seeder builds on: a household with one member who can sign in
- * with email and password. Returns the household id.
+ * The foundation every other seeder builds on: a household with one member (the admin) who can
+ * sign in with email and password. Returns the household id.
  */
 export const createDemoAccount = async (db: Db): Promise<string> => {
   await removeDemoHousehold(db);
@@ -47,6 +47,7 @@ export const createDemoAccount = async (db: Db): Promise<string> => {
       displayName: DEMO_ACCOUNT.displayName,
       email: DEMO_ACCOUNT.email,
       id: userId,
+      isAdmin: true,
       householdId,
       passwordHash,
     }),

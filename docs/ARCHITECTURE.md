@@ -32,7 +32,7 @@ Open the app and quickly answer, per car:
 
 Users sign in with email + password (works on any device, e.g. Linux PCs without passkeys) and/or passkeys, with one-time recovery codes as a fallback. Passwords are hashed with PBKDF2-SHA256 (100,000 iterations, the Workers maximum) via Web Crypto; five failed attempts lock password sign-in for 15 minutes. Hashing may occasionally exceed the free plan's 10 ms CPU budget, which only affects the rare sign-in request. Changing credentials needs the current password unless the session is less than 15 minutes old. Sessions are random 256-bit tokens in an `HttpOnly; Secure; SameSite=Lax` cookie; only their SHA-256 hash is stored. Recovery codes are high-entropy and stored as SHA-256 hashes.
 
-Sign-up is only possible while no user exists (first-run setup). Additional household members can be added later through invites.
+There is no public sign-up. First-run setup works only while no user exists, and that first account is the **admin**. After that, only the admin can let people in, from Settings › People (`/api/admin/*`, guarded by `requireAdmin`): they create a one-time invite link (256-bit token, only its SHA-256 stored, valid 7 days) and decide there whether the person **joins the admin's household** or **gets a new one of their own**. The invitee opens `/invite/<token>`, sets their name, email and password (they can't choose the household), and is signed in. Claiming an invite is a single conditional `UPDATE`, so a link can't be used twice. The admin can also revoke invites, disable an account (its sessions end and `createSession` refuses it) and move someone into the admin's household later. The admin endpoints are the one place that reads across households on purpose.
 
 ## One project, one deploy
 

@@ -10,6 +10,7 @@ import { financeWorkSeeder } from "./seeders/finance-work";
 import { fuelSeeder } from "./seeders/fuel";
 import { maintenanceSeeder } from "./seeders/maintenance";
 import { odometerSeeder } from "./seeders/odometer";
+import { peopleSeeder } from "./seeders/people";
 import { remindersSeeder } from "./seeders/reminders";
 import { renewalsSeeder } from "./seeders/renewals";
 import { visitsSeeder } from "./seeders/visits";
@@ -34,4 +35,5 @@ export const SEEDERS: readonly Seeder[] = [
   financeDocumentsSeeder,
   financeExtrasSeeder,
   financeSettingsSeeder,
+  peopleSeeder,
 ];

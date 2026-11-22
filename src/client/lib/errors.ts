@@ -1,7 +1,11 @@
 import { useTranslation } from "react-i18next";
 
-import { ApiClientError, FINANCE_ERROR_CODES } from "./api";
-import type { ApiErrorCode, FinanceErrorCode } from "./api";
+import {
+  ACCOUNT_ERROR_CODES,
+  ApiClientError,
+  FINANCE_ERROR_CODES,
+} from "./api";
+import type { AccountErrorCode, ApiErrorCode, FinanceErrorCode } from "./api";
 
 const GENERIC = "errors.generic";
 
@@ -13,7 +17,18 @@ type MessageKey =
   | "errors.notConfigured"
   | "errors.validation"
   | "errors.rateLimited"
-  | "errors.reauthRequired";
+  | "errors.reauthRequired"
+  | "errors.alreadyMember"
+  | "errors.cannotChangeSelf"
+  | "errors.emailTaken"
+  | "errors.inviteInvalid";
+
+const ACCOUNT_MESSAGES = {
+  "account.already_member": "errors.alreadyMember",
+  "account.cannot_change_self": "errors.cannotChangeSelf",
+  "account.email_taken": "errors.emailTaken",
+  "account.invite_invalid": "errors.inviteInvalid",
+} as const satisfies Record<AccountErrorCode, MessageKey>;
 
 const FINANCE_MESSAGES = {
   "finances.category_archived": "errors.categoryArchived",
@@ -39,8 +54,11 @@ const FINANCE_MESSAGES = {
 const isFinanceCode = (code: ApiErrorCode): code is FinanceErrorCode =>
   FINANCE_ERROR_CODES.some((known) => known === code);
 
+const isAccountCode = (code: ApiErrorCode): code is AccountErrorCode =>
+  ACCOUNT_ERROR_CODES.some((known) => known === code);
+
 const MESSAGE_FOR_CODE: Record<
-  Exclude<ApiErrorCode, FinanceErrorCode>,
+  Exclude<ApiErrorCode, FinanceErrorCode | AccountErrorCode>,
   MessageKey | "server"
 > = {
   bad_request: "server",
@@ -64,6 +82,10 @@ export const useErrorMessage = () => {
   return (error: unknown): string => {
     if (!(error instanceof ApiClientError)) {
       return t(GENERIC);
+    }
+
+    if (isAccountCode(error.code)) {
+      return t(ACCOUNT_MESSAGES[error.code]);
     }
 
     if (isFinanceCode(error.code)) {
