@@ -83,14 +83,14 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 ## Motion
 
-Motion explains change; it never decorates. Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits), `--motion-base` 150 ms (overlays, tab panels), `--motion-slow` 220 ms (content arriving), all on `--ease-out`. `prefers-reduced-motion` turns every one of them off.
+Subtle by default: motion explains a change the user just made; it never decorates, and nothing moves on its own. Opacity over movement — no slides, no rises. Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits, indicators) and `--motion-base` 150 ms (overlays, content fading in), on `--ease-out`. `prefers-reduced-motion` turns them all off.
 
-- **Pages:** when the path changes the content panel cross-fades (old page out in 100 ms, new one rises 4px in 220 ms) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate; browsers without view-transition types get no page transitions at all. Sidebar and bottom bar stay still.
-- **Lists:** rows fade in, fade out and slide into place as data changes. Use `ListSection` / `ListRows`, or `MotionList` / `useListMotion()` (`lib/motion`) for any other list. Turning a `PagedList` page swaps the rows at once.
+- **Pages:** when the path changes the content panel cross-fades (150 ms, no movement) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate; browsers without view-transition types get no page transitions at all. Sidebar and bottom bar stay still.
+- **Lists:** static by default. Only short lists the user edits in place animate rows in and out: `ListRows animated` / `OverviewSection animated` ("To confirm"), `MotionList` / `useListMotion()` (service items editor, categories, recurring, attachments). Data lists that refetch, filter or page (transactions, timeline, invoices, Today) never animate.
 - **Optimistic:** quick, reversible mutations update the cache before the request (`optimistic: [optimisticUpdate(key, fn)]` on `useAppMutation`); errors roll back (or refetch, when other mutations are in flight). Never empty a page optimistically: wait for the server instead. Used for Confirm / Skip recurring income and deleting a transaction.
-- **Figures:** headline numbers in `Stat`s roll to their new value (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`), silent for the first second after mount. Multi-currency totals stay plain text so they can truncate.
-- **Tabs:** pill tabs slide one indicator between tabs; the panel rises in.
-- **Small things:** buttons scale to .97 while pressed; disclosures and empty states rise in (`animate-rise`); chevrons rotate.
+- **Figures:** headline numbers in `Stat`s roll to a new value only when it changes after the page has settled (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`); plain text on phones and for multi-currency totals.
+- **Tabs:** pill tabs slide one indicator (100 ms); panels swap without animation.
+- **Small things:** buttons scale to .985 while pressed; disclosures and empty states fade in (`animate-fade`); chevrons rotate.
 
 ## Long lists
 

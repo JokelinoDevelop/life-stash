@@ -52,15 +52,10 @@
   animation: progress-slide 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-/* Content arriving: a 4px rise and fade (pages, tab panels, empty states). */
-@keyframes rise-in {
+/* Content arriving: opacity only, no movement (pages, disclosures, empty states). */
+@keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
@@ -70,8 +65,8 @@
   }
 }
 
-@utility animate-rise {
-  animation: rise-in var(--motion-slow) var(--ease-out) both;
+@utility animate-fade {
+  animation: fade-in var(--motion-base) var(--ease-out) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -124,10 +119,9 @@
   --overlay-shadow:
     0 16px 48px -12px oklch(0.2 0.02 265 / 0.22),
     0 2px 6px oklch(0.2 0.02 265 / 0.05);
-  /* Motion tokens: fast = hover/press/exits, base = overlays, slow = content arriving. */
+  /* Motion tokens: fast = hover/press/exits/indicators, base = overlays and content fading in. */
   --motion-fast: 100ms;
   --motion-base: 150ms;
-  --motion-slow: 220ms;
 }
 
 .dark {
@@ -324,8 +318,8 @@
 }
 
 /* Page transitions (View Transitions API, started by the router when the path
-   changes). Only the content panel animates: the old page fades out fast and
-   the new one rises in; the sidebar and bottom bar stay put. */
+   changes). Only the content panel animates, as a quick cross-fade with no
+   movement; the sidebar and bottom bar stay put. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -334,10 +328,10 @@
   animation: fade-out var(--motion-fast) var(--ease-out) both;
 }
 ::view-transition-new(page) {
-  animation: rise-in var(--motion-slow) var(--ease-out) both;
+  animation: fade-in var(--motion-base) var(--ease-out) both;
 }
 ::view-transition-group(page) {
-  animation-duration: var(--motion-slow);
+  animation-duration: var(--motion-base);
 }
 
 /* Press feedback: buttons give a little under the pointer. */
@@ -347,20 +341,12 @@
     [data-disabled],
     [aria-haspopup]
   ) {
-  scale: 0.97;
-}
-
-/* A tab panel eases in when you switch to it. Layered so an `animate-*`
-   utility on a TabsContent can still override it. */
-@layer components {
-  [data-slot="tabs-content"] {
-    animation: rise-in var(--motion-base) var(--ease-out) both;
-  }
+  scale: 0.985;
 }
 
 /* Pill tabs: the active surface is one indicator that slides between tabs. */
 [data-slot="tabs-indicator"] {
   transition-property: left, width, top, height;
-  transition-duration: var(--motion-base);
+  transition-duration: var(--motion-fast);
   transition-timing-function: var(--ease-out);
 }

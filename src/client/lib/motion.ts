@@ -6,7 +6,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
  * Put the returned ref on the `<ul>` whose direct children are the rows.
  */
 export const useListMotion = <T extends HTMLElement = HTMLUListElement>() => {
-  const [ref] = useAutoAnimate<T>({ duration: 180, easing: "ease-out" });
+  const [ref] = useAutoAnimate<T>({ duration: 150, easing: "ease-out" });
 
   return ref;
 };

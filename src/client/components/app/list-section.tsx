@@ -58,26 +58,28 @@ export const ListSection = ({
   </section>
 );
 
+const ROWS_BOX =
+  "bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b";
+
 /**
  * The rows box of a `ListSection`, for lists that draw their own heading.
- * Rows animate in and out as the list changes (`useListMotion`).
+ * Static by default; `animated` for short lists the user edits in place
+ * (rows fade in and out). Data lists that refetch or filter stay still.
  */
 export const ListRows = ({
+  animated = false,
   children,
   className,
 }: {
+  animated?: boolean;
   children: React.ReactNode;
   className?: string;
-}) => (
-  <MotionList
-    className={cn(
-      "bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b",
-      className
-    )}
-  >
-    {children}
-  </MotionList>
-);
+}) =>
+  animated ? (
+    <MotionList className={cn(ROWS_BOX, className)}>{children}</MotionList>
+  ) : (
+    <ul className={cn(ROWS_BOX, className)}>{children}</ul>
+  );
 
 /** A plain `<ul>` whose rows animate in and out; for lists rendered inside render props. */
 export const MotionList = ({
