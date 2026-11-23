@@ -209,7 +209,7 @@
   --motion-fast: 100ms;
   --motion-base: 150ms;
   /* Phone push/pop slides, matching the swipe-back settle (use-swipe-back.ts). */
-  --motion-slide: 260ms;
+  --motion-slide: 350ms;
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
@@ -470,9 +470,13 @@
   animation-duration: var(--motion-base);
 }
 
-/* Phones (v0.5): drill-downs slide like a native stack — the new screen comes
-   in from the right (push) and leaves to the right on Back (pop); the screen
-   underneath shifts a little. Switching tabs keeps the plain fade above.
+/* Phones: like a native (and Linear's) stack. Drill-downs push in from the
+   right over the old screen, which drifts left and dims; Back reverses it.
+   Switching tabs, or tabs inside a page (Settings), is instant, as in iOS.
+   Phones animate the root snapshot (exactly what is on screen) rather than
+   the page element: that one is as tall as the whole page, so its group
+   morphed in height and jumped vertically whenever either screen was
+   scrolled. The tab bar has its own name, so it stays still above it.
    prefers-reduced-motion collapses all of it (see the base layer). */
 @keyframes slide-in-right {
   from {
@@ -481,14 +485,14 @@
 }
 @keyframes slide-out-left {
   to {
-    transform: translateX(-28%);
-    opacity: 0.6;
+    transform: translateX(-30%);
+    filter: brightness(0.92);
   }
 }
 @keyframes slide-in-left {
   from {
-    transform: translateX(-28%);
-    opacity: 0.6;
+    transform: translateX(-30%);
+    filter: brightness(0.92);
   }
 }
 @keyframes slide-out-right {
@@ -498,23 +502,19 @@
 }
 
 @media (max-width: 47.999rem) {
-  html:active-view-transition-type(push)::view-transition-group(page),
-  html:active-view-transition-type(pop)::view-transition-group(page) {
-    animation-duration: var(--motion-slide);
-  }
-  html:active-view-transition-type(push)::view-transition-old(page) {
+  html:active-view-transition-type(push)::view-transition-old(root) {
     animation: slide-out-left var(--motion-slide) var(--ease-slide) both;
   }
-  html:active-view-transition-type(push)::view-transition-new(page) {
+  html:active-view-transition-type(push)::view-transition-new(root) {
     animation: slide-in-right var(--motion-slide) var(--ease-slide) both;
-    box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.1);
   }
-  html:active-view-transition-type(pop)::view-transition-old(page) {
+  html:active-view-transition-type(pop)::view-transition-old(root) {
     z-index: 1;
     animation: slide-out-right var(--motion-slide) var(--ease-slide) both;
-    box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.1);
   }
-  html:active-view-transition-type(pop)::view-transition-new(page) {
+  html:active-view-transition-type(pop)::view-transition-new(root) {
     animation: slide-in-left var(--motion-slide) var(--ease-slide) both;
   }
 }

@@ -6,6 +6,9 @@ export type NavDirection = "push" | "pop" | "tab" | "same";
 
 const segments = (path: string): string[] => path.split("/").filter(Boolean);
 
+/** Sections whose sub-paths are tabs on one page, not drill-downs. */
+const TABBED_SECTIONS = new Set(["settings"]);
+
 /**
  * Drill-downs slide in (push) and out (pop); switching sections of the tab bar
  * fades. Going back (`back`, a popstate) to a shallower screen is always a pop,
@@ -19,6 +22,10 @@ export const navDirection = (
   const fromParts = segments(from);
   const toParts = segments(to);
   const sameSection = (fromParts[0] ?? "") === (toParts[0] ?? "");
+
+  if (sameSection && TABBED_SECTIONS.has(toParts[0] ?? "")) {
+    return "same";
+  }
 
   if (back && toParts.length < fromParts.length) {
     return "pop";

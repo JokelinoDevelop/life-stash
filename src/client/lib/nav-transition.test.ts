@@ -32,4 +32,9 @@ describe(navDirection, () => {
     );
     expect(navDirection("/garage/cars/a", "/garage/cars/b")).toBe("same");
   });
+
+  it("keeps Settings tabs in place instead of pushing", () => {
+    expect(navDirection("/settings", "/settings/finances")).toBe("same");
+    expect(navDirection("/settings/users", "/settings", true)).toBe("same");
+  });
 });

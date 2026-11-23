@@ -286,8 +286,9 @@ export const AppShell = () => {
             ref={main}
           >
             <RouteProgress />
-            {/* The page snapshot for route transitions (see styles.css). */}
-            <div className="[view-transition-name:page]">
+            {/* Desktop: the page snapshot for route transitions (phones
+                animate the root, see styles.css). */}
+            <div className="md:[view-transition-name:page]">
               <Outlet />
             </div>
           </main>
