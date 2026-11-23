@@ -2,7 +2,12 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { PageContent } from "@/components/app/page-header";
 import { authStatusQuery } from "@/lib/session";
+import { cached, warm } from "@/lib/warm";
 import { UsersSettings } from "@/modules/settings/users/users-settings";
+import {
+  adminInvitesQuery,
+  adminUsersQuery,
+} from "@/modules/settings/users/users.queries";
 
 const UsersSettingsPage = () => (
   <PageContent>
@@ -19,6 +24,12 @@ export const Route = createFileRoute("/_app/settings/users")({
     if (status.user?.isAdmin !== true) {
       throw redirect({ to: "/settings" });
     }
+  },
+  loader: async ({ context: { queryClient } }) => {
+    await warm(
+      queryClient.query(cached(adminUsersQuery)),
+      queryClient.query(cached(adminInvitesQuery))
+    );
   },
   component: UsersSettingsPage,
 });

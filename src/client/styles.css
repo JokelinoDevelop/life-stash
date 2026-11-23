@@ -350,3 +350,11 @@
   transition-duration: var(--motion-fast);
   transition-timing-function: var(--ease-out);
 }
+
+/* Installed app: no rubber-band past the ends of the page or pull-to-refresh
+   (a native app doesn't show the browser behind it). */
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}

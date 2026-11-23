@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { BackLink } from "@/components/app/back-link";
 import { PageContent, PageHeader } from "@/components/app/page-header";
 import { useFormat } from "@/lib/format";
+import { cached } from "@/lib/warm";
 import { carQuery } from "@/modules/garage/cars/cars.queries";
 import {
   VisitActions,
@@ -47,8 +48,8 @@ export const Route = createFileRoute(
 )({
   loader: async ({ context, params }) => {
     await Promise.all([
-      context.queryClient.query(visitQuery(params.visitId)),
-      context.queryClient.query(carQuery(params.carId)),
+      context.queryClient.query(cached(visitQuery(params.visitId))),
+      context.queryClient.query(cached(carQuery(params.carId))),
     ]);
   },
   component: VisitPage,

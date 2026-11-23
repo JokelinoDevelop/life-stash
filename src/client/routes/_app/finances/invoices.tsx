@@ -12,6 +12,8 @@ import { useHotkey } from "@/hooks/use-hotkey";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
+import { clientsQuery } from "@/modules/finances/clients/clients.queries";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
 import {
   applyInvoicesPatch,
@@ -101,6 +103,27 @@ const InvoicesPage = () => {
 };
 
 export const Route = createFileRoute("/_app/finances/invoices")({
-  component: InvoicesPage,
   validateSearch: invoicesSearchSchema,
+  loaderDeps: ({ search }) => ({
+    client: search.client,
+    status: search.status,
+    year: search.year,
+  }),
+  loader: async ({ context: { queryClient }, deps }) => {
+    const year = deps.year ?? Number(todayIso().slice(0, 4));
+
+    await warm(
+      queryClient.query(cached(clientsQuery(year))),
+      queryClient.query(
+        cached(
+          invoicesQuery({
+            clientId: deps.client,
+            status: deps.status ?? "all",
+            year,
+          })
+        )
+      )
+    );
+  },
+  component: InvoicesPage,
 });

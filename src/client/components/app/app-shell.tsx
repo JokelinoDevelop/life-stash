@@ -9,6 +9,7 @@ import {
   Sun,
   Wallet,
 } from "lucide-react";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -34,6 +35,7 @@ import { useCommandMenu } from "./command-menu-context";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
 import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
+import { useSwipeBack } from "./use-swipe-back";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
@@ -204,7 +206,7 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="bg-card pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden"
+      className="bg-card/90 pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t backdrop-blur-md md:hidden"
     >
       <Link
         activeOptions={{ exact: true, includeSearch: false }}
@@ -257,22 +259,30 @@ const MobileNav = () => {
   );
 };
 
-export const AppShell = () => (
-  <CommandMenuProvider>
-    <div className="bg-background flex min-h-dvh">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
-        <main className="md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0">
-          <RouteProgress />
-          {/* The page snapshot for route transitions (see styles.css). */}
-          <div className="[view-transition-name:page]">
-            <Outlet />
-          </div>
-        </main>
-        <MobileNav />
+export const AppShell = () => {
+  const main = useRef<HTMLElement>(null);
+  useSwipeBack(main);
+
+  return (
+    <CommandMenuProvider>
+      <div className="bg-background flex min-h-dvh">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
+          <main
+            className="bg-background md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            ref={main}
+          >
+            <RouteProgress />
+            {/* The page snapshot for route transitions (see styles.css). */}
+            <div className="[view-transition-name:page]">
+              <Outlet />
+            </div>
+          </main>
+          <MobileNav />
+        </div>
       </div>
-    </div>
-    <EntryDialogHost />
-    <FinanceDialogHost />
-  </CommandMenuProvider>
-);
+      <EntryDialogHost />
+      <FinanceDialogHost />
+    </CommandMenuProvider>
+  );
+};

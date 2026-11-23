@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { useFormat } from "@/lib/format";
 import { ADD_CAR_SHORTCUT } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
 import { CarRow } from "@/modules/garage/cars/car-row";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
@@ -232,5 +233,11 @@ const GarageHome = () => {
 };
 
 export const Route = createFileRoute("/_app/garage/")({
+  loader: async ({ context: { queryClient } }) => {
+    await warm(
+      queryClient.query(cached(carsQuery(false))),
+      queryClient.query(cached(householdOverviewQuery))
+    );
+  },
   component: GarageHome,
 });

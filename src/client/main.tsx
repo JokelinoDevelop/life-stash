@@ -10,6 +10,10 @@ import { applyDensity, readDensity } from "./app/density";
 import { RouteError } from "./components/app/route-error";
 import { RoutePending } from "./components/app/route-pending";
 import { ApiClientError } from "./lib/api";
+import {
+  listenForBrowserTransitions,
+  pageTransitionTypes,
+} from "./lib/nav-transition";
 import { routeTree } from "./routeTree.gen";
 
 applyDensity(readDensity());
@@ -17,6 +21,8 @@ applyDensity(readDensity());
 /** View transition types (needed to skip search-only navigations); implies the API itself. */
 const supportsViewTransitionTypes = () =>
   CSS.supports("selector(:active-view-transition-type(a))");
+
+listenForBrowserTransitions();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,7 +53,7 @@ const router = createRouter({
   // The router ignores `types` where transition types are unsupported and would
   // animate every change, so those browsers get no page transitions.
   defaultViewTransition: supportsViewTransitionTypes() && {
-    types: ({ pathChanged }) => (pathChanged ? ["page"] : false),
+    types: pageTransitionTypes,
   },
   scrollRestoration: true,
   routeTree,

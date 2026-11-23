@@ -8,6 +8,7 @@ import { BackLink } from "@/components/app/back-link";
 import { PageHeader } from "@/components/app/page-header";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cached, warm } from "@/lib/warm";
 import { CarActions } from "@/modules/garage/cars/car-actions";
 import { CarHeading } from "@/modules/garage/cars/car-heading";
 import {
@@ -20,9 +21,14 @@ import { carQuery } from "@/modules/garage/cars/cars.queries";
 import { DetailsStatsTab } from "@/modules/garage/cars/details-stats-tab";
 import { OverviewTab } from "@/modules/garage/cars/overview-tab";
 import { useCarShortcuts } from "@/modules/garage/cars/use-car-shortcuts";
+import { expensesQuery } from "@/modules/garage/expenses/expenses.queries";
+import { mileageQuery } from "@/modules/garage/mileage/mileage.queries";
 import { RemindersTab } from "@/modules/garage/reminders/reminders-tab";
+import { remindersQuery } from "@/modules/garage/reminders/reminders.queries";
+import { carSpendingQuery } from "@/modules/garage/spending/spending.queries";
 import { TIMELINE_FILTERS } from "@/modules/garage/timeline/build-timeline";
 import { TimelineTab } from "@/modules/garage/timeline/timeline-tab";
+import { visitsQuery } from "@/modules/garage/visits/visits.queries";
 
 const searchSchema = z.object({
   /** Opens the odometer dialog; push notifications send `log=1`. */
@@ -130,6 +136,7 @@ const CarPage = () => {
 
 export const Route = createFileRoute("/_app/garage/cars/$carId/")({
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ tab: search.tab }),
   beforeLoad: ({ params, search }) => {
     const legacy = legacyCarTab(search.tab);
 
@@ -146,8 +153,40 @@ export const Route = createFileRoute("/_app/garage/cars/$carId/")({
       });
     }
   },
-  loader: async ({ context, params }) => {
-    await context.queryClient.query(carQuery(params.carId));
+  loader: async ({ context: { queryClient }, deps, params }) => {
+    const { carId } = params;
+
+    const load = {
+      expenses: async () =>
+        await queryClient.query(cached(expensesQuery(carId))),
+      mileage: async () => await queryClient.query(cached(mileageQuery(carId))),
+      reminders: async () =>
+        await queryClient.query(cached(remindersQuery(carId))),
+      spending: async () =>
+        await queryClient.query(cached(carSpendingQuery(carId))),
+      visits: async () => await queryClient.query(cached(visitsQuery(carId))),
+    };
+
+    // The open tab's data comes with the car, so the tab never pops in.
+    const tabLoads = {
+      details: [load.mileage, load.expenses],
+      overview: [load.mileage, load.reminders, load.visits, load.spending],
+      reminders: [load.reminders],
+      timeline: [load.visits, load.expenses, load.mileage],
+    };
+
+    const tab = isCarTab(deps.tab) ? deps.tab : "overview";
+
+    const loads: Promise<unknown>[] = [];
+
+    for (const run of tabLoads[tab]) {
+      loads.push(run());
+    }
+
+    await Promise.all([
+      queryClient.query(cached(carQuery(carId))),
+      warm(...loads),
+    ]);
   },
   component: CarPage,
 });

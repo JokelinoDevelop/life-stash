@@ -1,5 +1,104 @@
 import { ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
+
+/** Height of the phone top row (min-h-11), where the compact title appears. */
+const TOP_ROW = 44;
+
+/**
+ * Phones: the top row (back or `mobileTop`, actions) sticks to the top, and
+ * once the large title has scrolled under it the title appears there, small
+ * and centred — the iOS large-title pattern.
+ */
+const MobileHeader = ({
+  actions,
+  back,
+  description,
+  hideMobileTitle,
+  mobileTop,
+  title,
+}: {
+  actions?: ReactNode;
+  back?: ReactNode;
+  description?: ReactNode;
+  hideMobileTitle: boolean;
+  mobileTop?: ReactNode;
+  title: ReactNode;
+}) => {
+  const sentinel = useRef<HTMLDivElement>(null);
+  const [compact, setCompact] = useState(false);
+
+  const hasTopRow =
+    back !== undefined || mobileTop !== undefined || actions !== undefined;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setCompact(
+          entry !== undefined &&
+            !entry.isIntersecting &&
+            entry.boundingClientRect.top < TOP_ROW
+        );
+      },
+      { rootMargin: `-${TOP_ROW}px 0px 0px 0px` }
+    );
+
+    if (sentinel.current !== null) {
+      observer.observe(sentinel.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <header className="mb-5 flex flex-col gap-2 md:hidden">
+      {hasTopRow && (
+        <div
+          className={cn(
+            "bg-background/85 sticky top-0 z-20 -mx-4 flex min-h-11 items-center justify-between gap-2 border-b px-3 backdrop-blur-md transition-colors duration-200",
+            compact ? "border-divider" : "border-transparent"
+          )}
+        >
+          <div
+            className={cn(
+              "flex min-w-0 items-center transition-opacity duration-200",
+              compact && mobileTop !== undefined && "opacity-0"
+            )}
+          >
+            {mobileTop ?? back}
+          </div>
+          <p
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-x-20 truncate text-center text-sm font-semibold transition-opacity duration-200",
+              compact ? "opacity-100" : "opacity-0"
+            )}
+          >
+            {title}
+          </p>
+          {actions !== undefined && (
+            <div className="flex shrink-0 items-center gap-1">{actions}</div>
+          )}
+        </div>
+      )}
+      {!hideMobileTitle && (
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+          {description !== undefined && (
+            <p className="text-muted-foreground mt-0.5 text-sm">
+              {description}
+            </p>
+          )}
+        </div>
+      )}
+      <div aria-hidden="true" ref={sentinel} />
+    </header>
+  );
+};
 
 /**
  * Desktop: a 44px bar at the top of the content panel (crumb › title, actions).
@@ -41,28 +140,14 @@ export const PageHeader = ({
         </div>
       )}
     </header>
-    <header className="mb-5 flex flex-col gap-2 md:hidden">
-      {(back !== undefined ||
-        mobileTop !== undefined ||
-        actions !== undefined) && (
-        <div className="-mx-1 flex min-h-11 items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center">{mobileTop ?? back}</div>
-          {actions !== undefined && (
-            <div className="flex shrink-0 items-center gap-1">{actions}</div>
-          )}
-        </div>
-      )}
-      {!hideMobileTitle && (
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          {description !== undefined && (
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              {description}
-            </p>
-          )}
-        </div>
-      )}
-    </header>
+    <MobileHeader
+      actions={actions}
+      back={back}
+      description={description}
+      hideMobileTitle={hideMobileTitle}
+      mobileTop={mobileTop}
+      title={title}
+    />
   </>
 );
 

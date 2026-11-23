@@ -6,6 +6,11 @@ import { HouseholdName } from "@/components/app/app-shell";
 import { useCommandMenu } from "@/components/app/command-menu-context";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
+import { todayIso } from "@/lib/partial-date";
+import { cached, warm } from "@/lib/warm";
+import { overviewQuery } from "@/modules/finances/overview/overview.queries";
+import { carsQuery } from "@/modules/garage/cars/cars.queries";
+import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import { TodayView, useTodayCount } from "@/modules/today/today-view";
 
 const TodayPage = () => {
@@ -38,5 +43,14 @@ const TodayPage = () => {
 };
 
 export const Route = createFileRoute("/_app/")({
+  loader: async ({ context: { queryClient } }) => {
+    const year = Number(todayIso().slice(0, 4));
+
+    await warm(
+      queryClient.query(cached(householdOverviewQuery)),
+      queryClient.query(cached(carsQuery(false))),
+      queryClient.query(cached(overviewQuery(year)))
+    );
+  },
   component: TodayPage,
 });

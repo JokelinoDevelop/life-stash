@@ -1,4 +1,5 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Wrench } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -10,6 +11,7 @@ import { ListSection } from "@/components/app/list-section";
 import { PageHeader, PageStack } from "@/components/app/page-header";
 import { EmptyState, LoadingState } from "@/components/app/states";
 import { paginate } from "@/lib/paginate";
+import { cached, warm } from "@/lib/warm";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { groupByYear } from "@/modules/garage/visits/group-by-year";
 import { VisitRow } from "@/modules/garage/visits/visit-row";
@@ -88,9 +90,27 @@ const HistoryPage = () => {
   );
 };
 
+/** Visits need the car list first: one round for the cars, then all visits at once. */
+const warmHistory = async (queryClient: QueryClient) => {
+  const cars = await queryClient
+    .query(cached(carsQuery(false)))
+    .catch(() => null);
+
+  const loads: Promise<unknown>[] = [];
+
+  for (const car of cars?.cars ?? []) {
+    loads.push(queryClient.query(cached(visitsQuery(car.id))));
+  }
+
+  await warm(...loads);
+};
+
 export const Route = createFileRoute("/_app/garage/history")({
   validateSearch: z.object({
     page: z.number().int().min(2).optional().catch(undefined),
   }),
+  loader: async ({ context: { queryClient } }) => {
+    await warmHistory(queryClient);
+  },
   component: HistoryPage,
 });

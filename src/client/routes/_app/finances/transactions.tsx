@@ -10,14 +10,19 @@ import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
+import { categoriesQuery } from "@/modules/finances/categories/categories.queries";
+import { clientsQuery } from "@/modules/finances/clients/clients.queries";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
 import { MonthStatus } from "@/modules/finances/transactions/month-status";
 import {
   applySearchPatch,
   transactionsSearchSchema,
+  filterFromSearch,
 } from "@/modules/finances/transactions/transactions-search";
 import type { SearchPatch } from "@/modules/finances/transactions/transactions-search";
 import { TransactionsView } from "@/modules/finances/transactions/transactions-view";
+import { transactionsQuery } from "@/modules/finances/transactions/transactions.queries";
 
 const TransactionsPage = () => {
   const { t } = useTranslation("finances");
@@ -94,6 +99,18 @@ const TransactionsPage = () => {
 };
 
 export const Route = createFileRoute("/_app/finances/transactions")({
-  component: TransactionsPage,
   validateSearch: transactionsSearchSchema,
+  loaderDeps: ({ search }) => search,
+  loader: async ({ context: { queryClient }, deps }) => {
+    const year = Number(todayIso().slice(0, 4));
+
+    await warm(
+      queryClient.query(cached(categoriesQuery)),
+      queryClient.query(cached(clientsQuery(year))),
+      queryClient.infiniteQuery(
+        cached(transactionsQuery(filterFromSearch(deps, year)))
+      )
+    );
+  },
+  component: TransactionsPage,
 });

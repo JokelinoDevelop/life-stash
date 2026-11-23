@@ -16,9 +16,13 @@ import {
 import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { CATALOG_SHORTCUTS } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
 import { CatalogView } from "@/modules/garage/catalog/catalog-view";
 import type { CatalogTarget } from "@/modules/garage/catalog/catalog-view";
-import { catalogItemsQuery } from "@/modules/garage/catalog/catalog.queries";
+import {
+  catalogItemsQuery,
+  catalogPackagesQuery,
+} from "@/modules/garage/catalog/catalog.queries";
 import { ItemDialog } from "@/modules/garage/catalog/item-dialog";
 import { PackageDialog } from "@/modules/garage/catalog/package-dialog";
 
@@ -139,5 +143,11 @@ const CatalogPage = () => {
 };
 
 export const Route = createFileRoute("/_app/garage/catalog")({
+  loader: async ({ context: { queryClient } }) => {
+    await warm(
+      queryClient.query(cached(catalogItemsQuery(true))),
+      queryClient.query(cached(catalogPackagesQuery))
+    );
+  },
   component: CatalogPage,
 });
