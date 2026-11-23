@@ -73,11 +73,12 @@ export const parseQuantity = (value: string): number => {
   return Number.isFinite(milli) ? milli : 0;
 };
 
-/** "18" / "5,5" → basis points (empty is 0). */
-export const parseVatRate = (value: string): number =>
-  value.trim() === ""
-    ? 0
-    : Math.round(decimal(value) * (BASIS_POINTS / PERCENT));
+/** "18" / "5,5" → basis points (empty, or not a number yet, is 0). */
+export const parseVatRate = (value: string): number => {
+  const bp = Math.round(decimal(value) * (BASIS_POINTS / PERCENT));
+
+  return value.trim() === "" || !Number.isFinite(bp) ? 0 : bp;
+};
 
 /** "12,50" → 1250 (empty, or not a number yet, is 0). */
 export const parseShipping = (value: string): number =>

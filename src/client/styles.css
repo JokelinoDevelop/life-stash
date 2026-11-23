@@ -606,6 +606,25 @@
   outline: none;
 }
 
+/* While a sheet (vaul drawer) is open it sets `pointer-events: none` on <body>
+   so only the sheet takes taps. Selects, date pickers, menus and confirms
+   opened from a sheet are portalled to <body>, outside it, and would inherit
+   that: taps fell through to the field behind them. These layers stay
+   interactive (their overlays too, so a tap outside a confirm dismisses it
+   instead of reaching the sheet). */
+:is(
+  [data-slot="select-content"],
+  [data-slot="popover-content"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="dialog-content"],
+  [data-slot="dialog-overlay"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="alert-dialog-overlay"]
+) {
+  pointer-events: auto;
+}
+
 /* A small, visible grabber (36 × 4) instead of shadcn's wide grey bar. */
 [data-slot="drawer-handle"] {
   width: 2.25rem;

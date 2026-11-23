@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import type { InvoiceDetail } from "../../invoices.queries";
 import {
+  formLineTotals,
+  parseShipping,
+  parseVatRate,
   duplicateToFormValues,
   invoiceFormToCreateRequest,
   periodBounds,
@@ -147,5 +150,43 @@ describe("drafts", () => {
     expect(
       invoiceFormToCreateRequest({ ...values, number: "" }, true).number
     ).toBeNull();
+  });
+});
+
+/** A typed line for the totals tests. */
+const line = (unitPrice: string, quantity = "1", vatRate = "") => ({
+  description: "Work",
+  key: "k",
+  unit: "",
+  quantity,
+  unitPrice,
+  vatRate,
+});
+
+describe(formLineTotals, () => {
+  it("prices half-typed or malformed input as zero instead of throwing", () => {
+    const priced = formLineTotals(
+      [line("40€"), line("1.000,00"), line("1e999"), line("12", "abc", "x")],
+      true
+    );
+
+    expect(priced.lines.map((row) => row.amountMinor)).toStrictEqual([
+      0, 0, 0, 0,
+    ]);
+    expect(priced.totals.totalMinor).toBe(0);
+  });
+
+  it("still prices valid lines", () => {
+    expect(formLineTotals([line("40", "80")], false).totals.totalMinor).toBe(
+      320_000
+    );
+  });
+});
+
+describe("half-typed numbers", () => {
+  it("treats a malformed VAT rate or shipping as zero", () => {
+    expect(parseVatRate("abc")).toBe(0);
+    expect(parseVatRate("18")).toBe(1800);
+    expect(parseShipping("abc")).toBe(0);
   });
 });
