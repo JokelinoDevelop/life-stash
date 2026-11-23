@@ -198,7 +198,10 @@ const Sidebar = () => {
   );
 };
 
-/** One tab: the current section's icon sits on a tinted pill, in the accent colour. */
+/**
+ * One tab: an icon (the label is for screen readers and the tooltip-less
+ * touch UI reads it aloud); the current section sits on a tinted pill.
+ */
 const Tab = ({
   activeOptions,
   badge,
@@ -214,22 +217,19 @@ const Tab = ({
 }) => (
   <Link
     activeOptions={activeOptions}
-    className="text-muted-foreground data-[status=active]:text-primary group/tab flex flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors active:opacity-70"
+    aria-label={label}
+    className="text-muted-foreground data-[status=active]:bg-primary/12 data-[status=active]:text-primary relative flex h-12 w-15 items-center justify-center rounded-full transition-colors active:opacity-70"
     to={to}
   >
-    <span className="group-data-[status=active]/tab:bg-primary/12 relative flex h-7 w-12 items-center justify-center rounded-full transition-colors">
-      <Icon className="size-5.5 [stroke-width:1.75] group-data-[status=active]/tab:[stroke-width:2.25]" />
-      {badge}
-    </span>
-    <span className="group-data-[status=active]/tab:font-semibold">
-      {label}
-    </span>
+    <Icon className="size-6 [stroke-width:1.75] in-data-[status=active]:[stroke-width:2.25]" />
+    {badge}
   </Link>
 );
 
 /**
- * Phones: four sections and, in the middle, Quick add, on a floating,
- * translucent bar (the page blurs underneath it).
+ * Phones (Linear-style): an icon-only capsule of the four sections with Quick
+ * add as its own round button beside it. The page fades and blurs into the
+ * canvas near the bottom edge, so rows never show through the bar.
  */
 const MobileNav = () => {
   const { t } = useTranslation();
@@ -238,33 +238,35 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="tabbar-float fixed inset-x-3 z-40 [view-transition-name:tabbar] md:hidden"
+      className="tabbar-edge pointer-events-none fixed inset-x-0 bottom-0 z-40 [view-transition-name:tabbar] md:hidden"
     >
-      <div className="bg-card/90 flex h-16 items-stretch rounded-3xl px-1 backdrop-blur-xl backdrop-saturate-150">
-        <Tab
-          activeOptions={{ exact: true, includeSearch: false }}
-          badge={
-            today.count > 0 && (
-              <span
-                className={cn(
-                  "ring-card absolute top-0.5 right-2.5 size-2 rounded-full ring-2",
-                  today.overdue ? "bg-destructive" : "bg-primary"
-                )}
-              >
-                <span className="sr-only">
-                  {t("nav.needsAttention", { count: today.count })}
+      <div className="tabbar-float pointer-events-auto absolute inset-x-0 z-10 flex items-center justify-center gap-3 px-4">
+        <div className="tabbar-glass flex h-14 items-center gap-0.5 rounded-full px-1">
+          <Tab
+            activeOptions={{ exact: true, includeSearch: false }}
+            badge={
+              today.count > 0 && (
+                <span
+                  className={cn(
+                    "ring-card absolute top-2.5 right-4 size-2 rounded-full ring-2",
+                    today.overdue ? "bg-destructive" : "bg-primary"
+                  )}
+                >
+                  <span className="sr-only">
+                    {t("nav.needsAttention", { count: today.count })}
+                  </span>
                 </span>
-              </span>
-            )
-          }
-          icon={Sun}
-          label={t("nav.today")}
-          to="/"
-        />
-        <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
+              )
+            }
+            icon={Sun}
+            label={t("nav.today")}
+            to="/"
+          />
+          <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
+          <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
+          <Tab icon={Settings} label={t(SETTINGS_LABEL)} to={SETTINGS} />
+        </div>
         <QuickAdd />
-        <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
-        <Tab icon={Settings} label={t(SETTINGS_LABEL)} to={SETTINGS} />
       </div>
     </nav>
   );
@@ -280,7 +282,7 @@ export const AppShell = () => {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
           <main
-            className="bg-background md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
             ref={main}
           >
             <RouteProgress />

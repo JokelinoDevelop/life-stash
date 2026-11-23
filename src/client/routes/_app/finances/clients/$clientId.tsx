@@ -26,6 +26,10 @@ const ClientPage = () => {
     void dialog.open({ dialog: "invoice", forClient: clientId });
   };
 
+  const editClient = () => {
+    void dialog.open({ dialog: "client", id: clientId });
+  };
+
   useHotkey(FINANCE_SHORTCUTS.newInvoice, newInvoice);
 
   return (
@@ -33,23 +37,36 @@ const ClientPage = () => {
       <PageHeader
         actions={
           <>
-            <Button
-              onClick={() => {
-                void dialog.open({ dialog: "client", id: clientId });
-              }}
-              size="compact"
-              variant="ghost"
-            >
-              <Pencil />
-              <span className="hidden md:inline">{t("clients.edit")}</span>
-            </Button>
-            <Button onClick={newInvoice} size="compact">
-              <Plus />
-              <span className="hidden md:inline">{t("invoices.new")}</span>
-              <Kbd className="hidden md:inline-flex">
-                {FINANCE_SHORTCUTS.newInvoice.toUpperCase()}
-              </Kbd>
-            </Button>
+            {/* Phones: bare icon buttons, like every phone top row. */}
+            <span className="flex md:hidden">
+              <Button
+                aria-label={t("clients.edit")}
+                onClick={editClient}
+                size="icon-compact"
+                variant="ghost"
+              >
+                <Pencil />
+              </Button>
+              <Button
+                aria-label={t("invoices.new")}
+                onClick={newInvoice}
+                size="icon-compact"
+                variant="ghost"
+              >
+                <Plus />
+              </Button>
+            </span>
+            <span className="hidden items-center gap-1.5 md:flex">
+              <Button onClick={editClient} size="compact" variant="ghost">
+                <Pencil />
+                {t("clients.edit")}
+              </Button>
+              <Button onClick={newInvoice} size="compact">
+                <Plus />
+                {t("invoices.new")}
+                <Kbd>{FINANCE_SHORTCUTS.newInvoice.toUpperCase()}</Kbd>
+              </Button>
+            </span>
           </>
         }
         back={<BackLink label={t("clients.title")} to="/finances/clients" />}

@@ -129,11 +129,13 @@ Everything here applies below 48rem only; desktop renders exactly as before.
 - **Header actions:** one pattern: bare 44px icon buttons (search, +, …). No labelled buttons in the phone top row; Log out lives at the end of Settings.
 - **Rows:** the title always wins. Long status ("10 days ago · 1,232 km over") moves into the meta line in its status colour, so the trailing slot holds at most a short figure (an amount). Transactions and Timeline amounts use `Money`, so "−MKD" reads as a light prefix.
 - **Swipe actions:** reminder rows (Skip, Done), unpaid invoices (Mark paid), recurring income to confirm (Skip, Confirm), transactions (Delete). They reuse the same dialogs, mutations, confirmations and toasts as the tap path, which keeps working.
-- **Tab bar:** floats 8px above the home indicator (`tabbar-float`), translucent and blurred, 24px radius. The current tab's icon sits on a tinted pill in the accent colour with a semibold label. It keeps `view-transition-name: tabbar`, so it never animates with the page.
+- **Tab bar:** Linear-style: an icon-only capsule of the four sections (labels are `aria-label`s) with Quick add as its own round button beside it, floating 12px above the home indicator (`tabbar-float`, `tabbar-glass`: frosted, nearly opaque). The page fades and blurs progressively into the canvas near the bottom edge (`tabbar-edge`), so rows never show through the bar. The current tab sits on a tinted pill in the accent colour. It keeps `view-transition-name: tabbar`, so it never animates with the page.
+- **Sheet footers with several actions** (an issued invoice): the main action full width, the rest in a "…" menu beside it.
+- **Sign-in screens** never auto-focus a field on phones (the keyboard would cover the screen on load).
 - **Charts:** the Garage spending and Finances net cards scrub (tap or drag); Finances shows month initials and a readout line for the chosen month.
 - **Tints:** a fixed palette of eight (`tint-*`), one per category icon (`categoryTint`, expense categories) or car (`carTint`), as a 15% tile with the tint as the icon colour.
 - **Installed app:** the manifest, `index.html`, `boot.js` and the theme switch share `THEME_COLORS` (the phone canvas), so the status bar and splash match the page in both themes (Chrome also reads the manifest's dark-scheme override).
-- **Sign-in screens:** no card on phones: the mark and name on a soft accent glow, a large title, a full-width form with 48px buttons.
+- **Sign-in screens:** no card on phones: the mark and name in a row on a soft accent glow, a large title, a full-width form with 48px buttons, all in the optical centre of the screen.
 
 ## Rules of thumb
 

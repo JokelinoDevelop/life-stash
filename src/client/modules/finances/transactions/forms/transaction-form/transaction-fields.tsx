@@ -112,7 +112,7 @@ export const NoteField = withForm({
               {t("form.note")}
             </label>
             <textarea
-              className="placeholder:text-muted-foreground mt-1 h-11 w-full resize-none border-0 bg-transparent p-0 text-sm outline-none"
+              className="placeholder:text-muted-foreground mt-1 h-11 w-full resize-none border-0 bg-transparent p-0 text-base outline-none md:text-sm"
               id="notes"
               onBlur={field.handleBlur}
               onChange={(event) => {

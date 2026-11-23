@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useIsDesktop } from "@/components/app/responsive-dialog";
 import { useAppForm } from "@/components/form/form-hook";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
@@ -15,6 +16,8 @@ export const PasswordSetupForm = ({
   onCreated: (codes: string[]) => void;
 }) => {
   const { t } = useTranslation("auth");
+  // Phones: no keyboard over the screen before the user taps a field.
+  const isDesktop = useIsDesktop();
   const errorMessage = useErrorMessage();
 
   const form = useAppForm({
@@ -47,7 +50,7 @@ export const PasswordSetupForm = ({
         {(field) => (
           <field.TextField
             autoComplete="name"
-            autoFocus
+            autoFocus={isDesktop}
             label={t("setup.displayName")}
           />
         )}
