@@ -59,7 +59,7 @@ export const ListSection = ({
 );
 
 const ROWS_BOX =
-  "bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b";
+  "surface bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b";
 
 /**
  * The rows box of a `ListSection`, for lists that draw their own heading.
@@ -122,7 +122,10 @@ export const Panel = ({
       </div>
     )}
     <div
-      className={cn("bg-card overflow-hidden rounded-lg border p-4", className)}
+      className={cn(
+        "surface bg-card overflow-hidden rounded-lg border p-4",
+        className
+      )}
     >
       {children}
     </div>

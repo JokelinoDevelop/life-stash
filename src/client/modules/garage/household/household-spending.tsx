@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Money } from "@/components/app/money";
 import { useFormat } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -68,15 +69,15 @@ export const SpentCard = ({
   const peak = Math.max(1, ...money.months);
 
   return (
-    <section className="bg-card rounded-lg border p-4">
+    <section className="surface bg-card rounded-lg border p-4">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-muted-foreground text-xs font-medium">
           {t("home.spentThisYear", { year })}
         </span>
         <Change money={money} year={year} />
       </div>
-      <p className="mt-0.5 text-3xl font-semibold tracking-tight tabular-nums">
-        {format.money(money.thisYear, money.currency)}
+      <p className="mt-1 text-4xl font-semibold tracking-tight">
+        <Money amountMinor={money.thisYear} currency={money.currency} />
       </p>
       <div
         aria-hidden="true"

@@ -81,7 +81,7 @@ export const LoadingState = ({
           <div className="md:bg-background md:border-divider flex h-5 items-center px-0.5 md:h-8 md:border-b md:px-5">
             <Skeleton className="h-3 w-24" />
           </div>
-          <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+          <ul className="surface bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
             {Array.from({ length: rows }, (_row, row) => (
               <SkeletonRow index={row + section} key={row} />
             ))}

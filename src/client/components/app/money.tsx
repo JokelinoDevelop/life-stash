@@ -79,7 +79,7 @@ export const Money = ({
         part.kind === "currency" ? (
           <span
             className={cn(
-              "font-medium tracking-normal",
+              phoneOnly ? "max-md:font-medium" : "font-medium",
               phoneOnly ? "max-md:money-code" : "money-code"
             )}
             // oxlint-disable-next-line react/no-array-index-key -- parts have no identity

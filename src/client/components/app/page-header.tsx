@@ -16,6 +16,7 @@ const MobileHeader = ({
   actions,
   back,
   description,
+  eyebrow,
   hideMobileTitle,
   mobileTop,
   title,
@@ -23,6 +24,7 @@ const MobileHeader = ({
   actions?: ReactNode;
   back?: ReactNode;
   description?: ReactNode;
+  eyebrow?: ReactNode;
   hideMobileTitle: boolean;
   mobileTop?: ReactNode;
   title: ReactNode;
@@ -87,6 +89,11 @@ const MobileHeader = ({
       )}
       {!hideMobileTitle && (
         <div>
+          {eyebrow !== undefined && (
+            <p className="text-muted-foreground mb-0.5 text-xs font-semibold tracking-wide uppercase">
+              {eyebrow}
+            </p>
+          )}
           <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
           {description !== undefined && (
             <p className="text-muted-foreground mt-0.5 text-sm">
@@ -109,6 +116,7 @@ export const PageHeader = ({
   back,
   description,
   desktopTitle,
+  eyebrow,
   hideMobileTitle = false,
   mobileTop,
   title,
@@ -118,6 +126,8 @@ export const PageHeader = ({
   description?: ReactNode;
   /** Bar title on desktop when it differs from the phone title. */
   desktopTitle?: ReactNode;
+  /** Phones: a small line above the large title (Today's date). */
+  eyebrow?: ReactNode;
   hideMobileTitle?: boolean;
   mobileTop?: ReactNode;
   title: ReactNode;
@@ -144,6 +154,7 @@ export const PageHeader = ({
       actions={actions}
       back={back}
       description={description}
+      eyebrow={eyebrow}
       hideMobileTitle={hideMobileTitle}
       mobileTop={mobileTop}
       title={title}

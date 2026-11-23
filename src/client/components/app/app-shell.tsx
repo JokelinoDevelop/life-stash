@@ -197,7 +197,7 @@ const Sidebar = () => {
   );
 };
 
-/** One tab: the icon is bolder and the label darker when it is the current section. */
+/** One tab: the current section's icon sits on a tinted pill, in the accent colour. */
 const Tab = ({
   activeOptions,
   badge,
@@ -213,18 +213,23 @@ const Tab = ({
 }) => (
   <Link
     activeOptions={activeOptions}
-    className="text-muted-foreground data-[status=active]:text-foreground group/tab flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
+    className="text-muted-foreground data-[status=active]:text-primary group/tab flex flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors active:opacity-70"
     to={to}
   >
-    <span className="relative flex">
+    <span className="group-data-[status=active]/tab:bg-primary/12 relative flex h-7 w-12 items-center justify-center rounded-full transition-colors">
       <Icon className="size-5.5 [stroke-width:1.75] group-data-[status=active]/tab:[stroke-width:2.25]" />
       {badge}
     </span>
-    {label}
+    <span className="group-data-[status=active]/tab:font-semibold">
+      {label}
+    </span>
   </Link>
 );
 
-/** Phones: four sections and, in the middle, Quick add. */
+/**
+ * Phones: four sections and, in the middle, Quick add, on a floating,
+ * translucent bar (the page blurs underneath it).
+ */
 const MobileNav = () => {
   const { t } = useTranslation();
   const today = useTodayCount();
@@ -232,16 +237,16 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="bg-card pb-safe fixed inset-x-0 bottom-0 z-40 border-t [view-transition-name:tabbar] md:hidden"
+      className="tabbar-float fixed inset-x-3 z-40 [view-transition-name:tabbar] md:hidden"
     >
-      <div className="flex h-14 items-stretch">
+      <div className="bg-card/90 flex h-16 items-stretch rounded-3xl px-1 backdrop-blur-xl backdrop-saturate-150">
         <Tab
           activeOptions={{ exact: true, includeSearch: false }}
           badge={
             today.count > 0 && (
               <span
                 className={cn(
-                  "ring-card absolute -top-0.5 -right-1 size-2 rounded-full ring-2",
+                  "ring-card absolute top-0.5 right-2.5 size-2 rounded-full ring-2",
                   today.overdue ? "bg-destructive" : "bg-primary"
                 )}
               >

@@ -1,3 +1,5 @@
+import { sumByCurrency } from "@shared/domain/money";
+import type { MoneyTotal } from "@shared/domain/money";
 import { NEXT_HORIZON_DAYS, reminderHorizon } from "@shared/domain/reminders";
 import type {
   ReminderEvaluation,
@@ -77,4 +79,37 @@ export const groupTodayItems = <
   }
 
   return groups;
+};
+
+/** The line under Today's title: how much is overdue and how much money is owed. */
+export interface TodaySummary {
+  /** Overdue reminders plus overdue invoices. */
+  overdue: number;
+  /** Everything else that needs action now (due-soon reminders, invoices due within 30 days). */
+  dueSoon: number;
+  /** Unpaid invoices, per currency. */
+  waiting: MoneyTotal[];
+}
+
+export const summarizeToday = (
+  reminders: readonly ReminderEvaluation[],
+  invoices: readonly (DueInvoice & MoneyTotal)[],
+  today: string
+): TodaySummary => {
+  let overdue = 0;
+  let dueSoon = 0;
+
+  for (const entry of reminders) {
+    const horizon = reminderHorizon(entry);
+    overdue += horizon === "overdue" ? 1 : 0;
+    dueSoon += horizon === "next30" ? 1 : 0;
+  }
+
+  for (const entry of invoices) {
+    const horizon = invoiceHorizon(entry, today);
+    overdue += horizon === "overdue" ? 1 : 0;
+    dueSoon += horizon === "next30" ? 1 : 0;
+  }
+
+  return { dueSoon, overdue, waiting: sumByCurrency(invoices) };
 };

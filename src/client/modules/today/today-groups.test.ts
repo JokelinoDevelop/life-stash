@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { groupTodayItems, invoiceHorizon } from "./today-groups";
+import {
+  groupTodayItems,
+  invoiceHorizon,
+  summarizeToday,
+} from "./today-groups";
 
 const TODAY = "2026-11-19";
 
@@ -70,5 +74,58 @@ describe(groupTodayItems, () => {
           item.kind === "reminder" ? item.reminder.id : item.invoice.id
         )
     ).toStrictEqual(["d1", "km1", "km2"]);
+  });
+});
+
+describe(summarizeToday, () => {
+  it("counts overdue and due-soon items and sums money waiting per currency", () => {
+    const summary = summarizeToday(
+      [
+        reminder("r1", "overdue", -3),
+        reminder("r2", "due-soon", 5),
+        reminder("r3", "upcoming", 90),
+      ],
+      [
+        {
+          amountMinor: 320_000,
+          currency: "EUR",
+          dueDate: "2026-11-01",
+          id: "i1",
+          status: "overdue",
+        },
+        {
+          amountMinor: 138_350,
+          currency: "EUR",
+          dueDate: "2026-11-22",
+          id: "i2",
+          status: "sent",
+        },
+        {
+          amountMinor: 500_000,
+          currency: "MKD",
+          dueDate: "2027-02-01",
+          id: "i3",
+          status: "sent",
+        },
+      ],
+      TODAY
+    );
+
+    expect(summary).toStrictEqual({
+      dueSoon: 2,
+      overdue: 2,
+      waiting: [
+        { amountMinor: 500_000, currency: "MKD" },
+        { amountMinor: 458_350, currency: "EUR" },
+      ],
+    });
+  });
+
+  it("is all zero with nothing to do", () => {
+    expect(summarizeToday([], [], TODAY)).toStrictEqual({
+      dueSoon: 0,
+      overdue: 0,
+      waiting: [],
+    });
   });
 });

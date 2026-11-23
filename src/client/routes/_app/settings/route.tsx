@@ -33,7 +33,7 @@ const PhoneSignOut = () => {
 const tabClass =
   "text-muted-foreground hover:text-foreground flex h-9 items-center rounded-md px-2.5 text-sm font-medium transition-colors md:h-7";
 
-const activeTabClass = "bg-accent text-foreground";
+const activeTabClass = "bg-accent max-md:bg-card text-foreground";
 
 /** Settings: General (account, preferences, security), one tab per module, and People (admins). */
 const SettingsLayout = () => {

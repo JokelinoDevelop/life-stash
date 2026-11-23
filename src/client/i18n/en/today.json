@@ -10,5 +10,19 @@
   },
   "invoiceMeta": "Invoice {{number}}",
   "emptyTitle": "All clear",
-  "empty": "Nothing is overdue or due soon in Garage or Finances."
+  "empty": "Nothing is overdue or due soon in Garage or Finances.",
+  "hero": {
+    "overdue_one": "{{count}} overdue",
+    "overdue_other": "{{count}} overdue",
+    "dueSoon_one": "{{count}} due soon",
+    "dueSoon_other": "{{count}} due soon",
+    "waiting": "<money></money> waiting",
+    "clear": "Nothing needs you right now"
+  },
+  "allClear": {
+    "title": "You're all caught up",
+    "message": "No reminders are due and every invoice is paid. New ones will show up here.",
+    "nextUp": "Next up",
+    "viewGarage": "Open Garage"
+  }
 }

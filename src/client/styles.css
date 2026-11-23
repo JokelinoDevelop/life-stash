@@ -24,6 +24,24 @@
   );
 }
 
+/* A raised surface (card, list box, panel). Phones: no outline and a 16px
+   radius, like a native grouped list; desktop keeps its hairline and radius. */
+@utility surface {
+  @media (max-width: 47.999rem) {
+    border-width: 0 !important;
+    border-radius: 1rem !important;
+  }
+}
+
+/* The phone tab bar floats above the home indicator with a soft lift. */
+@utility tabbar-float {
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+  border-radius: 1.5rem;
+  box-shadow:
+    0 0 0 1px color-mix(in oklch, var(--foreground) 6%, transparent),
+    0 8px 28px -6px oklch(0.2 0.02 265 / 0.22);
+}
+
 /* The currency next to a figure (`Money`): smaller and lighter than the digits. */
 @utility money-code {
   font-size: 0.7em;
@@ -125,6 +143,15 @@
   --overlay-shadow:
     0 16px 48px -12px oklch(0.2 0.02 265 / 0.22),
     0 2px 6px oklch(0.2 0.02 265 / 0.05);
+  /* Category tints (phone icons): a small fixed palette, re-tuned for dark. */
+  --tint-blue: oklch(0.55 0.16 255);
+  --tint-green: oklch(0.55 0.13 152);
+  --tint-orange: oklch(0.6 0.16 45);
+  --tint-amber: oklch(0.62 0.14 75);
+  --tint-purple: oklch(0.53 0.17 300);
+  --tint-pink: oklch(0.58 0.17 355);
+  --tint-teal: oklch(0.55 0.1 195);
+  --tint-slate: oklch(0.5 0.02 260);
   /* Motion tokens: fast = hover/press/exits/indicators, base = overlays and content fading in. */
   --motion-fast: 100ms;
   --motion-base: 150ms;
@@ -170,6 +197,31 @@
   --sidebar-ring: oklch(0.66 0.15 263);
   --overlay-shadow:
     0 0 0 1px oklch(1 0 0 / 6%), 0 16px 48px -12px oklch(0 0 0 / 0.6);
+  --tint-blue: oklch(0.74 0.13 255);
+  --tint-green: oklch(0.76 0.13 152);
+  --tint-orange: oklch(0.76 0.13 50);
+  --tint-amber: oklch(0.82 0.12 80);
+  --tint-purple: oklch(0.74 0.13 300);
+  --tint-pink: oklch(0.76 0.13 355);
+  --tint-teal: oklch(0.78 0.09 195);
+  --tint-slate: oklch(0.75 0.02 260);
+}
+
+/* Phones (v0.5 grouped lists): a slightly darker canvas, so white cards can
+   drop their outlines and read like native grouped lists (row dividers stay).
+   Dark mode deepens the canvas the same way. Desktop keeps the tokens above. */
+@media (max-width: 47.999rem) {
+  :root:not(.dark) {
+    --background: oklch(0.962 0.004 260);
+    --accent: oklch(0.945 0.005 260);
+    --divider: oklch(0.925 0.004 260);
+  }
+  .dark {
+    --background: oklch(0.135 0.005 265);
+    --card: oklch(0.2 0.006 265);
+    --accent: oklch(0.255 0.008 265);
+    --divider: oklch(1 0 0 / 7%);
+  }
 }
 
 /* Type, elevation and motion. Non-inline so utilities read the variables at
@@ -271,6 +323,14 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-green: var(--tint-green);
+  --color-tint-orange: var(--tint-orange);
+  --color-tint-amber: var(--tint-amber);
+  --color-tint-purple: var(--tint-purple);
+  --color-tint-pink: var(--tint-pink);
+  --color-tint-teal: var(--tint-teal);
+  --color-tint-slate: var(--tint-slate);
 }
 
 @layer base {
@@ -392,6 +452,21 @@
   height: 0.25rem;
   margin-top: 0.5rem;
   background: color-mix(in oklch, var(--muted-foreground) 35%, transparent);
+}
+
+@media (max-width: 47.999rem) {
+  /* Sheets are raised white panels with a 16px top radius on phones. */
+  [data-slot="drawer-content"][data-vaul-drawer-direction="bottom"] {
+    background: var(--card);
+    border-top-width: 0;
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+  }
+  /* Pill tabs on the grey canvas: the active tab is a raised white chip. */
+  [data-slot="tabs-indicator"] {
+    background: var(--card);
+    box-shadow: 0 1px 2px oklch(0.2 0.02 265 / 0.08);
+  }
 }
 
 /* The phone tab bar sits above the page fade (it would otherwise be covered

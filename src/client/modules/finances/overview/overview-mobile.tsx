@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Money } from "@/components/app/money";
 import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 
@@ -10,6 +11,47 @@ import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { headline, percentChange, subtractTotals } from "./money-split";
 import type { FinanceOverview } from "./overview.queries";
+
+/** Phone: one-tap Expense / Income / Invoice. */
+const QuickActions = () => {
+  const { t } = useTranslation("finances");
+  const dialog = useFinanceDialog();
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "transaction", entryKind: "expense" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <ArrowUpRight />
+        {t("overview.quick.expense")}
+      </Button>
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "transaction", entryKind: "income" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <ArrowDownLeft />
+        {t("overview.quick.income")}
+      </Button>
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "invoice" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <FileText />
+        {t("overview.quick.invoice")}
+      </Button>
+    </div>
+  );
+};
 
 /** Phone: quick actions and the "Net this year" card with monthly bars (5.1). */
 export const OverviewMobileTop = ({
@@ -19,7 +61,6 @@ export const OverviewMobileTop = ({
 }) => {
   const { t } = useTranslation("finances");
   const format = useFormat();
-  const dialog = useFinanceDialog();
 
   const rates = useQuery(financeSettingsQuery).data?.exchangeRates ?? NO_RATES;
   const main = format.currency;
@@ -53,39 +94,8 @@ export const OverviewMobileTop = ({
 
   return (
     <div className="flex flex-col gap-4 md:hidden">
-      <div className="grid grid-cols-3 gap-2">
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "transaction", entryKind: "expense" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <ArrowUpRight />
-          {t("overview.quick.expense")}
-        </Button>
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "transaction", entryKind: "income" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <ArrowDownLeft />
-          {t("overview.quick.income")}
-        </Button>
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "invoice" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <FileText />
-          {t("overview.quick.invoice")}
-        </Button>
-      </div>
-      <section className="bg-card flex flex-col gap-1 rounded-lg border p-4">
+      <QuickActions />
+      <section className="surface bg-card flex flex-col gap-1 rounded-lg border p-4">
         <div className="text-muted-foreground flex items-baseline justify-between text-xs">
           <span className="font-medium">
             {t("overview.netIn", { year: overview.year })}
@@ -99,10 +109,15 @@ export const OverviewMobileTop = ({
             </span>
           )}
         </div>
-        <span className="text-2xl font-semibold tracking-tight tabular-nums">
-          {net.primary === null
-            ? "—"
-            : format.money(net.primary.amountMinor, net.primary.currency)}
+        <span className="mt-0.5 text-4xl font-semibold tracking-tight">
+          {net.primary === null ? (
+            "—"
+          ) : (
+            <Money
+              amountMinor={net.primary.amountMinor}
+              currency={net.primary.currency}
+            />
+          )}
         </span>
         <span className="text-muted-foreground text-xs tabular-nums">
           {t("overview.in")}{" "}

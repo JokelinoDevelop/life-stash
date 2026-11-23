@@ -24,7 +24,7 @@ export const CategoryStrip = ({
         </p>
       ) : (
         <div className="-mx-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:px-0">
-          <ul className="bg-card divide-divider flex w-max min-w-full divide-x rounded-lg border">
+          <ul className="surface bg-card divide-divider flex w-max min-w-full divide-x rounded-lg border">
             {categories.map((entry) => (
               <li
                 className="flex min-w-32 flex-1 items-center gap-2.5 px-3 py-2.5"
