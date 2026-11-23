@@ -38,6 +38,11 @@ const router = createRouter({
   defaultPendingMs: 800,
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
+  // Pages cross-fade when the path changes (see `::view-transition-*(page)` in
+  // styles.css). Search-only changes (dialogs, tabs, filters) don't animate.
+  defaultViewTransition: {
+    types: ({ pathChanged }) => (pathChanged ? ["page"] : false),
+  },
   scrollRestoration: true,
   routeTree,
 });

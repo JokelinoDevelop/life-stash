@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
+import { useListMotion } from "@/lib/motion";
 import { SettingsSection } from "@/modules/settings/settings-section";
 
 import { CategoryIcon } from "../categories/category-icon";
@@ -113,6 +114,7 @@ export const RecurringSettings = () => {
   const { t } = useTranslation("finances");
   const dialog = useFinanceDialog();
   const items = useQuery(recurringQuery);
+  const rows = useListMotion();
 
   let body = <LoadingState rows={2} variant="rows" />;
 
@@ -128,7 +130,7 @@ export const RecurringSettings = () => {
     );
   } else if (items.data !== undefined) {
     body = (
-      <ul className="divide-divider divide-y">
+      <ul className="divide-divider divide-y" ref={rows}>
         {items.data.recurring.length === 0 && (
           <li className="text-muted-foreground px-3 py-3 text-sm">
             {t("recurring.empty")}

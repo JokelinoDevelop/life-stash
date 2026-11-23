@@ -1,6 +1,7 @@
 import { useRender } from "@base-ui/react/use-render";
 import type * as React from "react";
 
+import { useListMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 /** Heading that sits above a hairline box: title, optional count and action. */
@@ -53,11 +54,47 @@ export const ListSection = ({
         <SectionHeading action={action} count={count} title={title} />
       </div>
     </div>
-    <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
-      {children}
-    </ul>
+    <ListRows>{children}</ListRows>
   </section>
 );
+
+/**
+ * The rows box of a `ListSection`, for lists that draw their own heading.
+ * Rows animate in and out as the list changes (`useListMotion`).
+ */
+export const ListRows = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <MotionList
+    className={cn(
+      "bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b",
+      className
+    )}
+  >
+    {children}
+  </MotionList>
+);
+
+/** A plain `<ul>` whose rows animate in and out; for lists rendered inside render props. */
+export const MotionList = ({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  const rows = useListMotion();
+
+  return (
+    <ul className={className} ref={rows}>
+      {children}
+    </ul>
+  );
+};
 
 /** A hairline box for non-list content (charts, tables, form fields), optionally titled. */
 export const Panel = ({

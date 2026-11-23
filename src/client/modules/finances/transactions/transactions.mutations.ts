@@ -1,10 +1,12 @@
+import type { InfiniteData } from "@tanstack/react-query";
 import type { InferRequestType } from "hono/client";
 import { useTranslation } from "react-i18next";
 
 import { api, unwrap } from "@/lib/api";
-import { useAppMutation } from "@/lib/mutation";
+import { optimisticUpdate, useAppMutation } from "@/lib/mutation";
 
 import { financeKeys } from "../finance-keys";
+import type { TransactionPage } from "./transactions.queries";
 
 type CreateBody = InferRequestType<
   typeof api.finances.transactions.$post
@@ -51,6 +53,18 @@ export const useUpdateTransaction = (
   });
 };
 
+/** The deleted row leaves every loaded list at once; totals catch up on refetch. */
+const dropTransaction = optimisticUpdate<InfiniteData<TransactionPage>, string>(
+  financeKeys.transactionsAll,
+  (data, id) => ({
+    ...data,
+    pages: data.pages.map((page) => ({
+      ...page,
+      transactions: page.transactions.filter((row) => row.id !== id),
+    })),
+  })
+);
+
 /** Deletes with an Undo toast (the server keeps the row for a week). */
 export const useDeleteTransaction = () => {
   const { t } = useTranslation("finances");
@@ -63,6 +77,7 @@ export const useDeleteTransaction = () => {
           param: { transactionId: id },
         })
       ),
+    optimistic: [dropTransaction],
     success: t("transactions.deleted"),
     undo: async (_data, id) =>
       await unwrap(

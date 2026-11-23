@@ -27,6 +27,15 @@ const integerFormat = (locale: string): Intl.NumberFormat => {
   return created;
 };
 
+/** How money is shown: whole denars, up to two decimals for other currencies. */
+export const moneyFormatOptions = (currency: Currency) =>
+  ({
+    currency,
+    maximumFractionDigits: currency === "MKD" ? 0 : 2,
+    minimumFractionDigits: 0,
+    style: "currency",
+  }) as const satisfies Intl.NumberFormatOptions;
+
 const moneyFormat = (locale: string, currency: Currency): Intl.NumberFormat => {
   const key = `${locale}:${currency}`;
   const cached = moneyFormats.get(key);
@@ -35,12 +44,7 @@ const moneyFormat = (locale: string, currency: Currency): Intl.NumberFormat => {
     return cached;
   }
 
-  const created = new Intl.NumberFormat(locale, {
-    currency,
-    maximumFractionDigits: currency === "MKD" ? 0 : 2,
-    minimumFractionDigits: 0,
-    style: "currency",
-  });
+  const created = new Intl.NumberFormat(locale, moneyFormatOptions(currency));
 
   moneyFormats.set(key, created);
 
@@ -81,9 +85,12 @@ export const useFormat = () => {
     shortDate: formatShortDate,
     currency,
     distance,
+    /** Number locale ("en-GB" / "mk-MK"), for animated figures. */
+    locale,
     money,
     number,
     totals,
     unit,
+    unitLabel,
   };
 };

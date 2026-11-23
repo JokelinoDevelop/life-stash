@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useErrorMessage } from "@/lib/errors";
+import { useListMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 import {
@@ -173,6 +174,7 @@ export const FileList = ({
   const upload = useUploadAttachments(owner);
   const remove = useDeleteAttachment();
   const [pending, setPending] = useState<File[]>([]);
+  const rows = useListMotion();
 
   const onFiles = async (picked: File[]) => {
     setPending(picked);
@@ -204,7 +206,7 @@ export const FileList = ({
   return (
     <div className="flex flex-col gap-2">
       {(list.length > 0 || pending.length > 0) && (
-        <ul className="divide-divider divide-y rounded-md border">
+        <ul className="divide-divider divide-y rounded-md border" ref={rows}>
           {list.map((file) => (
             <FileRow
               contentType={file.contentType}

@@ -264,7 +264,10 @@ export const AppShell = () => (
       <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
         <main className="md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0">
           <RouteProgress />
-          <Outlet />
+          {/* The page snapshot for route transitions (see styles.css). */}
+          <div className="[view-transition-name:page]">
+            <Outlet />
+          </div>
         </main>
         <MobileNav />
       </div>

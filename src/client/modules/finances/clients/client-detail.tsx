@@ -5,7 +5,9 @@ import { Archive, ArchiveRestore } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AnimatedTotals } from "@/components/app/animated-number";
 import { useConfirm } from "@/components/app/confirm/confirm-context";
+import { ListRows } from "@/components/app/list-section";
 import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -77,7 +79,7 @@ const InvoicesList = ({ data }: { data: ClientDetailBody }) => {
           })}
         </span>
       </div>
-      <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+      <ListRows>
         {data.invoices.length === 0 && (
           <li className="text-muted-foreground flex min-h-12 items-center px-3.5 text-sm md:px-5">
             {t("clients.noInvoicesYet")}
@@ -136,7 +138,7 @@ const InvoicesList = ({ data }: { data: ClientDetailBody }) => {
             </Button>
           </li>
         )}
-      </ul>
+      </ListRows>
     </section>
   );
 };
@@ -191,7 +193,6 @@ export const ClientDetail = ({
   year: number;
 }) => {
   const { t } = useTranslation("finances");
-  const format = useFormat();
   const month = useMonthLabel();
   const detail = useQuery(clientQuery(clientId, year));
 
@@ -244,15 +245,15 @@ export const ClientDetail = ({
         <StatPanel bleed className="md:border-t">
           <Stat
             label={t("clients.earnedIn", { year })}
-            value={format.totals(client.earnedThisYear)}
+            value={<AnimatedTotals values={client.earnedThisYear} />}
           />
           <Stat
             label={t("clients.allTime")}
-            value={format.totals(client.earnedAllTime)}
+            value={<AnimatedTotals values={client.earnedAllTime} />}
           />
           <Stat
             label={t("invoices.unpaid")}
-            value={format.totals(client.unpaid)}
+            value={<AnimatedTotals values={client.unpaid} />}
           />
           <Stat
             label={t("clients.usuallyPays")}

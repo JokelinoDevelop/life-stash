@@ -81,6 +81,17 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 - **Empty:** a neutral 40px icon tile, optional title, one line of help and the main action (with its key hint). No dashed boxes.
 - **Errors:** inline where the content would be: icon, "Couldn't load this", the reason and Retry. A failed route shows the same, centred, via the router's `defaultErrorComponent`.
 
+## Motion
+
+Motion explains change; it never decorates. Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits), `--motion-base` 150 ms (overlays, tab panels), `--motion-slow` 220 ms (content arriving), all on `--ease-out`. `prefers-reduced-motion` turns every one of them off.
+
+- **Pages:** when the path changes the content panel cross-fades (old page out in 100 ms, new one rises 4px in 220 ms) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate. Sidebar and bottom bar stay still.
+- **Lists:** rows fade in, fade out and slide into place as data changes. Use `ListSection` / `ListRows`, or `MotionList` / `useListMotion()` (`lib/motion`) for any other list.
+- **Optimistic:** quick, reversible mutations update the cache before the request (`optimistic: [optimisticUpdate(key, fn)]` on `useAppMutation`); errors roll back. Used for Confirm / Skip recurring income and deleting a transaction.
+- **Figures:** headline numbers in `Stat`s roll to their new value (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`).
+- **Tabs:** pill tabs slide one indicator between tabs; the panel rises in.
+- **Small things:** buttons scale to .97 while pressed; disclosures and empty states rise in (`animate-rise`); chevrons rotate.
+
 ## Long lists
 
 - Every long list uses the same pager (`PagedList`: "‹ Newer · 13–24 of 79 · Older ›"). Lists built on the client (car Timeline, the household history) show **12 rows a page**; Transactions pages through the API, 25 at a time. Short capped lists (Today's "Later", paid invoices, "Last done") use "Show all N" / "Show less". The page lives in the URL (`?page=2`, absent on page 1) so refresh and Back from a detail return to it; switching car tabs or the Timeline filter starts at page 1. Turning the page scrolls back to the top of the list.

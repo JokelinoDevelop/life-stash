@@ -7,6 +7,7 @@ import type { OdometerPoint } from "@shared/domain/mileage";
 import { averagePerMonth } from "@shared/domain/mileage-buckets";
 import { useTranslation } from "react-i18next";
 
+import { AnimatedDistance } from "@/components/app/animated-number";
 import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { useFormat } from "@/lib/format";
 
@@ -32,14 +33,21 @@ export const MileageStats = ({
       <Stat
         label={t("stats.latest")}
         value={
-          latest === null ? t("stats.none") : format.distance(latest.odometerKm)
+          latest === null ? (
+            t("stats.none")
+          ) : (
+            <AnimatedDistance km={latest.odometerKm} />
+          )
         }
       />
       <Stat
         label={t("stats.total")}
-        value={format.distance(totalDistance(points))}
+        value={<AnimatedDistance km={totalDistance(points)} />}
       />
-      <Stat label={t("stats.thisYear")} value={format.distance(thisYear)} />
+      <Stat
+        label={t("stats.thisYear")}
+        value={<AnimatedDistance km={thisYear} />}
+      />
       <Stat
         label={t("stats.perMonth")}
         value={average === null ? t("stats.none") : format.distance(average)}

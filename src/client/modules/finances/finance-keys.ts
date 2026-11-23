@@ -21,9 +21,13 @@ export const financeKeys = {
     ["finances", "projects", clientId] as const,
   recurring: ["finances", "recurring"] as const,
   overview: (year: number) => ["finances", "overview", year] as const,
+  /** Every year's overview (prefix of `overview`). */
+  overviewAll: ["finances", "overview"] as const,
   settings: ["finances", "settings"] as const,
   transaction: (transactionId: string) =>
     ["finances", "transaction", transactionId] as const,
   transactions: (filter: TransactionFilter) =>
     ["finances", "transactions", filter] as const,
+  /** Every filtered transaction list (prefix of `transactions`). */
+  transactionsAll: ["finances", "transactions"] as const,
 };

@@ -1,7 +1,12 @@
 import { NO_RATES } from "@shared/domain/exchange";
+import type { MoneyTotal } from "@shared/domain/money";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import {
+  AnimatedMoney,
+  AnimatedTotals,
+} from "@/components/app/animated-number";
 import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { useFormat } from "@/lib/format";
 
@@ -9,6 +14,14 @@ import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { headline, percentChange, subtractTotals } from "./money-split";
 import type { Headline } from "./money-split";
 import type { FinanceOverview } from "./overview.queries";
+
+/** A headline amount, or "—" when there is nothing to show. */
+const headlineValue = (total: MoneyTotal | null) =>
+  total === null ? (
+    "—"
+  ) : (
+    <AnimatedMoney amountMinor={total.amountMinor} currency={total.currency} />
+  );
 
 /** Earned (vs last year) · Spent (+ other currencies) · Net (monthly average) · Waiting. */
 export const OverviewKpis = ({ overview }: { overview: FinanceOverview }) => {
@@ -41,10 +54,6 @@ export const OverviewKpis = ({ overview }: { overview: FinanceOverview }) => {
       })
     );
 
-  const money = (
-    total: { amountMinor: number; currency: typeof main } | null
-  ) => (total === null ? "—" : format.money(total.amountMinor, total.currency));
-
   let waitingHint = t("overview.allPaid");
 
   if (waiting.overdueCount > 0) {
@@ -69,14 +78,14 @@ export const OverviewKpis = ({ overview }: { overview: FinanceOverview }) => {
               }),
         ].join(" · ")}
         label={t("overview.earned")}
-        value={money(earned.primary)}
+        value={headlineValue(earned.primary)}
       />
       <Stat
         hint={
           spent.others.length === 0 ? undefined : otherParts(spent).join(" · ")
         }
         label={t("overview.spent")}
-        value={money(spent.primary)}
+        value={headlineValue(spent.primary)}
       />
       <Stat
         hint={
@@ -93,7 +102,7 @@ export const OverviewKpis = ({ overview }: { overview: FinanceOverview }) => {
               })
         }
         label={t("overview.net")}
-        value={money(net.primary)}
+        value={headlineValue(net.primary)}
       />
       <Stat
         hint={
@@ -106,7 +115,7 @@ export const OverviewKpis = ({ overview }: { overview: FinanceOverview }) => {
           </span>
         }
         label={t("overview.waiting")}
-        value={format.totals(waiting.unpaid)}
+        value={<AnimatedTotals values={waiting.unpaid} />}
       />
     </StatPanel>
   );

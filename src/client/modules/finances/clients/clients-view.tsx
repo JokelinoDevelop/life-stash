@@ -4,6 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ListRows } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
@@ -111,11 +112,11 @@ const Section = ({
         {clients.length}
       </span>
     </div>
-    <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+    <ListRows>
       {clients.map((client) => (
         <Row client={client} key={client.id} />
       ))}
-    </ul>
+    </ListRows>
   </section>
 );
 
