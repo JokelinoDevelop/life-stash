@@ -5,6 +5,6 @@
  * in vite.config.ts (which cannot import this file at runtime).
  */
 export const THEME_COLORS = {
-  dark: "#07080a",
-  light: "#f1f2f5",
+  dark: "#070709",
+  light: "#f2f2f4",
 } as const;

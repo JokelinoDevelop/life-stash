@@ -25,7 +25,7 @@ const commit = (() => {
 // the splash and title bar follow dark mode where supported.
 const darkSchemeManifest = {
   user_preferences: {
-    color_scheme_dark: { background_color: "#07080a", theme_color: "#07080a" },
+    color_scheme_dark: { background_color: "#070709", theme_color: "#070709" },
   },
 };
 
@@ -52,8 +52,8 @@ export default defineConfig({
         description: "Records and reminders that make everyday life easier.",
         // The phone canvas (THEME_COLORS in src/client/app/theme-colors.ts), so the
         // splash and status bar match the app; Chrome reads the dark pair below.
-        theme_color: "#f1f2f5",
-        background_color: "#f1f2f5",
+        theme_color: "#f2f2f4",
+        background_color: "#f2f2f4",
         ...darkSchemeManifest,
         display: "standalone",
         start_url: "/",

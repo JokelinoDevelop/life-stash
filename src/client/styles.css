@@ -156,46 +156,48 @@
    Source of truth: the "LifeStash Design Language" canvas (Tokens board). */
 :root {
   --radius: 0.5rem; /* sm 4 · md 6 · lg 8 · xl 12 */
-  --background: oklch(0.984 0.002 260);
-  --foreground: oklch(0.21 0.012 265);
+  /* Neutrals lean very slightly violet (hue 285) and the one accent is an
+     indigo, in the spirit of Linear: quiet greys, a single cool colour. */
+  --background: oklch(0.982 0.002 286);
+  --foreground: oklch(0.2 0.008 286);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.012 265);
+  --card-foreground: oklch(0.2 0.008 286);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.012 265);
-  --primary: oklch(0.53 0.17 263);
+  --popover-foreground: oklch(0.2 0.008 286);
+  --primary: oklch(0.555 0.15 277);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.97 0.003 260);
-  --secondary-foreground: oklch(0.21 0.012 265);
-  --muted: oklch(0.97 0.003 260);
-  --muted-foreground: oklch(0.49 0.012 265);
-  --subtle-foreground: oklch(0.38 0.012 265);
-  --accent: oklch(0.955 0.004 260);
-  --accent-foreground: oklch(0.21 0.012 265);
+  --secondary: oklch(0.968 0.003 286);
+  --secondary-foreground: oklch(0.2 0.008 286);
+  --muted: oklch(0.968 0.003 286);
+  --muted-foreground: oklch(0.5 0.01 286);
+  --subtle-foreground: oklch(0.38 0.01 286);
+  --accent: oklch(0.953 0.004 286);
+  --accent-foreground: oklch(0.2 0.008 286);
   --destructive: oklch(0.58 0.2 27);
   --success: oklch(0.6 0.13 155);
   --success-foreground: oklch(0.5 0.12 155);
   --warning: oklch(0.74 0.15 70);
   --warning-foreground: oklch(0.52 0.12 60);
-  --border: oklch(0.912 0.005 260);
-  --divider: oklch(0.94 0.004 260);
-  --input: oklch(0.912 0.005 260);
-  --ring: oklch(0.53 0.17 263);
-  --chart-1: oklch(0.53 0.17 263);
-  --chart-2: oklch(0.68 0.12 250);
-  --chart-3: oklch(0.8 0.07 250);
-  --chart-4: oklch(0.9 0.025 255);
-  --chart-5: oklch(0.4 0.08 265);
-  --sidebar: oklch(0.984 0.002 260);
-  --sidebar-foreground: oklch(0.42 0.012 265);
-  --sidebar-primary: oklch(0.53 0.17 263);
+  --border: oklch(0.915 0.004 286);
+  --divider: oklch(0.942 0.003 286);
+  --input: oklch(0.905 0.005 286);
+  --ring: oklch(0.555 0.15 277);
+  --chart-1: oklch(0.555 0.15 277);
+  --chart-2: oklch(0.68 0.11 277);
+  --chart-3: oklch(0.8 0.065 277);
+  --chart-4: oklch(0.9 0.025 280);
+  --chart-5: oklch(0.38 0.09 280);
+  --sidebar: oklch(0.982 0.002 286);
+  --sidebar-foreground: oklch(0.42 0.01 286);
+  --sidebar-primary: oklch(0.555 0.15 277);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.955 0.004 260);
-  --sidebar-accent-foreground: oklch(0.21 0.012 265);
-  --sidebar-border: oklch(0.912 0.005 260);
-  --sidebar-ring: oklch(0.53 0.17 263);
+  --sidebar-accent: oklch(0.953 0.004 286);
+  --sidebar-accent-foreground: oklch(0.2 0.008 286);
+  --sidebar-border: oklch(0.915 0.004 286);
+  --sidebar-ring: oklch(0.555 0.15 277);
   --overlay-shadow:
-    0 16px 48px -12px oklch(0.2 0.02 265 / 0.22),
-    0 2px 6px oklch(0.2 0.02 265 / 0.05);
+    0 16px 48px -12px oklch(0.2 0.02 286 / 0.2),
+    0 2px 6px oklch(0.2 0.02 286 / 0.05);
   /* Category tints (phone icons): a small fixed palette, re-tuned for dark. */
   --tint-blue: oklch(0.55 0.16 255);
   --tint-green: oklch(0.55 0.13 152);
@@ -209,48 +211,49 @@
   --motion-fast: 100ms;
   --motion-base: 150ms;
   /* Phone push/pop slides, matching the swipe-back settle (use-swipe-back.ts). */
-  --motion-slide: 350ms;
+  --motion-slide: 280ms;
   --ease-slide: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .dark {
-  --background: oklch(0.165 0.006 265);
-  --foreground: oklch(0.95 0.004 260);
-  --card: oklch(0.195 0.006 265);
-  --card-foreground: oklch(0.95 0.004 260);
-  --popover: oklch(0.215 0.007 265);
-  --popover-foreground: oklch(0.95 0.004 260);
-  --primary: oklch(0.66 0.15 263);
-  --primary-foreground: oklch(0.165 0.006 265);
-  --secondary: oklch(0.235 0.007 265);
-  --secondary-foreground: oklch(0.95 0.004 260);
-  --muted: oklch(0.235 0.007 265);
-  --muted-foreground: oklch(0.72 0.01 265);
-  --subtle-foreground: oklch(0.82 0.008 265);
-  --accent: oklch(0.25 0.008 265);
-  --accent-foreground: oklch(0.95 0.004 260);
+  /* Near-black canvas with raised greys; the indigo lifts for contrast. */
+  --background: oklch(0.155 0.004 286);
+  --foreground: oklch(0.95 0.003 286);
+  --card: oklch(0.185 0.005 286);
+  --card-foreground: oklch(0.95 0.003 286);
+  --popover: oklch(0.21 0.006 286);
+  --popover-foreground: oklch(0.95 0.003 286);
+  --primary: oklch(0.68 0.13 277);
+  --primary-foreground: oklch(0.155 0.004 286);
+  --secondary: oklch(0.23 0.006 286);
+  --secondary-foreground: oklch(0.95 0.003 286);
+  --muted: oklch(0.23 0.006 286);
+  --muted-foreground: oklch(0.7 0.008 286);
+  --subtle-foreground: oklch(0.82 0.006 286);
+  --accent: oklch(0.245 0.007 286);
+  --accent-foreground: oklch(0.95 0.003 286);
   --destructive: oklch(0.66 0.19 25);
   --success: oklch(0.7 0.14 155);
   --success-foreground: oklch(0.74 0.14 155);
   --warning: oklch(0.8 0.14 75);
   --warning-foreground: oklch(0.8 0.14 75);
-  --border: oklch(1 0 0 / 9%);
-  --divider: oklch(1 0 0 / 6%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.66 0.15 263);
-  --chart-1: oklch(0.66 0.15 263);
-  --chart-2: oklch(0.58 0.11 250);
-  --chart-3: oklch(0.47 0.07 255);
-  --chart-4: oklch(0.36 0.03 260);
-  --chart-5: oklch(0.82 0.06 260);
-  --sidebar: oklch(0.165 0.006 265);
-  --sidebar-foreground: oklch(0.78 0.008 265);
-  --sidebar-primary: oklch(0.66 0.15 263);
-  --sidebar-primary-foreground: oklch(0.165 0.006 265);
-  --sidebar-accent: oklch(0.25 0.008 265);
-  --sidebar-accent-foreground: oklch(0.95 0.004 260);
-  --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.66 0.15 263);
+  --border: oklch(1 0 0 / 8%);
+  --divider: oklch(1 0 0 / 5.5%);
+  --input: oklch(1 0 0 / 11%);
+  --ring: oklch(0.68 0.13 277);
+  --chart-1: oklch(0.68 0.13 277);
+  --chart-2: oklch(0.58 0.1 277);
+  --chart-3: oklch(0.47 0.065 278);
+  --chart-4: oklch(0.36 0.03 280);
+  --chart-5: oklch(0.83 0.06 280);
+  --sidebar: oklch(0.155 0.004 286);
+  --sidebar-foreground: oklch(0.76 0.007 286);
+  --sidebar-primary: oklch(0.68 0.13 277);
+  --sidebar-primary-foreground: oklch(0.155 0.004 286);
+  --sidebar-accent: oklch(0.245 0.007 286);
+  --sidebar-accent-foreground: oklch(0.95 0.003 286);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.68 0.13 277);
   --overlay-shadow:
     0 0 0 1px oklch(1 0 0 / 6%), 0 16px 48px -12px oklch(0 0 0 / 0.6);
   --tint-blue: oklch(0.74 0.13 255);
@@ -268,14 +271,14 @@
    Dark mode deepens the canvas the same way. Desktop keeps the tokens above. */
 @media (max-width: 47.999rem) {
   :root:not(.dark) {
-    --background: oklch(0.962 0.004 260);
-    --accent: oklch(0.935 0.006 260);
-    --divider: oklch(0.925 0.004 260);
+    --background: oklch(0.962 0.003 286);
+    --accent: oklch(0.935 0.005 286);
+    --divider: oklch(0.925 0.003 286);
   }
   .dark {
-    --background: oklch(0.135 0.005 265);
-    --card: oklch(0.2 0.006 265);
-    --accent: oklch(0.255 0.008 265);
+    --background: oklch(0.13 0.004 286);
+    --card: oklch(0.195 0.005 286);
+    --accent: oklch(0.25 0.007 286);
     --divider: oklch(1 0 0 / 7%);
   }
 }
@@ -470,53 +473,18 @@
   animation-duration: var(--motion-base);
 }
 
-/* Phones: like a native (and Linear's) stack. Drill-downs push in from the
-   right over the old screen, which drifts left and dims; Back reverses it.
-   Switching tabs, or tabs inside a page (Settings), is instant, as in iOS.
-   Phones animate the root snapshot (exactly what is on screen) rather than
-   the page element: that one is as tall as the whole page, so its group
-   morphed in height and jumped vertically whenever either screen was
-   scrolled. The tab bar has its own name, so it stays still above it.
-   prefers-reduced-motion collapses all of it (see the base layer). */
-@keyframes slide-in-right {
+/* Phones: a page you drill into slides in from the right as it renders
+   (`phonePageEnters` in lib/nav-transition). It animates the live page, not
+   a snapshot, so it never blocks taps or scrolling; going back and switching
+   tabs are instant. prefers-reduced-motion collapses it (base layer). */
+@keyframes page-enter {
   from {
-    transform: translateX(100%);
+    transform: translateX(28%);
+    opacity: 0;
   }
 }
-@keyframes slide-out-left {
-  to {
-    transform: translateX(-30%);
-    filter: brightness(0.92);
-  }
-}
-@keyframes slide-in-left {
-  from {
-    transform: translateX(-30%);
-    filter: brightness(0.92);
-  }
-}
-@keyframes slide-out-right {
-  to {
-    transform: translateX(100%);
-  }
-}
-
-@media (max-width: 47.999rem) {
-  html:active-view-transition-type(push)::view-transition-old(root) {
-    animation: slide-out-left var(--motion-slide) var(--ease-slide) both;
-  }
-  html:active-view-transition-type(push)::view-transition-new(root) {
-    animation: slide-in-right var(--motion-slide) var(--ease-slide) both;
-    box-shadow: -8px 0 24px rgb(0 0 0 / 0.1);
-  }
-  html:active-view-transition-type(pop)::view-transition-old(root) {
-    z-index: 1;
-    animation: slide-out-right var(--motion-slide) var(--ease-slide) both;
-    box-shadow: -8px 0 24px rgb(0 0 0 / 0.1);
-  }
-  html:active-view-transition-type(pop)::view-transition-new(root) {
-    animation: slide-in-left var(--motion-slide) var(--ease-slide) both;
-  }
+@utility animate-page-enter {
+  animation: page-enter var(--motion-slide) var(--ease-slide) both;
 }
 
 /* Car hero (phones): the car's tint as a deep gradient, a scrim so white text
@@ -695,4 +663,52 @@
    by the page snapshot while a route changes) and never animates itself. */
 ::view-transition-group(tabbar) {
   animation: none;
+}
+
+/* Toasts (sonner), Linear-style: small neutral cards, the status only in the
+   icon's colour, one line, an optional quiet action. Bottom-right on
+   desktop; on phones a narrow card centred above the tab bar. */
+[data-sonner-toaster] [data-sonner-toast][data-styled="true"] {
+  gap: 0.625rem;
+  padding: 0.625rem 0.75rem;
+  font-size: var(--text-sm);
+  box-shadow: var(--overlay-shadow);
+  &[data-type="success"] [data-icon] {
+    color: var(--success);
+  }
+  &[data-type="error"] [data-icon] {
+    color: var(--destructive);
+  }
+  &[data-type="warning"] [data-icon] {
+    color: var(--warning);
+  }
+  &[data-type="info"] [data-icon] {
+    color: var(--primary);
+  }
+  [data-title] {
+    font-weight: 500;
+  }
+  [data-description] {
+    color: var(--muted-foreground);
+  }
+  [data-button] {
+    height: 1.625rem;
+    padding: 0 0.5rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--accent);
+    color: var(--foreground);
+    font-weight: 500;
+  }
+}
+
+@media (max-width: 600px) {
+  [data-sonner-toaster][data-x-position] {
+    left: 50% !important;
+    right: auto !important;
+    width: min(22rem, calc(100vw - 2rem)) !important;
+    transform: translateX(-50%);
+  }
+  [data-sonner-toaster] [data-sonner-toast] {
+    width: 100% !important;
+  }
 }

@@ -24,5 +24,5 @@
   document
     .querySelector('meta[name="theme-color"]')
     // THEME_COLORS in src/client/app/theme-colors.ts (the phone canvas).
-    ?.setAttribute("content", dark ? "#07080a" : "#f1f2f5");
+    ?.setAttribute("content", dark ? "#070709" : "#f2f2f4");
 }

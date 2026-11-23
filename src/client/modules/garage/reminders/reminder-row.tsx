@@ -218,7 +218,9 @@ export const ReminderRow = ({
         title={reminder.title}
       />
       {!readOnly && (
-        <CompleteReminderButton carId={carId} reminder={reminder} />
+        <span className="hidden md:flex">
+          <CompleteReminderButton carId={carId} reminder={reminder} />
+        </span>
       )}
       {!readOnly && (
         <ReminderMenu
@@ -226,6 +228,16 @@ export const ReminderRow = ({
           onSkip={swipe.handleSkip}
           reminder={reminder}
         />
+      )}
+      {/* Phones: the done circle, like the car Overview (swipe works too). */}
+      {!readOnly && (
+        <span className="md:hidden">
+          <CompleteReminderButton
+            carId={carId}
+            reminder={reminder}
+            variant="circle"
+          />
+        </span>
       )}
     </ListRow>
   );
