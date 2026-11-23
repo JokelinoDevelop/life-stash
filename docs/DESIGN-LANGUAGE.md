@@ -7,7 +7,7 @@ v0.5 adds a **phone layer** (below 48rem): grouped lists on a darker canvas, a f
 ## Principles
 
 1. **Hairlines, not shadows.** Borders separate things. Only overlays (dialogs, menus, popovers) get a shadow. _Phones depart:_ cards drop their outline and sit on a darker canvas (row dividers stay); the floating tab bar and the done tick carry a soft shadow.
-2. **One accent.** Blue (`primary`) marks the primary action, links and focus. Everything else is greyscale. Icons and avatars are neutral, not tinted. _Phones depart:_ category icons (Transactions, car Timeline, To confirm) take a tint from a small fixed palette, and a car without a photo gets a hero gradient in its own tint. Tints never mark actions or status; blue still does.
+2. **One accent.** Indigo (`primary`, in the spirit of Linear; neutrals lean very slightly violet) marks the primary action, links and focus. Everything else is greyscale. Icons and avatars are neutral, not tinted. _Phones depart:_ category icons (Transactions, car Timeline, To confirm) take a tint from a small fixed palette, and a car without a photo gets a hero gradient in its own tint. Tints never mark actions or status; the indigo still does.
 3. **Lists over cards.** Content is rows under a small heading (`ListSection`). Boxes (`Panel`) only frame charts, tables and form fields.
 4. **Status is a shape.** Four shapes only: an empty ring (later), a ring with a dot (due soon), a solid "!" disc (overdue), a check (done). No partial fills. Colour is the second cue.
 5. **15px is the base** on desktop and on touch (the default "comfortable" size; ⌘K switches to "compact": 13/14px and tighter spacing, via `data-density` in `styles.css`). Phones keep the native 4px grid in comfortable, so about eight two-line rows fit a screen. Hierarchy comes from weight and grey level, not size jumps, except the one hero figure per phone screen (see "Phones (v0.5)").
@@ -24,7 +24,7 @@ v0.5 adds a **phone layer** (below 48rem): grouped lists on a darker canvas, a f
 | `foreground`, `subtle-foreground`, `muted-foreground` | text levels (primary, secondary, tertiary) |
 | `primary` | the one accent |
 | `destructive`, `warning`, `success` | status; use `warning-foreground` / `success-foreground` for warning / success **text** (income amounts) |
-| `chart-1…5` | blue ramp (chart-5 is a dark navy for a fourth series) |
+| `chart-1…5` | indigo ramp (chart-5 is a deep indigo for a fourth series) |
 | `tint-blue…slate` | phone category icons and car hero gradients (`TINTS` / `TINT_TILE` in `components/app/tint.ts`); tuned per theme |
 
 Radii: `--radius` is 0.5rem, giving `rounded-sm` 4 · `md` 6 · `lg` 8 · `xl` 12. Phones: surfaces (`surface` utility) and sheets are 16px. Shadows: `shadow-xs`/`sm` are none; `shadow-md`/`lg`/`xl` are the overlay shadow. Font: Inter Variable (self-hosted, optical sizing, `cv11 ss01 ss03`).
@@ -70,6 +70,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
 | `useConfirm()` (`components/app/confirm`) | imperative yes/no: `await confirm({ title, tone })` |
 | `useAppMutation` (`lib/mutation`) | every mutation: one toast, optional Undo / action, invalidation |
+| Toasts (sonner) | small neutral cards, Linear-style: status only in the icon colour, one line, a quiet action button; bottom-right on desktop, a narrow card centred above the tab bar on phones (styles in `styles.css`) |
 | `PagedList` + `paginate` (`lib/paginate`) | any list that can grow past a screen: 12 rows a page, "‹ Newer · 13–24 of 79 · Older ›" |
 | `DrawerHeader align="start"` | sheet titles read top-left like their dialogs |
 
@@ -95,9 +96,9 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 ## Motion
 
-Subtle by default: motion explains a change the user just made; it never decorates, and nothing moves on its own. Opacity over movement — no slides, no rises (_phones depart_ for navigation and gestures, below). Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits, indicators), `--motion-base` 150 ms (overlays, content fading in), on `--ease-out`; `--motion-slide` 260 ms on `--ease-slide` for phone push/pop (the same curve as swipe-back). `prefers-reduced-motion` turns them all off, including scroll-driven effects.
+Subtle by default: motion explains a change the user just made; it never decorates, and nothing moves on its own. Opacity over movement — no slides, no rises (_phones depart_ for navigation and gestures, below). Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits, indicators), `--motion-base` 150 ms (overlays, content fading in), on `--ease-out`; `--motion-slide` 280 ms on `--ease-slide` for the phone drill-down slide-in (the same curve as swipe-back). `prefers-reduced-motion` turns them all off, including scroll-driven effects.
 
-- **Pages:** when the path changes the content panel cross-fades (150 ms, no movement) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). On phones `navDirection` (`lib/nav-transition`) adds a type: drill-downs slide in from the right (`push`) and back out (`pop`, also for Back), switching tab-bar sections keeps the fade (`tab`). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate; browsers without view-transition types get no page transitions at all. Sidebar and bottom bar stay still; a swipe-back that already animated is not animated again.
+- **Pages:** on desktop, when the path changes the content panel cross-fades (150 ms, no movement) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in `PageOutlet`). **Phones use no view transitions** (they freeze the screen on snapshots until the next page renders and fight iOS's own back swipe): a page you drill into slides in from the right as it renders (`animate-page-enter` on the live page, `phonePageEnters` in `lib/nav-transition`), so it can be tapped and scrolled at once; Back, tab-bar switches and tabs inside a page (Settings) are instant, as in iOS. Search-only changes (dialogs, tabs, filters, pages of a list) never animate. Sidebar and bottom bar stay still.
 - **Lists:** static by default. Only short lists the user edits in place animate rows in and out: `ListRows animated` / `OverviewSection animated` ("To confirm"), `MotionList` / `useListMotion()` (service items editor, categories, recurring, attachments). Data lists that refetch, filter or page (transactions, timeline, invoices, Today) never animate.
 - **Optimistic:** quick, reversible mutations update the cache before the request (`optimistic: [optimisticUpdate(key, fn)]` on `useAppMutation`); errors roll back (or refetch, when other mutations are in flight). Never empty a page optimistically: wait for the server instead. Used for Confirm / Skip recurring income and deleting a transaction.
 - **Figures:** headline numbers in `Stat`s roll to a new value only when it changes after the page has settled (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`), on phones too; multi-currency totals stay plain text so they can truncate.
@@ -123,7 +124,7 @@ Subtle by default: motion explains a change the user just made; it never decorat
 
 Everything here applies below 48rem only; desktop renders exactly as before.
 
-- **Canvas and surfaces:** the canvas is a shade darker (light `#f1f2f5`, dark `#07080a`) and cards are white (dark: a raised grey) without an outline, 16px radius, like a native grouped list. Row dividers stay. Pill tabs show the active tab as a raised white chip; sheets are white with a 16px top radius and a 36 × 4 grabber, and never draw a focus ring around the whole sheet.
+- **Canvas and surfaces:** the canvas is a shade darker (light `#f2f2f4`, dark `#070709`) and cards are white (dark: a raised grey) without an outline, 16px radius, like a native grouped list. Row dividers stay. Pill tabs show the active tab as a raised white chip; sheets are white with a 16px top radius and a 36 × 4 grabber, and never draw a focus ring around the whole sheet.
 - **Density and targets:** comfortable keeps 4px spacing and a 15px body; rows are 52px, icon buttons, compact buttons and form fields 44px.
 - **One hero per screen:** Today shows the date above the title and one summary line (overdue in red, due soon, money waiting). Garage's spending and Finances' net figures are 36px. A car page opens on `CarHero`. Everything else keeps the 15px scale.
 - **Header actions:** one pattern: bare 44px icon buttons (search, +, …). No labelled buttons in the phone top row; Log out lives at the end of Settings.

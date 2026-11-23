@@ -107,7 +107,8 @@ export const RemindersTab = ({
   return (
     <PageStack>
       {addButton !== null && active.length > 0 && (
-        <div className="flex justify-end">{addButton}</div>
+        // Phones add from the header's + (Add reminder is in its menu).
+        <div className="hidden justify-end md:flex">{addButton}</div>
       )}
       {active.length === 0 && (
         <EmptyState

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { navDirection } from "./nav-transition";
+import { navDirection, phonePageEnters } from "./nav-transition";
 
 describe(navDirection, () => {
   it("pushes into a deeper screen of the same section", () => {
@@ -31,5 +31,19 @@ describe(navDirection, () => {
       "same"
     );
     expect(navDirection("/garage/cars/a", "/garage/cars/b")).toBe("same");
+  });
+
+  it("keeps Settings tabs in place instead of pushing", () => {
+    expect(navDirection("/settings", "/settings/finances")).toBe("same");
+    expect(navDirection("/settings/users", "/settings", true)).toBe("same");
+  });
+});
+
+describe(phonePageEnters, () => {
+  it("slides in drill-downs only", () => {
+    expect(phonePageEnters("/garage", "/garage/cars/c1")).toBeTruthy();
+    expect(phonePageEnters("/", "/garage")).toBeFalsy();
+    expect(phonePageEnters("/garage/cars/c1", "/garage")).toBeFalsy();
+    expect(phonePageEnters("/settings", "/settings/users")).toBeFalsy();
   });
 });

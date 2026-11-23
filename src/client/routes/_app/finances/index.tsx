@@ -123,7 +123,7 @@ const FinancesPage = () => {
           </>
         }
         description={status}
-        mobileTop={<HouseholdName />}
+        mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />
       <OverviewView year={year} />

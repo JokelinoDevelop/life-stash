@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, Outlet } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import type { LinkProps } from "@tanstack/react-router";
 import {
   CarFront,
@@ -35,6 +35,7 @@ import { useTodayCount } from "@/modules/today/today-view";
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
 import { DoneTickHost } from "./done-tick";
+import { PageOutlet } from "./page-outlet";
 import { QuickAdd } from "./quick-add";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
@@ -282,14 +283,11 @@ export const AppShell = () => {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
           <main
-            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 overflow-x-clip px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
             ref={main}
           >
             <RouteProgress />
-            {/* The page snapshot for route transitions (see styles.css). */}
-            <div className="[view-transition-name:page]">
-              <Outlet />
-            </div>
+            <PageOutlet />
           </main>
           <MobileNav />
         </div>

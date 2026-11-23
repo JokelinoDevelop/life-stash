@@ -23,7 +23,7 @@ export const App = ({
         <ConfirmProvider>
           <RouterProvider router={router} />
         </ConfirmProvider>
-        <Toaster position="top-center" richColors />
+        <Toaster position="bottom-right" />
         <UpdatePrompt />
       </TooltipProvider>
     </QueryClientProvider>

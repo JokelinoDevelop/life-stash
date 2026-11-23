@@ -1,10 +1,16 @@
 let alreadyAnimated = false;
 let wentBack = false;
 
+/** Where the last back / forward (popstate) landed; phones don't slide into it. */
+let poppedTo: string | null = null;
+
 /** How a route change moves on phones: deeper (push), back up (pop), across tabs, or in place. */
 export type NavDirection = "push" | "pop" | "tab" | "same";
 
 const segments = (path: string): string[] => path.split("/").filter(Boolean);
+
+/** Sections whose sub-paths are tabs on one page, not drill-downs. */
+const TABBED_SECTIONS = new Set(["settings"]);
 
 /**
  * Drill-downs slide in (push) and out (pop); switching sections of the tab bar
@@ -19,6 +25,10 @@ export const navDirection = (
   const fromParts = segments(from);
   const toParts = segments(to);
   const sameSection = (fromParts[0] ?? "") === (toParts[0] ?? "");
+
+  if (sameSection && TABBED_SECTIONS.has(toParts[0] ?? "")) {
+    return "same";
+  }
 
   if (back && toParts.length < fromParts.length) {
     return "pop";
@@ -48,6 +58,7 @@ export const markAlreadyAnimated = () => {
 export const listenForBrowserTransitions = () => {
   window.addEventListener("popstate", (event) => {
     wentBack = true;
+    poppedTo = window.location.pathname;
 
     // Undefined (falsy) where unsupported.
     if (event.hasUAVisualTransition) {
@@ -56,12 +67,29 @@ export const listenForBrowserTransitions = () => {
   });
 };
 
+const PHONE_QUERY = "(max-width: 47.999rem)";
+
+const isPhone = () => window.matchMedia(PHONE_QUERY).matches;
+
+/**
+ * Phones don't use view transitions: they freeze the screen on snapshots
+ * until the next page renders and fight iOS's own back swipe. Instead a page
+ * that was drilled into slides in once it renders (a CSS animation on the
+ * live page, so it can be tapped and scrolled at once); going back and
+ * switching tabs are instant. Call when the path has changed on a phone.
+ */
+export const phonePageEnters = (from: string, to: string): boolean => {
+  const back = poppedTo === to;
+  poppedTo = null;
+
+  return !back && navDirection(from, to) === "push";
+};
+
 /**
  * The router's `defaultViewTransition.types`: pages cross-fade when the path
- * changes (see `::view-transition-*(page)` in styles.css); on phones the
- * direction type (push / pop / tab) turns drill-downs into slides. Search-only
+ * changes (see `::view-transition-*(page)` in styles.css). Search-only
  * changes (dialogs, tabs, filters) and back swipes that already animated stay
- * instant.
+ * instant. Desktop only.
  */
 export const pageTransitionTypes = ({
   fromLocation,
@@ -72,6 +100,11 @@ export const pageTransitionTypes = ({
   pathChanged: boolean;
   toLocation: { pathname: string };
 }): string[] | false => {
+  // Phones: no view transitions, see `phonePageEnters`.
+  if (isPhone()) {
+    return false;
+  }
+
   const animated = alreadyAnimated;
   const back = wentBack;
   alreadyAnimated = false;
