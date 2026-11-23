@@ -21,7 +21,7 @@ export const INVOICE_GRID =
 const MUTED = "text-muted-foreground";
 
 const ROW_CLASS =
-  "group/row bg-card hover:bg-background relative flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5 before:bg-primary before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100";
+  "group/row bg-card hover:bg-background relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5 before:bg-primary before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100";
 
 const RowAction = ({ invoice }: { invoice: InvoiceListItem }) => {
   const { t } = useTranslation("finances");

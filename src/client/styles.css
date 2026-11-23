@@ -24,6 +24,12 @@
   );
 }
 
+/* The currency next to a figure (`Money`): smaller and lighter than the digits. */
+@utility money-code {
+  font-size: 0.7em;
+  opacity: 0.55;
+}
+
 /* Loading placeholders wait 150 ms before fading in, so fast loads never flash. */
 @keyframes reveal {
   from {
@@ -209,6 +215,20 @@
   }
 }
 
+/* Phones (v0.5): "comfortable" keeps the native 4px grid and a 15px body, so
+   about eight two-line rows fit a screen while every tap target stays at least
+   44px (rows 52px, icon buttons 44px). Desktop keeps the roomier scale above. */
+@media (max-width: 47.999rem) {
+  :root[data-density="comfortable"] {
+    --spacing: 0.25rem;
+    --text-sm: 0.9375rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.75rem;
+  }
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -357,6 +377,21 @@
   html {
     overscroll-behavior-y: none;
   }
+}
+
+/* Sheets: the panel itself takes focus when it opens (for screen readers);
+   that is not a keyboard focus to show, so no ring around the whole sheet. */
+[data-slot="drawer-content"]:focus,
+[data-slot="drawer-content"]:focus-visible {
+  outline: none;
+}
+
+/* A small, visible grabber (36 × 4) instead of shadcn's wide grey bar. */
+[data-slot="drawer-handle"] {
+  width: 2.25rem;
+  height: 0.25rem;
+  margin-top: 0.5rem;
+  background: color-mix(in oklch, var(--muted-foreground) 35%, transparent);
 }
 
 /* The phone tab bar sits above the page fade (it would otherwise be covered

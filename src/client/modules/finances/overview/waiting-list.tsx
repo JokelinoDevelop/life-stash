@@ -75,7 +75,7 @@ export const WaitingList = ({ overview }: { overview: FinanceOverview }) => {
           // Remembers the focused row for the P shortcut; its link and buttons are the interactive parts.
           // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
           <li
-            className="group/row hover:bg-background bg-card before:bg-primary relative flex min-h-14 items-center gap-3 px-3.5 transition-colors before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100 md:min-h-10 md:px-5"
+            className="group/row hover:bg-background bg-card before:bg-primary relative flex min-h-13 items-center gap-3 px-3.5 transition-colors before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100 md:min-h-10 md:px-5"
             key={invoice.id}
             onFocus={() => {
               focused.current = invoice.id;

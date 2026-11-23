@@ -46,7 +46,7 @@ const Row = ({ client }: { client: ClientListItem }) => {
   return (
     <li
       className={cn(
-        "group/row bg-card hover:bg-background relative flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-11 md:px-5",
+        "group/row bg-card hover:bg-background relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-11 md:px-5",
         GRID
       )}
     >

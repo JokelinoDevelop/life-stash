@@ -25,6 +25,8 @@ export const ReminderRow = ({
 }) => {
   const { t } = useTranslation();
   const format = useFormat();
+  const due = describeDue(reminder, format, t);
+  const tone = STATUS_TEXT_TONE[reminder.status];
 
   return (
     <ListRow
@@ -37,14 +39,27 @@ export const ReminderRow = ({
       }
     >
       <StatusRing status={reminder.status} />
-      <ListRowText meta={car?.name} title={reminder.title} />
+      {/* Phones: the due text joins the meta line so the title keeps the row. */}
+      <ListRowText
+        meta={
+          <>
+            {car?.name}
+            {due !== "" && (
+              <span className="md:hidden">
+                {car === undefined ? "" : " · "}
+                <span className={cn("font-medium tabular-nums", tone)}>
+                  {due}
+                </span>
+              </span>
+            )}
+          </>
+        }
+        title={reminder.title}
+      />
       <span
-        className={cn(
-          "shrink-0 text-sm font-medium tabular-nums md:font-normal",
-          STATUS_TEXT_TONE[reminder.status]
-        )}
+        className={cn("hidden shrink-0 text-sm tabular-nums md:inline", tone)}
       >
-        {describeDue(reminder, format, t)}
+        {due}
       </span>
     </ListRow>
   );

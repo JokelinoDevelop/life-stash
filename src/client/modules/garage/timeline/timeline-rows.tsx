@@ -7,6 +7,7 @@ import {
   ListRowText,
   ListSection,
 } from "@/components/app/list-section";
+import { Money } from "@/components/app/money";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useFormat } from "@/lib/format";
@@ -67,9 +68,11 @@ export const ExpenseRow = ({
         meta={<span className="tabular-nums">{meta}</span>}
         title={t(`categories.${expense.category}`)}
       />
-      <span className="shrink-0 font-medium tabular-nums">
-        {format.money(expense.amountMinor, expense.currency)}
-      </span>
+      <Money
+        amountMinor={expense.amountMinor}
+        className="shrink-0 font-medium"
+        currency={expense.currency}
+      />
     </ListRow>
   );
 };

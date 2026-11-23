@@ -12,7 +12,7 @@ const TITLE_WIDTHS = ["w-40", "w-28", "w-52", "w-36", "w-44", "w-32"] as const;
 const META_WIDTHS = ["w-24", "w-32", "w-20", "w-28", "w-16", "w-24"] as const;
 
 const SkeletonRow = ({ index }: { index: number }) => (
-  <li className="flex min-h-14 items-center gap-3 px-3.5 md:min-h-10 md:px-5">
+  <li className="flex min-h-13 items-center gap-3 px-3.5 md:min-h-10 md:px-5">
     <Skeleton className="size-5 shrink-0" variant="circle" />
     <div className="flex min-w-0 flex-1 flex-col gap-1.5 md:flex-row md:items-center md:gap-3">
       <div className={TITLE_WIDTHS[index % TITLE_WIDTHS.length]}>

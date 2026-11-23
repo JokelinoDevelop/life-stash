@@ -10,6 +10,7 @@ import {
   ListRowText,
   ListSection,
 } from "@/components/app/list-section";
+import { Money } from "@/components/app/money";
 import { PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,6 @@ import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 import { FinanceDialogLink } from "@/modules/finances/dialogs/finance-dialog-link";
 import { InvoiceStatusIcon } from "@/modules/finances/invoices/invoice-status-icon";
-import { useLedgerMoney } from "@/modules/finances/money";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import type { FinanceOverview } from "@/modules/finances/overview/overview.queries";
 import { ToConfirm } from "@/modules/finances/overview/to-confirm";
@@ -46,7 +46,6 @@ const InvoiceRow = ({
 }) => {
   const { t } = useTranslation("today");
   const { t: tf } = useTranslation("finances");
-  const ledger = useLedgerMoney();
   const overdue = invoice.status === "overdue";
   const days = daysUntil(invoice.dueDate, today);
 
@@ -57,6 +56,10 @@ const InvoiceRow = ({
     ? tf("invoices.daysLate", { count: invoice.daysOverdue })
     : upcoming;
 
+  const tone = overdue
+    ? "text-destructive font-medium"
+    : "text-muted-foreground";
+
   return (
     <ListRow
       render={
@@ -64,20 +67,30 @@ const InvoiceRow = ({
       }
     >
       <InvoiceStatusIcon status={invoice.status} />
+      {/* Phones: when it is due joins the meta line; the amount is the trailing figure. */}
       <ListRowText
-        meta={t("invoiceMeta", { number: invoice.number })}
+        meta={
+          <>
+            {t("invoiceMeta", { number: invoice.number })}
+            <span className="md:hidden">
+              {" · "}
+              <span className={cn("tabular-nums", tone)}>{when}</span>
+            </span>
+          </>
+        }
         title={invoice.clientName}
       />
       <span
-        className={cn(
-          "shrink-0 text-sm tabular-nums",
-          overdue ? "text-destructive font-medium" : "text-muted-foreground"
-        )}
+        className={cn("hidden shrink-0 text-sm tabular-nums md:inline", tone)}
       >
         {when}
       </span>
-      <span className="hidden w-24 shrink-0 text-right font-medium tabular-nums md:block">
-        {ledger.money(invoice.amountMinor, invoice.currency)}
+      <span className="block shrink-0 text-right font-medium tabular-nums md:w-24">
+        <Money
+          amountMinor={invoice.amountMinor}
+          currency={invoice.currency}
+          variant="ledger"
+        />
       </span>
     </ListRow>
   );

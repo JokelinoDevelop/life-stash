@@ -215,7 +215,25 @@ export const CarActions = ({
               {tc("actions.edit")}
             </Button>
           </span>
+          {/* Phones: the same bare "+" as every other page header. */}
           <Button
+            className="md:hidden"
+            size="icon-compact"
+            variant="ghost"
+            render={
+              <Link
+                aria-label={tc("actions.logEntry")}
+                params={{ carId: car.id }}
+                search={{ log: true, tab: "timeline" }}
+                to="/garage/cars/$carId"
+              />
+            }
+            nativeButton={false}
+          >
+            <Plus />
+          </Button>
+          <Button
+            className="hidden md:inline-flex"
             size="compact"
             render={
               <Link
@@ -227,11 +245,8 @@ export const CarActions = ({
             nativeButton={false}
           >
             <Plus />
-            <span className="md:hidden">{tc("actions.log")}</span>
-            <span className="hidden md:inline">{tc("actions.logEntry")}</span>
-            <Kbd className="hidden md:inline-flex">
-              {CAR_SHORTCUTS.logOdometer.toUpperCase()}
-            </Kbd>
+            {tc("actions.logEntry")}
+            <Kbd>{CAR_SHORTCUTS.logOdometer.toUpperCase()}</Kbd>
           </Button>
         </>
       ) : (

@@ -56,7 +56,7 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
     >
       {overview.toConfirm.map((item) => (
         <li
-          className="bg-card flex min-h-14 items-center gap-3 px-3.5 md:min-h-11 md:px-5"
+          className="bg-card flex min-h-13 items-center gap-3 px-3.5 md:min-h-11 md:px-5"
           key={item.id}
         >
           <CategoryIcon name={item.categoryIcon} />

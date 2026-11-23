@@ -62,7 +62,7 @@ export const RecentList = ({ overview }: { overview: FinanceOverview }) => {
 
         return (
           <li
-            className="hover:bg-background bg-card relative grid min-h-14 grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-3 px-3.5 md:min-h-10 md:grid-cols-[24px_minmax(140px,1fr)_160px_150px_64px_104px] md:px-5"
+            className="hover:bg-background bg-card relative grid min-h-13 grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-3 px-3.5 md:min-h-10 md:grid-cols-[24px_minmax(140px,1fr)_160px_150px_64px_104px] md:px-5"
             key={row.id}
           >
             <CategoryIcon name={row.category.icon} />

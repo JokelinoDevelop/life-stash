@@ -105,7 +105,6 @@ export const TransactionForm = ({
               <form.FormFooter
                 onCancel={onCancel}
                 start={footerStart}
-                stretchOnMobile
                 submitLabel={
                   kind === "income"
                     ? t("form.saveIncome")

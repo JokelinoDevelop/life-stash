@@ -24,20 +24,19 @@ const ReportDirty = ({ dirty }: { dirty: boolean }) => {
 /**
  * The footer of a dialog form: a hint (or `start`, e.g. Delete) on the left,
  * Cancel and Save (⌘↵) on the right. Save keeps its width while saving.
+ * Phones: one full-width Save (sheets close by swiping down, so no Cancel);
+ * `start` and `secondary` sit beside it.
  */
 export const FormFooter = ({
   onCancel,
   secondary,
   start,
-  stretchOnMobile = false,
   submitLabel,
 }: {
   onCancel: () => void;
   /** A second action before Save, e.g. "Save as draft". */
   secondary?: ReactNode;
   start?: ReactNode;
-  /** Phones: one full-width Save (sheets that close by swiping down need no Cancel). */
-  stretchOnMobile?: boolean;
   submitLabel?: string;
 }) => {
   const form = useFormContext();
@@ -48,8 +47,8 @@ export const FormFooter = ({
     <div className="border-divider pb-safe-2.5 flex shrink-0 items-center gap-2 border-t px-3 pt-2.5 md:px-5 md:py-3">
       <div
         className={cn(
-          "flex min-w-0 flex-1 items-center",
-          stretchOnMobile && start === undefined && "hidden md:flex"
+          "flex min-w-0 items-center md:flex-1",
+          start === undefined && "hidden md:flex"
         )}
       >
         {start ?? (
@@ -72,7 +71,7 @@ export const FormFooter = ({
             dialog.requestClose();
           }
         }}
-        className={cn(stretchOnMobile && "hidden md:inline-flex")}
+        className="hidden md:inline-flex"
         size="compact"
         type="button"
         variant="ghost"
@@ -84,9 +83,8 @@ export const FormFooter = ({
         {(isSubmitting) => (
           <Button
             aria-busy={isSubmitting}
-            className={cn(stretchOnMobile && "max-md:h-11 max-md:flex-1")}
             disabled={isSubmitting}
-            size="compact"
+            size="submit"
             type="submit"
           >
             {submitLabel ?? t("actions.save")}

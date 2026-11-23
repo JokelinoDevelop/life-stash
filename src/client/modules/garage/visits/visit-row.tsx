@@ -3,6 +3,7 @@ import { Camera } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ListRow, ListRowText } from "@/components/app/list-section";
+import { Money } from "@/components/app/money";
 import { StatusRing } from "@/components/app/status-ring";
 import { useFormat } from "@/lib/format";
 
@@ -63,9 +64,11 @@ export const VisitRow = ({
         </span>
       )}
       {visit.effectiveTotalMinor !== null && (
-        <span className="shrink-0 font-medium tabular-nums">
-          {format.money(visit.effectiveTotalMinor, visit.currency)}
-        </span>
+        <Money
+          amountMinor={visit.effectiveTotalMinor}
+          className="shrink-0 font-medium"
+          currency={visit.currency}
+        />
       )}
     </ListRow>
   );

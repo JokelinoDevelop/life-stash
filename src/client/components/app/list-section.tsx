@@ -139,7 +139,7 @@ export const ListRow = ({
     defaultTagName: "div",
     props: {
       className: cn(
-        "group/row hover:bg-background [&:is(a,button)]:active:bg-accent flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
+        "group/row hover:bg-background [&:is(a,button)]:active:bg-accent flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
         className
       ),
       "data-slot": "list-row",
