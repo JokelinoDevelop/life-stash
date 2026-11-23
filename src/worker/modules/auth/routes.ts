@@ -56,7 +56,11 @@ export const publicAuthRoutes = new Hono<PublicEnv>()
 
     const [user] = session
       ? await c.var.db
-          .select({ displayName: users.displayName, id: users.id })
+          .select({
+            displayName: users.displayName,
+            id: users.id,
+            isAdmin: users.isAdmin,
+          })
           .from(users)
           .where(eq(users.id, session.userId))
       : [];

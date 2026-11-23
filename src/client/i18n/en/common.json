@@ -84,7 +84,11 @@
     "rateLimited": "Too many attempts. Wait a few minutes and try again.",
     "loadFailed": "Couldn't load this",
     "pageFailed": "This page couldn't be shown",
-    "reauthRequired": "Confirm it's you to continue."
+    "reauthRequired": "Confirm it's you to continue.",
+    "alreadyMember": "They're already in your household.",
+    "cannotChangeSelf": "You can't do that to your own account.",
+    "emailTaken": "That email is already in use.",
+    "inviteInvalid": "This invite link is invalid, expired or already used."
   },
   "confirmDelete": {
     "title": "Delete this?",

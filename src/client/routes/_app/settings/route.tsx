@@ -1,10 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
-import { preferencesQuery } from "@/lib/session";
+import { authStatusQuery, preferencesQuery } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 
 const tabClass =
@@ -12,13 +13,14 @@ const tabClass =
 
 const activeTabClass = "bg-accent text-foreground";
 
-/** Settings: General (account, preferences, security) and one tab per module. */
+/** Settings: General (account, preferences, security), one tab per module, and People (admins). */
 const SettingsLayout = () => {
   const { t } = useTranslation("settings");
   const { t: ta } = useTranslation("auth");
   const { t: tf } = useTranslation("finances");
   // Phones only: on desktop, Log out lives in the sidebar's account menu.
   const handleSignOut = useSignOut();
+  const status = useQuery(authStatusQuery);
 
   return (
     <>
@@ -57,6 +59,15 @@ const SettingsLayout = () => {
         >
           {tf("settings.tab")}
         </Link>
+        {status.data?.user?.isAdmin === true && (
+          <Link
+            activeProps={{ className: activeTabClass }}
+            className={tabClass}
+            to="/settings/users"
+          >
+            {t("users.tab")}
+          </Link>
+        )}
       </nav>
       <Outlet />
     </>

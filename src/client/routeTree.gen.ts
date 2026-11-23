@@ -15,6 +15,7 @@ import { Route as RecoverRouteImport } from './routes/recover'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppSettingsRouteRouteImport } from './routes/_app/settings/route'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances/index'
 import { Route as AppFinancesInvoicesRouteImport } from './routes/_app/finances/invoices'
 import { Route as AppFinancesTransactionsRouteImport } from './routes/_app/finances/transactions'
@@ -24,6 +25,7 @@ import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/histo
 import { Route as AppGarageRemindersRouteImport } from './routes/_app/garage/reminders'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
 import { Route as AppSettingsFinancesRouteImport } from './routes/_app/settings/finances'
+import { Route as AppSettingsUsersRouteImport } from './routes/_app/settings/users'
 import { Route as AppFinancesClientsIndexRouteImport } from './routes/_app/finances/clients/index'
 import { Route as AppFinancesClientsClientIdRouteImport } from './routes/_app/finances/clients/$clientId'
 import { Route as AppGarageCarsCarIdIndexRouteImport } from './routes/_app/garage/cars/$carId/index'
@@ -57,6 +59,11 @@ const AppSettingsRouteRoute = AppSettingsRouteRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AppRoute,
+} as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppFinancesIndexRoute = AppFinancesIndexRouteImport.update({
   id: '/finances/',
@@ -103,6 +110,11 @@ const AppSettingsFinancesRoute = AppSettingsFinancesRouteImport.update({
   path: '/finances',
   getParentRoute: () => AppSettingsRouteRoute,
 } as any)
+const AppSettingsUsersRoute = AppSettingsUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppSettingsRouteRoute,
+} as any)
 const AppFinancesClientsIndexRoute = AppFinancesClientsIndexRouteImport.update({
   id: '/finances/clients/',
   path: '/finances/clients/',
@@ -132,12 +144,14 @@ export interface FileRoutesByFullPath {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/settings': typeof AppSettingsRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/finances/invoices': typeof AppFinancesInvoicesRoute
   '/finances/transactions': typeof AppFinancesTransactionsRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
+  '/settings/users': typeof AppSettingsUsersRoute
   '/finances/': typeof AppFinancesIndexRoute
   '/garage/': typeof AppGarageIndexRoute
   '/settings/': typeof AppSettingsIndexRoute
@@ -150,6 +164,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/': typeof AppIndexRoute
   '/finances/invoices': typeof AppFinancesInvoicesRoute
   '/finances/transactions': typeof AppFinancesTransactionsRoute
@@ -157,6 +172,7 @@ export interface FileRoutesByTo {
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
+  '/settings/users': typeof AppSettingsUsersRoute
   '/finances': typeof AppFinancesIndexRoute
   '/garage': typeof AppGarageIndexRoute
   '/settings': typeof AppSettingsIndexRoute
@@ -172,6 +188,7 @@ export interface FileRoutesById {
   '/recover': typeof RecoverRoute
   '/setup': typeof SetupRoute
   '/_app/settings': typeof AppSettingsRouteRouteWithChildren
+  '/invite/$token': typeof InviteTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/finances/invoices': typeof AppFinancesInvoicesRoute
   '/_app/finances/transactions': typeof AppFinancesTransactionsRoute
@@ -179,6 +196,7 @@ export interface FileRoutesById {
   '/_app/garage/history': typeof AppGarageHistoryRoute
   '/_app/garage/reminders': typeof AppGarageRemindersRoute
   '/_app/settings/finances': typeof AppSettingsFinancesRoute
+  '/_app/settings/users': typeof AppSettingsUsersRoute
   '/_app/finances/': typeof AppFinancesIndexRoute
   '/_app/garage/': typeof AppGarageIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
@@ -195,12 +213,14 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/settings'
+    | '/invite/$token'
     | '/finances/invoices'
     | '/finances/transactions'
     | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
+    | '/settings/users'
     | '/finances/'
     | '/garage/'
     | '/settings/'
@@ -213,6 +233,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/recover'
     | '/setup'
+    | '/invite/$token'
     | '/'
     | '/finances/invoices'
     | '/finances/transactions'
@@ -220,6 +241,7 @@ export interface FileRouteTypes {
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
+    | '/settings/users'
     | '/finances'
     | '/garage'
     | '/settings'
@@ -234,6 +256,7 @@ export interface FileRouteTypes {
     | '/recover'
     | '/setup'
     | '/_app/settings'
+    | '/invite/$token'
     | '/_app/'
     | '/_app/finances/invoices'
     | '/_app/finances/transactions'
@@ -241,6 +264,7 @@ export interface FileRouteTypes {
     | '/_app/garage/history'
     | '/_app/garage/reminders'
     | '/_app/settings/finances'
+    | '/_app/settings/users'
     | '/_app/finances/'
     | '/_app/garage/'
     | '/_app/settings/'
@@ -255,6 +279,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RecoverRoute: typeof RecoverRoute
   SetupRoute: typeof SetupRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -300,6 +325,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/finances/': {
       id: '/_app/finances/'
@@ -364,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsFinancesRouteImport
       parentRoute: typeof AppSettingsRouteRoute
     }
+    '/_app/settings/users': {
+      id: '/_app/settings/users'
+      path: '/users'
+      fullPath: '/settings/users'
+      preLoaderRoute: typeof AppSettingsUsersRouteImport
+      parentRoute: typeof AppSettingsRouteRoute
+    }
     '/_app/finances/clients/': {
       id: '/_app/finances/clients/'
       path: '/finances/clients'
@@ -397,11 +436,13 @@ declare module '@tanstack/react-router' {
 
 interface AppSettingsRouteRouteChildren {
   AppSettingsFinancesRoute: typeof AppSettingsFinancesRoute
+  AppSettingsUsersRoute: typeof AppSettingsUsersRoute
   AppSettingsIndexRoute: typeof AppSettingsIndexRoute
 }
 
 const AppSettingsRouteRouteChildren: AppSettingsRouteRouteChildren = {
   AppSettingsFinancesRoute: AppSettingsFinancesRoute,
+  AppSettingsUsersRoute: AppSettingsUsersRoute,
   AppSettingsIndexRoute: AppSettingsIndexRoute,
 }
 
@@ -448,6 +489,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RecoverRoute: RecoverRoute,
   SetupRoute: SetupRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

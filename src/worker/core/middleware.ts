@@ -3,7 +3,7 @@ import { createMiddleware } from "hono/factory";
 import type { AppEnv, PublicEnv } from "./app-env";
 import { Container } from "./container";
 import { createDb } from "./db";
-import { unauthorized } from "./errors";
+import { ApiError, unauthorized } from "./errors";
 import { readSession } from "./session";
 
 export const noStore = createMiddleware<PublicEnv>(async (c, next) => {
@@ -36,6 +36,15 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
       householdId: auth.householdId,
     })
   );
+
+  await next();
+});
+
+/** After `requireAuth`: only admins (they invite people and manage accounts). */
+export const requireAdmin = createMiddleware<AppEnv>(async (c, next) => {
+  if (!c.var.auth.isAdmin) {
+    throw new ApiError(403, "forbidden");
+  }
 
   await next();
 });

@@ -20,7 +20,17 @@ export type ApiErrorCode =
   | "reauth_required"
   | "unauthorized"
   | "validation"
+  | AccountErrorCode
   | FinanceErrorCode;
+
+export const ACCOUNT_ERROR_CODES = [
+  "account.already_member",
+  "account.cannot_change_self",
+  "account.email_taken",
+  "account.invite_invalid",
+] as const;
+
+export type AccountErrorCode = (typeof ACCOUNT_ERROR_CODES)[number];
 
 export const FINANCE_ERROR_CODES = [
   "finances.category_archived",
@@ -76,6 +86,7 @@ const ERROR_CODES: readonly ApiErrorCode[] = [
   "reauth_required",
   "unauthorized",
   "validation",
+  ...ACCOUNT_ERROR_CODES,
   ...FINANCE_ERROR_CODES,
 ];
 

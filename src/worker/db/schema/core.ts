@@ -18,6 +18,8 @@ export const households = sqliteTable("households", {
 
 export const users = sqliteTable("users", {
   createdAt: createdAt(),
+  /** Set when an admin turned the account off: no sign-in, no sessions. */
+  disabledAt: text("disabled_at"),
   displayName: text("display_name").notNull(),
   /** Lower-cased sign-in email; null for passkey-only accounts. */
   email: text("email").unique(),
@@ -26,9 +28,34 @@ export const users = sqliteTable("users", {
     .notNull()
     .references(() => households.id, { onDelete: "cascade" }),
   id: id(),
+  /** Admins invite people and manage accounts. The first user (setup) is one. */
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
   loginLockedUntil: text("login_locked_until"),
   /** `pbkdf2-sha256$<iterations>$<salt>$<hash>`; null when no password is set. */
   passwordHash: text("password_hash"),
+});
+
+/**
+ * One-time invite links, created by an admin. Only the SHA-256 of the token is stored. The admin
+ * picks the household: `householdId` set joins it, null creates a new household on accept.
+ */
+export const invites = sqliteTable("invites", {
+  createdAt: createdAt(),
+  createdByUserId: text("created_by_user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: text("expires_at").notNull(),
+  householdId: text("household_id").references(() => households.id, {
+    onDelete: "cascade",
+  }),
+  id: id(),
+  /** Who it's for (pre-fills their name); optional. */
+  name: text("name"),
+  tokenHash: text("token_hash").notNull().unique(),
+  usedAt: text("used_at"),
+  usedByUserId: text("used_by_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
 });
 
 export const userPreferences = sqliteTable("user_preferences", {

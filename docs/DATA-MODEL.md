@@ -7,7 +7,8 @@ All ids are random UUIDs (text). Timestamps are ISO-8601 UTC strings. Calendar d
 | Table | Columns |
 | --- | --- |
 | `households` | id, name, created_at |
-| `users` | id, household_id, display_name, created_at |
+| `users` | id, household_id, display_name, email? (unique, lower-cased), password_hash?, is_admin (the setup account), disabled_at? (no sign-in while set), failed_login_count, login_locked_until?, created_at |
+| `invites` | id, token_hash (unique, sha256 of the link token), household_id? (set: joins that household; null: a new household on accept), name?, created_by_user_id, expires_at (7 days), used_at?, used_by_user_id?, created_at |
 | `user_preferences` | user_id (pk), locale (`en`/`mk`), distance_unit (`km`/`mi`), currency, time_zone, odometer_nudge_weeks |
 | `passkeys` | id (credential id), user_id, public_key, counter, transports, device_name, created_at, last_used_at |
 | `sessions` | id (sha256 of token), user_id, expires_at, created_at |

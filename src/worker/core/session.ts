@@ -1,4 +1,4 @@
-import { and, eq, gt, ne } from "drizzle-orm";
+import { and, eq, gt, isNull, ne } from "drizzle-orm";
 import type { Context } from "hono";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 
@@ -6,6 +6,7 @@ import { sessions, users } from "../db/schema/core";
 import type { AuthContext } from "./app-env";
 import { randomToken, sha256Hex } from "./crypto";
 import type { Db } from "./db";
+import { unauthorized } from "./errors";
 
 const SESSION_COOKIE = "ls_session";
 const DAY_MS = 86_400_000;
@@ -26,12 +27,23 @@ const expiryFromNow = () =>
 /**
  * Signs in on this browser with a new session token. A session this browser already held is
  * removed, so signing in again (or confirming it's you) never leaves the old token valid.
+ * Disabled accounts are refused here, so every sign-in path (password, passkey, recovery) stops.
  */
 export const createSession = async (
   c: Context,
   db: Db,
   userId: string
 ): Promise<void> => {
+  const [user] = await db
+    .select({ disabledAt: users.disabledAt })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+
+  if (!user || user.disabledAt !== null) {
+    throw unauthorized();
+  }
+
   const previous = getCookie(c, SESSION_COOKIE);
 
   if (previous !== undefined && previous !== "") {
@@ -66,11 +78,18 @@ export const readSession = async (
       createdAt: sessions.createdAt,
       expiresAt: sessions.expiresAt,
       householdId: users.householdId,
+      isAdmin: users.isAdmin,
       userId: users.id,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
-    .where(and(eq(sessions.id, sessionId), gt(sessions.expiresAt, nowIso)))
+    .where(
+      and(
+        eq(sessions.id, sessionId),
+        gt(sessions.expiresAt, nowIso),
+        isNull(users.disabledAt)
+      )
+    )
     .limit(1);
 
   if (!row) {
@@ -90,6 +109,7 @@ export const readSession = async (
   // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
   return {
     householdId: row.householdId,
+    isAdmin: row.isAdmin,
     sessionCreatedAt: row.createdAt,
     sessionId,
     userId: row.userId,

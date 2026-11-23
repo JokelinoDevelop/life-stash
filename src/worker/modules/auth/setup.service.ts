@@ -3,21 +3,14 @@ import { count } from "drizzle-orm";
 
 import type { Db } from "../../core/db";
 import { badRequest, conflict } from "../../core/errors";
-import {
-  households,
-  passkeys,
-  userPreferences,
-  users,
-} from "../../db/schema/core";
-import { seedDefaultCategories } from "../finances/categories/default-categories";
-import { seedGarageCatalog } from "./catalog-seed";
+import { users } from "../../db/schema/core";
+import { createAccount } from "./accounts";
 import { consumeChallenge, storeChallenge } from "./challenges";
 import {
   passkeyRow,
   registrationOptions,
   verifyRegistration,
 } from "./passkeys.service";
-import { issueRecoveryCodes } from "./recovery";
 import type { RelyingParty } from "./relying-party";
 
 export const isSetupRequired = async (db: Db): Promise<boolean> => {
@@ -55,44 +48,6 @@ export const startSetup = async (
   return { challengeId, options };
 };
 
-interface NewAccount {
-  userId: string;
-  displayName: string;
-  timeZone: string;
-  email?: string;
-  passwordHash?: string;
-  passkey?: ReturnType<typeof passkeyRow>;
-}
-
-/** Creates the household, first user, preferences, starter catalog, finance categories and recovery codes. */
-const createAccount = async (
-  db: Db,
-  account: NewAccount
-): Promise<string[]> => {
-  const householdId = crypto.randomUUID();
-  const { userId } = account;
-  await db.batch([
-    db.insert(households).values({ id: householdId, name: "Home" }),
-    db.insert(users).values({
-      displayName: account.displayName,
-      email: account.email ?? null,
-      id: userId,
-      passwordHash: account.passwordHash ?? null,
-      householdId,
-    }),
-    db.insert(userPreferences).values({ timeZone: account.timeZone, userId }),
-  ]);
-
-  if (account.passkey) {
-    await db.insert(passkeys).values(account.passkey);
-  }
-
-  await seedGarageCatalog(db, householdId);
-  await seedDefaultCategories(db, householdId);
-
-  return await issueRecoveryCodes(db, userId);
-};
-
 export interface FinishSetupInput {
   challengeId: string;
   displayName: string;
@@ -124,6 +79,7 @@ export const finishSetup = async (
 
   const recoveryCodes = await createAccount(db, {
     displayName: input.displayName,
+    isAdmin: true,
     passkey: passkeyRow(credential, { deviceName: input.deviceName, userId }),
     timeZone: input.timeZone,
     userId,
@@ -146,7 +102,12 @@ export const finishPasswordSetup = async (
 ): Promise<{ userId: string; recoveryCodes: string[] }> => {
   await assertSetupAllowed(db);
   const userId = crypto.randomUUID();
-  const recoveryCodes = await createAccount(db, { ...input, userId });
+
+  const recoveryCodes = await createAccount(db, {
+    ...input,
+    isAdmin: true,
+    userId,
+  });
 
   return { recoveryCodes, userId };
 };

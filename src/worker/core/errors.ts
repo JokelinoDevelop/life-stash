@@ -14,7 +14,15 @@ export type ApiErrorCode =
   | "reauth_required"
   | "unauthorized"
   | "validation"
+  | AccountErrorCode
   | FinanceErrorCode;
+
+/** Account and invite error codes; the client translates each one (`errors.*` in common). */
+export type AccountErrorCode =
+  | "account.already_member"
+  | "account.cannot_change_self"
+  | "account.email_taken"
+  | "account.invite_invalid";
 
 /** Finances error codes; the client translates each one (`finances:errors.*`). */
 export type FinanceErrorCode =
@@ -59,7 +67,7 @@ export class ApiError extends Error {
 
 /** A business-rule error with a typed code (and optionally the field it concerns). */
 export const domainError = (
-  code: FinanceErrorCode,
+  code: AccountErrorCode | FinanceErrorCode,
   options: { status?: ContentfulStatusCode; field?: string } = {}
 ): ApiError => new ApiError(options.status ?? 409, code, code, options.field);
 

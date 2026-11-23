@@ -7,6 +7,8 @@ export interface AuthContext {
   sessionId: string;
   userId: string;
   householdId: string;
+  /** May invite people and manage accounts (`/api/admin`). */
+  isAdmin: boolean;
   /** When this session was created; recent sign-ins may change credentials without re-entry. */
   sessionCreatedAt: string;
 }
