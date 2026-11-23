@@ -1,14 +1,22 @@
 {
   "title": "Today",
-  "summary_other": "{{count}} things need you",
-  "summary_one": "1 thing needs you",
-  "summaryClear": "All clear",
   "horizons": {
     "overdue": "Overdue",
     "next30": "Next 30 days",
     "later": "Later"
   },
   "invoiceMeta": "Invoice {{number}}",
-  "emptyTitle": "All clear",
-  "empty": "Nothing is overdue or due soon in Garage or Finances."
+  "hero": {
+    "overdue_one": "{{count}} overdue",
+    "overdue_other": "{{count}} overdue",
+    "dueSoon_one": "{{count}} due soon",
+    "dueSoon_other": "{{count}} due soon",
+    "waiting": "<money></money> waiting",
+    "clear": "Nothing needs you right now"
+  },
+  "allClear": {
+    "title": "You're all caught up",
+    "message": "Nothing is overdue or due in the next 30 days, and no invoice is waiting. New reminders show up here when they come due.",
+    "compact": "Nothing needs you in the next 30 days."
+  }
 }

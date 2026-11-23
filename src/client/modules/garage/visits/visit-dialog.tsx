@@ -8,6 +8,7 @@ import { FormDialog } from "@/components/app/form-dialog";
 import { ErrorState, FormSkeleton } from "@/components/app/states";
 import { FormNotice } from "@/components/form/dialog-form";
 import { api, unwrap } from "@/lib/api";
+import { showDoneTick } from "@/lib/done-tick";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
@@ -83,6 +84,7 @@ const NewVisitForm = ({
           let description: string | undefined;
 
           if (reminder !== null) {
+            showDoneTick();
             description =
               result.nextReminderId === null
                 ? t("form.reminderDone")

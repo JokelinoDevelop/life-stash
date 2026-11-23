@@ -42,7 +42,7 @@ export const PasskeySetupForm = ({
         )}
       </form.AppField>
       <form.AppForm>
-        <form.SubmitButton label={t("setup.submit")} />
+        <form.SubmitButton label={t("setup.submit")} size="block" />
       </form.AppForm>
     </form>
   );

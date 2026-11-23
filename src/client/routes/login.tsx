@@ -59,7 +59,12 @@ const LoginPage = () => {
           {t("login.or")}
           <Separator className="flex-1" />
         </div>
-        <Button disabled={busy} onClick={signInPasskey} variant="outline">
+        <Button
+          disabled={busy}
+          onClick={signInPasskey}
+          size="block"
+          variant="outline"
+        >
           {busy ? <Loader2 className="animate-spin" /> : <Fingerprint />}
           {busy ? t("login.working") : t("login.passkey")}
         </Button>

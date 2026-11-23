@@ -162,6 +162,7 @@ export const photos = sqliteTable(
     ownerId: text("owner_id").notNull(),
     ownerType: text("owner_type", {
       enum: [
+        "car",
         "service_visit",
         "expense",
         "finance_invoice",

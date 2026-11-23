@@ -9,7 +9,8 @@
     "months_one": "{{count}} month",
     "months_other": "{{count}} months",
     "deleted": "Reminder deleted",
-    "skipped": "Reminder marked as done"
+    "skipped": "Reminder marked as done",
+    "skipShort": "Skip"
   },
   "groups": {
     "overdue": "Overdue",

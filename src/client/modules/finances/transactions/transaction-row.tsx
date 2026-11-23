@@ -3,6 +3,7 @@ import { Copy, MoreHorizontal, Paperclip, Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useConfirm } from "@/components/app/confirm/confirm-context";
+import { Money } from "@/components/app/money";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,13 +18,12 @@ import { CategoryIcon } from "../categories/category-icon";
 import { useCategoryName } from "../categories/category-label";
 import { FinanceDialogLink } from "../dialogs/finance-dialog-link";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
-import { useLedgerMoney } from "../money";
 import { SwipeToDelete } from "./swipe-to-delete";
 import { useDeleteTransaction } from "./transactions.mutations";
 import type { TransactionListItem } from "./transactions.queries";
 
 const ROW_CLASS =
-  "group/row bg-card hover:bg-background relative flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5";
+  "group/row bg-card hover:bg-background max-md:active:bg-accent relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5";
 
 /** Desktop columns: icon · description · category · date · amount · actions. */
 export const TRANSACTION_GRID =
@@ -102,16 +102,9 @@ export const TransactionRow = ({
 }) => {
   const { t } = useTranslation("finances");
   const nameOf = useCategoryName();
-  const ledger = useLedgerMoney();
   const remove = useDeleteTransaction();
   const income = transaction.kind === "income";
   const category = nameOf(transaction.category);
-
-  const amount = ledger.signed(
-    transaction.amountMinor,
-    transaction.currency,
-    transaction.kind
-  );
 
   const linked = transaction.invoice;
 
@@ -168,14 +161,16 @@ export const TransactionRow = ({
       <span className="text-muted-foreground hidden tabular-nums md:block">
         {formatShortDate(transaction.date)}
       </span>
-      <span
+      <Money
+        amountMinor={transaction.amountMinor}
         className={cn(
-          "shrink-0 text-right tabular-nums",
+          "shrink-0 text-right",
           income && "text-success-foreground font-medium"
         )}
-      >
-        {amount}
-      </span>
+        currency={transaction.currency}
+        sign={income ? "+" : "−"}
+        variant="ledger"
+      />
       <span className="relative z-10 hidden justify-end gap-0.5 opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100 md:flex">
         {linked === null && (
           <>

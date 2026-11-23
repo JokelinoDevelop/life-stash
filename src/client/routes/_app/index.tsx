@@ -11,13 +11,14 @@ import { cached, warm } from "@/lib/warm";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
-import { TodayView, useTodayCount } from "@/modules/today/today-view";
+import { TodaySummaryLine, useTodayLabel } from "@/modules/today/today-hero";
+import { TodayView } from "@/modules/today/today-view";
 
 const TodayPage = () => {
   const { t } = useTranslation("today");
   const { t: tc } = useTranslation("command");
   const { open: handleOpenMenu } = useCommandMenu();
-  const { count } = useTodayCount();
+  const date = useTodayLabel();
 
   return (
     <>
@@ -33,7 +34,8 @@ const TodayPage = () => {
             <Search />
           </Button>
         }
-        description={count === 0 ? t("summaryClear") : t("summary", { count })}
+        description={<TodaySummaryLine />}
+        eyebrow={date}
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />

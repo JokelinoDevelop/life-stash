@@ -3,13 +3,56 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Money } from "@/components/app/money";
 import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { headline, percentChange, subtractTotals } from "./money-split";
+import { NetBars } from "./net-bars";
 import type { FinanceOverview } from "./overview.queries";
+
+/** Phone: one-tap Expense / Income / Invoice. */
+const QuickActions = () => {
+  const { t } = useTranslation("finances");
+  const dialog = useFinanceDialog();
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "transaction", entryKind: "expense" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <ArrowUpRight />
+        {t("overview.quick.expense")}
+      </Button>
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "transaction", entryKind: "income" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <ArrowDownLeft />
+        {t("overview.quick.income")}
+      </Button>
+      <Button
+        onClick={() => {
+          void dialog.open({ dialog: "invoice" });
+        }}
+        size="tile"
+        variant="outline"
+      >
+        <FileText />
+        {t("overview.quick.invoice")}
+      </Button>
+    </div>
+  );
+};
 
 /** Phone: quick actions and the "Net this year" card with monthly bars (5.1). */
 export const OverviewMobileTop = ({
@@ -19,7 +62,6 @@ export const OverviewMobileTop = ({
 }) => {
   const { t } = useTranslation("finances");
   const format = useFormat();
-  const dialog = useFinanceDialog();
 
   const rates = useQuery(financeSettingsQuery).data?.exchangeRates ?? NO_RATES;
   const main = format.currency;
@@ -46,46 +88,10 @@ export const OverviewMobileTop = ({
     overview.cashflow.find((series) => series.currency === currency)?.months ??
     [];
 
-  const highest = Math.max(
-    1,
-    ...months.map((month) => Math.max(month.incomeMinor, month.expenseMinor))
-  );
-
   return (
     <div className="flex flex-col gap-4 md:hidden">
-      <div className="grid grid-cols-3 gap-2">
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "transaction", entryKind: "expense" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <ArrowUpRight />
-          {t("overview.quick.expense")}
-        </Button>
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "transaction", entryKind: "income" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <ArrowDownLeft />
-          {t("overview.quick.income")}
-        </Button>
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "invoice" });
-          }}
-          size="tile"
-          variant="outline"
-        >
-          <FileText />
-          {t("overview.quick.invoice")}
-        </Button>
-      </div>
-      <section className="bg-card flex flex-col gap-1 rounded-lg border p-4">
+      <QuickActions />
+      <section className="surface bg-card flex flex-col gap-1 rounded-lg border p-4">
         <div className="text-muted-foreground flex items-baseline justify-between text-xs">
           <span className="font-medium">
             {t("overview.netIn", { year: overview.year })}
@@ -99,10 +105,15 @@ export const OverviewMobileTop = ({
             </span>
           )}
         </div>
-        <span className="text-2xl font-semibold tracking-tight tabular-nums">
-          {net.primary === null
-            ? "—"
-            : format.money(net.primary.amountMinor, net.primary.currency)}
+        <span className="mt-0.5 text-4xl font-semibold tracking-tight">
+          {net.primary === null ? (
+            "—"
+          ) : (
+            <Money
+              amountMinor={net.primary.amountMinor}
+              currency={net.primary.currency}
+            />
+          )}
         </span>
         <span className="text-muted-foreground text-xs tabular-nums">
           {t("overview.in")}{" "}
@@ -115,23 +126,12 @@ export const OverviewMobileTop = ({
             ? "—"
             : format.money(spent.primary.amountMinor, spent.primary.currency)}
         </span>
-        <div aria-hidden="true" className="mt-3 flex h-14 items-end gap-1">
-          {months.map((month) => (
-            <span
-              className="flex h-full flex-1 items-end gap-px"
-              key={month.month}
-            >
-              <span
-                className="bg-chart-1 h-(--bar) flex-1 rounded-t-sm"
-                style={{ "--bar": `${(month.incomeMinor / highest) * 100}%` }}
-              />
-              <span
-                className="bg-chart-3 h-(--bar) flex-1 rounded-t-sm"
-                style={{ "--bar": `${(month.expenseMinor / highest) * 100}%` }}
-              />
-            </span>
-          ))}
-        </div>
+        <NetBars
+          currency={currency}
+          months={months}
+          today={overview.today}
+          year={overview.year}
+        />
       </section>
     </div>
   );

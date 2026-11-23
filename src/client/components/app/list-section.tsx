@@ -4,6 +4,9 @@ import type * as React from "react";
 import { useListMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
+import { SwipeActions } from "./swipe-actions";
+import type { SwipeAction } from "./swipe-actions";
+
 /** Heading that sits above a hairline box: title, optional count and action. */
 export const SectionHeading = ({
   action,
@@ -30,7 +33,7 @@ export const SectionHeading = ({
 /**
  * A titled group of rows. Phones: heading outside, rows in one hairline box.
  * Desktop: a grey band heading with full-bleed rows (add `data-bleed` so a
- * `PageStack` does not pad it). Rows are 56px on touch and 40px on desktop.
+ * `PageStack` does not pad it). Rows are 52px on touch and 40px on desktop.
  */
 export const ListSection = ({
   action,
@@ -59,7 +62,7 @@ export const ListSection = ({
 );
 
 const ROWS_BOX =
-  "bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b";
+  "surface bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b";
 
 /**
  * The rows box of a `ListSection`, for lists that draw their own heading.
@@ -122,24 +125,36 @@ export const Panel = ({
       </div>
     )}
     <div
-      className={cn("bg-card overflow-hidden rounded-lg border p-4", className)}
+      className={cn(
+        "surface bg-card overflow-hidden rounded-lg border p-4",
+        className
+      )}
     >
       {children}
     </div>
   </section>
 );
 
-/** One row. Pass `render` to make it a link (the `<li>` stays around it). */
+/**
+ * One row. Pass `render` to make it a link (the `<li>` stays around it), and
+ * `swipe` for phone swipe actions (the tap path keeps working).
+ */
 export const ListRow = ({
+  after,
   className,
   render,
+  swipe,
   ...props
-}: useRender.ComponentProps<"div">) => {
+}: useRender.ComponentProps<"div"> & {
+  /** Rendered beside the row, outside its link (e.g. a dialog it opens). */
+  after?: React.ReactNode;
+  swipe?: readonly SwipeAction[];
+}) => {
   const element = useRender({
     defaultTagName: "div",
     props: {
       className: cn(
-        "group/row hover:bg-background [&:is(a,button)]:active:bg-accent flex min-h-14 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
+        "group/row hover:bg-background [&:is(a,button)]:active:bg-accent flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5",
         className
       ),
       "data-slot": "list-row",
@@ -148,7 +163,16 @@ export const ListRow = ({
     render,
   });
 
-  return <li>{element}</li>;
+  return (
+    <li>
+      {swipe === undefined ? (
+        element
+      ) : (
+        <SwipeActions actions={swipe}>{element}</SwipeActions>
+      )}
+      {after}
+    </li>
+  );
 };
 
 export const ListRowText = ({

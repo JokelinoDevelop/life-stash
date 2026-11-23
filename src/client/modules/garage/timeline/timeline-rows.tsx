@@ -7,10 +7,13 @@ import {
   ListRowText,
   ListSection,
 } from "@/components/app/list-section";
+import { Money } from "@/components/app/money";
+import { TINT_TILE } from "@/components/app/tint";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useFormat } from "@/lib/format";
 import { paginate } from "@/lib/paginate";
+import { cn } from "@/lib/utils";
 
 import { useTabPage } from "../cars/use-tab-page";
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
@@ -67,9 +70,11 @@ export const ExpenseRow = ({
         meta={<span className="tabular-nums">{meta}</span>}
         title={t(`categories.${expense.category}`)}
       />
-      <span className="shrink-0 font-medium tabular-nums">
-        {format.money(expense.amountMinor, expense.currency)}
-      </span>
+      <Money
+        amountMinor={expense.amountMinor}
+        className="shrink-0 font-medium"
+        currency={expense.currency}
+      />
     </ListRow>
   );
 };
@@ -97,7 +102,10 @@ export const ReadingRow = ({
     <>
       <span
         aria-hidden="true"
-        className="bg-muted text-subtle-foreground flex size-7 shrink-0 items-center justify-center rounded-md border [&_svg]:size-3.5"
+        className={cn(
+          "bg-muted text-subtle-foreground flex size-7 shrink-0 items-center justify-center rounded-md border max-md:size-8 max-md:rounded-lg [&_svg]:size-3.5 max-md:[&_svg]:size-4",
+          TINT_TILE.slate
+        )}
       >
         <Gauge />
       </span>

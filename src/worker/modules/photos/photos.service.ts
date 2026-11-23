@@ -6,22 +6,28 @@ import { conflict, notFound } from "../../core/errors";
 import { photoStorageFor } from "../../core/photo-storage";
 import { photos } from "../../db/schema/core";
 import { financeInvoices, financeTransactions } from "../../db/schema/finances";
-import { garageExpenses, garageServiceVisits } from "../../db/schema/garage";
+import {
+  garageCars,
+  garageExpenses,
+  garageServiceVisits,
+} from "../../db/schema/garage";
 
 export type PhotoOwnerType =
+  | "car"
   | "service_visit"
   | "expense"
   | "finance_invoice"
   | "finance_transaction";
 
 const OWNER_TABLES = {
+  car: garageCars,
   expense: garageExpenses,
   finance_invoice: financeInvoices,
   finance_transaction: financeTransactions,
   service_visit: garageServiceVisits,
 } as const;
 
-/** Throws 404 unless the photo owner (visit, expense, invoice, transaction) belongs to the household. */
+/** Throws 404 unless the photo owner (car, visit, expense, invoice, transaction) belongs to the household. */
 export const assertPhotoOwner = async (
   db: Db,
   householdId: string,
@@ -170,6 +176,10 @@ export const deletePhotosOfCar = async (
   await deletePhotosOfOwners(env, db, householdId, {
     ownerIds: expenses.map((row) => row.id),
     ownerType: "expense",
+  });
+  await deletePhotosOfOwners(env, db, householdId, {
+    ownerIds: [carId],
+    ownerType: "car",
   });
 };
 

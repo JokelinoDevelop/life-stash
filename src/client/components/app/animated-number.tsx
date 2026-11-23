@@ -3,7 +3,7 @@ import type { NumberFlowProps } from "@number-flow/react";
 import { toMajor } from "@shared/domain/money";
 import type { Currency, MoneyTotal } from "@shared/domain/money";
 import { kmToDisplay } from "@shared/domain/units";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { moneyFormatOptions, useFormat } from "@/lib/format";
 
@@ -31,28 +31,16 @@ const Flow = (props: NumberFlowProps) => {
     };
   }, []);
 
-  const { format, locales, prefix = "", suffix = "", value } = props;
-
-  const formatter = useMemo(
-    () => new Intl.NumberFormat(locales, format),
-    [format, locales]
-  );
-
-  const plain = `${prefix}${formatter.format(value)}${suffix}`;
-
-  // Phones (2-column stats) show plain text: it truncates with "…", which the
-  // animated element can't. From md up the 4-column panel has room to roll.
+  // Rolls on every screen size (single figures fit a phone's 2-column stat);
+  // multi-currency totals stay plain text so they can truncate (see AnimatedTotals).
+  // NumberFlow itself stays still for prefers-reduced-motion.
   return (
-    <>
-      <span className="md:hidden">{plain}</span>
-      <NumberFlow
-        animated={settled}
-        className="hidden md:inline-block"
-        spinTiming={TIMING}
-        transformTiming={TIMING}
-        {...props}
-      />
-    </>
+    <NumberFlow
+      animated={settled}
+      spinTiming={TIMING}
+      transformTiming={TIMING}
+      {...props}
+    />
   );
 };
 

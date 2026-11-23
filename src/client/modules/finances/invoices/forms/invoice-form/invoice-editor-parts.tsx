@@ -198,8 +198,6 @@ export const InvoiceEditorFooter = withForm({
               )}
             </span>
           }
-          // Phones: the sheet closes by swiping down, so no Cancel; Issue takes the room.
-          stretchOnMobile
           submitLabel={
             mode === "itemised"
               ? t("invoices.editor.issueDownload")

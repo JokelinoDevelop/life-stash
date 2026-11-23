@@ -27,7 +27,7 @@ export const SettingsSection = ({
     </div>
     <div
       className={cn(
-        "bg-card rounded-lg border",
+        "surface bg-card rounded-lg border",
         flush ? "overflow-hidden" : "p-4"
       )}
     >

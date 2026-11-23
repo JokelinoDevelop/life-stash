@@ -68,7 +68,7 @@ const SpentPanel = ({
         }
         title={t("overview.spentIn", { year })}
       />
-      <div className="bg-card rounded-lg border px-4 pt-3.5 pb-1">
+      <div className="surface bg-card rounded-lg border px-4 pt-3.5 pb-1">
         <div className="flex items-baseline justify-between gap-3">
           <span className="text-2xl font-semibold tracking-tight tabular-nums">
             {format.money(total, spending.currency)}
@@ -118,7 +118,7 @@ const OverviewContent = ({
     <div className="flex flex-col gap-6 md:flex-row md:gap-0">
       <div className="flex min-w-0 flex-1 flex-col gap-6 md:gap-0">
         {points.length > 0 && (
-          <section className="bg-card overflow-hidden rounded-lg border md:rounded-none md:border-0 md:px-7 md:py-5">
+          <section className="surface bg-card overflow-hidden rounded-lg border md:rounded-none md:border-0 md:px-7 md:py-5">
             <div className="px-4 pt-4 md:p-0">
               <OdometerSummary points={points} today={today} />
             </div>

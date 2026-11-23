@@ -98,7 +98,7 @@ export const AcceptInviteForm = ({
         )}
       </form.AppField>
       <form.AppForm>
-        <form.SubmitButton label={t("invite.submit")} />
+        <form.SubmitButton label={t("invite.submit")} size="block" />
       </form.AppForm>
     </form>
   );

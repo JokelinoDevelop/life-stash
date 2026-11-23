@@ -1,7 +1,7 @@
 import type { MoneyTotal } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
-import { useFormat } from "@/lib/format";
+import { Money } from "@/components/app/money";
 import { cn } from "@/lib/utils";
 
 import type { MonthSummary } from "./group-by-month";
@@ -34,21 +34,26 @@ export const useMonthLabel = () => {
   };
 };
 
+/** Amounts per currency: " · " between them on desktop, stacked on phones. */
 const Totals = ({
   sign,
+  stack = false,
   totals,
 }: {
   sign: "+" | "−" | "±";
+  stack?: boolean;
   totals: readonly MoneyTotal[];
 }) => {
-  const format = useFormat();
-
   if (totals.length === 0) {
     return <span>—</span>;
   }
 
   return (
-    <>
+    <span
+      className={cn(
+        stack && "max-md:inline-flex max-md:flex-col max-md:items-end"
+      )}
+    >
       {totals.map((total, index) => {
         let prefix: string = sign;
 
@@ -64,13 +69,18 @@ const Totals = ({
             )}
             key={total.currency}
           >
-            {index > 0 && " · "}
-            {prefix}
-            {format.money(Math.abs(total.amountMinor), total.currency)}
+            {index > 0 && (
+              <span className={cn(stack && "max-md:hidden")}> · </span>
+            )}
+            <Money
+              amountMinor={total.amountMinor}
+              currency={total.currency}
+              sign={prefix === "+" ? "+" : "−"}
+            />
           </span>
         );
       })}
-    </>
+    </span>
   );
 };
 
@@ -88,7 +98,7 @@ export const MonthBand = ({
 
   return (
     <div className="md:bg-background md:border-divider flex items-baseline gap-3 px-0.5 pb-2 text-sm md:h-8 md:items-center md:border-b md:px-5 md:pb-0 md:text-xs">
-      <h2 className="text-subtle-foreground font-semibold md:font-medium">
+      <h2 className="text-subtle-foreground shrink-0 font-semibold whitespace-nowrap md:font-medium">
         {label(month)}
       </h2>
       {summary !== undefined && (
@@ -109,10 +119,10 @@ export const MonthBand = ({
               <Totals sign="−" totals={summary.expense} />
             </span>
           </span>
-          <span className="text-muted-foreground tabular-nums md:min-w-24 md:text-right">
+          <span className="text-muted-foreground flex items-baseline gap-1 text-right tabular-nums max-md:text-xs md:inline md:min-w-24">
             {t("transactions.net")}{" "}
-            <span className="font-semibold">
-              <Totals sign="±" totals={net} />
+            <span className="font-semibold max-md:text-sm">
+              <Totals sign="±" stack totals={net} />
             </span>
           </span>
         </>

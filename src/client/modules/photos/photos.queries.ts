@@ -9,7 +9,7 @@ import type { SuccessBody } from "@/lib/api";
 
 import { compressPhoto } from "./compress";
 
-export type PhotoOwnerType = "service_visit" | "expense";
+export type PhotoOwnerType = "car" | "service_visit" | "expense";
 
 export interface PhotoOwner {
   ownerType: PhotoOwnerType;

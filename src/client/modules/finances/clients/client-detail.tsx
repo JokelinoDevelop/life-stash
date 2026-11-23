@@ -277,7 +277,7 @@ export const ClientDetail = ({
         <h3 className="text-subtle-foreground text-sm font-semibold">
           {t("clients.details")}
         </h3>
-        <dl className="bg-card flex flex-col gap-3 rounded-lg border p-4 md:border-0 md:bg-transparent md:p-0">
+        <dl className="surface bg-card flex flex-col gap-3 rounded-lg border p-4 md:border-0 md:bg-transparent md:p-0">
           <Detail label={t("clients.columns.kind")}>
             {t(`clients.kind.${client.kind}`)}
           </Detail>

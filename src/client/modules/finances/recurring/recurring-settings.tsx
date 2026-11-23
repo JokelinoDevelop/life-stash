@@ -47,7 +47,7 @@ const Row = ({ item }: { item: RecurringItem }) => {
   ].filter((part) => part !== null);
 
   return (
-    <li className="flex min-h-14 items-center gap-2.5 px-3 md:min-h-12">
+    <li className="flex min-h-13 items-center gap-2.5 px-3 md:min-h-12">
       <CategoryIcon name={item.category.icon} />
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-medium">{item.description}</span>

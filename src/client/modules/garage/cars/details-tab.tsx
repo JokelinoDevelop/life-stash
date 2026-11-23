@@ -73,7 +73,7 @@ export const DetailsTab = ({ car }: { car: CarDetails }) => {
   );
 
   return (
-    <dl className="bg-card divide-divider divide-y overflow-hidden rounded-lg border">
+    <dl className="surface bg-card divide-divider divide-y overflow-hidden rounded-lg border">
       {present.map(([label, value]) => (
         <div
           className="flex flex-col gap-0.5 px-4 py-2.5 md:grid md:min-h-10 md:grid-cols-[12rem_minmax(0,1fr)] md:items-center md:gap-4 md:py-2"

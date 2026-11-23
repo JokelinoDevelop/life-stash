@@ -68,7 +68,7 @@ const RecoverPage = () => {
           )}
         </form.AppField>
         <form.AppForm>
-          <form.SubmitButton label={t("recover.submit")} />
+          <form.SubmitButton label={t("recover.submit")} size="block" />
         </form.AppForm>
         <Button
           variant="link"

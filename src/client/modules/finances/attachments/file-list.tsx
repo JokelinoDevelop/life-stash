@@ -120,7 +120,7 @@ const DropZone = ({
     // oxlint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <label
       className={cn(
-        "text-muted-foreground flex min-h-14 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed px-3 text-sm transition-colors",
+        "text-muted-foreground flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed px-3 text-sm transition-colors",
         over && "border-primary bg-accent"
       )}
       onDragLeave={() => {

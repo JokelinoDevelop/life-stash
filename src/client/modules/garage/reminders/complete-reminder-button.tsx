@@ -1,4 +1,3 @@
-import { EXPENSE_REMINDER_KINDS } from "@shared/domain/garage-kinds";
 import type { ReminderKind } from "@shared/domain/garage-kinds";
 import { Check } from "lucide-react";
 import type { ReactNode } from "react";
@@ -7,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
+import { completionEntry } from "./completion-entry";
 
 type Variant = "button" | "circle" | "hover";
 
@@ -26,13 +26,7 @@ const CompletionLink = ({
   <EntryDialogLink
     aria-label={label}
     className={className}
-    entry={{
-      car: carId,
-      dialog: EXPENSE_REMINDER_KINDS.includes(reminder.kind)
-        ? "expense"
-        : "service",
-      reminder: reminder.id,
-    }}
+    entry={completionEntry(carId, reminder)}
   >
     {children}
   </EntryDialogLink>

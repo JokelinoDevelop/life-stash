@@ -1,6 +1,6 @@
 import { CarMonogram } from "./car-monogram";
 
-/** Monogram, name and model line under the page bar (both breakpoints). */
+/** Desktop: monogram, name and model line under the page bar (phones use `CarHero`). */
 export const CarHeading = ({
   car,
 }: {
@@ -17,9 +17,8 @@ export const CarHeading = ({
     .join(" ");
 
   return (
-    <div className="flex items-center gap-3 md:px-7 md:pt-6">
-      <CarMonogram className="md:hidden" name={car.name} size="lg" />
-      <CarMonogram className="hidden md:flex" name={car.name} />
+    <div className="hidden items-center gap-3 md:flex md:px-7 md:pt-6">
+      <CarMonogram name={car.name} />
       <div className="min-w-0">
         <p className="truncate text-xl font-semibold tracking-tight md:text-lg">
           {car.name}

@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cached, warm } from "@/lib/warm";
 import { CarActions } from "@/modules/garage/cars/car-actions";
 import { CarHeading } from "@/modules/garage/cars/car-heading";
+import { CarHero } from "@/modules/garage/cars/car-hero";
 import {
   CAR_TABS,
   legacyCarTab,
@@ -91,6 +92,7 @@ const CarPage = () => {
         hideMobileTitle
         title={car.name}
       />
+      <CarHero car={car} readOnly={readOnly} />
       <CarHeading car={car} />
       {readOnly && (
         <Alert className="mt-4 md:mx-7 md:w-auto">

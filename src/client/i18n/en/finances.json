@@ -186,13 +186,14 @@
       "invoice": "Invoice"
     },
     "noSpending": "No spending in {{year}} yet.",
-    "chartLabel": "Monthly income and spending in {{year}}",
+    "chartLabel": "Money in and out per month. Tap or drag across the bars to read a month.",
     "empty": {
       "title": "Start tracking your money",
       "message": "Log what you earn and spend, or add a client to start sending invoices.",
       "addClient": "Add client"
     },
-    "including": "incl. {{amount}}"
+    "including": "incl. {{amount}}",
+    "monthReadout": "{{month}} · in {{income}} · out {{expense}}"
   },
   "invoices": {
     "title": "Invoices",
