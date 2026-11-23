@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ErrorState, LoadingState } from "@/components/app/states";
+import { useListMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import { SettingsSection } from "@/modules/settings/settings-section";
 
@@ -108,6 +109,7 @@ const CategoryList = ({
   const move = useUpdateCategory(false);
   const dragged = useRef<number | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const rows = useListMotion();
   const ofKind = categories.filter((category) => category.kind === kind);
   const active = ofKind.filter((category) => !category.archived);
   const archived = ofKind.filter((category) => category.archived);
@@ -125,7 +127,7 @@ const CategoryList = ({
   };
 
   return (
-    <ul className="divide-divider divide-y">
+    <ul className="divide-divider divide-y" ref={rows}>
       {active.map((category, index) => (
         <CategoryRow
           category={category}

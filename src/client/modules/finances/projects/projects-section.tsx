@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 
 import { useConfirm } from "@/components/app/confirm/confirm-context";
+import { ListRows } from "@/components/app/list-section";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -127,7 +128,7 @@ export const ProjectsSection = ({ clientId }: { clientId: string }) => {
           {t("projects.add")}
         </Button>
       </div>
-      <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+      <ListRows>
         {rows.length === 0 && (
           <li className="text-muted-foreground flex min-h-12 items-center px-3.5 text-sm md:px-5">
             {t("projects.empty")}
@@ -162,7 +163,7 @@ export const ProjectsSection = ({ clientId }: { clientId: string }) => {
             <ProjectMenu project={project} />
           </li>
         ))}
-      </ul>
+      </ListRows>
     </section>
   );
 };

@@ -1,7 +1,11 @@
 import { useTranslation } from "react-i18next";
 
+import {
+  AnimatedCount,
+  AnimatedDistance,
+  AnimatedMoney,
+} from "@/components/app/animated-number";
 import { Stat, StatPanel } from "@/components/app/stat-panel";
-import { useFormat } from "@/lib/format";
 
 import type { HouseholdMoney } from "./household-money";
 import { Change } from "./household-spending";
@@ -24,24 +28,28 @@ export const HouseholdStats = ({
   year: number;
 }) => {
   const { t } = useTranslation("garage");
-  const format = useFormat();
 
   return (
     <StatPanel bleed className="hidden md:grid">
       <Stat
         hint={<Change money={money} year={year} />}
         label={t("home.spentThisYear", { year })}
-        value={format.money(money.thisYear, money.currency)}
+        value={
+          <AnimatedMoney
+            amountMinor={money.thisYear}
+            currency={money.currency}
+          />
+        }
       />
       <Stat
         hint={t("home.acrossCars", { count: carCount })}
         label={t("home.drivenThisYear", { year })}
-        value={format.distance(kmThisYear)}
+        value={<AnimatedDistance km={kmThisYear} />}
       />
       <Stat
         hint={next30.map((reminder) => reminder.title).join(", ") || undefined}
         label={t("home.dueIn30")}
-        value={String(next30.length)}
+        value={<AnimatedCount value={next30.length} />}
       />
       <Stat
         hint={
@@ -52,7 +60,7 @@ export const HouseholdStats = ({
         label={t("home.overdueLabel")}
         value={
           <span className={overdue.length > 0 ? "text-destructive" : undefined}>
-            {overdue.length}
+            <AnimatedCount value={overdue.length} />
           </span>
         }
       />

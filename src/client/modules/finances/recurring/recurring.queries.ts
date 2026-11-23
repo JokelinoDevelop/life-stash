@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next";
 
 import { api, unwrap } from "@/lib/api";
 import type { SuccessBody } from "@/lib/api";
-import { useAppMutation } from "@/lib/mutation";
+import { optimisticUpdate, useAppMutation } from "@/lib/mutation";
 
 import { financeKeys } from "../finance-keys";
 import { useLedgerMoney } from "../money";
+import type { FinanceOverview } from "../overview/overview.queries";
 
 export const recurringQuery = queryOptions({
   queryFn: async () => await unwrap(api.finances.recurring.$get()),
@@ -63,6 +64,15 @@ interface PendingRef {
   currency: "MKD" | "EUR" | "USD";
 }
 
+/** Confirming or skipping takes the item off "To confirm" straight away. */
+const dropFromToConfirm = optimisticUpdate<FinanceOverview, PendingRef>(
+  financeKeys.overviewAll,
+  (overview, item) => ({
+    ...overview,
+    toConfirm: overview.toConfirm.filter((entry) => entry.id !== item.id),
+  })
+);
+
 export const useConfirmRecurring = () => {
   const { t } = useTranslation("finances");
   const ledger = useLedgerMoney();
@@ -73,6 +83,7 @@ export const useConfirmRecurring = () => {
       await unwrap(
         recurringApi.confirm.$post({ param: { recurringId: item.id } })
       ),
+    optimistic: [dropFromToConfirm],
     success: false,
     successFor: (_data, item) =>
       t("recurring.confirmed", {
@@ -91,6 +102,7 @@ export const useSkipRecurring = () => {
       await unwrap(
         recurringApi.skip.$post({ param: { recurringId: item.id } })
       ),
+    optimistic: [dropFromToConfirm],
     success: false,
     successFor: (_data, item) =>
       t("recurring.skipped", { name: item.description }),

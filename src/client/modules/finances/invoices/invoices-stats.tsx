@@ -1,6 +1,7 @@
 import type { MoneyTotal } from "@shared/domain/money";
 import { useTranslation } from "react-i18next";
 
+import { AnimatedTotals } from "@/components/app/animated-number";
 import { Stat, StatPanel } from "@/components/app/stat-panel";
 import { useFormat } from "@/lib/format";
 
@@ -30,9 +31,12 @@ export const InvoicesStats = ({ list }: { list: InvoiceList }) => {
     <StatPanel bleed>
       <Stat
         label={t("invoices.invoicedIn", { year: list.year })}
-        value={format.totals(stats.invoiced)}
+        value={<AnimatedTotals values={stats.invoiced} />}
       />
-      <Stat label={t("invoices.paid")} value={format.totals(stats.paid)} />
+      <Stat
+        label={t("invoices.paid")}
+        value={<AnimatedTotals values={stats.paid} />}
+      />
       <Stat
         hint={
           unpaid > 0 ? (
@@ -60,7 +64,7 @@ export const InvoicesStats = ({ list }: { list: InvoiceList }) => {
           ) : undefined
         }
         label={t("invoices.unpaid")}
-        value={format.totals(stats.unpaid)}
+        value={<AnimatedTotals values={stats.unpaid} />}
       />
       <Stat
         label={t("invoices.avgDays")}

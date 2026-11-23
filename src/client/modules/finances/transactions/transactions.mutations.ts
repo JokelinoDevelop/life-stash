@@ -1,10 +1,12 @@
+import type { InfiniteData } from "@tanstack/react-query";
 import type { InferRequestType } from "hono/client";
 import { useTranslation } from "react-i18next";
 
 import { api, unwrap } from "@/lib/api";
-import { useAppMutation } from "@/lib/mutation";
+import { optimisticUpdate, useAppMutation } from "@/lib/mutation";
 
 import { financeKeys } from "../finance-keys";
+import type { TransactionPage } from "./transactions.queries";
 
 type CreateBody = InferRequestType<
   typeof api.finances.transactions.$post
@@ -51,6 +53,33 @@ export const useUpdateTransaction = (
   });
 };
 
+/**
+ * The deleted row leaves every loaded list at once and the count drops; month
+ * totals catch up on refetch. A list where it is the last row on its page waits
+ * for the server instead, so the page never flashes the empty state.
+ */
+const dropTransaction = optimisticUpdate<InfiniteData<TransactionPage>, string>(
+  financeKeys.transactionsAll,
+  (data, id) => {
+    const holder = data.pages.find((page) =>
+      page.transactions.some((row) => row.id === id)
+    );
+
+    if (holder === undefined || holder.transactions.length === 1) {
+      return data;
+    }
+
+    return {
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        total: page.total === null ? null : page.total - 1,
+        transactions: page.transactions.filter((row) => row.id !== id),
+      })),
+    };
+  }
+);
+
 /** Deletes with an Undo toast (the server keeps the row for a week). */
 export const useDeleteTransaction = () => {
   const { t } = useTranslation("finances");
@@ -63,6 +92,7 @@ export const useDeleteTransaction = () => {
           param: { transactionId: id },
         })
       ),
+    optimistic: [dropTransaction],
     success: t("transactions.deleted"),
     undo: async (_data, id) =>
       await unwrap(

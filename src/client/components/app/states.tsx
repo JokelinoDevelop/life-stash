@@ -175,7 +175,7 @@ export const EmptyState = ({
   message: ReactNode;
   title?: ReactNode;
 }) => (
-  <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+  <div className="animate-rise flex flex-col items-center gap-3 px-6 py-12 text-center">
     {icon !== undefined && (
       <div className="bg-card text-muted-foreground flex size-10 items-center justify-center rounded-lg border [&_svg]:size-5">
         {icon}

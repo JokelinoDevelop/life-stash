@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { MotionList } from "@/components/app/list-section";
 import { FieldErrors } from "@/components/form/field-errors";
 import { Button } from "@/components/ui/button";
 
@@ -131,7 +132,7 @@ export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
             </legend>
             <form.Subscribe selector={(state) => state.values.currency}>
               {(currency) => (
-                <ul className="flex flex-col divide-y">
+                <MotionList className="flex flex-col divide-y">
                   {field.state.value.map((item, index) => (
                     <ItemRow
                       currency={currency}
@@ -140,7 +141,7 @@ export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
                       key={item.key}
                     />
                   ))}
-                </ul>
+                </MotionList>
               )}
             </form.Subscribe>
             {field.state.value.length === 0 && (

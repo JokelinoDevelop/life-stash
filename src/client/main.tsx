@@ -14,6 +14,10 @@ import { routeTree } from "./routeTree.gen";
 
 applyDensity(readDensity());
 
+/** View transition types (needed to skip search-only navigations); implies the API itself. */
+const supportsViewTransitionTypes = () =>
+  CSS.supports("selector(:active-view-transition-type(a))");
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -38,6 +42,13 @@ const router = createRouter({
   defaultPendingMs: 800,
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
+  // Pages cross-fade when the path changes (see `::view-transition-*(page)` in
+  // styles.css). Search-only changes (dialogs, tabs, filters) don't animate.
+  // The router ignores `types` where transition types are unsupported and would
+  // animate every change, so those browsers get no page transitions.
+  defaultViewTransition: supportsViewTransitionTypes() && {
+    types: ({ pathChanged }) => (pathChanged ? ["page"] : false),
+  },
   scrollRestoration: true,
   routeTree,
 });

@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { PagedList } from "@/components/app/list-pagination";
+import { ListRows } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -144,11 +145,11 @@ const LedgerContent = ({
           key={group.month}
         >
           <MonthBand month={group.month} summary={group.summary} />
-          <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+          <ListRows>
             {group.rows.map((transaction) => (
               <TransactionRow key={transaction.id} transaction={transaction} />
             ))}
-          </ul>
+          </ListRows>
         </section>
       ))}
     </PagedList>

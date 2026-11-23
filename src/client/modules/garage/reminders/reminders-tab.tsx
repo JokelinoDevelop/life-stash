@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
 import { CAR_SHORTCUTS } from "@/lib/shortcuts";
+import { cn } from "@/lib/utils";
 
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
 import { ReminderRow } from "./reminder-row";
@@ -36,7 +37,9 @@ const CompletedList = ({ reminders }: { reminders: CompletedReminder[] }) => {
         size="sm"
         variant="ghost"
       >
-        <ChevronDown className={open ? "rotate-180" : undefined} />
+        <ChevronDown
+          className={cn("transition-transform", open && "rotate-180")}
+        />
         {t("tab.completed")}
       </Button>
       {open && (

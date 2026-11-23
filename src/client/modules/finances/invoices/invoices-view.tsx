@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ListRows } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { useHotkey } from "@/hooks/use-hotkey";
@@ -84,7 +85,7 @@ const Group = ({
           {format.totals(group.total)}
         </span>
       </div>
-      <ul className="bg-card divide-divider md:border-divider divide-y overflow-hidden rounded-lg border md:rounded-none md:border-0 md:border-b">
+      <ListRows>
         {rows.map((invoice) => (
           <InvoiceRow invoice={invoice} key={invoice.id} onFocus={onFocus} />
         ))}
@@ -103,7 +104,7 @@ const Group = ({
             </Button>
           </li>
         )}
-      </ul>
+      </ListRows>
     </section>
   );
 };
