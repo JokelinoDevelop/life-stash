@@ -23,7 +23,7 @@ export const INVOICE_GRID =
 const MUTED = "text-muted-foreground";
 
 const ROW_CLASS =
-  "group/row bg-card hover:bg-background max-md:active:bg-accent relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5 before:bg-primary before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100";
+  "group/row bg-card hover:bg-background max-md:active:bg-accent relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-0 md:flex-1 md:px-5 before:bg-primary before:absolute before:inset-y-0 before:left-0 before:w-0.5 before:opacity-0 focus-within:before:opacity-100";
 
 const RowAction = ({ invoice }: { invoice: InvoiceListItem }) => {
   const { t } = useTranslation("finances");
@@ -97,7 +97,7 @@ export const InvoiceRow = ({
   ].join(" · ");
 
   return (
-    <li>
+    <li className="md:flex md:min-h-10 md:flex-col">
       <SwipeActions actions={swipeFor(invoice)}>
         {/* Remembers the focused row for the P shortcut; its link and buttons are the interactive parts. */}
         {/* oxlint-disable-next-line jsx-a11y/no-static-element-interactions */}

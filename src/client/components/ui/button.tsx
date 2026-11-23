@@ -20,6 +20,9 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // A rounded suggestion pill (category shortcuts); `aria-pressed` marks the chosen one.
         chip: "border-border bg-card text-subtle-foreground hover:bg-accent aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-foreground rounded-full",
+        // Frosted white-on-dark, for buttons over a photo (car hero).
+        glass:
+          "rounded-full bg-black/25 text-white backdrop-blur-md hover:bg-black/35 hover:text-white aria-expanded:bg-black/35",
         // Looks like an input (date picker trigger); `data-empty` greys the placeholder.
         field:
           "border-input hover:bg-accent/50 data-[empty=true]:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:text-muted-foreground justify-start bg-transparent font-normal shadow-xs",
@@ -34,6 +37,8 @@ const buttonVariants = cva(
         compact:
           "h-11 gap-1.5 px-3 has-[>svg]:px-2.5 md:h-7 md:px-2.5 md:has-[>svg]:px-2",
         "icon-compact": "size-11 md:size-7",
+        // A full-width 48px button on phones and a default one on desktop (sign-in screens).
+        block: "h-12 w-full gap-1.5 px-4 text-base md:h-9 md:px-2.5 md:text-sm",
         // A form's primary action: one full-width 48px button on phones, `compact` on desktop.
         submit:
           "h-12 flex-1 gap-1.5 px-4 text-base md:h-7 md:flex-none md:px-2.5 md:text-sm md:has-[>svg]:px-2",

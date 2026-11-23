@@ -57,7 +57,7 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
       title={t("recurring.toConfirm")}
     >
       {overview.toConfirm.map((item) => (
-        <li key={item.id}>
+        <li className="md:flex md:min-h-11 md:flex-col" key={item.id}>
           <SwipeActions
             actions={[
               {
@@ -78,7 +78,7 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
               },
             ]}
           >
-            <div className="bg-card flex min-h-13 items-center gap-3 px-3.5 md:min-h-11 md:px-5">
+            <div className="bg-card flex min-h-13 items-center gap-3 px-3.5 md:min-h-0 md:flex-1 md:px-5">
               <CategoryIcon name={item.categoryIcon} />
               <div className="flex min-w-0 flex-1 flex-col md:flex-row md:items-baseline md:gap-2">
                 <span className="truncate font-medium">{title(item)}</span>

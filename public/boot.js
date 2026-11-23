@@ -23,5 +23,6 @@
   root.dataset.density = density === "compact" ? "compact" : "comfortable";
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", dark ? "#151b26" : "#f7f9fc");
+    // THEME_COLORS in src/client/app/theme-colors.ts (the phone canvas).
+    ?.setAttribute("content", dark ? "#07080a" : "#f1f2f5");
 }

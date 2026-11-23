@@ -21,6 +21,14 @@ const commit = (() => {
   }
 })();
 
+// Chrome's per-scheme manifest colours (not in vite-plugin-pwa's types yet):
+// the splash and title bar follow dark mode where supported.
+const darkSchemeManifest = {
+  user_preferences: {
+    color_scheme_dark: { background_color: "#07080a", theme_color: "#07080a" },
+  },
+};
+
 export default defineConfig({
   plugins: [
     tanstackRouter({
@@ -42,8 +50,11 @@ export default defineConfig({
         name: "LifeStash",
         short_name: "LifeStash",
         description: "Records and reminders that make everyday life easier.",
-        theme_color: "#0f172a",
-        background_color: "#0f172a",
+        // The phone canvas (THEME_COLORS in src/client/app/theme-colors.ts), so the
+        // splash and status bar match the app; Chrome reads the dark pair below.
+        theme_color: "#f1f2f5",
+        background_color: "#f1f2f5",
+        ...darkSchemeManifest,
         display: "standalone",
         start_url: "/",
         scope: "/",

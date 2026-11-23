@@ -13,7 +13,7 @@ export const SubmitButton = ({
   label?: string;
   className?: string;
   /** `submit`: a sheet's full-width primary on phones (pair with `w-full md:w-auto`). */
-  size?: "default" | "submit";
+  size?: "default" | "submit" | "block";
 }) => {
   const form = useFormContext();
   const { t } = useTranslation();

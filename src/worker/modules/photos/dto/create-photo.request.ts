@@ -14,6 +14,7 @@ export const createPhotoRequest = z
     objectKey: z.string().min(1).max(300),
     ownerId: z.uuid(),
     ownerType: z.enum([
+      "car",
       "service_visit",
       "expense",
       "finance_invoice",
@@ -30,4 +31,8 @@ export const createPhotoRequest = z
       input.generated !== true ||
       (input.ownerType === "finance_invoice" && input.contentType === PDF),
     { message: "Only invoice PDFs can be generated", path: ["generated"] }
-  );
+  )
+  .refine((input) => input.ownerType !== "car" || input.contentType !== PDF, {
+    message: "A car's photo must be an image",
+    path: ["contentType"],
+  });

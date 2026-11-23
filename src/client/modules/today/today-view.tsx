@@ -1,7 +1,6 @@
 import { REMINDER_HORIZONS } from "@shared/domain/reminders";
 import type { ReminderHorizon } from "@shared/domain/reminders";
 import { useQuery } from "@tanstack/react-query";
-import { CircleCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +11,7 @@ import {
 } from "@/components/app/list-section";
 import { Money } from "@/components/app/money";
 import { PageStack } from "@/components/app/page-header";
-import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
+import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
@@ -28,6 +27,7 @@ import { householdOverviewQuery } from "@/modules/garage/household/household.que
 import type { HouseholdReminder } from "@/modules/garage/household/household.queries";
 import { ReminderRow } from "@/modules/garage/household/reminder-groups";
 
+import { AllClear } from "./all-clear";
 import { daysUntil, groupTodayItems } from "./today-groups";
 import type { TodayItem } from "./today-groups";
 
@@ -166,7 +166,6 @@ const HorizonSection = ({
 
 /** Everything that needs you, across Garage and Finances. */
 export const TodayView = () => {
-  const { t } = useTranslation("today");
   const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
   const cars = useQuery(carsQuery(false));
@@ -200,19 +199,18 @@ export const TodayView = () => {
   const nothing = groups.size === 0 && finances.data.toConfirm.length === 0;
 
   if (nothing) {
-    return (
-      <div className="md:p-5">
-        <EmptyState
-          icon={<CircleCheck />}
-          message={t("empty")}
-          title={t("emptyTitle")}
-        />
-      </div>
-    );
+    return <AllClear />;
   }
+
+  // Only "Later" items: say so before listing them.
+  const onlyLater =
+    finances.data.toConfirm.length === 0 &&
+    !groups.has("overdue") &&
+    !groups.has("next30");
 
   return (
     <PageStack>
+      {onlyLater && <AllClear compact />}
       <ToConfirm overview={finances.data} />
       {REMINDER_HORIZONS.map((horizon) => {
         const items = groups.get(horizon) ?? [];

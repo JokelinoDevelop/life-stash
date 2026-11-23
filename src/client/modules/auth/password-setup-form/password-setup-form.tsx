@@ -82,7 +82,7 @@ export const PasswordSetupForm = ({
         )}
       </form.AppField>
       <form.AppForm>
-        <form.SubmitButton label={t("setup.submitPassword")} />
+        <form.SubmitButton label={t("setup.submitPassword")} size="block" />
       </form.AppForm>
     </form>
   );

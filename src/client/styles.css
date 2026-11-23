@@ -12,6 +12,13 @@
   }
 }
 
+/* `pt-safe-12`: that spacing below the notch / status bar. */
+@utility pt-safe-* {
+  padding-top: calc(
+    var(--spacing) * --value(number) + env(safe-area-inset-top)
+  );
+}
+
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -31,6 +38,15 @@
     border-width: 0 !important;
     border-radius: 1rem !important;
   }
+}
+
+/* Sign-in screens on phones: a soft wash of the accent behind the mark. */
+@utility auth-glow {
+  background-image: radial-gradient(
+    120% 55% at 50% -10%,
+    color-mix(in oklch, var(--primary) 16%, transparent),
+    transparent 70%
+  );
 }
 
 /* The phone tab bar floats above the home indicator with a soft lift. */
@@ -466,6 +482,61 @@
   }
 }
 
+/* Car hero (phones): the car's tint as a deep gradient, a scrim so white text
+   reads on any photo (its buttons use the `glass` Button variant). */
+@utility car-hero-gradient {
+  background:
+    radial-gradient(
+      120% 90% at 100% 0%,
+      color-mix(in oklch, var(--hero) 70%, white) 0%,
+      transparent 55%
+    ),
+    linear-gradient(
+      150deg,
+      var(--hero),
+      color-mix(in oklch, var(--hero) 55%, black)
+    );
+}
+@utility car-hero-scrim {
+  background: linear-gradient(
+    to top,
+    oklch(0 0 0 / 0.55),
+    oklch(0 0 0 / 0) 60%
+  );
+}
+
+/* Collapse on scroll where scroll-driven animations exist: the picture drifts
+   and zooms a little, the name fades as it reaches the top bar. */
+@keyframes car-hero-drift {
+  to {
+    transform: translateY(18%) scale(1.08);
+  }
+}
+@keyframes car-hero-fade {
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+@utility car-hero-media {
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: car-hero-drift linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 12rem;
+    }
+  }
+}
+@utility car-hero-text {
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: car-hero-fade linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 8rem;
+    }
+  }
+}
+
 /* Done tick (showDoneTick): the disc pops in, the check draws, both fade out. */
 @keyframes done-tick {
   0% {
@@ -549,6 +620,13 @@
     border-top-width: 0;
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
+  }
+  /* Form fields are 44px touch targets on phones (desktop keeps 36px). */
+  [data-slot="input"],
+  [data-slot="input-group"],
+  [data-slot="select-trigger"][data-size="default"],
+  [data-slot="button"][data-variant="field"] {
+    height: 2.75rem;
   }
   /* Pill tabs on the grey canvas: the active tab is a raised white chip. */
   [data-slot="tabs-indicator"] {

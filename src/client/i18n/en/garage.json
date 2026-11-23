@@ -57,7 +57,17 @@
     "deleteDescription": "Service history, mileage, reminders, expenses and photos for this car will be permanently deleted.",
     "deletedToast": "Car deleted",
     "readOnly": "This car is archived. Restore it to make changes.",
-    "soldDatePlaceholder": "Not sold yet"
+    "soldDatePlaceholder": "Not sold yet",
+    "photo": {
+      "add": "Add a photo",
+      "change": "Change photo",
+      "remove": "Remove photo",
+      "menu": "Car photo",
+      "uploading": "Uploading photo…",
+      "added": "Photo added",
+      "removed": "Photo removed",
+      "failed": "Couldn't upload the photo."
+    }
   },
   "overview": {
     "dueNext": "What's due next",

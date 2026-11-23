@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
+import { THEME_COLORS } from "./theme-colors";
+
 export type Theme = "system" | "light" | "dark";
 
 const STORAGE_KEY = "lifestash.theme";
@@ -33,7 +35,7 @@ const applyTheme = (theme: Theme) => {
   document.documentElement.classList.toggle("dark", dark);
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", dark ? "#151b26" : "#f7f9fc");
+    ?.setAttribute("content", dark ? THEME_COLORS.dark : THEME_COLORS.light);
 };
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
