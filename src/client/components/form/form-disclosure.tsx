@@ -33,6 +33,6 @@ export const FormDisclosure = ({
       />
       {label}
     </Button>
-    {open && <div className="animate-rise mt-3">{children}</div>}
+    {open && <div className="animate-fade mt-3">{children}</div>}
   </>
 );

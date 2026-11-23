@@ -50,6 +50,7 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
           {t("recurring.toConfirmHint")}
         </span>
       }
+      animated
       count={overview.toConfirm.length}
       title={t("recurring.toConfirm")}
     >
