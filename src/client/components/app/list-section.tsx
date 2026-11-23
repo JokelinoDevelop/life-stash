@@ -33,7 +33,7 @@ export const SectionHeading = ({
 /**
  * A titled group of rows. Phones: heading outside, rows in one hairline box.
  * Desktop: a grey band heading with full-bleed rows (add `data-bleed` so a
- * `PageStack` does not pad it). Rows are 56px on touch and 40px on desktop.
+ * `PageStack` does not pad it). Rows are 52px on touch and 40px on desktop.
  */
 export const ListSection = ({
   action,

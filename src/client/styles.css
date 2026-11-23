@@ -115,7 +115,8 @@
   }
 }
 
-/* Design language v0.3 "crisp" — flat surfaces, hairlines, one accent.
+/* Design language v0.5 — flat surfaces, hairlines, one accent (phones: see
+   the "Phones (v0.5)" blocks below and docs/DESIGN-LANGUAGE.md).
    Source of truth: the "LifeStash Design Language" canvas (Tokens board). */
 :root {
   --radius: 0.5rem; /* sm 4 · md 6 · lg 8 · xl 12 */
