@@ -11,8 +11,8 @@
     "overdue_other": "{{count}} задоцнети",
     "dueSoon_one": "{{count}} наскоро",
     "dueSoon_other": "{{count}} наскоро",
-    "waiting": "<money></money> се чека",
-    "clear": "Ништо не чека на тебе"
+    "clear": "Ништо не чека на тебе",
+    "waitingTotal": "{{amount}} се чека"
   },
   "allClear": {
     "title": "Сè е завршено",

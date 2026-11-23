@@ -13,19 +13,22 @@ import { headline, percentChange, subtractTotals } from "./money-split";
 import { NetBars } from "./net-bars";
 import type { FinanceOverview } from "./overview.queries";
 
-/** Phone: one-tap Expense / Income / Invoice. */
+/**
+ * Phone: one-tap Expense / Income / Invoice as small chips under the hero
+ * card (they shortcut the tab bar's +, so they stay out of the way).
+ */
 const QuickActions = () => {
   const { t } = useTranslation("finances");
   const dialog = useFinanceDialog();
 
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="flex gap-2">
       <Button
         onClick={() => {
           void dialog.open({ dialog: "transaction", entryKind: "expense" });
         }}
-        size="tile"
-        variant="outline"
+        size="compact"
+        variant="chip"
       >
         <ArrowUpRight />
         {t("overview.quick.expense")}
@@ -34,8 +37,8 @@ const QuickActions = () => {
         onClick={() => {
           void dialog.open({ dialog: "transaction", entryKind: "income" });
         }}
-        size="tile"
-        variant="outline"
+        size="compact"
+        variant="chip"
       >
         <ArrowDownLeft />
         {t("overview.quick.income")}
@@ -44,8 +47,8 @@ const QuickActions = () => {
         onClick={() => {
           void dialog.open({ dialog: "invoice" });
         }}
-        size="tile"
-        variant="outline"
+        size="compact"
+        variant="chip"
       >
         <FileText />
         {t("overview.quick.invoice")}
@@ -54,7 +57,7 @@ const QuickActions = () => {
   );
 };
 
-/** Phone: quick actions and the "Net this year" card with monthly bars (5.1). */
+/** Phone: the "Net this year" card, then quick actions with monthly bars (5.1). */
 export const OverviewMobileTop = ({
   overview,
 }: {
@@ -90,7 +93,6 @@ export const OverviewMobileTop = ({
 
   return (
     <div className="flex flex-col gap-4 md:hidden">
-      <QuickActions />
       <section className="surface bg-card flex flex-col gap-1 rounded-lg border p-4">
         <div className="text-muted-foreground flex items-baseline justify-between text-xs">
           <span className="font-medium">
@@ -133,6 +135,7 @@ export const OverviewMobileTop = ({
           year={overview.year}
         />
       </section>
+      <QuickActions />
     </div>
   );
 };

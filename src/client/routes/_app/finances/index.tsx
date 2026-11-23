@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useHotkey } from "@/hooks/use-hotkey";
-import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 import { cached, warm } from "@/lib/warm";
@@ -18,6 +17,7 @@ import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog"
 import { OverviewView } from "@/modules/finances/overview/overview-view";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import { financeSettingsQuery } from "@/modules/finances/settings/finance-settings.queries";
+import { useSummaryTotals } from "@/modules/finances/use-summary-totals";
 
 const searchSchema = z.object({
   year: z.coerce.number().int().min(1990).max(2200).optional().catch(undefined),
@@ -25,7 +25,6 @@ const searchSchema = z.object({
 
 const FinancesPage = () => {
   const { t } = useTranslation("finances");
-  const format = useFormat();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const dialog = useFinanceDialog();
@@ -45,6 +44,7 @@ const FinancesPage = () => {
   useHotkey(FINANCE_SHORTCUTS.logTransaction, logTransaction);
   useHotkey(FINANCE_SHORTCUTS.newInvoice, newInvoice);
 
+  const summary = useSummaryTotals();
   let status: string | undefined;
 
   if (receivables !== undefined) {
@@ -52,12 +52,12 @@ const FinancesPage = () => {
       status = t("overview.statusClear");
     } else if (receivables.overdueCount > 0) {
       status = t("overview.status", {
-        amount: format.totals(receivables.unpaid),
+        amount: summary(receivables.unpaid),
         count: receivables.overdueCount,
       });
     } else {
       status = t("overview.statusNoOverdue", {
-        amount: format.totals(receivables.unpaid),
+        amount: summary(receivables.unpaid),
       });
     }
   }

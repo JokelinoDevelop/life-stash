@@ -1,8 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-import { useFormat } from "@/lib/format";
-
+import { useSummaryTotals } from "../use-summary-totals";
 import { useMonthLabel } from "./month-band";
 import { filterFromSearch } from "./transactions-search";
 import type { TransactionsSearch } from "./transactions-search";
@@ -17,7 +16,7 @@ export const MonthStatus = ({
   search: TransactionsSearch;
 }) => {
   const { t } = useTranslation("finances");
-  const format = useFormat();
+  const summary = useSummaryTotals();
   const label = useMonthLabel();
 
   const list = useInfiniteQuery(
@@ -33,8 +32,8 @@ export const MonthStatus = ({
   return (
     <span className="tabular-nums">
       {t("transactions.monthSummary", {
-        expense: format.totals(month.expense),
-        income: format.totals(month.income),
+        expense: summary(month.expense),
+        income: summary(month.income),
         month: label(month.month, false),
       })}
     </span>

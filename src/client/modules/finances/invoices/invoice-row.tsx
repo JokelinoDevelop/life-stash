@@ -86,13 +86,12 @@ export const InvoiceRow = ({
   const overdue = invoice.status === "overdue";
   const voided = invoice.status === "void";
   const amount = ledger.money(invoice.amountMinor, invoice.currency);
-  const paid = invoice.status === "paid";
   const swipeFor = useInvoiceSwipe();
 
+  // Phones: two facts so the line never truncates — the number (the amount
+  // when overdue, since Mark paid takes the trailing slot) and when it's due.
   const mobileMeta = [
-    numberOf(invoice),
-    ...(overdue ? [amount] : []),
-    ...(overdue || paid ? [] : [forLabel(invoice)]),
+    overdue ? amount : numberOf(invoice),
     dueLabel(invoice),
   ].join(" · ");
 

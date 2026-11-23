@@ -12,3 +12,7 @@ coverage
 
 # Production secrets for `wrangler secret bulk`. Never commit.
 secrets.json
+
+# Playwright (pnpm test:layout)
+test-results/
+playwright-report/

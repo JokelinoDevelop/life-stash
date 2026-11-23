@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { useAppForm } from "@/components/form/form-hook";
-import { FieldGroup } from "@/components/ui/field";
 import { setLocale } from "@/i18n";
 import { api, unwrap } from "@/lib/api";
 import type { SuccessBody } from "@/lib/api";
@@ -57,62 +56,64 @@ export const PreferencesForm = ({
   });
 
   return (
-    <SettingsSection title={t("preferences.title")}>
+    <SettingsSection flush title={t("preferences.title")}>
       <form
-        className="flex flex-col gap-6"
         onSubmit={(event) => {
           event.preventDefault();
           void form.handleSubmit();
         }}
       >
-        <FieldGroup>
+        <div className="divide-divider divide-y">
           <form.AppField name="displayName">
             {(field) => (
               <field.TextField
                 autoComplete="name"
                 label={t("preferences.displayName")}
+                layout="row"
               />
             )}
           </form.AppField>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <form.AppField name="locale">
-              {(field) => (
-                <field.SelectField
-                  label={t("preferences.language")}
-                  options={[
-                    { label: t("languages.en"), value: "en" },
-                    { label: t("languages.mk"), value: "mk" },
-                  ]}
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="distanceUnit">
-              {(field) => (
-                <field.SelectField
-                  label={t("preferences.distanceUnit")}
-                  options={[
-                    { label: t("units.km"), value: "km" },
-                    { label: t("units.mi"), value: "mi" },
-                  ]}
-                />
-              )}
-            </form.AppField>
-            <form.AppField name="currency">
-              {(field) => (
-                <field.SelectField
-                  label={t("preferences.currency")}
-                  options={CURRENCIES.map((code) => ({
-                    label: code,
-                    value: code,
-                  }))}
-                />
-              )}
-            </form.AppField>
-          </div>
+          <form.AppField name="locale">
+            {(field) => (
+              <field.SelectField
+                label={t("preferences.language")}
+                layout="row"
+                options={[
+                  { label: t("languages.en"), value: "en" },
+                  { label: t("languages.mk"), value: "mk" },
+                ]}
+              />
+            )}
+          </form.AppField>
+          <form.AppField name="distanceUnit">
+            {(field) => (
+              <field.SelectField
+                label={t("preferences.distanceUnit")}
+                layout="row"
+                options={[
+                  { label: t("units.km"), value: "km" },
+                  { label: t("units.mi"), value: "mi" },
+                ]}
+              />
+            )}
+          </form.AppField>
+          <form.AppField name="currency">
+            {(field) => (
+              <field.SelectField
+                label={t("preferences.currency")}
+                layout="row"
+                options={CURRENCIES.map((code) => ({
+                  label: code,
+                  value: code,
+                }))}
+              />
+            )}
+          </form.AppField>
           <form.AppField name="timeZone">
             {(field) => (
               <field.SelectField
                 label={t("preferences.timeZone")}
+                layout="row"
                 options={timeZones(preferences.timeZone).map((zone) => ({
                   label: zone,
                   value: zone,
@@ -126,14 +127,17 @@ export const PreferencesForm = ({
                 description={t("preferences.nudgeHelp")}
                 inputMode="numeric"
                 label={t("preferences.nudge")}
+                layout="row"
                 suffix={t("preferences.weeks")}
               />
             )}
           </form.AppField>
-        </FieldGroup>
-        <form.AppForm>
-          <form.SubmitButton className="self-end" />
-        </form.AppForm>
+        </div>
+        <div className="border-divider flex justify-end border-t p-3">
+          <form.AppForm>
+            <form.SubmitButton />
+          </form.AppForm>
+        </div>
       </form>
     </SettingsSection>
   );

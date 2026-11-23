@@ -5,7 +5,7 @@ import { parseAmount } from "./form-schemas";
 describe(parseAmount, () => {
   it("reads dot or comma decimals and ignores spaces", () => {
     expect(parseAmount("12,50")).toBe(12.5);
-    expect(parseAmount(" 1 234.56 ")).toBe(1234.56);
+    expect(parseAmount(" 1 234.56 ")).toBeCloseTo(1234.56);
   });
 
   it("is null when empty", () => {

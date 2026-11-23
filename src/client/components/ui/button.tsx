@@ -42,7 +42,6 @@ const buttonVariants = cva(
         // A form's primary action: one full-width 48px button on phones, `compact` on desktop.
         submit:
           "h-12 flex-1 gap-1.5 px-4 text-base md:h-7 md:flex-none md:px-2.5 md:text-sm md:has-[>svg]:px-2",
-        tile: "h-auto flex-col gap-1 px-3 py-3",
         icon: "size-9",
         "icon-xs":
           "size-6 rounded-[min(var(--radius-md),8px)] in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3",

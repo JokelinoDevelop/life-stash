@@ -11,8 +11,8 @@
     "overdue_other": "{{count}} overdue",
     "dueSoon_one": "{{count}} due soon",
     "dueSoon_other": "{{count}} due soon",
-    "waiting": "<money></money> waiting",
-    "clear": "Nothing needs you right now"
+    "clear": "Nothing needs you right now",
+    "waitingTotal": "{{amount}} waiting"
   },
   "allClear": {
     "title": "You're all caught up",
