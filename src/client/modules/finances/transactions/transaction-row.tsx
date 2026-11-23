@@ -108,10 +108,11 @@ export const TransactionRow = ({
 
   const linked = transaction.invoice;
 
+  // The date before the client, so a long client name truncates, not the date.
   const meta = [
     category,
-    transaction.client?.name,
     formatShortDate(transaction.date),
+    transaction.client?.name,
   ].filter((part) => part !== undefined);
 
   const row = (

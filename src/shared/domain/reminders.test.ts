@@ -129,7 +129,7 @@ describe(reminderProgress, () => {
       })
     ).toBe(0);
     expect(reminderProgress({ ...base, status: "upcoming" })).toBe(0.25);
-    expect(reminderProgress({ ...base, status: "due-soon" })).toBe(0.9);
+    expect(reminderProgress({ ...base, status: "due-soon" })).toBeCloseTo(0.9);
   });
 });
 

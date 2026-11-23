@@ -11,7 +11,7 @@ import {
   Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useRef } from "react";
+import { lazy, Suspense, useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -26,9 +26,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { usePreferences } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
-import { FinanceDialogHost } from "@/modules/finances/dialogs/finance-dialog-host";
 import { FinanceNavLinks } from "@/modules/finances/finance-nav-links";
-import { EntryDialogHost } from "@/modules/garage/entry-dialogs/entry-dialog-host";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import { useTodayCount } from "@/modules/today/today-view";
 
@@ -41,6 +39,22 @@ import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
 import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
 import { useSwipeBack } from "./use-swipe-back";
+
+/* The dialog hosts carry every create/edit form; they load right after the
+   shell paints instead of on the critical path (a dialog link opened before
+   they arrive simply shows once they do). */
+const EntryDialogHost = lazy(async () => {
+  const module =
+    await import("@/modules/garage/entry-dialogs/entry-dialog-host");
+
+  return { default: module.EntryDialogHost };
+});
+
+const FinanceDialogHost = lazy(async () => {
+  const module = await import("@/modules/finances/dialogs/finance-dialog-host");
+
+  return { default: module.FinanceDialogHost };
+});
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
@@ -240,6 +254,7 @@ const MobileNav = () => {
     <nav
       aria-label={t("appName")}
       className="tabbar-edge pointer-events-none fixed inset-x-0 bottom-0 z-40 [view-transition-name:tabbar] md:hidden"
+      data-tabbar
     >
       <div className="tabbar-float pointer-events-auto absolute inset-x-0 z-10 flex items-center justify-center gap-3 px-4">
         <div className="tabbar-glass flex h-14 items-center gap-0.5 rounded-full px-1">
@@ -283,7 +298,7 @@ export const AppShell = () => {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
           <main
-            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 overflow-x-clip px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
             ref={main}
           >
             <RouteProgress />
@@ -292,8 +307,10 @@ export const AppShell = () => {
           <MobileNav />
         </div>
       </div>
-      <EntryDialogHost />
-      <FinanceDialogHost />
+      <Suspense fallback={null}>
+        <EntryDialogHost />
+        <FinanceDialogHost />
+      </Suspense>
       <DoneTickHost />
     </CommandMenuProvider>
   );

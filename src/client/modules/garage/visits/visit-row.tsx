@@ -26,18 +26,32 @@ export const VisitRow = ({
   const { t } = useTranslation("garageVisits");
   const format = useFormat();
 
-  const meta = [
+  const core = [
     carName ?? null,
     shortDate
       ? format.shortDate(visit.date, visit.datePrecision)
       : format.date(visit.date, visit.datePrecision),
     visit.odometerKm === null ? null : format.distance(visit.odometerKm),
+  ].filter((part) => part !== null);
+
+  // Desktop only: phones keep car, date and odometer so the line fits.
+  const extra = [
     t(`kinds.${visit.kind}`),
     visit.shop,
     visit.byPreviousOwner ? t("history.previousOwner") : null,
-  ]
-    .filter((part) => part !== null)
-    .join(" · ");
+  ].filter((part) => part !== null);
+
+  const meta = (
+    <>
+      {core.join(" · ")}
+      {extra.length > 0 && (
+        <span className="hidden md:inline">
+          {core.length > 0 && " · "}
+          {extra.join(" · ")}
+        </span>
+      )}
+    </>
+  );
 
   return (
     <ListRow

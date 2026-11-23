@@ -1,6 +1,11 @@
 import type { ComponentProps } from "react";
 
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   InputGroup,
@@ -10,6 +15,7 @@ import {
 } from "@/components/ui/input-group";
 
 import { FieldErrors } from "./field-errors";
+import type { FieldLayout } from "./field-layout";
 import { useFieldContext } from "./form-context";
 import { OptionalHint } from "./optional-hint";
 
@@ -26,6 +32,8 @@ export interface TextFieldProps {
   autoFocus?: boolean;
   /** Id of a `<datalist>` with suggestions (quick picks that can still be typed over). */
   list?: string;
+  /** `row`: label left, a compact right-aligned input right (settings lists). */
+  layout?: FieldLayout;
 }
 
 export const TextField = ({
@@ -33,6 +41,7 @@ export const TextField = ({
   description,
   optional,
   suffix,
+  layout = "stacked",
   ...input
 }: TextFieldProps) => {
   const field = useFieldContext<string>();
@@ -50,22 +59,53 @@ export const TextField = ({
     ...input,
   };
 
+  const row = layout === "row";
+
+  const control =
+    suffix === undefined ? (
+      <Input {...inputProps} className={row ? "w-2/5 text-right" : undefined} />
+    ) : (
+      <InputGroup className={row ? "w-2/5" : undefined}>
+        <InputGroupInput
+          {...inputProps}
+          className={row ? "text-right" : undefined}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupText>{suffix}</InputGroupText>
+        </InputGroupAddon>
+      </InputGroup>
+    );
+
+  if (row) {
+    return (
+      <div className="flex min-h-12 items-center px-3 py-1.5 md:min-h-11">
+        <Field data-invalid={invalid} orientation="horizontal">
+          {/* A plain label centres with the control; with help text or an
+              error the column top-aligns instead. */}
+          {description === undefined && !invalid ? (
+            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+          ) : (
+            <FieldContent>
+              <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+              {description !== undefined && (
+                <FieldDescription>{description}</FieldDescription>
+              )}
+              <FieldErrors errors={field.state.meta.errors} show={invalid} />
+            </FieldContent>
+          )}
+          {control}
+        </Field>
+      </div>
+    );
+  }
+
   return (
     <Field data-invalid={invalid}>
       <FieldLabel htmlFor={field.name}>
         {label}
         {optional === true && <OptionalHint />}
       </FieldLabel>
-      {suffix === undefined ? (
-        <Input {...inputProps} />
-      ) : (
-        <InputGroup>
-          <InputGroupInput {...inputProps} />
-          <InputGroupAddon align="inline-end">
-            <InputGroupText>{suffix}</InputGroupText>
-          </InputGroupAddon>
-        </InputGroup>
-      )}
+      {control}
       {description !== undefined && (
         <FieldDescription>{description}</FieldDescription>
       )}

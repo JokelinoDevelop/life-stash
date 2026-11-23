@@ -9,7 +9,6 @@ import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
-import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 import { cached, warm } from "@/lib/warm";
@@ -22,10 +21,11 @@ import {
 import type { InvoicesSearchPatch } from "@/modules/finances/invoices/invoices-search";
 import { InvoicesView } from "@/modules/finances/invoices/invoices-view";
 import { invoicesQuery } from "@/modules/finances/invoices/invoices.queries";
+import { useSummaryTotals } from "@/modules/finances/use-summary-totals";
 
 const InvoicesPage = () => {
   const { t } = useTranslation("finances");
-  const format = useFormat();
+  const summary = useSummaryTotals();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const dialog = useFinanceDialog();
@@ -86,8 +86,8 @@ const InvoicesPage = () => {
           list.data === undefined
             ? undefined
             : t("invoices.subtitle", {
-                invoiced: format.totals(list.data.stats.invoiced),
-                unpaid: format.totals(list.data.stats.unpaid),
+                invoiced: summary(list.data.stats.invoiced),
+                unpaid: summary(list.data.stats.unpaid),
                 year,
               })
         }

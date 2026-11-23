@@ -11,6 +11,8 @@
     "drizzle.config.ts",
     "oxlint.config.ts",
     "oxfmt.config.ts",
-    "scripts"
+    "scripts",
+    "playwright.config.ts",
+    "e2e"
   ]
 }

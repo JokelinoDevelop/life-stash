@@ -486,6 +486,11 @@
 @utility animate-page-enter {
   animation: page-enter var(--motion-slide) var(--ease-slide) both;
 }
+/* Only while it slides: clip the offset page so the screen doesn't widen.
+   Never permanently, which would hide real overflow (content cut off). */
+:has(> .animate-page-enter) {
+  overflow-x: clip;
+}
 
 /* Car hero (phones): the car's tint as a deep gradient, a scrim so white text
    reads on any photo (its buttons use the `glass` Button variant). */
@@ -710,5 +715,10 @@
   }
   [data-sonner-toaster] [data-sonner-toast] {
     width: 100% !important;
+  }
+  /* No tab bar (sign-in screens): just above the home indicator. */
+  body:not(:has([data-tabbar]))
+    [data-sonner-toaster][data-y-position="bottom"] {
+    bottom: calc(1rem + env(safe-area-inset-bottom)) !important;
   }
 }

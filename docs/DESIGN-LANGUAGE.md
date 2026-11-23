@@ -143,4 +143,6 @@ Everything here applies below 48rem only; desktop renders exactly as before.
 - Primary actions use `size="compact"`; icon buttons in rows use `size="icon-compact"`. A form's Save uses `size="submit"` (FormFooter does this for you).
 - Boxes use the `surface` utility with their `rounded-lg border`, so they become borderless grouped cards on phones.
 - Horizontal strips that scroll on phones use `scrollbar-none` and `-mx-4 px-4` to bleed to the screen edge.
-- Prefer one meta line (`a · b · c`, `tabular-nums`) over badges.
+- Prefer one meta line (`a · b · c`, `tabular-nums`) over badges. On phones keep it to the two or three facts that fit without truncating (put the date before free text such as a client name); the rest can be desktop-only.
+- **Summary lines** (a page description, Today's line) show one figure for money: `useSummaryTotals` (finances) gives "≈ MKD 586,320" in the main currency when every rate is known, otherwise the main currency first. Exact per-currency amounts stay in rows and tables.
+- **Settings lists** use `layout="row"` on `field.TextField` / `field.SelectField`: label left, compact control right, rows the height of the Finances defaults rows, inside a `flush` `SettingsSection`.
