@@ -26,7 +26,10 @@ const SettingsPage = () => {
         <SecurityCard />
         <ExportCard />
         <p className="text-muted-foreground text-center text-xs">
-          {t("about.version", { version: __APP_VERSION__ })}
+          {t("about.version", {
+            commit: __APP_COMMIT__,
+            version: __APP_VERSION__,
+          })}
         </p>
       </div>
     </PageContent>

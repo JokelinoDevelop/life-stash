@@ -19,6 +19,7 @@ import { garageRoutes } from "./modules/garage/garage.routes";
 import { photoRoutes } from "./modules/photos/photos.routes";
 import { configRoutes } from "./modules/settings/config.routes";
 import { settingsRoutes } from "./modules/settings/settings.routes";
+import { versionRoutes } from "./modules/settings/version.routes";
 
 const MAX_BODY_BYTES = 1024 * 1024;
 
@@ -55,6 +56,7 @@ export const app = new Hono<PublicEnv>()
   .route("/account", accountRoutes)
   .route("/account", accountPasswordRoutes)
   .route("/config", configRoutes)
+  .route("/version", versionRoutes)
   .route("/", privateRoutes);
 
 app.onError(handleError);
