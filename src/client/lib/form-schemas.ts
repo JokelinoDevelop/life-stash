@@ -75,11 +75,16 @@ export const parseInteger = (value: string): number | null => {
   return compact === "" ? null : Math.trunc(Number(compact));
 };
 
-/** Parses a decimal amount typed in a form (comma or dot) into a number. */
+/**
+ * Parses a decimal amount typed in a form (comma or dot) into a number; null
+ * when empty or not a finite number yet ("40€", "1.000,00", "1e999"), so live
+ * totals treat half-typed input as nothing instead of NaN or Infinity.
+ */
 export const parseAmount = (value: string): number | null => {
   const compact = value.replaceAll(/\s/gu, "").replace(",", ".");
+  const amount = Number(compact);
 
-  return compact === "" ? null : Number(compact);
+  return compact === "" || !Number.isFinite(amount) ? null : amount;
 };
 
 export const emptyToNull = (value: string): string | null => {
