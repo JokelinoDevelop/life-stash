@@ -9,7 +9,11 @@
     "finances": "Finances",
     "today": "Today",
     "expand": "Expand {{name}}",
-    "collapse": "Collapse {{name}}"
+    "collapse": "Collapse {{name}}",
+    "quickAdd": "Add",
+    "pickCar": "Which car?",
+    "needsAttention_one": "{{count}} item needs attention",
+    "needsAttention_other": "{{count}} items need attention"
   },
   "actions": {
     "save": "Save",

@@ -358,3 +358,9 @@
     overscroll-behavior-y: none;
   }
 }
+
+/* The phone tab bar sits above the page fade (it would otherwise be covered
+   by the page snapshot while a route changes) and never animates itself. */
+::view-transition-group(tabbar) {
+  animation: none;
+}

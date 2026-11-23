@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, Outlet } from "@tanstack/react-router";
+import type { LinkProps } from "@tanstack/react-router";
 import {
   CarFront,
   ChevronsUpDown,
@@ -9,6 +10,7 @@ import {
   Sun,
   Wallet,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
@@ -32,6 +34,7 @@ import { useTodayCount } from "@/modules/today/today-view";
 
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
+import { QuickAdd } from "./quick-add";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
 import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
@@ -39,11 +42,6 @@ import { useSwipeBack } from "./use-swipe-back";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
-
-const mobileLinkClass =
-  "flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted-foreground";
-
-const activeMobileLinkClass = "text-foreground";
 
 const Initial = ({ name }: { name: string }) => (
   <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
@@ -199,6 +197,34 @@ const Sidebar = () => {
   );
 };
 
+/** One tab: the icon is bolder and the label darker when it is the current section. */
+const Tab = ({
+  activeOptions,
+  badge,
+  icon: Icon,
+  label,
+  to,
+}: {
+  activeOptions?: { exact?: boolean; includeSearch?: boolean };
+  badge?: ReactNode;
+  icon: LucideIcon;
+  label: string;
+  to: LinkProps["to"];
+}) => (
+  <Link
+    activeOptions={activeOptions}
+    className="text-muted-foreground data-[status=active]:text-foreground group/tab flex flex-1 flex-col items-center justify-center gap-1 text-xs font-medium transition-colors"
+    to={to}
+  >
+    <span className="relative flex">
+      <Icon className="size-5.5 [stroke-width:1.75] group-data-[status=active]/tab:[stroke-width:2.25]" />
+      {badge}
+    </span>
+    {label}
+  </Link>
+);
+
+/** Phones: four sections and, in the middle, Quick add. */
 const MobileNav = () => {
   const { t } = useTranslation();
   const today = useTodayCount();
@@ -206,55 +232,34 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="bg-card/90 pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t backdrop-blur-md md:hidden"
+      className="bg-card pb-safe fixed inset-x-0 bottom-0 z-40 border-t [view-transition-name:tabbar] md:hidden"
     >
-      <Link
-        activeOptions={{ exact: true, includeSearch: false }}
-        activeProps={{ className: activeMobileLinkClass }}
-        className={mobileLinkClass}
-        to="/"
-      >
-        <span className="relative flex">
-          <Sun className="size-5" />
-          {today.count > 0 && (
-            <span
-              className={cn(
-                "text-primary-foreground absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-xs leading-none font-semibold tabular-nums",
-                today.overdue ? "bg-destructive" : "bg-muted-foreground"
-              )}
-            >
-              {today.count}
-            </span>
-          )}
-        </span>
-        {t("nav.today")}
-      </Link>
-      <Link
-        activeOptions={{ exact: false }}
-        activeProps={{ className: activeMobileLinkClass }}
-        className={mobileLinkClass}
-        to="/garage"
-      >
-        <CarFront className="size-5" />
-        {t("nav.garage")}
-      </Link>
-      <Link
-        activeOptions={{ exact: false }}
-        activeProps={{ className: activeMobileLinkClass }}
-        className={mobileLinkClass}
-        to="/finances"
-      >
-        <Wallet className="size-5" />
-        {t("nav.finances")}
-      </Link>
-      <Link
-        activeProps={{ className: activeMobileLinkClass }}
-        className={mobileLinkClass}
-        to={SETTINGS}
-      >
-        <Settings className="size-5" />
-        {t(SETTINGS_LABEL)}
-      </Link>
+      <div className="flex h-14 items-stretch">
+        <Tab
+          activeOptions={{ exact: true, includeSearch: false }}
+          badge={
+            today.count > 0 && (
+              <span
+                className={cn(
+                  "ring-card absolute -top-0.5 -right-1 size-2 rounded-full ring-2",
+                  today.overdue ? "bg-destructive" : "bg-primary"
+                )}
+              >
+                <span className="sr-only">
+                  {t("nav.needsAttention", { count: today.count })}
+                </span>
+              </span>
+            )
+          }
+          icon={Sun}
+          label={t("nav.today")}
+          to="/"
+        />
+        <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
+        <QuickAdd />
+        <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
+        <Tab icon={Settings} label={t(SETTINGS_LABEL)} to={SETTINGS} />
+      </div>
     </nav>
   );
 };
