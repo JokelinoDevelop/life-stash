@@ -102,8 +102,12 @@ export const useAppMutation = <TVariables = void, TData = unknown>({
       return { snapshots };
     },
     onError: (error, _variables, context) => {
-      for (const [key, data] of context?.snapshots ?? []) {
-        queryClient.setQueryData(key, data);
+      // The snapshot predates this mutation only; if others are still running,
+      // restoring it would undo their optimistic edits, so refetch instead.
+      if (queryClient.isMutating() <= 1) {
+        for (const [key, data] of context?.snapshots ?? []) {
+          queryClient.setQueryData(key, data);
+        }
       }
 
       if (optimistic.length > 0) {

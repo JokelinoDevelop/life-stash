@@ -74,25 +74,6 @@
   animation: rise-in var(--motion-slow) var(--ease-out) both;
 }
 
-/* A check that lands (done states). */
-@keyframes pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  70% {
-    opacity: 1;
-    transform: scale(1.06);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-@utility animate-pop {
-  animation: pop-in var(--motion-slow) var(--ease-out) both;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .animate-reveal {
     animation-duration: 0s;
@@ -360,13 +341,21 @@
 }
 
 /* Press feedback: buttons give a little under the pointer. */
-[data-slot="button"]:active:not(:disabled, [aria-haspopup]) {
+[data-slot="button"]:active:not(
+    :disabled,
+    [aria-disabled="true"],
+    [data-disabled],
+    [aria-haspopup]
+  ) {
   scale: 0.97;
 }
 
-/* A tab panel eases in when you switch to it. */
-[data-slot="tabs-content"] {
-  animation: rise-in var(--motion-base) var(--ease-out) both;
+/* A tab panel eases in when you switch to it. Layered so an `animate-*`
+   utility on a TabsContent can still override it. */
+@layer components {
+  [data-slot="tabs-content"] {
+    animation: rise-in var(--motion-base) var(--ease-out) both;
+  }
 }
 
 /* Pill tabs: the active surface is one indicator that slides between tabs. */

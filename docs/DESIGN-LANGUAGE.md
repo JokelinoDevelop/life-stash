@@ -85,10 +85,10 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 Motion explains change; it never decorates. Tokens in `styles.css`: `--motion-fast` 100 ms (hover, press, exits), `--motion-base` 150 ms (overlays, tab panels), `--motion-slow` 220 ms (content arriving), all on `--ease-out`. `prefers-reduced-motion` turns every one of them off.
 
-- **Pages:** when the path changes the content panel cross-fades (old page out in 100 ms, new one rises 4px in 220 ms) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate. Sidebar and bottom bar stay still.
-- **Lists:** rows fade in, fade out and slide into place as data changes. Use `ListSection` / `ListRows`, or `MotionList` / `useListMotion()` (`lib/motion`) for any other list.
-- **Optimistic:** quick, reversible mutations update the cache before the request (`optimistic: [optimisticUpdate(key, fn)]` on `useAppMutation`); errors roll back. Used for Confirm / Skip recurring income and deleting a transaction.
-- **Figures:** headline numbers in `Stat`s roll to their new value (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`).
+- **Pages:** when the path changes the content panel cross-fades (old page out in 100 ms, new one rises 4px in 220 ms) via the View Transitions API (`defaultViewTransition` in `main.tsx`, `view-transition-name: page` in the app shell). Search-only changes (dialogs, tabs, filters, pages of a list) don't animate; browsers without view-transition types get no page transitions at all. Sidebar and bottom bar stay still.
+- **Lists:** rows fade in, fade out and slide into place as data changes. Use `ListSection` / `ListRows`, or `MotionList` / `useListMotion()` (`lib/motion`) for any other list. Turning a `PagedList` page swaps the rows at once.
+- **Optimistic:** quick, reversible mutations update the cache before the request (`optimistic: [optimisticUpdate(key, fn)]` on `useAppMutation`); errors roll back (or refetch, when other mutations are in flight). Never empty a page optimistically: wait for the server instead. Used for Confirm / Skip recurring income and deleting a transaction.
+- **Figures:** headline numbers in `Stat`s roll to their new value (`AnimatedMoney`, `AnimatedTotals`, `AnimatedDistance`, `AnimatedCount`), silent for the first second after mount. Multi-currency totals stay plain text so they can truncate.
 - **Tabs:** pill tabs slide one indicator between tabs; the panel rises in.
 - **Small things:** buttons scale to .97 while pressed; disclosures and empty states rise in (`animate-rise`); chevrons rotate.
 

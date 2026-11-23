@@ -98,7 +98,11 @@ export const PagedList = ({
       data-bleed=""
       ref={top}
     >
-      {children}
+      {/* Keyed by page: a new page swaps in at once instead of animating every
+          row out and in (rows still animate when the page's data changes). */}
+      <div className="contents" key={slice.page}>
+        {children}
+      </div>
       {slice.pageCount > 1 && (
         <div className="md:mx-5 md:my-4">
           <ListPagination onPageChange={turn} slice={slice} />

@@ -53,16 +53,31 @@ export const useUpdateTransaction = (
   });
 };
 
-/** The deleted row leaves every loaded list at once; totals catch up on refetch. */
+/**
+ * The deleted row leaves every loaded list at once and the count drops; month
+ * totals catch up on refetch. A list where it is the last row on its page waits
+ * for the server instead, so the page never flashes the empty state.
+ */
 const dropTransaction = optimisticUpdate<InfiniteData<TransactionPage>, string>(
   financeKeys.transactionsAll,
-  (data, id) => ({
-    ...data,
-    pages: data.pages.map((page) => ({
-      ...page,
-      transactions: page.transactions.filter((row) => row.id !== id),
-    })),
-  })
+  (data, id) => {
+    const holder = data.pages.find((page) =>
+      page.transactions.some((row) => row.id === id)
+    );
+
+    if (holder === undefined || holder.transactions.length === 1) {
+      return data;
+    }
+
+    return {
+      ...data,
+      pages: data.pages.map((page) => ({
+        ...page,
+        total: page.total === null ? null : page.total - 1,
+        transactions: page.transactions.filter((row) => row.id !== id),
+      })),
+    };
+  }
 );
 
 /** Deletes with an Undo toast (the server keeps the row for a week). */
