@@ -35,29 +35,38 @@ const DesktopAuth = ({ children, description, title }: AuthLayoutProps) => (
 /**
  * Phones: no card — the app's mark and name on a soft glow, a large title,
  * and the form full width with 48px buttons, clear of the notch and home bar.
+ * The block sits in the optical centre of the screen (a little above the
+ * middle) instead of leaving the bottom half empty, and keeps a readable
+ * width on large phones and small tablets.
  */
 const PhoneAuth = ({ children, description, title }: AuthLayoutProps) => {
   const { t } = useTranslation();
   const { t: ta } = useTranslation("auth");
 
   return (
-    <div className="auth-glow bg-background pt-safe-12 pb-safe-8 flex min-h-dvh flex-col px-6">
-      <div className="flex flex-col items-center text-center">
-        <img
-          alt=""
-          className="size-18 rounded-2xl shadow-lg"
-          src="/icons/favicon.svg"
-        />
-        <p className="mt-3 text-base font-semibold tracking-tight">
-          {t("appName")}
+    <div className="auth-glow bg-background pt-safe-8 pb-safe-8 flex min-h-dvh flex-col px-6">
+      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center pb-12">
+        <div className="flex items-center gap-3">
+          <img
+            alt=""
+            className="size-11 rounded-xl shadow-md"
+            src="/icons/favicon.svg"
+          />
+          <div className="min-w-0">
+            <p className="text-base leading-tight font-semibold tracking-tight">
+              {t("appName")}
+            </p>
+            <p className="text-muted-foreground truncate text-xs">
+              {ta("tagline")}
+            </p>
+          </div>
+        </div>
+        <h1 className="mt-10 text-3xl font-semibold tracking-tight">{title}</h1>
+        <p className="text-muted-foreground mt-1.5 text-sm text-pretty">
+          {description}
         </p>
-        <p className="text-muted-foreground text-xs">{ta("tagline")}</p>
+        <div className="mt-7">{children}</div>
       </div>
-      <div className="mt-10">
-        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-        <p className="text-muted-foreground mt-1.5 text-sm">{description}</p>
-      </div>
-      <div className="mt-7">{children}</div>
     </div>
   );
 };

@@ -1,24 +1,21 @@
 import { daysToGetPaid } from "@shared/domain/finances/invoices";
-import { Download, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { FormNotice } from "@/components/form/dialog-form";
-import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 import { useConfig } from "@/lib/session";
 import { cn } from "@/lib/utils";
 
 import { FileList } from "../attachments/file-list";
 import { useCategoryName } from "../categories/category-label";
-import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { useLedgerMoney } from "../money";
 import { InvoiceNotesForm } from "./forms/invoice-notes-form/invoice-notes-form";
-import { useDownloadInvoicePdf } from "./invoice-document";
 import { useInvoiceFor } from "./invoice-labels";
 import { InvoiceStatusIcon } from "./invoice-status-icon";
+import { ViewFooter } from "./invoice-view-footer";
 import type { InvoiceDetail } from "./invoices.queries";
-import { useInvoiceActions } from "./use-invoice-actions";
 
 const Row = ({ children, label }: { children: ReactNode; label: string }) => (
   <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3 py-1.5 text-sm">
@@ -89,82 +86,6 @@ const History = ({ invoice }: { invoice: InvoiceDetail }) => {
         </li>
       ))}
     </ol>
-  );
-};
-
-/** Footer actions by status: void / mark paid (sent), mark unpaid (paid), duplicate (all). */
-const ViewFooter = ({
-  invoice,
-  onClose,
-}: {
-  invoice: InvoiceDetail;
-  onClose: () => Promise<void>;
-}) => {
-  const { t } = useTranslation("finances");
-  const dialog = useFinanceDialog();
-  const actions = useInvoiceActions();
-  const download = useDownloadInvoicePdf();
-  const unpaid = invoice.status === "sent" || invoice.status === "overdue";
-
-  return (
-    <div className="border-divider pb-safe-2.5 flex shrink-0 flex-wrap items-center gap-2 border-t px-3 pt-2.5">
-      {unpaid && (
-        <Button
-          onClick={async () => {
-            if (await actions.markVoid(invoice)) {
-              await onClose();
-            }
-          }}
-          size="compact"
-          variant="ghost"
-        >
-          {t("invoices.void")}
-        </Button>
-      )}
-      <span className="flex-1" />
-      {invoice.itemised && (
-        <Button
-          onClick={() => {
-            void download(invoice);
-          }}
-          size="compact"
-          variant="outline"
-        >
-          <Download />
-          {t("invoices.downloadPdf")}
-        </Button>
-      )}
-      {invoice.status === "paid" && (
-        <Button
-          onClick={async () => {
-            await actions.markUnpaid(invoice);
-          }}
-          size="compact"
-          variant="outline"
-        >
-          {t("invoices.unpaidConfirm")}
-        </Button>
-      )}
-      <Button
-        onClick={() => {
-          void dialog.open({ dialog: "invoice", duplicate: invoice.id });
-        }}
-        size="compact"
-        variant={unpaid ? "outline" : "default"}
-      >
-        {t("invoices.duplicate")}
-      </Button>
-      {unpaid && (
-        <Button
-          onClick={() => {
-            void dialog.open({ dialog: "mark-paid", id: invoice.id });
-          }}
-          size="compact"
-        >
-          {t("invoices.markPaid")}
-        </Button>
-      )}
-    </div>
   );
 };
 

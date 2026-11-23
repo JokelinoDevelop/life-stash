@@ -173,15 +173,13 @@ export const QuickAdd = () => {
     >
       <button
         aria-label={t("nav.quickAdd")}
-        className="flex flex-1 items-center justify-center"
+        className="tabbar-glass text-foreground flex size-14 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
         onClick={() => {
           setOpen(true);
         }}
         type="button"
       >
-        <span className="bg-foreground text-background flex size-9 items-center justify-center rounded-full transition-transform active:scale-95">
-          <Plus className="size-5" strokeWidth={2.25} />
-        </span>
+        <Plus className="size-6" strokeWidth={2} />
       </button>
       <DrawerContent>
         <div className="pb-safe-4 flex flex-col">

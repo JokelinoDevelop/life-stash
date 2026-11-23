@@ -18,7 +18,7 @@ export const SettingsSection = ({
   flush?: boolean;
   title: React.ReactNode;
 }) => (
-  <section className="border-divider grid gap-3 border-b pb-6 last:border-0 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8">
+  <section className="border-divider grid grid-cols-1 gap-3 border-b pb-6 last:border-0 md:grid-cols-[14rem_minmax(0,1fr)] md:gap-8">
     <div className="flex flex-col gap-1">
       <h2 className="text-sm font-semibold">{title}</h2>
       {description !== undefined && (
