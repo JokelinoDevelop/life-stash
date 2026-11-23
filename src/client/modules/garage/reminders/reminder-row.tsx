@@ -1,13 +1,21 @@
-import { CheckCheck, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import {
+  Check,
+  CheckCheck,
+  MoreHorizontal,
+  Pencil,
+  SkipForward,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
 import { ListRow, ListRowText } from "@/components/app/list-section";
-import { ResponsiveDialog } from "@/components/app/responsive-dialog";
 import { StatusRing } from "@/components/app/status-ring";
 import { STATUS_TEXT_TONE } from "@/components/app/status-tone";
+import type { SwipeAction } from "@/components/app/swipe-actions";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -18,16 +26,16 @@ import {
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
-import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
 import { useInvalidateGarage } from "../cars/cars.queries";
 import { describeDue } from "../cars/describe-due";
 import { EntryDialogLink } from "../entry-dialogs/entry-dialog-link";
+import { useEntryDialog } from "../entry-dialogs/use-entry-dialog";
 import { CompleteReminderButton } from "./complete-reminder-button";
-import { skipFormDefaults, skipFormToRequest } from "./forms/skip-form/mapper";
-import { SkipForm } from "./forms/skip-form/skip-form";
+import { completionEntry } from "./completion-entry";
 import type { ActiveReminder } from "./reminders.queries";
+import { SkipReminderDialog } from "./skip-reminder-dialog";
 
 const useIntervalText = (reminder: ActiveReminder): string | null => {
   const { t } = useTranslation("garageReminders");
@@ -47,101 +55,121 @@ const useIntervalText = (reminder: ActiveReminder): string | null => {
 
 const ReminderMenu = ({
   carId,
+  onSkip,
   reminder,
 }: {
   carId: string;
+  onSkip: () => void;
   reminder: ActiveReminder;
 }) => {
   const { t } = useTranslation("garageReminders");
   const { t: tc } = useTranslation();
   const invalidate = useInvalidateGarage();
   const errorMessage = useErrorMessage();
-  const { unit } = useFormat();
-  const [skipping, setSkipping] = useState(false);
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={tc("actions.edit")}
+            size="icon-compact"
+            variant="ghost"
+          />
+        }
+      >
+        <MoreHorizontal />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem
           render={
-            <Button
-              aria-label={tc("actions.edit")}
-              size="icon-compact"
-              variant="ghost"
+            <EntryDialogLink
+              entry={{ car: carId, dialog: "reminder", id: reminder.id }}
             />
           }
         >
-          <MoreHorizontal />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            render={
-              <EntryDialogLink
-                entry={{ car: carId, dialog: "reminder", id: reminder.id }}
-              />
-            }
-          >
-            <Pencil />
-            {tc("actions.edit")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => {
-              setSkipping(true);
-            }}
-          >
-            <CheckCheck />
-            {t("tab.skip")}
-          </DropdownMenuItem>
-          <ConfirmDialog
-            onConfirm={async () => {
-              try {
-                await unwrap(
-                  api.garage.reminders[":reminderId"].$delete({
-                    param: { reminderId: reminder.id },
-                  })
-                );
-                await invalidate();
-                toast.success(t("tab.deleted"));
-              } catch (error) {
-                toast.error(errorMessage(error));
-              }
-            }}
-            trigger={
-              <DropdownMenuItem closeOnClick={false} variant="destructive">
-                <Trash2 />
-                {tc("actions.delete")}
-              </DropdownMenuItem>
-            }
-          />
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <ResponsiveDialog
-        description={t("skip.description")}
-        onOpenChange={setSkipping}
-        open={skipping}
-        title={t("skip.title")}
-      >
-        <SkipForm
-          defaultValues={skipFormDefaults(todayIso())}
-          onSubmit={async (values) => {
+          <Pencil />
+          {tc("actions.edit")}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onSkip}>
+          <CheckCheck />
+          {t("tab.skip")}
+        </DropdownMenuItem>
+        <ConfirmDialog
+          onConfirm={async () => {
             try {
               await unwrap(
-                api.garage.reminders[":reminderId"].skip.$post({
-                  json: skipFormToRequest(values, unit),
+                api.garage.reminders[":reminderId"].$delete({
                   param: { reminderId: reminder.id },
                 })
               );
               await invalidate();
-              toast.success(t("tab.skipped"));
-              setSkipping(false);
+              toast.success(t("tab.deleted"));
             } catch (error) {
               toast.error(errorMessage(error));
             }
           }}
+          trigger={
+            <DropdownMenuItem closeOnClick={false} variant="destructive">
+              <Trash2 />
+              {tc("actions.delete")}
+            </DropdownMenuItem>
+          }
         />
-      </ResponsiveDialog>
-    </>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
+};
+
+/**
+ * Phone swipe actions for a reminder row — Skip (asks when, like the menu) and
+ * Done (opens the entry that completes it) — plus the Skip dialog to render.
+ */
+interface ReminderSwipe {
+  actions: SwipeAction[];
+  dialog: ReactNode;
+  handleSkip: () => void;
+}
+
+export const useReminderSwipe = (
+  carId: string,
+  reminder: { id: string; kind: ActiveReminder["kind"] }
+): ReminderSwipe => {
+  const { t } = useTranslation("garageReminders");
+  const { t: tc } = useTranslation();
+  const entryDialog = useEntryDialog();
+  const [skipping, setSkipping] = useState(false);
+
+  const handleSkip = () => {
+    setSkipping(true);
+  };
+
+  return {
+    actions: [
+      {
+        icon: <SkipForward />,
+        label: t("tab.skipShort"),
+        onSelect: handleSkip,
+        tone: "neutral",
+      },
+      {
+        icon: <Check />,
+        label: tc("actions.done"),
+        onSelect: () => {
+          void entryDialog.open(completionEntry(carId, reminder));
+        },
+        tone: "success",
+      },
+    ],
+    dialog: (
+      <SkipReminderDialog
+        onOpenChange={setSkipping}
+        open={skipping}
+        reminderId={reminder.id}
+      />
+    ),
+    handleSkip,
+  };
 };
 
 export const ReminderRow = ({
@@ -157,7 +185,7 @@ export const ReminderRow = ({
   const { t: tc } = useTranslation();
   const format = useFormat();
   const interval = useIntervalText(reminder);
-
+  const swipe = useReminderSwipe(carId, reminder);
   const due = describeDue(reminder, format, tc);
 
   const extra = [t(`kinds.${reminder.kind}`), interval].filter(
@@ -165,7 +193,11 @@ export const ReminderRow = ({
   );
 
   return (
-    <ListRow className="gap-2.5 py-2 md:gap-3 md:py-1">
+    <ListRow
+      className="gap-2.5 py-2 md:gap-3 md:py-1"
+      after={swipe.dialog}
+      swipe={readOnly ? undefined : swipe.actions}
+    >
       <StatusRing status={reminder.status} />
       <ListRowText
         meta={
@@ -188,7 +220,13 @@ export const ReminderRow = ({
       {!readOnly && (
         <CompleteReminderButton carId={carId} reminder={reminder} />
       )}
-      {!readOnly && <ReminderMenu carId={carId} reminder={reminder} />}
+      {!readOnly && (
+        <ReminderMenu
+          carId={carId}
+          onSkip={swipe.handleSkip}
+          reminder={reminder}
+        />
+      )}
     </ListRow>
   );
 };

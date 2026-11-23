@@ -128,7 +128,8 @@
     "browse": "Browse",
     "historyDescription": "Every service across your cars",
     "catalogDescription": "Parts, jobs and packages",
-    "reminders": "Reminders"
+    "reminders": "Reminders",
+    "chartLabel": "Spending per month. Tap or drag across the bars to read a month."
   },
   "timeline": {
     "filterLabel": "Show",

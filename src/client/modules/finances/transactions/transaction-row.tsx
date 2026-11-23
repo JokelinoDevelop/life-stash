@@ -23,7 +23,7 @@ import { useDeleteTransaction } from "./transactions.mutations";
 import type { TransactionListItem } from "./transactions.queries";
 
 const ROW_CLASS =
-  "group/row bg-card hover:bg-background relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5";
+  "group/row bg-card hover:bg-background max-md:active:bg-accent relative flex min-h-13 items-center gap-3 px-3.5 transition-colors md:min-h-10 md:px-5";
 
 /** Desktop columns: icon · description · category · date · amount · actions. */
 export const TRANSACTION_GRID =

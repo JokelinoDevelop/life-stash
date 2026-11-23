@@ -34,6 +34,7 @@ import { useTodayCount } from "@/modules/today/today-view";
 
 import { CommandMenuProvider } from "./command-menu";
 import { useCommandMenu } from "./command-menu-context";
+import { DoneTickHost } from "./done-tick";
 import { QuickAdd } from "./quick-add";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
@@ -293,6 +294,7 @@ export const AppShell = () => {
       </div>
       <EntryDialogHost />
       <FinanceDialogHost />
+      <DoneTickHost />
     </CommandMenuProvider>
   );
 };

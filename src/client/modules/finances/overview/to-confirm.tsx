@@ -1,6 +1,8 @@
 import { addDays, formatShortDate } from "@shared/domain/dates";
+import { Check, SkipForward } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { SwipeActions } from "@/components/app/swipe-actions";
 import { Button } from "@/components/ui/button";
 
 import { CategoryIcon } from "../categories/category-icon";
@@ -55,52 +57,72 @@ export const ToConfirm = ({ overview }: { overview: FinanceOverview }) => {
       title={t("recurring.toConfirm")}
     >
       {overview.toConfirm.map((item) => (
-        <li
-          className="bg-card flex min-h-13 items-center gap-3 px-3.5 md:min-h-11 md:px-5"
-          key={item.id}
-        >
-          <CategoryIcon name={item.categoryIcon} />
-          <div className="flex min-w-0 flex-1 flex-col md:flex-row md:items-baseline md:gap-2">
-            <span className="truncate font-medium">{title(item)}</span>
-            <span className="text-muted-foreground truncate text-xs md:text-sm">
-              {meta(item)}
-              <span className="md:hidden">
-                {" · "}
+        <li key={item.id}>
+          <SwipeActions
+            actions={[
+              {
+                icon: <SkipForward />,
+                label: t("recurring.skip"),
+                onSelect: () => {
+                  skip.mutate(item);
+                },
+                tone: "neutral",
+              },
+              {
+                icon: <Check />,
+                label: t("recurring.confirm"),
+                onSelect: () => {
+                  confirm.mutate(item);
+                },
+                tone: "success",
+              },
+            ]}
+          >
+            <div className="bg-card flex min-h-13 items-center gap-3 px-3.5 md:min-h-11 md:px-5">
+              <CategoryIcon name={item.categoryIcon} />
+              <div className="flex min-w-0 flex-1 flex-col md:flex-row md:items-baseline md:gap-2">
+                <span className="truncate font-medium">{title(item)}</span>
+                <span className="text-muted-foreground truncate text-xs md:text-sm">
+                  {meta(item)}
+                  <span className="md:hidden">
+                    {" · "}
+                    {ledger.money(item.amountMinor, item.currency)}
+                  </span>
+                </span>
+              </div>
+              <span className="text-muted-foreground hidden tabular-nums md:block">
+                {item.dueDate === addDays(overview.today, 0)
+                  ? t("overview.dueToday")
+                  : formatShortDate(item.dueDate)}
+              </span>
+              <span className="hidden w-28 text-right font-medium tabular-nums md:block">
                 {ledger.money(item.amountMinor, item.currency)}
               </span>
-            </span>
-          </div>
-          <span className="text-muted-foreground hidden tabular-nums md:block">
-            {item.dueDate === addDays(overview.today, 0)
-              ? t("overview.dueToday")
-              : formatShortDate(item.dueDate)}
-          </span>
-          <span className="hidden w-28 text-right font-medium tabular-nums md:block">
-            {ledger.money(item.amountMinor, item.currency)}
-          </span>
-          <span className="flex shrink-0 gap-1">
-            <Button
-              className="hidden md:inline-flex"
-              disabled={busy}
-              onClick={() => {
-                skip.mutate(item);
-              }}
-              size="xs"
-              variant="ghost"
-            >
-              {t("recurring.skip")}
-            </Button>
-            <Button
-              disabled={busy}
-              onClick={() => {
-                confirm.mutate(item);
-              }}
-              size="xs"
-              variant="outline"
-            >
-              {t("recurring.confirm")}
-            </Button>
-          </span>
+              <span className="flex shrink-0 gap-1">
+                <Button
+                  className="hidden md:inline-flex"
+                  disabled={busy}
+                  onClick={() => {
+                    skip.mutate(item);
+                  }}
+                  size="xs"
+                  variant="ghost"
+                >
+                  {t("recurring.skip")}
+                </Button>
+                <Button
+                  disabled={busy}
+                  onClick={() => {
+                    confirm.mutate(item);
+                  }}
+                  size="xs"
+                  variant="outline"
+                >
+                  {t("recurring.confirm")}
+                </Button>
+              </span>
+            </div>
+          </SwipeActions>
         </li>
       ))}
     </OverviewSection>

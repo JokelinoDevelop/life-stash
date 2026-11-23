@@ -1,28 +1,15 @@
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Money } from "@/components/app/money";
+import { ScrubRange } from "@/components/app/scrub-range";
+import { useScrub } from "@/components/app/use-scrub";
 import { useFormat } from "@/lib/format";
+import { useMonthNames } from "@/lib/use-month-names";
 import { cn } from "@/lib/utils";
 
 import type { CarListItem } from "../cars/car-row";
 import type { HouseholdMoney } from "./household-money";
 import { carColor, percentChange } from "./household-money";
-
-const useMonthNames = (style: "short" | "narrow") => {
-  const { i18n } = useTranslation();
-
-  return useMemo(() => {
-    const format = new Intl.DateTimeFormat(
-      i18n.language === "mk" ? "mk-MK" : "en-GB",
-      { month: style, timeZone: "UTC" }
-    );
-
-    return Array.from({ length: 12 }, (_, index) =>
-      format.format(new Date(Date.UTC(2026, index, 1)))
-    );
-  }, [i18n.language, style]);
-};
 
 export const Change = ({
   money,
@@ -67,6 +54,8 @@ export const SpentCard = ({
   const format = useFormat();
   const names = useMonthNames("short");
   const peak = Math.max(1, ...money.months);
+  const scrub = useScrub(12, monthIndex);
+  const shown = scrub.selected ?? monthIndex;
 
   return (
     <section className="surface bg-card rounded-lg border p-4">
@@ -80,18 +69,26 @@ export const SpentCard = ({
         <Money amountMinor={money.thisYear} currency={money.currency} />
       </p>
       <div
-        aria-hidden="true"
-        className="border-divider mt-4 flex h-14 items-end gap-1 border-b"
+        className="border-divider relative mt-4 flex h-16 cursor-pointer touch-pan-y items-end gap-1 border-b select-none has-focus-visible:ring-2"
+        {...scrub.bind}
       >
+        <ScrubRange
+          label={t("home.chartLabel")}
+          last={monthIndex}
+          onChange={scrub.handleSelect}
+          value={shown}
+          valueText={`${names[shown]} ${format.money(money.months[shown] ?? 0, money.currency)}`}
+        />
         {money.months.map((amount, index) => (
           <span
             className={cn(
-              "h-(--bar) flex-1 rounded-t-xs",
-              index === monthIndex ? "bg-primary" : "bg-chart-4"
+              "h-(--bar) flex-1 rounded-t-xs transition-colors",
+              index === shown ? "bg-primary" : "bg-chart-4"
             )}
+            aria-hidden="true"
             key={names[index]}
             style={{
-              "--bar": `${index > monthIndex ? 0 : (amount / peak) * 100}%`,
+              "--bar": `${index > monthIndex ? 0 : Math.max(2, (amount / peak) * 100)}%`,
             }}
           />
         ))}
@@ -102,8 +99,11 @@ export const SpentCard = ({
         <span>{names[6]}</span>
         <span>{names[9]}</span>
         <span className="text-foreground font-medium">
-          {names[monthIndex]}{" "}
-          {format.money(money.months[monthIndex] ?? 0, money.currency)}
+          {names[shown]}{" "}
+          <Money
+            amountMinor={money.months[shown] ?? 0}
+            currency={money.currency}
+          />
         </span>
       </div>
     </section>

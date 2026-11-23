@@ -10,6 +10,7 @@ import { useFormat } from "@/lib/format";
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
 import { financeSettingsQuery } from "../settings/finance-settings.queries";
 import { headline, percentChange, subtractTotals } from "./money-split";
+import { NetBars } from "./net-bars";
 import type { FinanceOverview } from "./overview.queries";
 
 /** Phone: one-tap Expense / Income / Invoice. */
@@ -87,11 +88,6 @@ export const OverviewMobileTop = ({
     overview.cashflow.find((series) => series.currency === currency)?.months ??
     [];
 
-  const highest = Math.max(
-    1,
-    ...months.map((month) => Math.max(month.incomeMinor, month.expenseMinor))
-  );
-
   return (
     <div className="flex flex-col gap-4 md:hidden">
       <QuickActions />
@@ -130,23 +126,12 @@ export const OverviewMobileTop = ({
             ? "—"
             : format.money(spent.primary.amountMinor, spent.primary.currency)}
         </span>
-        <div aria-hidden="true" className="mt-3 flex h-14 items-end gap-1">
-          {months.map((month) => (
-            <span
-              className="flex h-full flex-1 items-end gap-px"
-              key={month.month}
-            >
-              <span
-                className="bg-chart-1 h-(--bar) flex-1 rounded-t-sm"
-                style={{ "--bar": `${(month.incomeMinor / highest) * 100}%` }}
-              />
-              <span
-                className="bg-chart-3 h-(--bar) flex-1 rounded-t-sm"
-                style={{ "--bar": `${(month.expenseMinor / highest) * 100}%` }}
-              />
-            </span>
-          ))}
-        </div>
+        <NetBars
+          currency={currency}
+          months={months}
+          today={overview.today}
+          year={overview.year}
+        />
       </section>
     </div>
   );

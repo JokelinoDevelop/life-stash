@@ -18,6 +18,7 @@ import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 import { FinanceDialogLink } from "@/modules/finances/dialogs/finance-dialog-link";
 import { InvoiceStatusIcon } from "@/modules/finances/invoices/invoice-status-icon";
+import { useInvoiceSwipe } from "@/modules/finances/invoices/use-invoice-swipe";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import type { FinanceOverview } from "@/modules/finances/overview/overview.queries";
 import { ToConfirm } from "@/modules/finances/overview/to-confirm";
@@ -46,6 +47,7 @@ const InvoiceRow = ({
 }) => {
   const { t } = useTranslation("today");
   const { t: tf } = useTranslation("finances");
+  const swipeFor = useInvoiceSwipe();
   const overdue = invoice.status === "overdue";
   const days = daysUntil(invoice.dueDate, today);
 
@@ -65,6 +67,7 @@ const InvoiceRow = ({
       render={
         <FinanceDialogLink entry={{ dialog: "invoice", id: invoice.id }} />
       }
+      swipe={swipeFor(invoice)}
     >
       <InvoiceStatusIcon status={invoice.status} />
       {/* Phones: when it is due joins the meta line; the amount is the trailing figure. */}

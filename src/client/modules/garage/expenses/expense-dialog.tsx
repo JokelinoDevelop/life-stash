@@ -9,6 +9,7 @@ import { ErrorState, FormSkeleton } from "@/components/app/states";
 import { FormNotice } from "@/components/form/dialog-form";
 import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
+import { showDoneTick } from "@/lib/done-tick";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
@@ -87,6 +88,11 @@ const NewExpense = ({
             })
           );
           await invalidate();
+
+          if (linkedReminderId !== null) {
+            showDoneTick();
+          }
+
           toast.success(t("created"));
           await onClose();
         } catch (error) {

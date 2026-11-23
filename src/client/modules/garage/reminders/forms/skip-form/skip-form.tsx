@@ -50,7 +50,11 @@ export const SkipForm = ({
         </form.AppField>
       </FieldGroup>
       <form.AppForm>
-        <form.SubmitButton className="self-end" label={tc("actions.confirm")} />
+        <form.SubmitButton
+          className="w-full md:w-auto md:self-end"
+          label={tc("actions.confirm")}
+          size="submit"
+        />
       </form.AppForm>
     </form>
   );

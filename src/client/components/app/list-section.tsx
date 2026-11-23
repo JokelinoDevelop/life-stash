@@ -4,6 +4,9 @@ import type * as React from "react";
 import { useListMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
+import { SwipeActions } from "./swipe-actions";
+import type { SwipeAction } from "./swipe-actions";
+
 /** Heading that sits above a hairline box: title, optional count and action. */
 export const SectionHeading = ({
   action,
@@ -132,12 +135,21 @@ export const Panel = ({
   </section>
 );
 
-/** One row. Pass `render` to make it a link (the `<li>` stays around it). */
+/**
+ * One row. Pass `render` to make it a link (the `<li>` stays around it), and
+ * `swipe` for phone swipe actions (the tap path keeps working).
+ */
 export const ListRow = ({
+  after,
   className,
   render,
+  swipe,
   ...props
-}: useRender.ComponentProps<"div">) => {
+}: useRender.ComponentProps<"div"> & {
+  /** Rendered beside the row, outside its link (e.g. a dialog it opens). */
+  after?: React.ReactNode;
+  swipe?: readonly SwipeAction[];
+}) => {
   const element = useRender({
     defaultTagName: "div",
     props: {
@@ -151,7 +163,16 @@ export const ListRow = ({
     render,
   });
 
-  return <li>{element}</li>;
+  return (
+    <li>
+      {swipe === undefined ? (
+        element
+      ) : (
+        <SwipeActions actions={swipe}>{element}</SwipeActions>
+      )}
+      {after}
+    </li>
+  );
 };
 
 export const ListRowText = ({

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 import type { CarListItem } from "../cars/car-row";
 import { describeDue } from "../cars/describe-due";
+import { useReminderSwipe } from "../reminders/reminder-row";
 import type { HouseholdReminder } from "./household.queries";
 
 export const ReminderRow = ({
@@ -27,9 +28,12 @@ export const ReminderRow = ({
   const format = useFormat();
   const due = describeDue(reminder, format, t);
   const tone = STATUS_TEXT_TONE[reminder.status];
+  const swipe = useReminderSwipe(reminder.carId, reminder);
 
   return (
     <ListRow
+      after={swipe.dialog}
+      swipe={swipe.actions}
       render={
         <Link
           params={{ carId: reminder.carId }}

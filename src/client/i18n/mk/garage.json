@@ -128,7 +128,8 @@
     "browse": "Прегледај",
     "historyDescription": "Сите сервиси за сите возила",
     "catalogDescription": "Делови, работи и пакети",
-    "reminders": "Потсетници"
+    "reminders": "Потсетници",
+    "chartLabel": "Трошоци по месец. Допри или повлечи преку столбовите за да видиш месец."
   },
   "timeline": {
     "filterLabel": "Прикажи",
