@@ -478,9 +478,11 @@
    a snapshot, so it never blocks taps or scrolling; going back and switching
    tabs are instant. prefers-reduced-motion collapses it (base layer). */
 @keyframes page-enter {
+  /* Starts partly visible: if the phone is busy drawing the new page, the
+     first frames show it dimmed and offset, never an empty screen. */
   from {
-    transform: translateX(28%);
-    opacity: 0;
+    transform: translateX(22%);
+    opacity: 0.4;
   }
 }
 @utility animate-page-enter {
@@ -645,6 +647,10 @@
 @media (max-width: 47.999rem) {
   /* Sheets are raised white panels with a 16px top radius on phones. */
   [data-slot="drawer-content"][data-vaul-drawer-direction="bottom"] {
+    /* Android shrinks the page when the keyboard opens (index.html:
+       interactive-widget=resizes-content); dvh follows, so the sheet and its
+       Save button stay above the keyboard. */
+    max-height: 80dvh;
     background: var(--card);
     border-top-width: 0;
     border-top-left-radius: 1rem;
@@ -661,6 +667,23 @@
   [data-slot="tabs-indicator"] {
     background: var(--card);
     box-shadow: 0 1px 2px oklch(0.2 0.02 265 / 0.08);
+  }
+}
+
+/* Phones: anything the browser scrolls into view (a focused field, the first
+   error) stops above the floating tab bar, not underneath it. */
+@media (max-width: 47.999rem) {
+  html:has([data-tabbar]) {
+    scroll-padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* While typing in the page the floating tab bar steps aside, as in native
+   apps (Android would otherwise lift it above the keyboard). */
+@media (max-width: 47.999rem) {
+  body:has(main :is(input, textarea, [contenteditable="true"]):focus)
+    [data-tabbar] {
+    display: none;
   }
 }
 
