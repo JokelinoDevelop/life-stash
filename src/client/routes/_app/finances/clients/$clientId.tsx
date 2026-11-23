@@ -10,6 +10,7 @@ import { Kbd } from "@/components/ui/kbd";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
 import { ClientDetail } from "@/modules/finances/clients/client-detail";
 import { clientQuery } from "@/modules/finances/clients/clients.queries";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
@@ -61,5 +62,12 @@ const ClientPage = () => {
 };
 
 export const Route = createFileRoute("/_app/finances/clients/$clientId")({
+  loader: async ({ context: { queryClient }, params }) => {
+    await warm(
+      queryClient.query(
+        cached(clientQuery(params.clientId, Number(todayIso().slice(0, 4))))
+      )
+    );
+  },
   component: ClientPage,
 });

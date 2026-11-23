@@ -9,6 +9,7 @@ import {
   Sun,
   Wallet,
 } from "lucide-react";
+import { useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -20,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Kbd } from "@/components/ui/kbd";
+import { markTabSwitch } from "@/lib/nav-transition";
 import { usePreferences } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
@@ -34,12 +36,13 @@ import { useCommandMenu } from "./command-menu-context";
 import { RouteProgress } from "./route-progress";
 import { GarageLinks, ModuleGroup } from "./sidebar-modules";
 import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
+import { useSwipeBack } from "./use-swipe-back";
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
 
 const mobileLinkClass =
-  "flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted-foreground";
+  "flex min-h-13 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium text-muted-foreground transition duration-150 active:scale-[0.94]";
 
 const activeMobileLinkClass = "text-foreground";
 
@@ -204,12 +207,13 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="bg-card pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t md:hidden"
+      className="bg-card/90 pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t backdrop-blur-md [view-transition-name:tabbar] md:hidden"
     >
       <Link
         activeOptions={{ exact: true, includeSearch: false }}
         activeProps={{ className: activeMobileLinkClass }}
         className={mobileLinkClass}
+        onClick={markTabSwitch}
         to="/"
       >
         <span className="relative flex">
@@ -231,6 +235,7 @@ const MobileNav = () => {
         activeOptions={{ exact: false }}
         activeProps={{ className: activeMobileLinkClass }}
         className={mobileLinkClass}
+        onClick={markTabSwitch}
         to="/garage"
       >
         <CarFront className="size-5" />
@@ -240,6 +245,7 @@ const MobileNav = () => {
         activeOptions={{ exact: false }}
         activeProps={{ className: activeMobileLinkClass }}
         className={mobileLinkClass}
+        onClick={markTabSwitch}
         to="/finances"
       >
         <Wallet className="size-5" />
@@ -248,6 +254,7 @@ const MobileNav = () => {
       <Link
         activeProps={{ className: activeMobileLinkClass }}
         className={mobileLinkClass}
+        onClick={markTabSwitch}
         to={SETTINGS}
       >
         <Settings className="size-5" />
@@ -257,19 +264,27 @@ const MobileNav = () => {
   );
 };
 
-export const AppShell = () => (
-  <CommandMenuProvider>
-    <div className="bg-background flex min-h-dvh">
-      <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
-        <main className="md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0">
-          <RouteProgress />
-          <Outlet />
-        </main>
-        <MobileNav />
+export const AppShell = () => {
+  const main = useRef<HTMLElement>(null);
+  useSwipeBack(main);
+
+  return (
+    <CommandMenuProvider>
+      <div className="bg-background flex min-h-dvh">
+        <Sidebar />
+        <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
+          <main
+            className="bg-background md:bg-card relative flex-1 px-4 pt-2 pb-24 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            ref={main}
+          >
+            <RouteProgress />
+            <Outlet />
+          </main>
+          <MobileNav />
+        </div>
       </div>
-    </div>
-    <EntryDialogHost />
-    <FinanceDialogHost />
-  </CommandMenuProvider>
-);
+      <EntryDialogHost />
+      <FinanceDialogHost />
+    </CommandMenuProvider>
+  );
+};

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
+import { markTabSwitch } from "@/lib/nav-transition";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 
@@ -48,6 +49,7 @@ const SettingsLayout = () => {
           activeOptions={{ exact: true }}
           activeProps={{ className: activeTabClass }}
           className={tabClass}
+          onClick={markTabSwitch}
           to="/settings"
         >
           {tf("settings.general")}
@@ -55,6 +57,7 @@ const SettingsLayout = () => {
         <Link
           activeProps={{ className: activeTabClass }}
           className={tabClass}
+          onClick={markTabSwitch}
           to="/settings/finances"
         >
           {tf("settings.tab")}
@@ -63,6 +66,7 @@ const SettingsLayout = () => {
           <Link
             activeProps={{ className: activeTabClass }}
             className={tabClass}
+            onClick={markTabSwitch}
             to="/settings/users"
           >
             {t("users.tab")}

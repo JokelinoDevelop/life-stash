@@ -13,9 +13,11 @@ import { useHotkey } from "@/hooks/use-hotkey";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
+import { cached, warm } from "@/lib/warm";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
 import { OverviewView } from "@/modules/finances/overview/overview-view";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
+import { financeSettingsQuery } from "@/modules/finances/settings/finance-settings.queries";
 
 const searchSchema = z.object({
   year: z.coerce.number().int().min(1990).max(2200).optional().catch(undefined),
@@ -130,6 +132,15 @@ const FinancesPage = () => {
 };
 
 export const Route = createFileRoute("/_app/finances/")({
-  component: FinancesPage,
   validateSearch: searchSchema,
+  loaderDeps: ({ search }) => ({ year: search.year }),
+  loader: async ({ context: { queryClient }, deps }) => {
+    const year = deps.year ?? Number(todayIso().slice(0, 4));
+
+    await warm(
+      queryClient.query(cached(overviewQuery(year))),
+      queryClient.query(cached(financeSettingsQuery))
+    );
+  },
+  component: FinancesPage,
 });

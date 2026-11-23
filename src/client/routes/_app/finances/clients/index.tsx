@@ -6,7 +6,9 @@ import { BackLink } from "@/components/app/back-link";
 import { PageHeader, PageStack } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
+import { cached, warm } from "@/lib/warm";
 import { ClientsView } from "@/modules/finances/clients/clients-view";
+import { clientsQuery } from "@/modules/finances/clients/clients.queries";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
 
 const ClientsPage = () => {
@@ -53,5 +55,10 @@ const ClientsPage = () => {
 };
 
 export const Route = createFileRoute("/_app/finances/clients/")({
+  loader: async ({ context: { queryClient } }) => {
+    await warm(
+      queryClient.query(cached(clientsQuery(Number(todayIso().slice(0, 4)))))
+    );
+  },
   component: ClientsPage,
 });

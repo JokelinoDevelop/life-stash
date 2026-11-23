@@ -293,3 +293,76 @@
 ) {
   animation-duration: 100ms;
 }
+
+/* Screen transitions on phones (View Transitions, typed by
+   lib/nav-transition.ts). The root snapshot is the visible viewport, so
+   scroll position is right; the tab bar has its own name and stays put.
+   Curve and timing follow the iOS navigation stack. */
+:root {
+  --ease-stack: cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes stack-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes stack-out-left {
+  to {
+    transform: translateX(-28%);
+    filter: brightness(0.92);
+  }
+}
+@keyframes stack-in-left {
+  from {
+    transform: translateX(-28%);
+    filter: brightness(0.92);
+  }
+}
+@keyframes stack-out-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes tab-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes tab-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+html:active-view-transition-type(push)::view-transition-old(root) {
+  animation: stack-out-left 340ms var(--ease-stack) both;
+}
+html:active-view-transition-type(push)::view-transition-new(root) {
+  animation: stack-in-right 340ms var(--ease-stack) both;
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+}
+html:active-view-transition-type(pop)::view-transition-old(root) {
+  z-index: 1;
+  animation: stack-out-right 300ms var(--ease-stack) both;
+  box-shadow: -12px 0 32px rgb(0 0 0 / 0.12);
+}
+html:active-view-transition-type(pop)::view-transition-new(root) {
+  animation: stack-in-left 300ms var(--ease-stack) both;
+}
+html:active-view-transition-type(fade)::view-transition-old(root) {
+  animation: tab-out 90ms ease-out both;
+}
+html:active-view-transition-type(fade)::view-transition-new(root) {
+  animation: tab-in 180ms var(--ease-out) 40ms both;
+}
+::view-transition-group(tabbar) {
+  animation: none;
+}
+
+/* Installed app: no rubber-band past the ends of the page or pull-to-refresh
+   (a native app doesn't show the browser behind it). */
+@media (display-mode: standalone) {
+  html {
+    overscroll-behavior-y: none;
+  }
+}

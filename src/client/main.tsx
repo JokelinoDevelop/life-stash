@@ -10,9 +10,15 @@ import { applyDensity, readDensity } from "./app/density";
 import { RouteError } from "./components/app/route-error";
 import { RoutePending } from "./components/app/route-pending";
 import { ApiClientError } from "./lib/api";
+import {
+  listenForBrowserTransitions,
+  navTransitionTypes,
+} from "./lib/nav-transition";
 import { routeTree } from "./routeTree.gen";
 
 applyDensity(readDensity());
+
+listenForBrowserTransitions();
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +44,8 @@ const router = createRouter({
   defaultPendingMs: 800,
   defaultPreload: "intent",
   defaultPreloadStaleTime: 0,
+  // Phones: screens slide in and out like a native stack (see styles.css).
+  defaultViewTransition: { types: navTransitionTypes },
   scrollRestoration: true,
   routeTree,
 });
