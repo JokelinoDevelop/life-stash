@@ -83,7 +83,7 @@
   },
   "about": {
     "title": "За апликацијата",
-    "version": "Верзија {{version}}"
+    "version": "Верзија {{version}} · {{commit}}"
   },
   "users": {
     "tab": "Луѓе",

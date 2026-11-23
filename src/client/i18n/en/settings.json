@@ -83,7 +83,7 @@
   },
   "about": {
     "title": "About",
-    "version": "Version {{version}}"
+    "version": "Version {{version}} · {{commit}}"
   },
   "users": {
     "tab": "People",

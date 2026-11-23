@@ -19,4 +19,5 @@ Read `docs/ARCHITECTURE.md` and `docs/DATA-MODEL.md` first. Code standards are i
 - `pnpm check` — route generation, typecheck, lint, tests. Must pass before committing.
 - `pnpm fix` — auto-fix formatting and lint.
 - `pnpm db:generate` — create a migration after changing `src/worker/db/schema/*`.
+- `pnpm release` — ship to production: check, version bump + tag, build, remote migrations, deploy, verify `/api/version`, push (`--dry-run` to rehearse). See README › Releasing updates.
 - `pnpm db:seed` — demo data in the local D1 (`src/worker/db/seed/`). When you add a table or feature, extend the fixtures and seeders so it shows up in the demo.

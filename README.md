@@ -72,6 +72,20 @@ Useful scripts:
    ```
    The app is served at `https://lifestash.<your-subdomain>.workers.dev`. Open it and create your passkey. Sign-up closes automatically after the first account exists.
 
+### Releasing updates
+
+After the first deploy, ship every update with the release script from a clean `main` that matches `origin`:
+
+```bash
+pnpm release            # asks patch / minor / major
+pnpm release minor      # bump without asking
+pnpm release --dry-run  # checks and builds the next version; changes nothing
+```
+
+It shows the commits since the last tag and the pending migrations, runs `pnpm check`, bumps `package.json` (commit + tag `vX.Y.Z`), builds, applies remote D1 migrations, deploys, waits until `/api/version` reports the new version, then pushes `main` and the tag. If the build or deploy fails, the version commit and tag are undone. Settings shows the running version and commit. Set `LIFESTASH_URL` to verify a custom domain instead of the `workers.dev` URL.
+
+Use `pnpm run deploy` (not `pnpm deploy`, which is a built-in pnpm command) only for a quick deploy without a version bump.
+
 ### Push notification keys
 
 ```bash

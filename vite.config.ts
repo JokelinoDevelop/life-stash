@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import path from "node:path";
 
 import { cloudflare } from "@cloudflare/vite-plugin";
@@ -6,6 +7,19 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
+
+// Baked into the client and the worker so Settings and /api/version show what is deployed.
+// pnpm sets npm_package_version from package.json (scripts/release.ts bumps it before building).
+const version = process.env.npm_package_version ?? "dev";
+
+const commit = (() => {
+  try {
+    // oxlint-disable-next-line sonarjs/no-os-command-from-path -- build-time call to the local git
+    return execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+  } catch {
+    return "unknown";
+  }
+})();
 
 export default defineConfig({
   plugins: [
@@ -55,7 +69,8 @@ export default defineConfig({
     }),
   ],
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version ?? "dev"),
+    __APP_COMMIT__: JSON.stringify(commit),
+    __APP_VERSION__: JSON.stringify(version),
   },
   resolve: {
     alias: {

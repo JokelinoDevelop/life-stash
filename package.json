@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "pnpm build && wrangler deploy",
+    "release": "tsx scripts/release.ts",
     "typecheck": "tsr generate && tsc -p tsconfig.app.json && tsc -p tsconfig.worker.json && tsc -p tsconfig.sw.json && tsc -p tsconfig.node.json",
     "lint": "ultracite check",
     "fix": "ultracite fix",

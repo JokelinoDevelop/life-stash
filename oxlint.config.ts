@@ -206,7 +206,10 @@ export default defineConfig({
     {
       // Controller tests drive a feature end to end through `app` on purpose; they belong
       // with the feature, not beside app.ts.
-      files: ["src/worker/**/*.controller.test.ts"],
+      files: [
+        "src/worker/**/*.controller.test.ts",
+        "src/worker/**/*.routes.test.ts",
+      ],
       rules: { "landmines-structure/colocated-tests": "off" },
     },
     {
