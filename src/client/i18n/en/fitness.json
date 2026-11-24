@@ -24,7 +24,10 @@
     "nothing": "Nothing planned",
     "more_one": "+{{count}} more",
     "more_other": "+{{count}} more",
-    "comingUp": "Coming up"
+    "comingUp": "Coming up",
+    "todayButton": "Today",
+    "month": "Month",
+    "year": "Year"
   },
   "overview": {
     "week": "This week",
@@ -67,7 +70,9 @@
       "duration": "Usual length",
       "description": "Description",
       "descriptionPlaceholder": "What you do, e.g. squats, lunges, calf raises"
-    }
+    },
+    "restoreTitle": "Restore this training?",
+    "restoreDescription": "{{name}} repeats again from today on the weekdays it had."
   },
   "sessions": {
     "add": "Add session",
@@ -99,7 +104,24 @@
       "planned": "Back to planned"
     },
     "reopen": "Undo",
-    "markDoneOf": "Mark {{name}} done"
+    "markDoneOf": "Mark {{name}} done",
+    "confirm": {
+      "done": {
+        "title": "Mark {{name}} done?",
+        "description": "It counts towards this week and your streak.",
+        "action": "Mark done"
+      },
+      "skipped": {
+        "title": "Skip {{name}}?",
+        "description": "Skipped sessions are excused: they don't break your streak.",
+        "action": "Skip"
+      },
+      "planned": {
+        "title": "Move {{name}} back to planned?",
+        "description": "It shows as still to do again.",
+        "action": "Back to planned"
+      }
+    }
   },
   "weight": {
     "title": "Weight",

@@ -4,6 +4,7 @@ import { enGB, mk } from "react-day-picker/locale";
 import { useTranslation } from "react-i18next";
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
+import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
 import type { SessionStatus } from "../sessions/session-status";
@@ -23,6 +24,10 @@ const MARK: Record<SessionStatus, string> = {
   planned: "border-primary border",
   skipped: "border-muted-foreground border",
 };
+
+/** How far the month / year dropdowns reach. */
+const YEARS_BACK = 5;
+const YEARS_AHEAD = 3;
 
 const MAX_DOTS = 3;
 const MAX_NAMES = 3;
@@ -109,6 +114,8 @@ export const FitnessCalendar = ({
   selected: string;
 }) => {
   const { i18n } = useTranslation();
+  const localeTag = i18n.language === "mk" ? "mk-MK" : "en-GB";
+  const thisYear = Number(todayIso().slice(0, 4));
 
   const items = useMemo(() => {
     const byDay = new Map<string, DayItem[]>();
@@ -126,7 +133,13 @@ export const FitnessCalendar = ({
   return (
     <DayItems value={items}>
       <Calendar
+        captionLayout="dropdown"
         components={{ DayButton: FitnessDayButton }}
+        endMonth={new Date(thisYear + YEARS_AHEAD, 11)}
+        formatters={{
+          formatMonthDropdown: (date) =>
+            date.toLocaleString(localeTag, { month: "long" }),
+        }}
         locale={i18n.language === "mk" ? mk : enGB}
         mode="single"
         month={localOfIso(`${month}-01`)}
@@ -141,6 +154,7 @@ export const FitnessCalendar = ({
         required
         selected={localOfIso(selected)}
         variant="month"
+        startMonth={new Date(thisYear - YEARS_BACK, 0)}
         weekStartsOn={1}
       />
     </DayItems>

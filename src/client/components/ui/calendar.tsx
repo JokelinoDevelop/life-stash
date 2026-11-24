@@ -39,11 +39,20 @@ const POPOVER_CLASS_NAMES = {
 /**
  * `month`: a full-width month grid for a page (Fitness). Phones: square cells with room under
  * the number for markers (status dots). Desktop: tall cells that fill the width, the number
- * top-left and the day's items listed under it; hairlines between days.
+ * top-left and the day's items listed under it; hairlines between days. With
+ * `captionLayout="dropdown"`, month and year are quiet dropdowns on the left, arrows on the right.
  */
 const MONTH_CLASS_NAMES = {
   root: "w-full",
   month: "flex w-full flex-col gap-3",
+  nav: "absolute top-0 right-0 flex items-center gap-0.5",
+  month_caption: "flex h-(--cell-size) w-full items-center pr-18",
+  dropdowns:
+    "flex h-(--cell-size) items-center gap-0.5 text-base font-semibold",
+  dropdown_root:
+    "hover:bg-accent has-focus:ring-ring/50 relative rounded-md transition-colors has-focus:ring-[3px]",
+  caption_label:
+    "[&>svg]:text-muted-foreground flex h-9 items-center gap-1 rounded-md px-2 text-base font-semibold select-none [&>svg]:size-4",
   month_grid: "w-full border-collapse",
   weekday:
     "text-muted-foreground flex-1 pb-1 text-[0.6875rem] font-medium tracking-wide uppercase select-none md:pb-2 md:text-left md:pl-2",

@@ -58,7 +58,7 @@ export const SessionRow = ({
           </span>
         </span>
       </FitnessDialogLink>
-      <SessionActions name={entry.name} session={entry} />
+      <SessionActions session={entry} />
     </ListRow>
   );
 };

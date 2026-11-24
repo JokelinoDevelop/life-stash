@@ -39,18 +39,26 @@ const ArchiveButton = ({
   return (
     <Button
       onClick={async () => {
-        if (!training.archived) {
-          const ok = await confirm({
-            confirmLabel: t("trainings.archive"),
-            description: t("trainings.archiveDescription", {
-              name: training.name,
-            }),
-            title: t("trainings.archiveTitle"),
-          });
+        const ok = await confirm(
+          training.archived
+            ? {
+                confirmLabel: t("trainings.restore"),
+                description: t("trainings.restoreDescription", {
+                  name: training.name,
+                }),
+                title: t("trainings.restoreTitle"),
+              }
+            : {
+                confirmLabel: t("trainings.archive"),
+                description: t("trainings.archiveDescription", {
+                  name: training.name,
+                }),
+                title: t("trainings.archiveTitle"),
+              }
+        );
 
-          if (!ok) {
-            return;
-          }
+        if (!ok) {
+          return;
         }
 
         await archive.mutateAsync({
