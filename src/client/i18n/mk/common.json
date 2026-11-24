@@ -14,7 +14,8 @@
     "quickAdd": "Додај",
     "pickCar": "Кое возило?",
     "needsAttention_one": "{{count}} ставка бара внимание",
-    "needsAttention_other": "{{count}} ставки бараат внимание"
+    "needsAttention_other": "{{count}} ставки бараат внимание",
+    "modules": "Модули"
   },
   "actions": {
     "save": "Зачувај",

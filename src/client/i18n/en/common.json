@@ -14,7 +14,8 @@
     "quickAdd": "Add",
     "pickCar": "Which car?",
     "needsAttention_one": "{{count}} item needs attention",
-    "needsAttention_other": "{{count}} items need attention"
+    "needsAttention_other": "{{count}} items need attention",
+    "modules": "Modules"
   },
   "actions": {
     "save": "Save",

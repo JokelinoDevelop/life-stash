@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { HouseholdName } from "@/components/app/app-shell";
+import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";

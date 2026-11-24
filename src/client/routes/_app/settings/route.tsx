@@ -3,7 +3,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { HouseholdName } from "@/components/app/app-shell";
+import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";

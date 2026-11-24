@@ -16,7 +16,8 @@
       "system": "System",
       "light": "Light",
       "dark": "Dark"
-    }
+    },
+    "themeIs": "Theme: {{theme}}"
   },
   "languages": {
     "en": "English",

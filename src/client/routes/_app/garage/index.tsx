@@ -5,8 +5,8 @@ import { CarFront, Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { HouseholdName } from "@/components/app/app-shell";
 import { useCommandMenu } from "@/components/app/command-menu-context";
+import { HouseholdName } from "@/components/app/household-name";
 import { ListSection } from "@/components/app/list-section";
 import { PageHeader, PageStack } from "@/components/app/page-header";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";

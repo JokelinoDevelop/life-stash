@@ -1,45 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { LinkProps } from "@tanstack/react-router";
-import {
-  CarFront,
-  ChevronsUpDown,
-  Dumbbell,
-  LogOut,
-  Search,
-  Settings,
-  Sun,
-  Wallet,
-} from "lucide-react";
+import { CarFront, Dumbbell, Settings, Sun, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { lazy, Suspense, useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Kbd } from "@/components/ui/kbd";
-import { usePreferences } from "@/lib/session";
-import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
-import { FinanceNavLinks } from "@/modules/finances/finance-nav-links";
-import { FitnessNavLinks } from "@/modules/fitness/fitness-nav-links";
-import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import { useTodayCount } from "@/modules/today/today-view";
 
 import { CommandMenuProvider } from "./command-menu";
-import { useCommandMenu } from "./command-menu-context";
 import { DoneTickHost } from "./done-tick";
 import { PageOutlet } from "./page-outlet";
 import { QuickAdd } from "./quick-add";
 import { RouteProgress } from "./route-progress";
-import { GarageLinks, ModuleGroup } from "./sidebar-modules";
-import { activeNavLinkClass, navLinkClass, subLinkClass } from "./sidebar-nav";
+import { Sidebar } from "./sidebar";
 import { useSwipeBack } from "./use-swipe-back";
 
 /* The dialog hosts carry every create/edit form; they load right after the
@@ -66,171 +41,6 @@ const FitnessDialogHost = lazy(async () => {
 
 const SETTINGS = "/settings";
 const SETTINGS_LABEL = "nav.settings";
-
-const Initial = ({ name }: { name: string }) => (
-  <span className="bg-foreground text-background flex size-5 shrink-0 items-center justify-center rounded-sm text-xs font-bold">
-    {name.slice(0, 1).toLocaleUpperCase()}
-  </span>
-);
-
-/** The household's mark and name (a label, not a menu). */
-export const HouseholdName = ({ className }: { className?: string }) => {
-  const { t } = useTranslation();
-  const household = useQuery(householdOverviewQuery);
-  const name = household.data?.householdName ?? t("appName");
-
-  return (
-    <div
-      className={cn(
-        "flex h-8 min-w-0 items-center gap-2 px-2 text-sm font-semibold",
-        className
-      )}
-    >
-      <Initial name={name} />
-      <span className="min-w-0 flex-1 truncate">{name}</span>
-    </div>
-  );
-};
-
-/** Bottom of the sidebar: who is signed in; opens Settings and Log out. */
-const AccountMenu = () => {
-  const { t } = useTranslation();
-  const { t: ta } = useTranslation("auth");
-  const preferences = usePreferences();
-  const handleSignOut = useSignOut();
-  const name = preferences.data?.displayName ?? "";
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <button
-            className="hover:bg-sidebar-accent data-popup-open:bg-sidebar-accent flex h-9 min-w-0 items-center gap-2 rounded-md px-2 text-left text-sm font-medium outline-none"
-            type="button"
-          >
-            <span className="bg-muted text-subtle-foreground flex size-6 shrink-0 items-center justify-center rounded-full border text-xs font-semibold">
-              {name.slice(0, 1).toLocaleUpperCase()}
-            </span>
-            <span className="min-w-0 flex-1 truncate">{name}</span>
-            <ChevronsUpDown className="text-muted-foreground/70 size-3.5 shrink-0" />
-          </button>
-        }
-      />
-      <DropdownMenuContent align="start" className="w-52" side="top">
-        <DropdownMenuItem render={<Link to={SETTINGS} />}>
-          <Settings />
-          {t(SETTINGS_LABEL)}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            void handleSignOut();
-          }}
-        >
-          <LogOut />
-          {ta("signOut")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
-const SearchButton = () => {
-  const { t } = useTranslation("command");
-  const { open: handleOpenMenu } = useCommandMenu();
-
-  return (
-    <button
-      className="bg-card text-muted-foreground hover:text-foreground mt-1.5 mb-2.5 flex h-8 w-full items-center gap-2 rounded-md border pr-1.5 pl-2 text-left text-sm whitespace-nowrap transition-colors"
-      onClick={handleOpenMenu}
-      type="button"
-    >
-      <Search className="size-3.5 shrink-0" />
-      <span className="min-w-0 flex-1 truncate">{t("searchOrRun")}</span>
-      <Kbd className="shrink-0">⌘K</Kbd>
-    </button>
-  );
-};
-
-const NavCount = ({
-  children,
-  tone = "muted",
-}: {
-  children: ReactNode;
-  tone?: "muted" | "destructive";
-}) => (
-  <span
-    className={cn(
-      "ml-auto text-xs tabular-nums",
-      tone === "destructive"
-        ? "text-destructive font-medium"
-        : "text-muted-foreground"
-    )}
-  >
-    {children}
-  </span>
-);
-
-const Sidebar = () => {
-  const { t } = useTranslation();
-  const today = useTodayCount();
-
-  return (
-    <aside className="bg-sidebar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-px overflow-y-auto px-2 py-2.5 md:flex">
-      <HouseholdName />
-      <SearchButton />
-      <nav aria-label={t("appName")} className="flex flex-col gap-px">
-        <Link
-          activeOptions={{ exact: true, includeSearch: false }}
-          activeProps={{ className: activeNavLinkClass }}
-          className={navLinkClass}
-          to="/"
-        >
-          <Sun />
-          {t("nav.today")}
-          {today.count > 0 && (
-            <NavCount tone={today.overdue ? "destructive" : "muted"}>
-              {today.count}
-            </NavCount>
-          )}
-        </Link>
-        <ModuleGroup
-          icon={<CarFront />}
-          id="garage"
-          label={t("nav.garage")}
-          to="/garage"
-        >
-          <GarageLinks />
-        </ModuleGroup>
-        <ModuleGroup
-          icon={<Wallet />}
-          id="finances"
-          label={t("nav.finances")}
-          to="/finances"
-        >
-          <FinanceNavLinks
-            activeClassName={activeNavLinkClass}
-            className={subLinkClass}
-          />
-        </ModuleGroup>
-        <ModuleGroup
-          icon={<Dumbbell />}
-          id="fitness"
-          label={t("nav.fitness")}
-          to="/fitness"
-        >
-          <FitnessNavLinks
-            activeClassName={activeNavLinkClass}
-            className={subLinkClass}
-          />
-        </ModuleGroup>
-      </nav>
-      <div className="mt-auto flex flex-col gap-px pt-6">
-        <AccountMenu />
-      </div>
-    </aside>
-  );
-};
 
 /**
  * One tab: an icon (the label is for screen readers and the tooltip-less
