@@ -73,7 +73,7 @@ export const WeightView = ({
   const { t } = useTranslation("fitness");
   const format = useFormat();
   const weight = useWeightFormat();
-  const entries = useQuery(weightQuery(addDays(today, -Number(range)), today));
+  const entries = useQuery(weightQuery(addDays(today, -range), today));
 
   if (entries.isPending) {
     return <LoadingState />;
@@ -121,7 +121,9 @@ export const WeightView = ({
           <ToggleGroup
             aria-label={t("weight.range")}
             onValueChange={([value]) => {
-              const picked = WEIGHT_RANGES.find((option) => option === value);
+              const picked = WEIGHT_RANGES.find(
+                (option) => String(option) === value
+              );
 
               if (picked !== undefined) {
                 onRangeChange(picked);
@@ -129,11 +131,11 @@ export const WeightView = ({
             }}
             size="segmented"
             spacing={0.5}
-            value={[range]}
+            value={[String(range)]}
             variant="segmented"
           >
             {WEIGHT_RANGES.map((option) => (
-              <ToggleGroupItem key={option} value={option}>
+              <ToggleGroupItem key={option} value={String(option)}>
                 {t(`weight.ranges.${option}`)}
               </ToggleGroupItem>
             ))}

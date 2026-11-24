@@ -14,14 +14,14 @@ import { FITNESS_SHORTCUTS } from "@/lib/shortcuts";
 import { cached, warm } from "@/lib/warm";
 import { useFitnessDialog } from "@/modules/fitness/dialogs/use-fitness-dialog";
 import { weightQuery } from "@/modules/fitness/fitness.queries";
-import { WEIGHT_RANGES } from "@/modules/fitness/weight/weight-ranges";
+import { isWeightRange } from "@/modules/fitness/weight/weight-ranges";
 import { WeightView } from "@/modules/fitness/weight/weight-view";
 
-const DEFAULT_RANGE = "90";
+const DEFAULT_RANGE = 90;
 
 const searchSchema = z.object({
   page: z.coerce.number().int().min(2).optional().catch(undefined),
-  range: z.enum(WEIGHT_RANGES).optional().catch(undefined),
+  range: z.coerce.number().refine(isWeightRange).optional().catch(undefined),
 });
 
 const WeightPage = () => {
@@ -91,7 +91,7 @@ export const Route = createFileRoute("/_app/fitness/weight")({
   loaderDeps: ({ search }) => ({ range: search.range }),
   loader: async ({ context: { queryClient }, deps }) => {
     const today = todayIso();
-    const days = Number(deps.range ?? DEFAULT_RANGE);
+    const days = deps.range ?? DEFAULT_RANGE;
 
     await warm(
       queryClient.query(cached(weightQuery(addDays(today, -days), today)))
