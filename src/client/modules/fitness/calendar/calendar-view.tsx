@@ -9,12 +9,14 @@ import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 
 import { FitnessDialogLink } from "../dialogs/fitness-dialog-link";
+import { useFitnessDialog } from "../dialogs/use-fitness-dialog";
 import { calendarQuery, fitnessOverviewQuery } from "../fitness.queries";
 import { FitnessStats } from "../overview/fitness-stats";
 import { SessionRow } from "../sessions/session-row";
 import { calendarRange, localOfIso } from "./calendar-dates";
 import { ComingUp } from "./coming-up";
 import { FitnessCalendar } from "./fitness-calendar";
+import { QuickAdd } from "./quick-add";
 
 const useDayTitle = (day: string, today: string) => {
   const { t, i18n } = useTranslation("fitness");
@@ -37,10 +39,15 @@ const useDayTitle = (day: string, today: string) => {
   );
 
   const date = localOfIso(day);
+  const label = formats.full.format(date);
 
-  return day === today
-    ? t("calendar.today", { date: formats.dayMonth.format(date) })
-    : formats.full.format(date);
+  return {
+    label,
+    title:
+      day === today
+        ? t("calendar.today", { date: formats.dayMonth.format(date) })
+        : label,
+  };
 };
 
 /** Fitness home: week summary, the month calendar, and the chosen day's sessions. */
@@ -60,7 +67,8 @@ export const CalendarView = ({
   const calendar = useQuery(calendarQuery(range.from, range.to));
   const overview = useQuery(fitnessOverviewQuery);
   const today = overview.data?.today ?? calendar.data?.today ?? day;
-  const title = useDayTitle(day, today);
+  const { label: dayLabel, title } = useDayTitle(day, today);
+  const dialog = useFitnessDialog();
 
   if (calendar.isPending || overview.isPending) {
     return <LoadingState />;
@@ -94,6 +102,9 @@ export const CalendarView = ({
             entries={entries}
             month={month}
             onMonthChange={onMonthChange}
+            onAdd={(date) => {
+              void dialog.open({ date, dialog: "session" });
+            }}
             onSelect={onDayChange}
             selected={day}
           />
@@ -126,6 +137,7 @@ export const CalendarView = ({
                 <SessionRow entry={entry} key={entry.key} today={today} />
               ))
             )}
+            <QuickAdd day={day} dayLabel={dayLabel} today={today} />
           </ListSection>
           <ComingUp after={day} entries={entries} onSelect={onDayChange} />
         </div>

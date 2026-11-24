@@ -168,5 +168,14 @@
     "notAnOccurrence": "That day isn't part of this training's weekly repeat.",
     "sessionNeedsTraining": "Pick a training or say what you did.",
     "trainingArchived": "This training is archived. Restore it to plan sessions."
+  },
+  "quickAdd": {
+    "title": "Add {{name}} on {{date}}?",
+    "doneDescription": "It's logged as done; add a note any time by opening it.",
+    "plannedDescription": "It's planned for that day.",
+    "confirm": "Add",
+    "logHint": "Quick log for this day",
+    "planHint": "Quick plan for this day",
+    "other": "Other…"
   }
 }

@@ -15,7 +15,18 @@ interface DayItem {
   status: SessionStatus;
 }
 
-const DayItems = createContext<ReadonlyMap<string, DayItem[]>>(new Map());
+interface DayContext {
+  items: ReadonlyMap<string, DayItem[]>;
+  /** Double-clicking a day adds a session on it. */
+  onAdd: (day: string) => void;
+}
+
+const DayCells = createContext<DayContext>({
+  items: new Map(),
+  onAdd: () => {
+    // No calendar mounted.
+  },
+});
 
 /** Status as a mark: filled when it happened (done, missed), a ring when it's ahead or skipped. */
 const MARK: Record<SessionStatus, string> = {
@@ -88,10 +99,17 @@ const Names = ({ items }: { items: readonly DayItem[] }) => {
 /** A day cell: the number, then the day's sessions (dots on phones, names on desktop). */
 const FitnessDayButton = (props: ComponentProps<typeof CalendarDayButton>) => {
   const { children, day } = props;
-  const items = use(DayItems).get(isoOfLocal(day.date)) ?? [];
+  const { items: byDay, onAdd } = use(DayCells);
+  const iso = isoOfLocal(day.date);
+  const items = byDay.get(iso) ?? [];
 
   return (
-    <CalendarDayButton {...props}>
+    <CalendarDayButton
+      {...props}
+      onDoubleClick={() => {
+        onAdd(iso);
+      }}
+    >
       <span className="md:px-0.5 md:text-sm md:!opacity-100">{children}</span>
       <Dots items={items} />
       <Names items={items} />
@@ -103,12 +121,14 @@ const FitnessDayButton = (props: ComponentProps<typeof CalendarDayButton>) => {
 export const FitnessCalendar = ({
   entries,
   month,
+  onAdd,
   onMonthChange,
   onSelect,
   selected,
 }: {
   entries: readonly (DayItem & { date: string })[];
   month: string;
+  onAdd: (day: string) => void;
   onMonthChange: (month: string) => void;
   onSelect: (day: string) => void;
   selected: string;
@@ -130,8 +150,10 @@ export const FitnessCalendar = ({
     return byDay;
   }, [entries]);
 
+  const cells = useMemo(() => ({ items, onAdd }), [items, onAdd]);
+
   return (
-    <DayItems value={items}>
+    <DayCells value={cells}>
       <Calendar
         captionLayout="dropdown"
         components={{ DayButton: FitnessDayButton }}
@@ -157,6 +179,6 @@ export const FitnessCalendar = ({
         startMonth={new Date(thisYear - YEARS_BACK, 0)}
         weekStartsOn={1}
       />
-    </DayItems>
+    </DayCells>
   );
 };
