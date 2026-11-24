@@ -57,7 +57,7 @@ const MONTH_CLASS_NAMES = {
   weekday:
     "text-muted-foreground flex-1 pb-1 text-[0.6875rem] font-medium tracking-wide uppercase select-none md:pb-2 md:text-left md:pl-2",
   week: "mt-1 flex w-full md:mt-0",
-  day: "group/day relative aspect-square h-full w-full min-w-0 flex-1 p-0 text-center select-none md:aspect-auto md:h-24 md:border-divider md:border-t md:p-px md:[&:not(:first-child)]:border-l",
+  day: "group/day relative aspect-square h-full w-full min-w-0 flex-1 p-0 text-center select-none md:aspect-auto md:h-(--month-cell-h,--spacing(24)) md:overflow-hidden md:border-divider md:border-t md:p-px md:[&:not(:first-child)]:border-l",
   today: "",
   outside: "text-muted-foreground/60 aria-selected:text-muted-foreground",
 } satisfies Partial<Record<string, string>>;

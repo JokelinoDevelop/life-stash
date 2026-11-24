@@ -128,7 +128,7 @@ export const AppShell = () => {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
           <main
-            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-1rem)] md:rounded-lg md:border md:p-0"
+            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-var(--spacing)*4)] md:rounded-lg md:border md:p-0"
             ref={main}
           >
             <RouteProgress />
