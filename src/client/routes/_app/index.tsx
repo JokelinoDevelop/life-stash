@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { HouseholdName } from "@/components/app/app-shell";
 import { useCommandMenu } from "@/components/app/command-menu-context";
+import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";

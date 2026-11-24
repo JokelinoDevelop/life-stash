@@ -1,10 +1,10 @@
 import { isIsoDate } from "@shared/domain/dates";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { CalendarCheck, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { HouseholdName } from "@/components/app/app-shell";
+import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -39,6 +39,15 @@ const FitnessPage = () => {
   const day = search.day ?? today;
   const month = search.month ?? day.slice(0, 7);
 
+  const onToday = day === today && month === today.slice(0, 7);
+
+  const goToday = () => {
+    void navigate({
+      replace: true,
+      search: ({ day: _day, month: _month, ...prev }) => prev,
+    });
+  };
+
   const addSession = () => {
     void dialog.open({ date: day, dialog: "session" });
   };
@@ -55,6 +64,27 @@ const FitnessPage = () => {
       <PageHeader
         actions={
           <>
+            {!onToday && (
+              <>
+                <Button
+                  className="hidden md:inline-flex"
+                  onClick={goToday}
+                  size="compact"
+                  variant="ghost"
+                >
+                  {t("calendar.todayButton")}
+                </Button>
+                <Button
+                  aria-label={t("calendar.todayButton")}
+                  className="md:hidden"
+                  onClick={goToday}
+                  size="icon-compact"
+                  variant="ghost"
+                >
+                  <CalendarCheck />
+                </Button>
+              </>
+            )}
             <Button
               className="hidden md:inline-flex"
               onClick={logWeight}
@@ -97,9 +127,14 @@ const FitnessPage = () => {
           });
         }}
         onMonthChange={(next) => {
+          // The chosen day follows the month (its 1st; today in the current month), so the
+          // day list never shows a day whose sessions aren't loaded.
           void navigate({
             replace: true,
-            search: (prev) => ({ ...prev, month: next }),
+            search: ({ day: _day, month: _month, ...prev }) =>
+              next === today.slice(0, 7)
+                ? prev
+                : { ...prev, day: `${next}-01`, month: next },
           });
         }}
       />

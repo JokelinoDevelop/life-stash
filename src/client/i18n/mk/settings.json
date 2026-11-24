@@ -16,7 +16,8 @@
       "system": "Системска",
       "light": "Светла",
       "dark": "Темна"
-    }
+    },
+    "themeIs": "Тема: {{theme}}"
   },
   "languages": {
     "en": "English",

@@ -10,13 +10,7 @@ import { useSessionActions } from "./use-session-actions";
  * The row's quick actions. Planned or missed: Skip and Done (desktop buttons; on phones a
  * check circle, with Skip in the swipe). Done or skipped: Undo on desktop row hover.
  */
-export const SessionActions = ({
-  name,
-  session,
-}: {
-  name: string;
-  session: ActionableSession;
-}) => {
+export const SessionActions = ({ session }: { session: ActionableSession }) => {
   const { t } = useTranslation("fitness");
   const actions = useSessionActions();
 
@@ -26,7 +20,7 @@ export const SessionActions = ({
         <Button
           disabled={actions.pending}
           onClick={() => {
-            actions.mark(session, "planned");
+            void actions.mark(session, "planned");
           }}
           size="xs"
           variant="ghost"
@@ -44,7 +38,7 @@ export const SessionActions = ({
         <Button
           disabled={actions.pending}
           onClick={() => {
-            actions.mark(session, "skipped");
+            void actions.mark(session, "skipped");
           }}
           size="xs"
           variant="ghost"
@@ -55,7 +49,7 @@ export const SessionActions = ({
         <Button
           disabled={actions.pending}
           onClick={() => {
-            actions.mark(session, "done");
+            void actions.mark(session, "done");
           }}
           size="xs"
           variant="outline"
@@ -66,11 +60,11 @@ export const SessionActions = ({
       </span>
       {/* Phones: the done circle, like reminders (swipe for Skip). */}
       <button
-        aria-label={t("sessions.markDoneOf", { name })}
+        aria-label={t("sessions.markDoneOf", { name: session.name })}
         className="group/done -mr-2 flex size-11 shrink-0 items-center justify-center md:hidden"
         disabled={actions.pending}
         onClick={() => {
-          actions.mark(session, "done");
+          void actions.mark(session, "done");
         }}
         type="button"
       >

@@ -4,6 +4,7 @@ import { enGB, mk } from "react-day-picker/locale";
 import { useTranslation } from "react-i18next";
 
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
+import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
 import type { SessionStatus } from "../sessions/session-status";
@@ -14,7 +15,18 @@ interface DayItem {
   status: SessionStatus;
 }
 
-const DayItems = createContext<ReadonlyMap<string, DayItem[]>>(new Map());
+interface DayContext {
+  items: ReadonlyMap<string, DayItem[]>;
+  /** Double-clicking a day adds a session on it. */
+  onAdd: (day: string) => void;
+}
+
+const DayCells = createContext<DayContext>({
+  items: new Map(),
+  onAdd: () => {
+    // No calendar mounted.
+  },
+});
 
 /** Status as a mark: filled when it happened (done, missed), a ring when it's ahead or skipped. */
 const MARK: Record<SessionStatus, string> = {
@@ -23,6 +35,10 @@ const MARK: Record<SessionStatus, string> = {
   planned: "border-primary border",
   skipped: "border-muted-foreground border",
 };
+
+/** How far the month / year dropdowns reach. */
+const YEARS_BACK = 5;
+const YEARS_AHEAD = 3;
 
 const MAX_DOTS = 3;
 const MAX_NAMES = 3;
@@ -83,10 +99,17 @@ const Names = ({ items }: { items: readonly DayItem[] }) => {
 /** A day cell: the number, then the day's sessions (dots on phones, names on desktop). */
 const FitnessDayButton = (props: ComponentProps<typeof CalendarDayButton>) => {
   const { children, day } = props;
-  const items = use(DayItems).get(isoOfLocal(day.date)) ?? [];
+  const { items: byDay, onAdd } = use(DayCells);
+  const iso = isoOfLocal(day.date);
+  const items = byDay.get(iso) ?? [];
 
   return (
-    <CalendarDayButton {...props}>
+    <CalendarDayButton
+      {...props}
+      onDoubleClick={() => {
+        onAdd(iso);
+      }}
+    >
       <span className="md:px-0.5 md:text-sm md:!opacity-100">{children}</span>
       <Dots items={items} />
       <Names items={items} />
@@ -98,17 +121,21 @@ const FitnessDayButton = (props: ComponentProps<typeof CalendarDayButton>) => {
 export const FitnessCalendar = ({
   entries,
   month,
+  onAdd,
   onMonthChange,
   onSelect,
   selected,
 }: {
   entries: readonly (DayItem & { date: string })[];
   month: string;
+  onAdd: (day: string) => void;
   onMonthChange: (month: string) => void;
   onSelect: (day: string) => void;
   selected: string;
 }) => {
   const { i18n } = useTranslation();
+  const localeTag = i18n.language === "mk" ? "mk-MK" : "en-GB";
+  const thisYear = Number(todayIso().slice(0, 4));
 
   const items = useMemo(() => {
     const byDay = new Map<string, DayItem[]>();
@@ -123,10 +150,18 @@ export const FitnessCalendar = ({
     return byDay;
   }, [entries]);
 
+  const cells = useMemo(() => ({ items, onAdd }), [items, onAdd]);
+
   return (
-    <DayItems value={items}>
+    <DayCells value={cells}>
       <Calendar
+        captionLayout="dropdown"
         components={{ DayButton: FitnessDayButton }}
+        endMonth={new Date(thisYear + YEARS_AHEAD, 11)}
+        formatters={{
+          formatMonthDropdown: (date) =>
+            date.toLocaleString(localeTag, { month: "long" }),
+        }}
         locale={i18n.language === "mk" ? mk : enGB}
         mode="single"
         month={localOfIso(`${month}-01`)}
@@ -141,8 +176,9 @@ export const FitnessCalendar = ({
         required
         selected={localOfIso(selected)}
         variant="month"
+        startMonth={new Date(thisYear - YEARS_BACK, 0)}
         weekStartsOn={1}
       />
-    </DayItems>
+    </DayCells>
   );
 };
