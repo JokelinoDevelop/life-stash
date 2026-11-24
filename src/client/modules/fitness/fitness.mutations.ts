@@ -176,3 +176,59 @@ export const useUpdateFitnessSettings = () => {
       reminders ? t("settings.remindersOn") : t("settings.remindersOff"),
   });
 };
+
+type MarkStatus = "planned" | "done" | "skipped";
+
+export interface MarkSessionInput {
+  session: {
+    id: string | null;
+    scheduleId: string | null;
+    originalDate: string | null;
+  };
+  status: MarkStatus;
+  /** The stored status before, for Undo. */
+  previous: MarkStatus;
+}
+
+const setSessionStatus = async (id: string, status: MarkStatus) =>
+  await unwrap(
+    api.fitness.sessions[":sessionId"].$patch({
+      json: { status },
+      param: { sessionId: id },
+    })
+  );
+
+/**
+ * Done / Skip / back to planned straight from a row (buttons, swipe). An untouched weekly
+ * occurrence gets its row; the toast offers Undo.
+ */
+export const useMarkSession = () => {
+  const { t } = useTranslation("fitness");
+
+  return useAppMutation({
+    invalidate,
+    mutationFn: async ({ session, status }: MarkSessionInput) => {
+      if (session.id !== null) {
+        return await setSessionStatus(session.id, status);
+      }
+
+      if (session.scheduleId === null || session.originalDate === null) {
+        throw new Error("A session needs an id or a weekly occurrence");
+      }
+
+      return await unwrap(
+        api.fitness.sessions.occurrence.$put({
+          json: {
+            originalDate: session.originalDate,
+            scheduleId: session.scheduleId,
+            status,
+          },
+        })
+      );
+    },
+    success: false,
+    successFor: (_data, { status }) => t(`sessions.marked.${status}`),
+    undo: async (data, { previous }) =>
+      await setSessionStatus(data.id, previous),
+  });
+};

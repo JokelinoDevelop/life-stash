@@ -21,7 +21,10 @@
   },
   "calendar": {
     "today": "Today · {{date}}",
-    "nothing": "Nothing planned"
+    "nothing": "Nothing planned",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "comingUp": "Coming up"
   },
   "overview": {
     "week": "This week",
@@ -89,7 +92,14 @@
       "duration": "Length",
       "note": "Note",
       "notePlaceholder": "Weights, how it felt — shown next time"
-    }
+    },
+    "marked": {
+      "done": "Marked done",
+      "skipped": "Skipped",
+      "planned": "Back to planned"
+    },
+    "reopen": "Undo",
+    "markDoneOf": "Mark {{name}} done"
   },
   "weight": {
     "title": "Weight",
