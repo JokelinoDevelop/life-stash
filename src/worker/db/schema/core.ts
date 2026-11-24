@@ -65,6 +65,10 @@ export const userPreferences = sqliteTable("user_preferences", {
   distanceUnit: text("distance_unit", { enum: ["km", "mi"] })
     .notNull()
     .default("km"),
+  /** Morning push listing today's trainings (Fitness). */
+  fitnessReminders: integer("fitness_reminders", { mode: "boolean" })
+    .notNull()
+    .default(true),
   locale: text("locale", { enum: ["en", "mk"] })
     .notNull()
     .default("en"),

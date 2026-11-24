@@ -9,7 +9,7 @@ All ids are random UUIDs (text). Timestamps are ISO-8601 UTC strings. Calendar d
 | `households` | id, name, created_at |
 | `users` | id, household_id, display_name, email? (unique, lower-cased), password_hash?, is_admin (the setup account), disabled_at? (no sign-in while set), failed_login_count, login_locked_until?, created_at |
 | `invites` | id, token_hash (unique, sha256 of the link token), household_id? (set: joins that household; null: a new household on accept), name?, created_by_user_id, expires_at (7 days), used_at?, used_by_user_id?, created_at |
-| `user_preferences` | user_id (pk), locale (`en`/`mk`), distance_unit (`km`/`mi`), currency, time_zone, odometer_nudge_weeks |
+| `user_preferences` | user_id (pk), locale (`en`/`mk`), distance_unit (`km`/`mi`), currency, time_zone, odometer_nudge_weeks, fitness_reminders (bool, default true: the morning training push) |
 | `passkeys` | id (credential id), user_id, public_key, counter, transports, device_name, created_at, last_used_at |
 | `sessions` | id (sha256 of token), user_id, expires_at, created_at |
 | `auth_challenges` | id, challenge, purpose (`register`/`login`/`add-passkey`), user_id?, expires_at |
@@ -120,3 +120,33 @@ Each month the overview lists active templates whose `last_handled_month` is bef
 ### Attachments
 
 Invoice PDFs and receipts reuse `photos` (owner `finance_invoice` / `finance_transaction`). PDFs up to 10 MB are uploaded as they are; images stay at 5 MB and are compressed in the browser. Files of purged records are removed from B2 by the daily cron.
+
+## Fitness
+
+Fitness is **personal**: every table has `household_id` **and** `user_id`, and every query filters on both (Garage and Finances are shared by the household). Weight is integer **grams** (kg only in the UI). Rules and math live in `shared/domain/fitness/` (`schedule.ts`, `progress.ts`, `weight.ts`).
+
+### `fitness_trainings`
+
+id, household_id, user_id, name, description?, duration_minutes? (the usual length), archived_at?, created_at, updated_at
+
+Archiving ends the weekly repeat (its schedule closes yesterday); past sessions stay. Restoring opens a new schedule from today with the weekdays it last had.
+
+### `fitness_schedules` — a training's weekly repeat
+
+id, household_id, user_id, training_id (cascade), weekdays (JSON array of ISO weekdays, 1 = Monday … 7 = Sunday), start_date, end_date? (inclusive; null while it runs), created_at
+
+Repeats are **never generated ahead**: reading the calendar expands each schedule overlapping the range (`expandSchedule`). Changing a training's weekdays closes the current schedule (`end_date` = yesterday) and opens a new one from today, so earlier weeks keep their days; touched occurrences from today on move to the new schedule. A schedule that never covered a past day is deleted instead of closed.
+
+### `fitness_sessions`
+
+id, household_id, user_id, training_id? (null = a free-form unplanned session), title? (its name when there is no training), schedule_id? (set null if the schedule goes), original_date? (the occurrence this row stands for), date, status (`planned`/`done`/`skipped`), duration_minutes?, note?, created_at, updated_at
+
+Unique: (schedule_id, original_date) where schedule_id is set. One-offs and unplanned sessions are always stored; a weekly occurrence gets a row only when it is touched (done, skipped, moved, note) via `PUT /api/fitness/sessions/occurrence`, and that row replaces the occurrence on the calendar even after moving to another `date`. Deleting an occurrence's row puts it back to plain "planned". **Missed is derived** (planned and before today in the user's time zone), never stored. The "last time" note is the latest done session of the same training before the session's date that has a note.
+
+Week progress counts done out of the week's sessions minus skipped ones (ISO weeks); the streak counts weeks in a row with at least one done session and none missed (skipped are excused; the current week adds once it qualifies and doesn't break the streak while open).
+
+### `fitness_weight_entries`
+
+id, household_id, user_id, date, weight_grams, note?, created_at
+
+Unique (user_id, date): one entry per day; logging the same day again replaces it. The 7- and 30-day change compares the latest entry with the last one on or before that many days earlier (null without enough history).

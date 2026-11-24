@@ -5,6 +5,7 @@ import enAuth from "./en/auth.json";
 import enCommand from "./en/command.json";
 import enCommon from "./en/common.json";
 import enFinances from "./en/finances.json";
+import enFitness from "./en/fitness.json";
 import enGarage from "./en/garage.json";
 import enGarageCatalog from "./en/garageCatalog.json";
 import enGarageExpenses from "./en/garageExpenses.json";
@@ -18,6 +19,7 @@ import mkAuth from "./mk/auth.json";
 import mkCommand from "./mk/command.json";
 import mkCommon from "./mk/common.json";
 import mkFinances from "./mk/finances.json";
+import mkFitness from "./mk/fitness.json";
 import mkGarage from "./mk/garage.json";
 import mkGarageCatalog from "./mk/garageCatalog.json";
 import mkGarageExpenses from "./mk/garageExpenses.json";
@@ -34,6 +36,7 @@ export const resources = {
     command: enCommand,
     common: enCommon,
     finances: enFinances,
+    fitness: enFitness,
     garage: enGarage,
     garageCatalog: enGarageCatalog,
     garageExpenses: enGarageExpenses,
@@ -49,6 +52,7 @@ export const resources = {
     command: mkCommand,
     common: mkCommon,
     finances: mkFinances,
+    fitness: mkFitness,
     garage: mkGarage,
     garageCatalog: mkGarageCatalog,
     garageExpenses: mkGarageExpenses,

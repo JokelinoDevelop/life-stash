@@ -1,6 +1,6 @@
 # LifeStash — Architecture
 
-LifeStash is a private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module; **Finances** (income, spending, invoices; see `docs/FINANCES-SPEC.md`) is the second.
+LifeStash is a private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module; **Finances** (income, spending, invoices; see `docs/FINANCES-SPEC.md`) is the second; **Fitness** (trainings on a calendar, body weight; personal to each user) is the third.
 
 ## Goals
 
@@ -93,13 +93,38 @@ src/worker/modules/finances/
 - `GET /finances/overview` is one request for the overview page. Its "Car costs" line comes from Garage's spending service through `overview/garage-costs.ts` (service → service, read only), so car costs are never copied into the ledger.
 - Tests: services with in-memory fakes; controllers through `app.request()` against a real SQLite database (`src/worker/test/sqlite-d1.ts`, Node's built-in `node:sqlite` behind a D1 shim with all migrations applied), including household isolation.
 
-On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar starts with **Today** (`/`, everything that needs action across modules), then Garage and Finances as always-open module groups; phones get Today / Garage / Finances / Settings.
+On the client, Finances lives in `src/client/modules/finances` (queries, mutations via `useAppMutation`, one schema + mapper per form) and opens its dialogs from the URL (`?dialog=transaction|category`, `id`, `entryKind`, `duplicate`) through `FinanceDialogHost`, next to Garage's host. The sidebar starts with **Today** (`/`, everything that needs action across modules), then Garage, Finances and Fitness as always-open module groups; phones get Today / Garage / Finances / Fitness / Settings.
+
+## Fitness module (per user)
+
+Fitness follows the Finances layout (controller → service → repository, one DTO pair per endpoint, typed `fitness.*` errors), with one difference: it is **personal**, not shared by the household.
+
+```
+src/worker/modules/fitness/
+├─ fitness.controller.ts      mounts the sub-controllers under /api/fitness
+├─ fitness.module.ts          builds repositories + services for one user
+├─ fitness.cron.ts            the morning "Today: Leg day" push
+├─ trainings/                 templates + weekly schedules (list, create, update incl. weekdays, archive, restore)
+├─ sessions/                  GET /calendar, GET /occurrence, PUT /occurrence, GET /last-note, CRUD; calendar.ts merges rules and rows
+├─ weight/                    list (range), upsert by date, delete
+├─ overview/                  week count, streak, today's sessions, latest weight and 7/30-day change in one request
+├─ settings/                  the training-reminders switch (on `user_preferences`)
+├─ notifications/             DayRemindersService (used by the cron)
+└─ user/                      the user's own preferences and time-zone clock
+```
+
+- `ContainerDeps` carries an optional `userId` (set by `requireAuth`); `container.fitness` refuses to build without one, so per-household crons keep working untouched. Fitness repositories are constructed with `(db, householdId, userId)` and filter on both; inserts take both from the constructor. Controller tests check isolation between two users of the same household and between households.
+- "Today" and "missed" follow the **user's** time zone (`user/clock.ts`), not the household's first member.
+- `fitness.cron.ts` (same daily trigger, 06:00 UTC) builds one container per user who has active trainings and `fitness_reminders` on, and sends at most one push (`sendPushToUser`, tag `fitness-YYYY-MM-DD`) listing today's planned trainings. `core/push.ts` shares the send-and-prune code between `sendPushToHousehold` and `sendPushToUser`.
+
+On the client, Fitness lives in `src/client/modules/fitness` and opens its dialogs from the URL (`?dialog=training|session|weight`, `id`, `schedule` + `date` for a weekly occurrence, `date` for a new session or weigh-in) through `FitnessDialogHost`. Pages: `/fitness` (week summary; a month calendar via `Calendar variant="month"`: status dots on phones, a full-width grid listing each day's sessions by name on desktop; the chosen day's sessions with Skip / Done buttons (phones: a check circle and swipe; Undo in the toast and on done rows) and, on wide screens, "Coming up" beside the calendar), `/fitness/trainings`, `/fitness/weight` (line chart, entries). Today lists today's trainings; Settings › Notifications has the "Training reminders" switch. Phones get a fifth tab (Today / Garage / Finances / Fitness / Settings).
 
 ## Reminders and notifications
 
 - A reminder is due by date, by odometer, or by whichever comes first; it may recur by months and/or km.
 - Status: `overdue` (past date or odometer reached), `due-soon` (within 7 days or 1,000 km), `upcoming`.
 - **Finances** (`finances.cron.ts`, same daily trigger): one push per invoice the day after it becomes overdue (`overdue_notified_at`; skipped when "Remind me about overdue invoices" is off), tapping opens Mark paid; then purges soft-deleted finance records past the 7-day undo window, with their files.
+- **Fitness** (`fitness.cron.ts`, same daily trigger): one push per user in the morning listing today's planned trainings ("Today: Leg day"); off when "Training reminders" is off.
 - **One heads-up per reminder** (`notified_at`): the daily cron notifies date reminders 7 days ahead; logging an odometer reading checks km reminders immediately.
 - **Odometer nudge**: if no reading has been logged for N weeks (setting, default 4, 0 = off), the cron sends one nudge per car per period.
 - Completing a service reminder opens a prefilled service visit; saving it completes the reminder and schedules the next one when an interval is set. Insurance/registration reminders open a prefilled expense instead.

@@ -36,7 +36,9 @@
     "testSent": "Test notification sent",
     "denied": "Notifications are blocked in your browser settings.",
     "unsupported": "This browser doesn't support push notifications. On iPhone, add LifeStash to your Home Screen first.",
-    "notConfigured": "Push notifications aren't configured on the server yet."
+    "notConfigured": "Push notifications aren't configured on the server yet.",
+    "trainingReminders": "Training reminders",
+    "trainingRemindersHint": "A morning notification listing today's trainings (on this account only)."
   },
   "security": {
     "title": "Sign-in & security",

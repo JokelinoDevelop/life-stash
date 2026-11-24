@@ -21,10 +21,17 @@ import { useInvoiceSwipe } from "@/modules/finances/invoices/use-invoice-swipe";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import type { FinanceOverview } from "@/modules/finances/overview/overview.queries";
 import { ToConfirm } from "@/modules/finances/overview/to-confirm";
+import { fitnessOverviewQuery } from "@/modules/fitness/fitness.queries";
+import type { FitnessOverview } from "@/modules/fitness/fitness.queries";
+import { FitnessToday } from "@/modules/fitness/overview/fitness-today";
+import { plannedToday } from "@/modules/fitness/overview/planned-today";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
-import type { HouseholdReminder } from "@/modules/garage/household/household.queries";
+import type {
+  HouseholdOverview,
+  HouseholdReminder,
+} from "@/modules/garage/household/household.queries";
 import { ReminderRow } from "@/modules/garage/household/reminder-groups";
 
 import { AllClear } from "./all-clear";
@@ -164,14 +171,75 @@ const HorizonSection = ({
   );
 };
 
-/** Everything that needs you, across Garage and Finances. */
+/** The Today lists once everything has loaded (fitness is left out if it failed). */
+const TodayLists = ({
+  cars,
+  finances,
+  fitness,
+  household,
+}: {
+  cars: readonly CarListItem[];
+  finances: FinanceOverview;
+  fitness: FitnessOverview | undefined;
+  household: HouseholdOverview;
+}) => {
+  const { today } = household;
+
+  const groups = groupTodayItems(household.reminders, finances.waiting, today);
+
+  const trainings = fitness?.todaySessions.length ?? 0;
+
+  const nothing =
+    groups.size === 0 && finances.toConfirm.length === 0 && trainings === 0;
+
+  if (nothing) {
+    return <AllClear />;
+  }
+
+  // Only "Later" items: say so before listing them.
+  const onlyLater =
+    finances.toConfirm.length === 0 &&
+    trainings === 0 &&
+    !groups.has("overdue") &&
+    !groups.has("next30");
+
+  return (
+    <PageStack>
+      {onlyLater && <AllClear compact />}
+      {fitness !== undefined && <FitnessToday overview={fitness} />}
+      <ToConfirm overview={finances} />
+      {REMINDER_HORIZONS.map((horizon) => {
+        const items = groups.get(horizon) ?? [];
+
+        return items.length === 0 ? null : (
+          <HorizonSection
+            cars={cars}
+            horizon={horizon}
+            items={items}
+            key={horizon}
+            today={today}
+          />
+        );
+      })}
+    </PageStack>
+  );
+};
+
+/** Everything that needs you, across Garage, Finances and Fitness. */
 export const TodayView = () => {
   const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
   const cars = useQuery(carsQuery(false));
   const finances = useQuery(overviewQuery(year));
+  // Fitness is personal and optional here: a failure just leaves its rows out.
+  const fitness = useQuery(fitnessOverviewQuery);
 
-  if (household.isPending || cars.isPending || finances.isPending) {
+  if (
+    household.isPending ||
+    cars.isPending ||
+    finances.isPending ||
+    fitness.isPending
+  ) {
     return <LoadingState />;
   }
 
@@ -188,48 +256,20 @@ export const TodayView = () => {
     );
   }
 
-  const { today } = household.data;
-
-  const groups = groupTodayItems(
-    household.data.reminders,
-    finances.data.waiting,
-    today
-  );
-
-  const nothing = groups.size === 0 && finances.data.toConfirm.length === 0;
-
-  if (nothing) {
-    return <AllClear />;
-  }
-
-  // Only "Later" items: say so before listing them.
-  const onlyLater =
-    finances.data.toConfirm.length === 0 &&
-    !groups.has("overdue") &&
-    !groups.has("next30");
-
   return (
-    <PageStack>
-      {onlyLater && <AllClear compact />}
-      <ToConfirm overview={finances.data} />
-      {REMINDER_HORIZONS.map((horizon) => {
-        const items = groups.get(horizon) ?? [];
-
-        return items.length === 0 ? null : (
-          <HorizonSection
-            cars={cars.data.cars}
-            horizon={horizon}
-            items={items}
-            key={horizon}
-            today={today}
-          />
-        );
-      })}
-    </PageStack>
+    <TodayLists
+      cars={cars.data.cars}
+      finances={finances.data}
+      fitness={fitness.data}
+      household={household.data}
+    />
   );
 };
 
-/** Things that need action now: overdue or due-soon reminders, late invoices, income to confirm. */
+/**
+ * Things that need action now: overdue or due-soon reminders, late invoices, income to
+ * confirm, and trainings still to do today.
+ */
 export interface TodayCount {
   count: number;
   overdue: boolean;
@@ -239,6 +279,7 @@ export const useTodayCount = (): TodayCount => {
   const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
   const finances = useQuery(overviewQuery(year));
+  const fitness = useQuery(fitnessOverviewQuery);
   const reminders = household.data?.reminders ?? [];
   const waiting = finances.data?.waiting ?? [];
 
@@ -251,7 +292,11 @@ export const useTodayCount = (): TodayCount => {
   ).length;
 
   return {
-    count: dueReminders + lateInvoices + (finances.data?.toConfirm.length ?? 0),
+    count:
+      dueReminders +
+      lateInvoices +
+      (finances.data?.toConfirm.length ?? 0) +
+      plannedToday(fitness.data),
     overdue:
       lateInvoices > 0 ||
       reminders.some((reminder) => reminder.status === "overdue"),
