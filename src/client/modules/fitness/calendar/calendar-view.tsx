@@ -97,7 +97,7 @@ export const CalendarView = ({
         className="flex flex-col gap-6 md:gap-0 xl:grid xl:grid-cols-[minmax(0,1fr)_18rem]"
         data-bleed=""
       >
-        <section className="surface bg-card md:border-divider rounded-lg border p-2 md:rounded-none md:border-0 md:border-b md:px-5 md:pt-3 md:pb-5 xl:border-b-0">
+        <section className="surface bg-card md:border-divider rounded-lg border p-2 md:rounded-none md:border-0 md:border-b md:px-5 md:pt-3 md:pb-5 md:[--month-cell-h:clamp(4rem,calc((100dvh-24rem)/6),7rem)] xl:border-b-0">
           <FitnessCalendar
             entries={entries}
             month={month}
@@ -109,37 +109,42 @@ export const CalendarView = ({
             selected={day}
           />
         </section>
-        <div className="xl:border-divider xl:border-l">
-          <ListSection
-            action={
-              <Button
-                nativeButton={false}
-                render={
-                  <FitnessDialogLink entry={{ date: day, dialog: "session" }} />
-                }
-                size="xs"
-                variant="ghost"
-              >
-                <Plus />
-                {t("sessions.add")}
-              </Button>
-            }
-            count={ofDay.length}
-            title={title}
-          >
-            {ofDay.length === 0 ? (
-              <ListRow className="text-muted-foreground gap-2 text-sm">
-                <CalendarDays className="size-4" />
-                {t("calendar.nothing")}
-              </ListRow>
-            ) : (
-              ofDay.map((entry) => (
-                <SessionRow entry={entry} key={entry.key} today={today} />
-              ))
-            )}
-            <QuickAdd day={day} dayLabel={dayLabel} today={today} />
-          </ListSection>
-          <ComingUp after={day} entries={entries} onSelect={onDayChange} />
+        {/* xl: the calendar sets the height; the day column scrolls on its own if it holds more. */}
+        <div className="xl:border-divider xl:relative xl:border-l">
+          <div className="xl:absolute xl:inset-0 xl:overflow-y-auto">
+            <ListSection
+              action={
+                <Button
+                  nativeButton={false}
+                  render={
+                    <FitnessDialogLink
+                      entry={{ date: day, dialog: "session" }}
+                    />
+                  }
+                  size="xs"
+                  variant="ghost"
+                >
+                  <Plus />
+                  {t("sessions.add")}
+                </Button>
+              }
+              count={ofDay.length}
+              title={title}
+            >
+              {ofDay.length === 0 ? (
+                <ListRow className="text-muted-foreground gap-2 text-sm">
+                  <CalendarDays className="size-4" />
+                  {t("calendar.nothing")}
+                </ListRow>
+              ) : (
+                ofDay.map((entry) => (
+                  <SessionRow entry={entry} key={entry.key} today={today} />
+                ))
+              )}
+              <QuickAdd day={day} dayLabel={dayLabel} today={today} />
+            </ListSection>
+            <ComingUp after={day} entries={entries} onSelect={onDayChange} />
+          </div>
         </div>
       </div>
     </PageStack>

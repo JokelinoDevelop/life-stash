@@ -12,6 +12,7 @@ import {
   Sun,
   Wallet,
 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useTheme } from "@/app/theme";
@@ -38,7 +39,7 @@ import { useTodayCount } from "@/modules/today/today-view";
 
 import { useCommandMenu } from "./command-menu-context";
 import { HouseholdName } from "./household-name";
-import { ModuleGroup, NavCount } from "./sidebar-modules";
+import { ActiveIndicator, ModuleGroup, NavCount } from "./sidebar-modules";
 import {
   activeNavLinkClass,
   activeSubLinkClass,
@@ -168,9 +169,16 @@ const FitnessBadge = () => {
 export const Sidebar = () => {
   const { t } = useTranslation();
   const today = useTodayCount();
+  // A callback ref: the pill measures once the sidebar exists (a plain ref is still empty
+  // when the child's layout effect runs).
+  const [aside, setAside] = useState<HTMLElement | null>(null);
 
   return (
-    <aside className="bg-sidebar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col overflow-y-auto px-2 py-2.5 md:flex">
+    <aside
+      className="bg-sidebar sticky top-0 hidden h-dvh w-60 shrink-0 flex-col overflow-y-auto px-2 py-2.5 md:flex"
+      ref={setAside}
+    >
+      <ActiveIndicator container={aside} />
       <HouseholdName className="mb-2" />
       <nav aria-label={t("appName")} className="flex flex-col gap-px">
         <SearchRow />
