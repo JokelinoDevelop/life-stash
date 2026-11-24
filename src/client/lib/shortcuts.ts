@@ -22,3 +22,10 @@ export const FINANCE_SHORTCUTS = {
   markPaid: "p",
   newInvoice: "i",
 } as const;
+
+/** Fitness pages. */
+export const FITNESS_SHORTCUTS = {
+  addSession: "s",
+  addTraining: "n",
+  logWeight: "w",
+} as const;

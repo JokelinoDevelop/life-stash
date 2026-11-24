@@ -19,6 +19,9 @@ import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AppFinancesIndexRouteImport } from './routes/_app/finances/index'
 import { Route as AppFinancesInvoicesRouteImport } from './routes/_app/finances/invoices'
 import { Route as AppFinancesTransactionsRouteImport } from './routes/_app/finances/transactions'
+import { Route as AppFitnessIndexRouteImport } from './routes/_app/fitness/index'
+import { Route as AppFitnessTrainingsRouteImport } from './routes/_app/fitness/trainings'
+import { Route as AppFitnessWeightRouteImport } from './routes/_app/fitness/weight'
 import { Route as AppGarageIndexRouteImport } from './routes/_app/garage/index'
 import { Route as AppGarageCatalogRouteImport } from './routes/_app/garage/catalog'
 import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/history'
@@ -78,6 +81,21 @@ const AppFinancesInvoicesRoute = AppFinancesInvoicesRouteImport.update({
 const AppFinancesTransactionsRoute = AppFinancesTransactionsRouteImport.update({
   id: '/finances/transactions',
   path: '/finances/transactions',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFitnessIndexRoute = AppFitnessIndexRouteImport.update({
+  id: '/fitness/',
+  path: '/fitness/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFitnessTrainingsRoute = AppFitnessTrainingsRouteImport.update({
+  id: '/fitness/trainings',
+  path: '/fitness/trainings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFitnessWeightRoute = AppFitnessWeightRouteImport.update({
+  id: '/fitness/weight',
+  path: '/fitness/weight',
   getParentRoute: () => AppRoute,
 } as any)
 const AppGarageIndexRoute = AppGarageIndexRouteImport.update({
@@ -147,12 +165,15 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/finances/invoices': typeof AppFinancesInvoicesRoute
   '/finances/transactions': typeof AppFinancesTransactionsRoute
+  '/fitness/trainings': typeof AppFitnessTrainingsRoute
+  '/fitness/weight': typeof AppFitnessWeightRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
   '/settings/users': typeof AppSettingsUsersRoute
   '/finances/': typeof AppFinancesIndexRoute
+  '/fitness/': typeof AppFitnessIndexRoute
   '/garage/': typeof AppGarageIndexRoute
   '/settings/': typeof AppSettingsIndexRoute
   '/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
@@ -168,12 +189,15 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/finances/invoices': typeof AppFinancesInvoicesRoute
   '/finances/transactions': typeof AppFinancesTransactionsRoute
+  '/fitness/trainings': typeof AppFitnessTrainingsRoute
+  '/fitness/weight': typeof AppFitnessWeightRoute
   '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
   '/settings/users': typeof AppSettingsUsersRoute
   '/finances': typeof AppFinancesIndexRoute
+  '/fitness': typeof AppFitnessIndexRoute
   '/garage': typeof AppGarageIndexRoute
   '/settings': typeof AppSettingsIndexRoute
   '/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
@@ -192,12 +216,15 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/finances/invoices': typeof AppFinancesInvoicesRoute
   '/_app/finances/transactions': typeof AppFinancesTransactionsRoute
+  '/_app/fitness/trainings': typeof AppFitnessTrainingsRoute
+  '/_app/fitness/weight': typeof AppFitnessWeightRoute
   '/_app/garage/catalog': typeof AppGarageCatalogRoute
   '/_app/garage/history': typeof AppGarageHistoryRoute
   '/_app/garage/reminders': typeof AppGarageRemindersRoute
   '/_app/settings/finances': typeof AppSettingsFinancesRoute
   '/_app/settings/users': typeof AppSettingsUsersRoute
   '/_app/finances/': typeof AppFinancesIndexRoute
+  '/_app/fitness/': typeof AppFitnessIndexRoute
   '/_app/garage/': typeof AppGarageIndexRoute
   '/_app/settings/': typeof AppSettingsIndexRoute
   '/_app/finances/clients/$clientId': typeof AppFinancesClientsClientIdRoute
@@ -216,12 +243,15 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/finances/invoices'
     | '/finances/transactions'
+    | '/fitness/trainings'
+    | '/fitness/weight'
     | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
     | '/settings/users'
     | '/finances/'
+    | '/fitness/'
     | '/garage/'
     | '/settings/'
     | '/finances/clients/$clientId'
@@ -237,12 +267,15 @@ export interface FileRouteTypes {
     | '/'
     | '/finances/invoices'
     | '/finances/transactions'
+    | '/fitness/trainings'
+    | '/fitness/weight'
     | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
     | '/settings/users'
     | '/finances'
+    | '/fitness'
     | '/garage'
     | '/settings'
     | '/finances/clients/$clientId'
@@ -260,12 +293,15 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/finances/invoices'
     | '/_app/finances/transactions'
+    | '/_app/fitness/trainings'
+    | '/_app/fitness/weight'
     | '/_app/garage/catalog'
     | '/_app/garage/history'
     | '/_app/garage/reminders'
     | '/_app/settings/finances'
     | '/_app/settings/users'
     | '/_app/finances/'
+    | '/_app/fitness/'
     | '/_app/garage/'
     | '/_app/settings/'
     | '/_app/finances/clients/$clientId'
@@ -352,6 +388,27 @@ declare module '@tanstack/react-router' {
       path: '/finances/transactions'
       fullPath: '/finances/transactions'
       preLoaderRoute: typeof AppFinancesTransactionsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fitness/': {
+      id: '/_app/fitness/'
+      path: '/fitness'
+      fullPath: '/fitness/'
+      preLoaderRoute: typeof AppFitnessIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fitness/trainings': {
+      id: '/_app/fitness/trainings'
+      path: '/fitness/trainings'
+      fullPath: '/fitness/trainings'
+      preLoaderRoute: typeof AppFitnessTrainingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/fitness/weight': {
+      id: '/_app/fitness/weight'
+      path: '/fitness/weight'
+      fullPath: '/fitness/weight'
+      preLoaderRoute: typeof AppFitnessWeightRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/garage/': {
@@ -454,10 +511,13 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppFinancesInvoicesRoute: typeof AppFinancesInvoicesRoute
   AppFinancesTransactionsRoute: typeof AppFinancesTransactionsRoute
+  AppFitnessTrainingsRoute: typeof AppFitnessTrainingsRoute
+  AppFitnessWeightRoute: typeof AppFitnessWeightRoute
   AppGarageCatalogRoute: typeof AppGarageCatalogRoute
   AppGarageHistoryRoute: typeof AppGarageHistoryRoute
   AppGarageRemindersRoute: typeof AppGarageRemindersRoute
   AppFinancesIndexRoute: typeof AppFinancesIndexRoute
+  AppFitnessIndexRoute: typeof AppFitnessIndexRoute
   AppGarageIndexRoute: typeof AppGarageIndexRoute
   AppFinancesClientsClientIdRoute: typeof AppFinancesClientsClientIdRoute
   AppFinancesClientsIndexRoute: typeof AppFinancesClientsIndexRoute
@@ -470,10 +530,13 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppFinancesInvoicesRoute: AppFinancesInvoicesRoute,
   AppFinancesTransactionsRoute: AppFinancesTransactionsRoute,
+  AppFitnessTrainingsRoute: AppFitnessTrainingsRoute,
+  AppFitnessWeightRoute: AppFitnessWeightRoute,
   AppGarageCatalogRoute: AppGarageCatalogRoute,
   AppGarageHistoryRoute: AppGarageHistoryRoute,
   AppGarageRemindersRoute: AppGarageRemindersRoute,
   AppFinancesIndexRoute: AppFinancesIndexRoute,
+  AppFitnessIndexRoute: AppFitnessIndexRoute,
   AppGarageIndexRoute: AppGarageIndexRoute,
   AppFinancesClientsClientIdRoute: AppFinancesClientsClientIdRoute,
   AppFinancesClientsIndexRoute: AppFinancesClientsIndexRoute,

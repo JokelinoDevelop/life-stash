@@ -53,7 +53,7 @@ export const ModuleGroup = ({
   icon: ReactNode;
   id: string;
   label: string;
-  to: "/garage" | "/finances";
+  to: "/garage" | "/finances" | "/fitness";
 }) => {
   const { t } = useTranslation();
 

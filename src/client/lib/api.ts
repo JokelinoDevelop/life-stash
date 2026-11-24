@@ -21,7 +21,8 @@ export type ApiErrorCode =
   | "unauthorized"
   | "validation"
   | AccountErrorCode
-  | FinanceErrorCode;
+  | FinanceErrorCode
+  | FitnessErrorCode;
 
 export const ACCOUNT_ERROR_CODES = [
   "account.already_member",
@@ -54,6 +55,14 @@ export const FINANCE_ERROR_CODES = [
 ] as const;
 
 export type FinanceErrorCode = (typeof FINANCE_ERROR_CODES)[number];
+
+export const FITNESS_ERROR_CODES = [
+  "fitness.not_an_occurrence",
+  "fitness.session_needs_training",
+  "fitness.training_archived",
+] as const;
+
+export type FitnessErrorCode = (typeof FITNESS_ERROR_CODES)[number];
 
 export class ApiClientError extends Error {
   override readonly name = "ApiClientError";
@@ -88,6 +97,7 @@ const ERROR_CODES: readonly ApiErrorCode[] = [
   "validation",
   ...ACCOUNT_ERROR_CODES,
   ...FINANCE_ERROR_CODES,
+  ...FITNESS_ERROR_CODES,
 ];
 
 const isErrorCode = (value: unknown): value is ApiErrorCode =>

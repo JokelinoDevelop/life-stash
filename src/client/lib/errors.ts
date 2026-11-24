@@ -4,8 +4,14 @@ import {
   ACCOUNT_ERROR_CODES,
   ApiClientError,
   FINANCE_ERROR_CODES,
+  FITNESS_ERROR_CODES,
 } from "./api";
-import type { AccountErrorCode, ApiErrorCode, FinanceErrorCode } from "./api";
+import type {
+  AccountErrorCode,
+  ApiErrorCode,
+  FinanceErrorCode,
+  FitnessErrorCode,
+} from "./api";
 
 const GENERIC = "errors.generic";
 
@@ -51,6 +57,15 @@ const FINANCE_MESSAGES = {
   "finances.transaction_linked": "errors.transactionLinked",
 } as const satisfies Record<FinanceErrorCode, string>;
 
+const FITNESS_MESSAGES = {
+  "fitness.not_an_occurrence": "errors.notAnOccurrence",
+  "fitness.session_needs_training": "errors.sessionNeedsTraining",
+  "fitness.training_archived": "errors.trainingArchived",
+} as const satisfies Record<FitnessErrorCode, string>;
+
+const isFitnessCode = (code: ApiErrorCode): code is FitnessErrorCode =>
+  FITNESS_ERROR_CODES.some((known) => known === code);
+
 const isFinanceCode = (code: ApiErrorCode): code is FinanceErrorCode =>
   FINANCE_ERROR_CODES.some((known) => known === code);
 
@@ -58,7 +73,7 @@ const isAccountCode = (code: ApiErrorCode): code is AccountErrorCode =>
   ACCOUNT_ERROR_CODES.some((known) => known === code);
 
 const MESSAGE_FOR_CODE: Record<
-  Exclude<ApiErrorCode, FinanceErrorCode | AccountErrorCode>,
+  Exclude<ApiErrorCode, FinanceErrorCode | AccountErrorCode | FitnessErrorCode>,
   MessageKey | "server"
 > = {
   bad_request: "server",
@@ -78,6 +93,7 @@ const MESSAGE_FOR_CODE: Record<
 export const useErrorMessage = () => {
   const { t } = useTranslation();
   const { t: tf } = useTranslation("finances");
+  const { t: tfit } = useTranslation("fitness");
 
   return (error: unknown): string => {
     if (!(error instanceof ApiClientError)) {
@@ -90,6 +106,10 @@ export const useErrorMessage = () => {
 
     if (isFinanceCode(error.code)) {
       return tf(FINANCE_MESSAGES[error.code]);
+    }
+
+    if (isFitnessCode(error.code)) {
+      return tfit(FITNESS_MESSAGES[error.code]);
     }
 
     const key = MESSAGE_FOR_CODE[error.code];

@@ -1,0 +1,140 @@
+{
+  "title": "Fitness",
+  "minutesShort": "min",
+  "minutes_one": "{{count}} min",
+  "minutes_other": "{{count}} min",
+  "kg": "kg",
+  "nav": {
+    "trainings": "Trainings",
+    "weight": "Weight"
+  },
+  "home": {
+    "browse": "Browse",
+    "trainingsDescription": "What you train and on which days",
+    "weightDescription": "Body weight over time"
+  },
+  "status": {
+    "planned": "Planned",
+    "done": "Done",
+    "skipped": "Skipped",
+    "missed": "Missed"
+  },
+  "calendar": {
+    "today": "Today · {{date}}",
+    "nothing": "Nothing planned"
+  },
+  "overview": {
+    "week": "This week",
+    "thisWeek": "done of planned",
+    "weekValue": "{{done}} of {{scheduled}}",
+    "streak": "Streak",
+    "streakHint": "weeks in a row on plan",
+    "weeks_one": "{{count}} week",
+    "weeks_other": "{{count}} weeks",
+    "weight": "Weight",
+    "change30": "30 days",
+    "change7": "7 days: {{value}}"
+  },
+  "today": {
+    "title": "Training today"
+  },
+  "trainings": {
+    "add": "Add training",
+    "newTitle": "Add training",
+    "editTitle": "Edit training",
+    "created": "Training added",
+    "updated": "Training saved",
+    "archive": "Archive",
+    "restore": "Restore",
+    "archiveTitle": "Archive this training?",
+    "archiveDescription": "{{name}} stops repeating from today. Past sessions stay on the calendar.",
+    "archivedToast": "Training archived",
+    "restoredToast": "Training restored",
+    "noRepeat": "No weekly repeat",
+    "active": "Trainings",
+    "archived": "Archived",
+    "emptyTitle": "No trainings yet",
+    "emptyMessage": "Add one, pick the weekdays it repeats on, and it shows up on the calendar.",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Leg day",
+      "repeat": "Repeats every week on",
+      "repeatNone": "Not repeating: plan it day by day from the calendar.",
+      "repeatHint": "Shows on the calendar from today; earlier weeks keep their days.",
+      "duration": "Usual length",
+      "description": "Description",
+      "descriptionPlaceholder": "What you do, e.g. squats, lunges, calf raises"
+    }
+  },
+  "sessions": {
+    "add": "Add session",
+    "newTitle": "Add session",
+    "editTitle": "Session",
+    "scheduled": "Session planned",
+    "logged": "Session logged",
+    "saved": "Session saved",
+    "deleted": "Session deleted",
+    "deleteTitle": "Delete this session?",
+    "deleteDescription": "{{name}} is removed from the calendar.",
+    "lastTime": "Last time ({{date}}):",
+    "skip": "Skip",
+    "done": "Done",
+    "form": {
+      "training": "Training",
+      "other": "Something else…",
+      "title": "What did you do?",
+      "titlePlaceholder": "e.g. Run, Football",
+      "status": "Status",
+      "date": "Date",
+      "duration": "Length",
+      "note": "Note",
+      "notePlaceholder": "Weights, how it felt — shown next time"
+    }
+  },
+  "weight": {
+    "title": "Weight",
+    "add": "Log weight",
+    "newTitle": "Log weight",
+    "editTitle": "Weight",
+    "saved": "Weight saved",
+    "deleted": "Weight entry deleted",
+    "deleteTitle": "Delete this entry?",
+    "deleteDescription": "The weight for {{date}} is removed.",
+    "chartLabel": "Body weight over time",
+    "emptyTitle": "No weight logged yet",
+    "emptyMessage": "Log your weight to see the trend and how it changes over 7 and 30 days.",
+    "latest": "Latest",
+    "change7": "7 days",
+    "change30": "30 days",
+    "lowest": "Lowest",
+    "trend": "Trend",
+    "entries": "Entries",
+    "range": "Range",
+    "ranges": {
+      "30": "1M",
+      "90": "3M",
+      "365": "1Y"
+    },
+    "form": {
+      "weight": "Weight",
+      "date": "Date",
+      "dateHint": "One entry per day; saving a day again replaces it.",
+      "note": "Note"
+    }
+  },
+  "settings": {
+    "remindersOn": "Training reminders on",
+    "remindersOff": "Training reminders off"
+  },
+  "command": {
+    "addSession": "Add session",
+    "logWeight": "Log weight",
+    "addTraining": "Add training",
+    "calendar": "Fitness calendar"
+  },
+  "errors": {
+    "notAnOccurrence": "That day isn't part of this training's weekly repeat.",
+    "sessionNeedsTraining": "Pick a training or say what you did.",
+    "trainingArchived": "This training is archived. Restore it to plan sessions."
+  }
+}

@@ -4,6 +4,7 @@ import type { LinkProps } from "@tanstack/react-router";
 import {
   CarFront,
   ChevronsUpDown,
+  Dumbbell,
   LogOut,
   Search,
   Settings,
@@ -27,6 +28,7 @@ import { usePreferences } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
 import { cn } from "@/lib/utils";
 import { FinanceNavLinks } from "@/modules/finances/finance-nav-links";
+import { FitnessNavLinks } from "@/modules/fitness/fitness-nav-links";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import { useTodayCount } from "@/modules/today/today-view";
 
@@ -54,6 +56,12 @@ const FinanceDialogHost = lazy(async () => {
   const module = await import("@/modules/finances/dialogs/finance-dialog-host");
 
   return { default: module.FinanceDialogHost };
+});
+
+const FitnessDialogHost = lazy(async () => {
+  const module = await import("@/modules/fitness/dialogs/fitness-dialog-host");
+
+  return { default: module.FitnessDialogHost };
 });
 
 const SETTINGS = "/settings";
@@ -205,6 +213,17 @@ const Sidebar = () => {
             className={subLinkClass}
           />
         </ModuleGroup>
+        <ModuleGroup
+          icon={<Dumbbell />}
+          id="fitness"
+          label={t("nav.fitness")}
+          to="/fitness"
+        >
+          <FitnessNavLinks
+            activeClassName={activeNavLinkClass}
+            className={subLinkClass}
+          />
+        </ModuleGroup>
       </nav>
       <div className="mt-auto flex flex-col gap-px pt-6">
         <AccountMenu />
@@ -233,7 +252,7 @@ const Tab = ({
   <Link
     activeOptions={activeOptions}
     aria-label={label}
-    className="text-muted-foreground data-[status=active]:bg-primary/12 data-[status=active]:text-primary relative flex h-12 w-15 items-center justify-center rounded-full transition-colors active:opacity-70"
+    className="text-muted-foreground data-[status=active]:bg-primary/12 data-[status=active]:text-primary relative flex h-12 w-12 items-center justify-center rounded-full transition-colors active:opacity-70 min-[380px]:w-13"
     to={to}
   >
     <Icon className="size-6 [stroke-width:1.75] in-data-[status=active]:[stroke-width:2.25]" />
@@ -242,7 +261,7 @@ const Tab = ({
 );
 
 /**
- * Phones (Linear-style): an icon-only capsule of the four sections with Quick
+ * Phones (Linear-style): an icon-only capsule of the five sections with Quick
  * add as its own round button beside it. The page fades and blurs into the
  * canvas near the bottom edge, so rows never show through the bar.
  */
@@ -280,6 +299,7 @@ const MobileNav = () => {
           />
           <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
           <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
+          <Tab icon={Dumbbell} label={t("nav.fitness")} to="/fitness" />
           <Tab icon={Settings} label={t(SETTINGS_LABEL)} to={SETTINGS} />
         </div>
         <QuickAdd />
@@ -310,6 +330,7 @@ export const AppShell = () => {
       <Suspense fallback={null}>
         <EntryDialogHost />
         <FinanceDialogHost />
+        <FitnessDialogHost />
       </Suspense>
       <DoneTickHost />
     </CommandMenuProvider>

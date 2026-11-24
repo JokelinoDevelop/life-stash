@@ -3,9 +3,11 @@ import {
   ArrowLeft,
   ArrowLeftRight,
   ChevronRight,
+  Dumbbell,
   FileText,
   Plus,
   Receipt,
+  Scale,
   Wrench,
 } from "lucide-react";
 import { useState } from "react";
@@ -14,6 +16,7 @@ import { useTranslation } from "react-i18next";
 
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
+import { useFitnessDialog } from "@/modules/fitness/dialogs/use-fitness-dialog";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { useEntryDialog } from "@/modules/garage/entry-dialogs/use-entry-dialog";
 
@@ -63,7 +66,9 @@ const WhatToAdd = ({
   const { t: tFinances } = useTranslation("finances");
   const { t: tVisits } = useTranslation("garageVisits");
   const { t: tExpenses } = useTranslation("garageExpenses");
+  const { t: tFitness } = useTranslation("fitness");
   const financeDialog = useFinanceDialog();
+  const fitnessDialog = useFitnessDialog();
 
   return (
     <ul className="divide-divider divide-y">
@@ -81,6 +86,22 @@ const WhatToAdd = ({
         onSelect={() => {
           onClose();
           void financeDialog.open({ dialog: "invoice" });
+        }}
+      />
+      <Option
+        icon={<Dumbbell />}
+        label={tFitness("sessions.add")}
+        onSelect={() => {
+          onClose();
+          void fitnessDialog.open({ dialog: "session" });
+        }}
+      />
+      <Option
+        icon={<Scale />}
+        label={tFitness("weight.add")}
+        onSelect={() => {
+          onClose();
+          void fitnessDialog.open({ dialog: "weight" });
         }}
       />
       {hasCars && (

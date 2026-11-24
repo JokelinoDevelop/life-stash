@@ -4,10 +4,13 @@ import { AppShell } from "@/components/app/app-shell";
 import { setLocale } from "@/i18n";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";
 import { financeDialogSearchFields } from "@/modules/finances/dialogs/finance-dialog-search";
+import { fitnessDialogSearchFields } from "@/modules/fitness/dialogs/fitness-dialog-search";
 import { entryDialogSearchSchema } from "@/modules/garage/entry-dialogs/entry-dialog-search";
 
 export const Route = createFileRoute("/_app")({
-  validateSearch: entryDialogSearchSchema.extend(financeDialogSearchFields),
+  validateSearch: entryDialogSearchSchema
+    .extend(financeDialogSearchFields)
+    .extend(fitnessDialogSearchFields),
   beforeLoad: async ({ context, location }) => {
     const status = await context.queryClient.query(authStatusQuery);
 

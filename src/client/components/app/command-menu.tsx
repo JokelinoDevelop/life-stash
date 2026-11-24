@@ -34,6 +34,10 @@ import {
   FinanceInvoicesGroup,
   FinancePagesGroup,
 } from "@/modules/finances/finance-commands";
+import {
+  FitnessActionsGroup,
+  FitnessPagesGroup,
+} from "@/modules/fitness/fitness-commands";
 import type { CarListItem } from "@/modules/garage/cars/car-row";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { useCarJump } from "@/modules/garage/cars/use-car-jump";
@@ -216,6 +220,10 @@ const CommandMenuDialog = ({
     select: (state) => state.location.pathname.startsWith("/finances"),
   });
 
+  const onFitness = useRouterState({
+    select: (state) => state.location.pathname.startsWith("/fitness"),
+  });
+
   const run: Run = (start) => {
     onOpenChange(false);
     void start();
@@ -247,6 +255,8 @@ const CommandMenuDialog = ({
         {onFinances && <FinanceActionsGroup run={run} />}
         {onFinances && <FinanceInvoicesGroup run={run} />}
         {onFinances && <FinancePagesGroup run={run} />}
+        {onFitness && <FitnessActionsGroup run={run} />}
+        {onFitness && <FitnessPagesGroup run={run} />}
         <ActionsGroup current={current} run={run} />
         <CarsGroup cars={list} run={run} />
         <PagesGroup run={run} />
@@ -266,6 +276,8 @@ const CommandMenuDialog = ({
         </CommandGroup>
         {!onFinances && <FinanceActionsGroup run={run} />}
         {!onFinances && <FinancePagesGroup run={run} />}
+        {!onFitness && <FitnessActionsGroup run={run} />}
+        {!onFitness && <FitnessPagesGroup run={run} />}
       </CommandList>
       <Hints />
     </CommandDialog>
