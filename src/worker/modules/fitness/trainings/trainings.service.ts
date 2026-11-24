@@ -114,7 +114,11 @@ export class TrainingsService {
    * starts today, so past occurrences keep their days. Touched occurrences from today on
    * move to the new schedule.
    */
-  async #setWeekdays(trainingId: string, input: readonly number[]) {
+  async #setWeekdays(
+    trainingId: string,
+    input: readonly number[],
+    { keepEnded = false }: { keepEnded?: boolean } = {}
+  ) {
     const weekdays = normalizeWeekdays(input);
     const today = await this.#clock.today();
     const current = await this.#current(trainingId, today);
@@ -140,8 +144,9 @@ export class TrainingsService {
       await this.#sessions.reassignSchedule(current.id, next.id, today);
     }
 
-    if (current.startDate >= today) {
-      // It never applied to a past day: drop it instead of keeping an empty range.
+    if (current.startDate >= today && !keepEnded) {
+      // It never applied to a past day: drop it instead of keeping an empty range (archiving
+      // keeps it, so restoring knows the weekdays).
       await this.#schedules.delete(current.id);
 
       return;
@@ -186,7 +191,7 @@ export class TrainingsService {
       return;
     }
 
-    await this.#setWeekdays(trainingId, []);
+    await this.#setWeekdays(trainingId, [], { keepEnded: true });
     await this.#repo.update(trainingId, {
       archivedAt: new Date().toISOString(),
     });

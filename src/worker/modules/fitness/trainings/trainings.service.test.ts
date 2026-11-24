@@ -118,6 +118,18 @@ describe(TrainingsService, () => {
     });
   });
 
+  it("restores the weekdays of a repeat that only started today", async () => {
+    const { schedules, service } = setup();
+    const row = await service.create({ ...BASE, weekdays: [2] });
+    await service.archive(row.id);
+    await service.restore(row.id);
+
+    await expect(service.list(false)).resolves.toMatchObject([
+      { weekdays: [2] },
+    ]);
+    expect(schedules.rows.at(-1)?.endDate).toBeNull();
+  });
+
   it("refuses archived trainings for new sessions", async () => {
     const { service } = setup();
     const row = await service.create({ ...BASE, weekdays: [] });
