@@ -31,3 +31,25 @@ export const createTestHousehold = async (
 
   return { cookie: `ls_session=${token}`, householdId: newHouseholdId };
 };
+
+/** Test-only: a second member of an existing household, with their own session. */
+export const createTestMember = async (
+  db: Db,
+  memberOf: string,
+  name: string
+): Promise<{ userId: string; cookie: string }> => {
+  const userId = crypto.randomUUID();
+  const token = `${name}-${crypto.randomUUID()}`;
+
+  await db
+    .insert(users)
+    .values({ displayName: name, householdId: memberOf, id: userId });
+  await db.insert(userPreferences).values({ currency: "EUR", userId });
+  await db.insert(sessions).values({
+    expiresAt: new Date(Date.now() + 90 * DAY_MS).toISOString(),
+    id: await sha256Hex(token),
+    userId,
+  });
+
+  return { cookie: `ls_session=${token}`, userId };
+};

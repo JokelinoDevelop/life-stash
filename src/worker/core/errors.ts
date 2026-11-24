@@ -15,7 +15,8 @@ export type ApiErrorCode =
   | "unauthorized"
   | "validation"
   | AccountErrorCode
-  | FinanceErrorCode;
+  | FinanceErrorCode
+  | FitnessErrorCode;
 
 /** Account and invite error codes; the client translates each one (`errors.*` in common). */
 export type AccountErrorCode =
@@ -45,6 +46,12 @@ export type FinanceErrorCode =
   | "finances.invoice_number_taken"
   | "finances.transaction_linked";
 
+/** Fitness error codes; the client translates each one (`fitness:errors.*`). */
+export type FitnessErrorCode =
+  | "fitness.not_an_occurrence"
+  | "fitness.session_needs_training"
+  | "fitness.training_archived";
+
 export class ApiError extends Error {
   override readonly name = "ApiError";
   readonly code: ApiErrorCode;
@@ -67,7 +74,7 @@ export class ApiError extends Error {
 
 /** A business-rule error with a typed code (and optionally the field it concerns). */
 export const domainError = (
-  code: AccountErrorCode | FinanceErrorCode,
+  code: AccountErrorCode | FinanceErrorCode | FitnessErrorCode,
   options: { status?: ContentfulStatusCode; field?: string } = {}
 ): ApiError => new ApiError(options.status ?? 409, code, code, options.field);
 

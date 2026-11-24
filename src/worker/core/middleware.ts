@@ -34,6 +34,7 @@ export const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
       },
       env: c.env,
       householdId: auth.householdId,
+      userId: auth.userId,
     })
   );
 

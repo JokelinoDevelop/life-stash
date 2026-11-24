@@ -58,28 +58,20 @@ const sendOne = async (
   return !GONE_STATUSES.has(response.status);
 };
 
-/** Sends a notification to every device of every user in a household. */
-export const sendPushToHousehold = async (
+const subscriptionColumns = {
+  auth: pushSubscriptions.auth,
+  endpoint: pushSubscriptions.endpoint,
+  id: pushSubscriptions.id,
+  p256dh: pushSubscriptions.p256dh,
+};
+
+/** Sends to each subscription and prunes the ones the push service says are gone. */
+const sendToSubscriptions = async (
   env: Bindings,
   db: Db,
-  householdId: string,
+  rows: readonly StoredSubscription[],
   message: PushMessage
 ): Promise<number> => {
-  if (!isPushConfigured(env)) {
-    return 0;
-  }
-
-  const rows = await db
-    .select({
-      auth: pushSubscriptions.auth,
-      endpoint: pushSubscriptions.endpoint,
-      id: pushSubscriptions.id,
-      p256dh: pushSubscriptions.p256dh,
-    })
-    .from(pushSubscriptions)
-    .innerJoin(users, eq(users.id, pushSubscriptions.userId))
-    .where(eq(users.householdId, householdId));
-
   const results = await Promise.allSettled(
     rows.map(async (row) => ({
       alive: await sendOne(env, row, message),
@@ -100,4 +92,43 @@ export const sendPushToHousehold = async (
   }
 
   return results.filter((result) => result.status === "fulfilled").length;
+};
+
+/** Sends a notification to every device of every user in a household. */
+export const sendPushToHousehold = async (
+  env: Bindings,
+  db: Db,
+  householdId: string,
+  message: PushMessage
+): Promise<number> => {
+  if (!isPushConfigured(env)) {
+    return 0;
+  }
+
+  const rows = await db
+    .select(subscriptionColumns)
+    .from(pushSubscriptions)
+    .innerJoin(users, eq(users.id, pushSubscriptions.userId))
+    .where(eq(users.householdId, householdId));
+
+  return await sendToSubscriptions(env, db, rows, message);
+};
+
+/** Sends a notification to every device of one user (personal modules such as Fitness). */
+export const sendPushToUser = async (
+  env: Bindings,
+  db: Db,
+  userId: string,
+  message: PushMessage
+): Promise<number> => {
+  if (!isPushConfigured(env)) {
+    return 0;
+  }
+
+  const rows = await db
+    .select(subscriptionColumns)
+    .from(pushSubscriptions)
+    .where(eq(pushSubscriptions.userId, userId));
+
+  return await sendToSubscriptions(env, db, rows, message);
 };
