@@ -611,7 +611,8 @@
     "invoiceWord": "Invoice",
     "saved": "Your details saved",
     "bankAddress": "Bank address",
-    "bankCountry": "Bank country"
+    "bankCountry": "Bank country",
+    "edit": "Edit details"
   },
   "pdf": {
     "from": "From",

@@ -131,3 +131,6 @@ export const PageSkeleton = ({
     <BodySkeleton {...body} />
   </>
 );
+
+/** A Settings tab while it loads: groups of rows in the centred column (the tabs stay put). */
+export const SettingsSkeleton = () => <BodySkeleton rows={4} sections={3} />;

@@ -13,9 +13,12 @@ import { queryKeys } from "@/lib/query-keys";
 import { RecoveryCodesPanel } from "@/modules/auth/recovery-codes-panel";
 
 import { ReauthCancelledError, useReauth } from "./reauth/use-reauth";
+import { recoveryCodesQuery } from "./settings.queries";
 
-const LOW_CODES = 3;
+/** At or below this many unused codes, Settings warns. */
+export const LOW_CODES = 3;
 
+/** Sheet content: how many codes are left, and generating a new set (shown once). */
 export const RecoveryCodesSection = () => {
   const { t } = useTranslation("settings");
   const queryClient = useQueryClient();
@@ -23,10 +26,7 @@ export const RecoveryCodesSection = () => {
   const [codes, setCodes] = useState<string[] | null>(null);
   const reauth = useReauth();
 
-  const remaining = useQuery({
-    queryFn: async () => await unwrap(api.account["recovery-codes"].$get()),
-    queryKey: queryKeys.recoveryCodes,
-  });
+  const remaining = useQuery(recoveryCodesQuery);
 
   const regenerateLabel = t("security.regenerate");
 
@@ -65,8 +65,10 @@ export const RecoveryCodesSection = () => {
   return (
     <div className="flex flex-col gap-3">
       {reauth.dialog}
-      <h3 className="text-sm font-medium">{t("security.recoveryCodes")}</h3>
       <p className="text-muted-foreground text-sm">
+        {t("security.recoveryHelp")}
+      </p>
+      <p className="text-sm font-medium tabular-nums">
         {t("security.remaining", { count: remainingCount })}
       </p>
       {remaining.isSuccess && remainingCount <= LOW_CODES && (
@@ -80,7 +82,7 @@ export const RecoveryCodesSection = () => {
         onConfirm={regenerate}
         title={regenerateLabel}
         trigger={
-          <Button className="self-start" variant="outline">
+          <Button className="w-full md:w-auto md:self-start" variant="outline">
             <RefreshCw />
             {regenerateLabel}
           </Button>

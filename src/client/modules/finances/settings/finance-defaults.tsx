@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
 import { ErrorState, LoadingState } from "@/components/app/states";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -24,7 +23,10 @@ import { useErrorMessage } from "@/lib/errors";
 import { todayIso } from "@/lib/partial-date";
 import { queryKeys } from "@/lib/query-keys";
 import { usePreferences } from "@/lib/session";
-import { SettingsSection } from "@/modules/settings/settings-section";
+import {
+  SettingsRow,
+  SettingsSection,
+} from "@/modules/settings/settings-section";
 
 import {
   financeSettingsQuery,
@@ -48,10 +50,9 @@ const Row = ({
   id: string;
   label: string;
 }) => (
-  <div className="flex min-h-12 items-center justify-between gap-4 px-3 md:min-h-11">
-    <Label htmlFor={id}>{label}</Label>
+  <SettingsRow htmlFor={id} label={label}>
     {children}
-  </div>
+  </SettingsRow>
 );
 
 /** The main currency lives in user preferences; this saves it there (one toast). */

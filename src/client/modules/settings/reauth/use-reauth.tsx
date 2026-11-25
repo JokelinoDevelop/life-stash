@@ -5,14 +5,8 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { ResponsiveDialog } from "@/components/app/responsive-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { api, ApiClientError, unwrap } from "@/lib/api";
 import { PasskeyError, signInWithPasskey } from "@/lib/passkeys";
 import { queryKeys } from "@/lib/query-keys";
@@ -109,42 +103,36 @@ export const useReauth = (): Reauth => {
   const hasPassword = credentials.data?.hasPassword === true && email !== null;
 
   const dialog = (
-    <Dialog
+    <ResponsiveDialog
+      description={t("security.reauthDescription")}
       onOpenChange={(next) => {
         if (!next) {
           settle("cancelled");
         }
       }}
       open={open}
+      title={t("security.reauthTitle")}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("security.reauthTitle")}</DialogTitle>
-          <DialogDescription>
-            {t("security.reauthDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4">
-          {hasPasskey && (
-            <Button
-              onClick={() => {
-                void confirmWithPasskey();
-              }}
-              type="button"
-            >
-              <KeyRound />
-              {t("security.reauthPasskey")}
-            </Button>
-          )}
-          {hasPasskey && hasPassword && (
-            <p className="text-muted-foreground text-center text-sm">
-              {t("security.reauthOr")}
-            </p>
-          )}
-          {hasPassword && <ReauthForm email={email} onConfirmed={confirmed} />}
-        </div>
-      </DialogContent>
-    </Dialog>
+      <div className="flex flex-col gap-4">
+        {hasPasskey && (
+          <Button
+            onClick={() => {
+              void confirmWithPasskey();
+            }}
+            type="button"
+          >
+            <KeyRound />
+            {t("security.reauthPasskey")}
+          </Button>
+        )}
+        {hasPasskey && hasPassword && (
+          <p className="text-muted-foreground text-center text-sm">
+            {t("security.reauthOr")}
+          </p>
+        )}
+        {hasPassword && <ReauthForm email={email} onConfirmed={confirmed} />}
+      </div>
+    </ResponsiveDialog>
   );
 
   return { dialog, run };

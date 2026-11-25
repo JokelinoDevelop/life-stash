@@ -18,8 +18,11 @@ type Credentials = SuccessBody<
 
 export const CredentialsForm = ({
   credentials,
+  onSaved,
 }: {
   credentials: Credentials;
+  /** After a successful save, e.g. to close the sheet. */
+  onSaved?: () => void;
 }) => {
   const { t } = useTranslation("settings");
   const queryClient = useQueryClient();
@@ -49,6 +52,7 @@ export const CredentialsForm = ({
         newPassword: "",
       });
       await queryClient.invalidateQueries({ queryKey: queryKeys.credentials });
+      onSaved?.();
     },
     validators: { onSubmit: credentialsFormSchema(!credentials.hasPassword) },
   });
@@ -108,7 +112,7 @@ export const CredentialsForm = ({
       </FieldGroup>
       <form.AppForm>
         <form.SubmitButton
-          className="self-start"
+          className="w-full md:w-auto md:self-end"
           label={t("security.saveCredentials")}
         />
       </form.AppForm>
