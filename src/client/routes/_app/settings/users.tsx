@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { PageContent } from "@/components/app/page-header";
+import { SettingsSkeleton } from "@/components/app/page-skeleton";
 import { authStatusQuery } from "@/lib/session";
 import { cached, warm } from "@/lib/warm";
 import { UsersSettings } from "@/modules/settings/users/users-settings";
@@ -9,13 +9,7 @@ import {
   adminUsersQuery,
 } from "@/modules/settings/users/users.queries";
 
-const UsersSettingsPage = () => (
-  <PageContent>
-    <div className="flex flex-col gap-6">
-      <UsersSettings />
-    </div>
-  </PageContent>
-);
+const UsersSettingsPage = () => <UsersSettings />;
 
 export const Route = createFileRoute("/_app/settings/users")({
   beforeLoad: async ({ context }) => {
@@ -32,4 +26,5 @@ export const Route = createFileRoute("/_app/settings/users")({
     );
   },
   component: UsersSettingsPage,
+  pendingComponent: SettingsSkeleton,
 });

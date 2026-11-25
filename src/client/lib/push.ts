@@ -26,6 +26,22 @@ export const currentPushSubscription =
     return await ready.pushManager.getSubscription();
   };
 
+/**
+ * Whether this device is subscribed, without waiting for the service worker to
+ * become ready (that can take a while, or never happen in development).
+ */
+export const hasPushSubscription = async (): Promise<boolean> => {
+  if (!isPushSupported()) {
+    return false;
+  }
+
+  const found = await navigator.serviceWorker.getRegistration();
+
+  return (
+    found !== undefined && (await found.pushManager.getSubscription()) !== null
+  );
+};
+
 /** Asks for permission, subscribes this device and stores the subscription on the server. */
 export const enablePush = async (
   publicKey: string

@@ -4,7 +4,7 @@ import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { HouseholdName } from "@/components/app/household-name";
-import { PageHeader } from "@/components/app/page-header";
+import { PageContent, PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";
 import { useSignOut } from "@/lib/use-sign-out";
@@ -15,7 +15,7 @@ const PhoneSignOut = () => {
   const handleSignOut = useSignOut();
 
   return (
-    <div className="mt-8 md:hidden">
+    <div className="mt-1 md:hidden">
       <Button
         className="w-full"
         onClick={() => {
@@ -78,8 +78,13 @@ const SettingsLayout = () => {
           </Link>
         )}
       </nav>
-      <Outlet />
-      <PhoneSignOut />
+      {/* One centred column for every tab, like iOS / Linear settings. */}
+      <PageContent>
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-7">
+          <Outlet />
+          <PhoneSignOut />
+        </div>
+      </PageContent>
     </>
   );
 };

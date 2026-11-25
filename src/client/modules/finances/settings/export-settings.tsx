@@ -35,7 +35,7 @@ export const ExportSettings = () => {
       title={t("export.title")}
     >
       <div className="divide-divider divide-y">
-        <div className="flex min-h-12 items-center justify-between gap-4 px-3 md:min-h-11">
+        <div className="flex min-h-13 items-center justify-between gap-4 px-4 py-2 md:min-h-12">
           <span className="text-sm">{t("export.year")}</span>
           <Select
             onValueChange={(value) => {
@@ -59,7 +59,7 @@ export const ExportSettings = () => {
         </div>
         {(["transactions", "invoices"] as const).map((type) => (
           <div
-            className="flex min-h-12 items-center justify-between gap-4 px-3 md:min-h-11"
+            className="flex min-h-13 items-center justify-between gap-4 px-4 py-2 md:min-h-12"
             key={type}
           >
             <span className="text-sm">{t(`export.${type}`, { year })}</span>

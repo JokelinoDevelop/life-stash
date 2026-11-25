@@ -8,16 +8,21 @@
     "currency": "Default currency",
     "timeZone": "Time zone",
     "nudge": "Odometer reminder",
-    "nudgeHelp": "Ask me to log the odometer if I haven't for this many weeks. 0 turns it off.",
+    "nudgeHelp": "Reminds you to log the odometer when it has been this long.",
     "weeks": "weeks",
-    "saved": "Preferences saved",
+    "saved": "Saved",
     "theme": "Theme",
     "themes": {
       "system": "System",
       "light": "Light",
       "dark": "Dark"
     },
-    "themeIs": "Theme: {{theme}}"
+    "themeIs": "Theme: {{theme}}",
+    "undo": "Undo",
+    "nudgeOff": "Off",
+    "nudgeWeeks_one": "After {{count}} week",
+    "nudgeWeeks_other": "After {{count}} weeks",
+    "searchTimeZone": "Search time zones…"
   },
   "languages": {
     "en": "English",
@@ -39,7 +44,8 @@
     "unsupported": "This browser doesn't support push notifications. On iPhone, add LifeStash to your Home Screen first.",
     "notConfigured": "Push notifications aren't configured on the server yet.",
     "trainingReminders": "Training reminders",
-    "trainingRemindersHint": "A morning notification listing today's trainings (on this account only)."
+    "trainingRemindersHint": "A morning notification listing today's trainings (on this account only).",
+    "thisDevice": "Push on this device"
   },
   "security": {
     "title": "Sign-in & security",
@@ -71,7 +77,18 @@
     "reauthPasskey": "Use a passkey",
     "reauthOr": "or enter your password",
     "reauthConfirm": "Confirm",
-    "reauthWrongPassword": "That password isn't right."
+    "reauthWrongPassword": "That password isn't right.",
+    "password": "Password",
+    "passwordSet": "Set",
+    "passwordNotSet": "Not set",
+    "passkeyCount_zero": "None",
+    "passkeyCount_one": "{{count}}",
+    "passkeyCount_other": "{{count}}",
+    "codesLeft_zero": "None left",
+    "codesLeft_one": "{{count}} left",
+    "codesLeft_other": "{{count}} left",
+    "passkeysHelp": "Sign in with Face ID, a fingerprint or your phone instead of a password.",
+    "recoveryHelp": "One-time codes for when you can't use a passkey or password. Keep them somewhere safe."
   },
   "export": {
     "title": "Backup & export",
@@ -136,5 +153,8 @@
     "disableDescription": "They're signed out everywhere and can't sign in until you enable them again. Nothing is deleted.",
     "disabledToast": "Access disabled",
     "enabledToast": "Access enabled"
+  },
+  "account": {
+    "title": "Account"
   }
 }

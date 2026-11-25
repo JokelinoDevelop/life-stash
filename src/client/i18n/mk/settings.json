@@ -8,16 +8,21 @@
     "currency": "Основна валута",
     "timeZone": "Временска зона",
     "nudge": "Потсетник за километража",
-    "nudgeHelp": "Потсети ме да внесам километража ако не сум внел толку недели. 0 го исклучува.",
+    "nudgeHelp": "Те потсетува да ја внесеш километражата кога ќе помине толку време.",
     "weeks": "недели",
-    "saved": "Преференциите се зачувани",
+    "saved": "Зачувано",
     "theme": "Тема",
     "themes": {
       "system": "Системска",
       "light": "Светла",
       "dark": "Темна"
     },
-    "themeIs": "Тема: {{theme}}"
+    "themeIs": "Тема: {{theme}}",
+    "undo": "Врати",
+    "nudgeOff": "Исклучено",
+    "nudgeWeeks_one": "По {{count}} недела",
+    "nudgeWeeks_other": "По {{count}} недели",
+    "searchTimeZone": "Пребарај временски зони…"
   },
   "languages": {
     "en": "English",
@@ -39,7 +44,8 @@
     "unsupported": "Овој прелистувач не поддржува известувања. На iPhone, прво додај го LifeStash на почетниот екран.",
     "notConfigured": "Известувањата уште не се поставени на серверот.",
     "trainingReminders": "Потсетници за тренинг",
-    "trainingRemindersHint": "Утринско известување со денешните тренинзи (само за оваа сметка)."
+    "trainingRemindersHint": "Утринско известување со денешните тренинзи (само за оваа сметка).",
+    "thisDevice": "Известувања на овој уред"
   },
   "security": {
     "title": "Најава и безбедност",
@@ -71,7 +77,18 @@
     "reauthPasskey": "Користи passkey",
     "reauthOr": "или внесете ја лозинката",
     "reauthConfirm": "Потврди",
-    "reauthWrongPassword": "Лозинката не е точна."
+    "reauthWrongPassword": "Лозинката не е точна.",
+    "password": "Лозинка",
+    "passwordSet": "Поставена",
+    "passwordNotSet": "Не е поставена",
+    "passkeyCount_zero": "Нема",
+    "passkeyCount_one": "{{count}}",
+    "passkeyCount_other": "{{count}}",
+    "codesLeft_zero": "Нема",
+    "codesLeft_one": "Уште {{count}}",
+    "codesLeft_other": "Уште {{count}}",
+    "passkeysHelp": "Најави се со Face ID, отпечаток или телефонот наместо со лозинка.",
+    "recoveryHelp": "Еднократни кодови за кога не можеш да користиш passkey или лозинка. Чувај ги на сигурно место."
   },
   "export": {
     "title": "Резервна копија и извоз",
@@ -136,5 +153,8 @@
     "disableDescription": "Се одјавуваат насекаде и не можат да се најават додека повторно не ги овозможите. Ништо не се брише.",
     "disabledToast": "Пристапот е оневозможен",
     "enabledToast": "Пристапот е овозможен"
+  },
+  "account": {
+    "title": "Сметка"
   }
 }

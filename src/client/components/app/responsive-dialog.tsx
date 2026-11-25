@@ -13,7 +13,9 @@ import {
   DrawerContent,
   DrawerDescription,
   DrawerHeader,
+  DrawerNested,
   DrawerTitle,
+  useInsideDrawer,
 } from "@/components/ui/drawer";
 
 const DESKTOP_QUERY = "(min-width: 768px)";
@@ -33,7 +35,10 @@ export const useIsDesktop = () =>
     () => window.matchMedia(DESKTOP_QUERY).matches
   );
 
-/** A dialog on desktop and a bottom sheet on phones — ideal for quick logging. */
+/**
+ * A dialog on desktop and a bottom sheet on phones — ideal for quick logging.
+ * Opened from inside another sheet, it nests (a plain dialog there couldn't take focus).
+ */
 export const ResponsiveDialog = ({
   open,
   onOpenChange,
@@ -48,6 +53,7 @@ export const ResponsiveDialog = ({
   children: ReactNode;
 }) => {
   const isDesktop = useIsDesktop();
+  const nested = useInsideDrawer();
 
   if (isDesktop) {
     return (
@@ -65,8 +71,10 @@ export const ResponsiveDialog = ({
     );
   }
 
+  const Root = nested ? DrawerNested : Drawer;
+
   return (
-    <Drawer onOpenChange={onOpenChange} open={open}>
+    <Root onOpenChange={onOpenChange} open={open}>
       <DrawerContent>
         <DrawerHeader align="start">
           <DrawerTitle>{title}</DrawerTitle>
@@ -78,6 +86,6 @@ export const ResponsiveDialog = ({
           {children}
         </div>
       </DrawerContent>
-    </Drawer>
+    </Root>
   );
 };

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PageContent } from "@/components/app/page-header";
+import { SettingsSkeleton } from "@/components/app/page-skeleton";
 import { cached, warm } from "@/lib/warm";
 import { BusinessProfileSettings } from "@/modules/finances/business-profile/business-profile-settings";
 import { businessProfileQuery } from "@/modules/finances/business-profile/business-profile.queries";
@@ -14,16 +14,14 @@ import { FinanceDefaults } from "@/modules/finances/settings/finance-defaults";
 import { financeSettingsQuery } from "@/modules/finances/settings/finance-settings.queries";
 
 const FinanceSettingsPage = () => (
-  <PageContent>
-    <div className="flex flex-col gap-6">
-      <FinanceDefaults />
-      <BusinessProfileSettings />
-      <ExchangeRatesSettings />
-      <CategoriesSettings />
-      <RecurringSettings />
-      <ExportSettings />
-    </div>
-  </PageContent>
+  <>
+    <FinanceDefaults />
+    <BusinessProfileSettings />
+    <ExchangeRatesSettings />
+    <CategoriesSettings />
+    <RecurringSettings />
+    <ExportSettings />
+  </>
 );
 
 export const Route = createFileRoute("/_app/settings/finances")({
@@ -36,4 +34,5 @@ export const Route = createFileRoute("/_app/settings/finances")({
     );
   },
   component: FinanceSettingsPage,
+  pendingComponent: SettingsSkeleton,
 });

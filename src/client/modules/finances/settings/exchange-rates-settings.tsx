@@ -40,6 +40,7 @@ export const ExchangeRatesSettings = () => {
   return (
     <SettingsSection
       description={t("rates.description")}
+      flush
       title={t("rates.title")}
     >
       {body}

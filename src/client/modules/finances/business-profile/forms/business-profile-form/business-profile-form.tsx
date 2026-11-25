@@ -60,8 +60,11 @@ const ProfileVatFields = withForm({
 
 /** Settings › Finances › Your details: who issues your invoices and where to pay. */
 export const BusinessProfileForm = ({
+  onSaved,
   profile,
 }: {
+  /** After a successful save, e.g. to close the sheet. */
+  onSaved?: () => void;
   profile: BusinessProfile | null;
 }) => {
   const { t } = useTranslation("finances");
@@ -71,6 +74,7 @@ export const BusinessProfileForm = ({
     defaultValues: businessProfileToFormValues(profile),
     onSubmit: async ({ value }) => {
       await save.mutateAsync(businessProfileFormToRequest(value));
+      onSaved?.();
     },
     validators: { onSubmit: businessProfileFormSchema },
   });
@@ -167,7 +171,7 @@ export const BusinessProfileForm = ({
         <ProfileVatFields form={form} />
       </FieldGroup>
       <form.AppForm>
-        <form.SubmitButton className="self-end" />
+        <form.SubmitButton className="w-full md:w-auto md:self-end" />
       </form.AppForm>
     </form>
   );

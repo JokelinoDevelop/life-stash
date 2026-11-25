@@ -59,7 +59,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `StatPanel`, `Stat` | exactly 2 or 4 figures side by side (odd counts leave a gap: use a list) |
 | `StatusRing` + `STATUS_TEXT_TONE` | reminder status (four shapes, see principle 4) |
 | `CarMonogram` (garage) | car initials in a neutral square (desktop car header, rows) |
-| `SettingsSection` (settings) | settings group: title/description left, box right |
+| `SettingsSection`, `SettingsRow`, `SettingsActionRow`, `ChoiceSelect` (settings) | settings group: heading above an inset box of rows; a row has its control on the right, or a value + chevron that opens a sheet / download |
 | `Kbd` (`components/ui`) | key hints; hide on touch with `hidden md:inline-flex` |
 | `DialogContent variant="bare"` | dialogs with their own header and footer; `size="lg"` for long forms |
 | `FormDialog` + `DialogForm` / `FormSection` / `FormNotice` | every create/edit form (see "Forms and dialogs") |
@@ -148,4 +148,4 @@ Everything here applies below 48rem only; desktop renders exactly as before.
 - Horizontal strips that scroll on phones use `scrollbar-none` and `-mx-4 px-4` to bleed to the screen edge.
 - Prefer one meta line (`a · b · c`, `tabular-nums`) over badges. On phones keep it to the two or three facts that fit without truncating (put the date before free text such as a client name); the rest can be desktop-only.
 - **Summary lines** (a page description, Today's line) show one figure for money: `useSummaryTotals` (finances) gives "≈ MKD 586,320" in the main currency when every rate is known, otherwise the main currency first. Exact per-currency amounts stay in rows and tables.
-- **Settings lists** use `layout="row"` on `field.TextField` / `field.SelectField`: label left, compact control right, rows the height of the Finances defaults rows, inside a `flush` `SettingsSection`.
+- **Settings** (v0.7): every tab is one centred column (`max-w-2xl`) of grouped rows, like iOS / Linear. Choices save the moment you pick them (`useSavePreferences`: optimistic, a "Saved" toast with Undo, rollback on error); typed values (name, exchange rates) save on blur or Enter. No Save buttons on the page. Longer or sensitive things open in a sheet from an action row that shows where they stand (Password: Set, Passkeys: 2, Recovery codes: 3 left in amber when low, Your details: the invoice header preview). The route loader fetches everything the rows show, and rows reserve their height with `RowValueSkeleton`, so nothing pops in.

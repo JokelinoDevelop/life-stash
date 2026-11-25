@@ -12,7 +12,9 @@ import { queryKeys } from "@/lib/query-keys";
 import { usePasskeyErrorMessage } from "@/modules/auth/use-passkey-error";
 
 import { ReauthCancelledError, useReauth } from "./reauth/use-reauth";
+import { credentialsQuery, passkeysQuery } from "./settings.queries";
 
+/** Sheet content: your passkeys (remove) and Add passkey. */
 export const PasskeysSection = () => {
   const { t } = useTranslation("settings");
   const queryClient = useQueryClient();
@@ -20,15 +22,8 @@ export const PasskeysSection = () => {
   const errorMessage = usePasskeyErrorMessage();
   const reauth = useReauth();
 
-  const passkeys = useQuery({
-    queryFn: async () => await unwrap(api.account.passkeys.$get()),
-    queryKey: queryKeys.passkeys,
-  });
-
-  const credentials = useQuery({
-    queryFn: async () => await unwrap(api.account.credentials.$get()),
-    queryKey: queryKeys.credentials,
-  });
+  const passkeys = useQuery(passkeysQuery);
+  const credentials = useQuery(credentialsQuery);
 
   const refresh = async () => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.passkeys });
@@ -74,44 +69,48 @@ export const PasskeysSection = () => {
   return (
     <div className="flex flex-col gap-3">
       {reauth.dialog}
-      <h3 className="text-sm font-medium">{t("security.passkeys")}</h3>
-      <ul className="flex flex-col divide-y rounded-lg border">
-        {list.map((passkey) => (
-          <li className="flex items-center gap-3 p-3" key={passkey.id}>
-            <KeyRound className="text-muted-foreground size-4 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
-                {passkey.deviceName}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                {passkey.lastUsedAt === null
-                  ? t("security.neverUsed")
-                  : t("security.lastUsed", {
-                      date: format.date(passkey.lastUsedAt.slice(0, 10)),
-                    })}
-              </p>
-            </div>
-            {(list.length > 1 || credentials.data?.hasPassword === true) && (
-              <ConfirmDialog
-                onConfirm={async () => {
-                  await remove(passkey.id);
-                }}
-                trigger={
-                  <Button
-                    aria-label={t("security.removed")}
-                    size="icon"
-                    variant="ghost"
-                  >
-                    <Trash2 />
-                  </Button>
-                }
-              />
-            )}
-          </li>
-        ))}
-      </ul>
+      <p className="text-muted-foreground text-sm">
+        {t("security.passkeysHelp")}
+      </p>
+      {list.length > 0 && (
+        <ul className="divide-divider flex flex-col divide-y rounded-lg border">
+          {list.map((passkey) => (
+            <li className="flex items-center gap-3 p-3" key={passkey.id}>
+              <KeyRound className="text-muted-foreground size-4 shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">
+                  {passkey.deviceName}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {passkey.lastUsedAt === null
+                    ? t("security.neverUsed")
+                    : t("security.lastUsed", {
+                        date: format.date(passkey.lastUsedAt.slice(0, 10)),
+                      })}
+                </p>
+              </div>
+              {(list.length > 1 || credentials.data?.hasPassword === true) && (
+                <ConfirmDialog
+                  onConfirm={async () => {
+                    await remove(passkey.id);
+                  }}
+                  trigger={
+                    <Button
+                      aria-label={t("security.removed")}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <Trash2 />
+                    </Button>
+                  }
+                />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
       <Button
-        className="self-start"
+        className="w-full md:w-auto md:self-start"
         disabled={add.isPending}
         onClick={() => {
           add.mutate();
