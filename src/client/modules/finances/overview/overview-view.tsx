@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
+import { LOADING_LAYOUTS } from "@/components/app/loading-layouts";
+import { BodySkeleton } from "@/components/app/page-skeleton";
+import { EmptyState, ErrorState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useFormat } from "@/lib/format";
@@ -61,7 +63,7 @@ export const OverviewView = ({ year }: { year: number }) => {
   const overview = useQuery(overviewQuery(year));
 
   if (overview.isPending) {
-    return <LoadingState rows={4} sections={2} />;
+    return <BodySkeleton {...LOADING_LAYOUTS.finances} />;
   }
 
   if (overview.isError) {

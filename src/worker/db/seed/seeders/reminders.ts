@@ -23,8 +23,6 @@ const reminderRow = (
       : car.odometerOn(ctx.today) + reminder.dueInKm,
   householdId: ctx.householdId,
   id: crypto.randomUUID(),
-  itemId:
-    reminder.item === undefined ? null : ctx.catalog.itemId(reminder.item),
   kind: reminder.kind,
   notes: reminder.notes ?? null,
   title: reminder.title,

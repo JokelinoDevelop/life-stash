@@ -6,7 +6,6 @@ import {
   Fuel,
   Gauge,
   History,
-  ListChecks,
   Plus,
   ALargeSmall,
   Settings,
@@ -158,12 +157,7 @@ const CarsGroup = ({ cars, run }: { cars: CarListItem[]; run: Run }) => {
   );
 };
 
-type PagePath =
-  | "/"
-  | "/garage"
-  | "/garage/history"
-  | "/garage/catalog"
-  | "/settings";
+type PagePath = "/" | "/garage" | "/garage/history" | "/settings";
 
 const PAGES: readonly {
   icon: LucideIcon;
@@ -173,11 +167,10 @@ const PAGES: readonly {
   { icon: Sun, label: "today", to: "/" },
   { icon: CarFront, label: "garage", to: "/garage" },
   { icon: History, label: "history", to: "/garage/history" },
-  { icon: ListChecks, label: "catalog", to: "/garage/catalog" },
   { icon: Settings, label: "settings", to: "/settings" },
 ];
 
-type PageLabel = "today" | "garage" | "history" | "catalog" | "settings";
+type PageLabel = "today" | "garage" | "history" | "settings";
 
 const PagesGroup = ({ run }: { run: Run }) => {
   const { t } = useTranslation("command");

@@ -14,7 +14,6 @@ import { getPlatformProxy } from "wrangler";
 
 import { createDb } from "../../core/db";
 import type { Db } from "../../core/db";
-import { CatalogRefs } from "./context";
 import type { SeedContext } from "./context";
 import { DEMO_ACCOUNT } from "./fixtures/account";
 import { createRandom } from "./random";
@@ -57,7 +56,6 @@ const seed = async (db: Db) => {
 
   const ctx: SeedContext = {
     cars: [],
-    catalog: new CatalogRefs(),
     householdId: await createDemoAccount(db),
     random: createRandom(Number(args.seed)),
     finance: { categoryIds: new Map(), clientIds: new Map() },

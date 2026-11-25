@@ -8,8 +8,10 @@ import { useTranslation } from "react-i18next";
 import { useCommandMenu } from "@/components/app/command-menu-context";
 import { HouseholdName } from "@/components/app/household-name";
 import { ListSection } from "@/components/app/list-section";
+import { LOADING_LAYOUTS } from "@/components/app/loading-layouts";
 import { PageHeader, PageStack } from "@/components/app/page-header";
-import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
+import { BodySkeleton, PageSkeleton } from "@/components/app/page-skeleton";
+import { EmptyState, ErrorState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { Label } from "@/components/ui/label";
@@ -184,7 +186,9 @@ const GarageHome = () => {
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />
-      {(cars.isPending || overview.isPending) && <LoadingState />}
+      {(cars.isPending || overview.isPending) && (
+        <BodySkeleton {...LOADING_LAYOUTS.garage} />
+      )}
       {cars.isError && (
         <ErrorState
           error={cars.error}
@@ -239,5 +243,6 @@ export const Route = createFileRoute("/_app/garage/")({
       queryClient.query(cached(householdOverviewQuery))
     );
   },
+  pendingComponent: () => <PageSkeleton {...LOADING_LAYOUTS.garage} />,
   component: GarageHome,
 });

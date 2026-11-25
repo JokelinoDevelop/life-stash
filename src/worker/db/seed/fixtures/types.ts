@@ -24,10 +24,7 @@ export interface Money {
   currency: Currency;
 }
 
-/**
- * A visit line with its own cost. Linked to the catalog when the label matches an item name.
- * Plain catalog item names (`items: [...]`) are priced from `prices.ts` instead.
- */
+/** A visit line with its own cost. Plain names (`items: [...]`) are priced from `prices.ts` instead. */
 export interface CustomLine {
   label: string;
   cost?: number | null;
@@ -36,9 +33,10 @@ export interface CustomLine {
 
 /** A recurring job, e.g. the yearly oil service. Generates the visit history and its reminder. */
 export interface MaintenancePlan {
-  /** A catalog package (all its items are done) or a single catalog item. */
-  package?: string;
-  item?: string;
+  /** The reminder's title. */
+  title: string;
+  /** The lines each round logs, priced from `prices.ts`. */
+  items: string[];
   everyMonths: number;
   everyKm?: number;
   /** When the next one is due, in days from the end of ownership (today for active cars). */
@@ -51,7 +49,7 @@ export interface MaintenancePlan {
 export interface OneOffVisit {
   monthsAgo: number;
   kind: VisitKind;
-  /** Catalog item names. */
+  /** Line names, priced from `prices.ts`. */
   items?: string[];
   custom?: CustomLine[];
   shop?: string;
@@ -110,7 +108,6 @@ export interface ReadingHabit {
 export interface OneOffReminder {
   kind: "service" | "other";
   title: string;
-  item?: string;
   dueInDays?: number;
   /** Relative to the car's current odometer. */
   dueInKm?: number;

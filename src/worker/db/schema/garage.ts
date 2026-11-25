@@ -1,10 +1,4 @@
-import {
-  index,
-  integer,
-  primaryKey,
-  sqliteTable,
-  text,
-} from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 import { households } from "./core";
 
@@ -57,43 +51,6 @@ export const garageCars = sqliteTable(
   (table) => [index("garage_cars_household_idx").on(table.householdId)]
 );
 
-export const garageItems = sqliteTable(
-  "garage_items",
-  {
-    archivedAt: text("archived_at"),
-    createdAt: text("created_at").notNull().$defaultFn(now),
-    householdId: householdId(),
-    id: id(),
-    name: text("name").notNull(),
-  },
-  (table) => [index("garage_items_household_idx").on(table.householdId)]
-);
-
-export const garagePackages = sqliteTable(
-  "garage_packages",
-  {
-    createdAt: text("created_at").notNull().$defaultFn(now),
-    householdId: householdId(),
-    id: id(),
-    name: text("name").notNull(),
-    notes: text("notes"),
-  },
-  (table) => [index("garage_packages_household_idx").on(table.householdId)]
-);
-
-export const garagePackageItems = sqliteTable(
-  "garage_package_items",
-  {
-    itemId: text("item_id")
-      .notNull()
-      .references(() => garageItems.id, { onDelete: "cascade" }),
-    packageId: text("package_id")
-      .notNull()
-      .references(() => garagePackages.id, { onDelete: "cascade" }),
-  },
-  (table) => [primaryKey({ columns: [table.packageId, table.itemId] })]
-);
-
 export const garageServiceVisits = sqliteTable(
   "garage_service_visits",
   {
@@ -126,9 +83,6 @@ export const garageServiceVisitItems = sqliteTable(
   {
     costMinor: integer("cost_minor"),
     id: id(),
-    itemId: text("item_id").references(() => garageItems.id, {
-      onDelete: "set null",
-    }),
     label: text("label").notNull(),
     notes: text("notes"),
     position: integer("position").notNull().default(0),
@@ -136,10 +90,7 @@ export const garageServiceVisitItems = sqliteTable(
       .notNull()
       .references(() => garageServiceVisits.id, { onDelete: "cascade" }),
   },
-  (table) => [
-    index("garage_visit_items_visit_idx").on(table.visitId),
-    index("garage_visit_items_item_idx").on(table.itemId),
-  ]
+  (table) => [index("garage_visit_items_visit_idx").on(table.visitId)]
 );
 
 export const garageOdometerReadings = sqliteTable(
@@ -174,17 +125,11 @@ export const garageReminders = sqliteTable(
     id: id(),
     intervalKm: integer("interval_km"),
     intervalMonths: integer("interval_months"),
-    itemId: text("item_id").references(() => garageItems.id, {
-      onDelete: "set null",
-    }),
     kind: text("kind", {
       enum: ["service", "insurance", "registration", "other"],
     }).notNull(),
     notes: text("notes"),
     notifiedAt: text("notified_at"),
-    packageId: text("package_id").references(() => garagePackages.id, {
-      onDelete: "set null",
-    }),
     previousReminderId: text("previous_reminder_id"),
     title: text("title").notNull(),
   },

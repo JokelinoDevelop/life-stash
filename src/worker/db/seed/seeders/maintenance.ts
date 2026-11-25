@@ -51,33 +51,13 @@ const pastRounds = (
   return dates;
 };
 
-const planTarget = (ctx: SeedContext, plan: MaintenancePlan) => {
-  if (plan.package !== undefined) {
-    const pkg = ctx.catalog.package(plan.package);
-
-    return { items: pkg.items, packageId: pkg.id, title: plan.package };
-  }
-
-  if (plan.item !== undefined) {
-    return {
-      itemId: ctx.catalog.itemId(plan.item),
-      items: [plan.item],
-      title: plan.item,
-    };
-  }
-
-  throw new Error("A maintenance plan needs a package or an item");
-};
-
 const seedPlan = (ctx: SeedContext, car: SeededCar, plan: MaintenancePlan) => {
-  const target = planTarget(ctx, plan);
-
   const visits = pastRounds(ctx, car, plan).map((date) =>
     buildVisit(ctx, {
       car,
       date,
       currency: car.fixture.currency,
-      items: target.items,
+      items: plan.items,
       kind: "maintenance",
       labour: Math.round(ctx.random.jitter(plan.labour, 0.1)),
       odometerKm: car.odometerOn(date),
@@ -93,15 +73,13 @@ const seedPlan = (ctx: SeedContext, car: SeededCar, plan: MaintenancePlan) => {
           car,
           intervalKm: plan.everyKm,
           intervalMonths: plan.everyMonths,
-          itemId: target.itemId,
           kind: "service",
           lastDone: {
             date: latest.visit.date,
             odometerKm: latest.visit.odometerKm ?? null,
             visitId: latest.visit.id,
           },
-          packageId: target.packageId,
-          title: target.title,
+          title: plan.title,
         })
       : [];
 

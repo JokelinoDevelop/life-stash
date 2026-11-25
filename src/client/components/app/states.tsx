@@ -92,24 +92,62 @@ export const LoadingState = ({
   );
 };
 
-/** Placeholder for a dialog form while the entry it edits loads. */
+const FIELDS_PER_SECTION = 2;
+
+/**
+ * Placeholder for a dialog form while its data loads, laid out like
+ * `DialogForm`: sections of label + input split by hairlines, and the pinned
+ * footer with Save, so the sheet doesn't jump when the form replaces it.
+ */
 export const FormSkeleton = ({ fields = 4 }: { fields?: number }) => {
   const { t } = useTranslation();
+  const sections = Math.ceil(fields / FIELDS_PER_SECTION);
 
   return (
     <output
       aria-busy="true"
       aria-label={t("loading")}
-      className="animate-reveal flex flex-col gap-4 px-4 py-4"
+      className="animate-reveal flex min-h-0 flex-1 flex-col"
     >
-      {Array.from({ length: fields }, (_field, index) => (
-        <div className="flex flex-col gap-2" key={index}>
-          <div className={META_WIDTHS[index % META_WIDTHS.length]}>
-            <Skeleton className="h-3 w-full" />
+      <div className="divide-divider min-h-0 flex-1 divide-y overflow-hidden">
+        {Array.from({ length: sections }, (_section, section) => (
+          <div
+            className="flex flex-col gap-5 px-4 py-4 md:px-6 md:py-5"
+            key={section}
+          >
+            {Array.from(
+              {
+                length: Math.min(
+                  FIELDS_PER_SECTION,
+                  fields - section * FIELDS_PER_SECTION
+                ),
+              },
+              (_field, index) => (
+                <div
+                  className="flex flex-col gap-2"
+                  key={`field-${section * FIELDS_PER_SECTION + index}`}
+                >
+                  <div
+                    className={cn(
+                      "flex h-5 items-center",
+                      META_WIDTHS[
+                        (section * FIELDS_PER_SECTION + index) %
+                          META_WIDTHS.length
+                      ]
+                    )}
+                  >
+                    <Skeleton className="h-3 w-full" />
+                  </div>
+                  <Skeleton className="h-9 w-full" />
+                </div>
+              )
+            )}
           </div>
-          <Skeleton className="h-9 w-full" />
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="border-divider pb-safe-2.5 flex shrink-0 items-center justify-end border-t px-3 pt-2.5 md:px-5 md:py-3">
+        <Skeleton className="h-12 flex-1 md:h-7 md:w-20 md:flex-none" />
+      </div>
     </output>
   );
 };

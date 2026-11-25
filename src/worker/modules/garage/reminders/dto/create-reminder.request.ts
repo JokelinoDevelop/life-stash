@@ -15,10 +15,8 @@ export const createReminderRequest = z
     dueOdometerKm: kilometres.nullable(),
     intervalKm: z.number().int().min(1).max(1_000_000).nullable(),
     intervalMonths: z.number().int().min(1).max(240).nullable(),
-    itemId: z.uuid().nullable(),
     kind: z.enum(REMINDER_KINDS),
     notes: optionalText(),
-    packageId: z.uuid().nullable(),
     title: shortText(120),
   })
   .refine((value) => value.dueDate !== null || value.dueOdometerKm !== null, {

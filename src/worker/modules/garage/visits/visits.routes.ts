@@ -1,11 +1,9 @@
-import { lastDonePerItem } from "@shared/domain/item-history";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 import type { AppEnv } from "../../../core/app-env";
 import { validate } from "../../../core/validate";
 import {
-  garageItems,
   garageServiceVisitItems,
   garageServiceVisits,
 } from "../../../db/schema/garage";
@@ -19,8 +17,6 @@ import { deleteVisitParams } from "./dto/delete-visit.request";
 import type { DeleteVisitResponse } from "./dto/delete-visit.response";
 import { getVisitParams } from "./dto/get-visit.request";
 import type { GetVisitResponse } from "./dto/get-visit.response";
-import { itemHistoryQuery } from "./dto/item-history.request";
-import type { ItemHistoryResponse } from "./dto/item-history.response";
 import { listVisitsQuery } from "./dto/list-visits.request";
 import type { ListVisitsResponse } from "./dto/list-visits.response";
 import {
@@ -65,7 +61,6 @@ export const visitRoutes = new Hono<AppEnv>()
         items: items.map((item) => ({
           costMinor: item.costMinor,
           id: item.id,
-          itemId: item.itemId,
           label: item.label,
         })),
         kind: visit.kind,
@@ -75,58 +70,6 @@ export const visitRoutes = new Hono<AppEnv>()
         shop: visit.shop,
         totalMinor: visit.totalMinor,
         effectiveTotalMinor,
-      })),
-    };
-
-    return c.json(body);
-  })
-  .get("/item-history", validate("query", itemHistoryQuery), async (c) => {
-    const { householdId } = c.var.auth;
-
-    const car = await findCar(
-      c.var.db,
-      householdId,
-      c.req.valid("query").carId
-    );
-
-    const [visits, catalog] = await Promise.all([
-      visitsOfCar(c.var.db, householdId, car.id),
-      c.var.db
-        .select({ id: garageItems.id, name: garageItems.name })
-        .from(garageItems)
-        .where(eq(garageItems.householdId, householdId)),
-    ]);
-
-    const names = new Map(catalog.map((item) => [item.id, item.name]));
-
-    const done = visits.flatMap(({ visit, items }) =>
-      items.flatMap((item) =>
-        item.itemId === null
-          ? []
-          : [
-              {
-                byPreviousOwner: visit.byPreviousOwner,
-                date: visit.date,
-                datePrecision: visit.datePrecision,
-                itemId: item.itemId,
-                label: names.get(item.itemId) ?? item.label,
-                odometerKm: visit.odometerKm,
-                visitId: visit.id,
-              },
-            ]
-      )
-    );
-
-    const body: ItemHistoryResponse = {
-      items: lastDonePerItem(done).map((entry) => ({
-        byPreviousOwner: entry.byPreviousOwner,
-        itemId: entry.itemId,
-        lastDate: entry.date,
-        lastDatePrecision: entry.datePrecision,
-        lastOdometerKm: entry.odometerKm,
-        name: entry.label,
-        timesDone: entry.timesDone,
-        visitId: entry.visitId,
       })),
     };
 
@@ -156,7 +99,6 @@ export const visitRoutes = new Hono<AppEnv>()
         items: items.map((item) => ({
           costMinor: item.costMinor,
           id: item.id,
-          itemId: item.itemId,
           label: item.label,
         })),
         kind: visit.kind,
@@ -181,7 +123,7 @@ export const visitRoutes = new Hono<AppEnv>()
     const { householdId } = c.var.auth;
     const car = await findCar(c.var.db, householdId, carId);
     assertWritableCar(car);
-    const items = await prepareVisitItems(c.var.db, householdId, inputItems);
+    const items = prepareVisitItems(inputItems);
     const id = crypto.randomUUID();
     await c.var.db.batch([
       c.var.db
@@ -229,7 +171,7 @@ export const visitRoutes = new Hono<AppEnv>()
 
       const car = await findCar(c.var.db, householdId, visit.carId);
       assertWritableCar(car);
-      const items = await prepareVisitItems(c.var.db, householdId, inputItems);
+      const items = prepareVisitItems(inputItems);
       await c.var.db.batch([
         c.var.db
           .update(garageServiceVisits)

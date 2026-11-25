@@ -5,10 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useCommandMenu } from "@/components/app/command-menu-context";
 import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
+import { PageSkeleton } from "@/components/app/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
 import { cached, warm } from "@/lib/warm";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
+import { fitnessOverviewQuery } from "@/modules/fitness/fitness.queries";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
 import { TodaySummaryLine, useTodayLabel } from "@/modules/today/today-hero";
@@ -51,8 +53,10 @@ export const Route = createFileRoute("/_app/")({
     await warm(
       queryClient.query(cached(householdOverviewQuery)),
       queryClient.query(cached(carsQuery(false))),
-      queryClient.query(cached(overviewQuery(year)))
+      queryClient.query(cached(overviewQuery(year))),
+      queryClient.query(cached(fitnessOverviewQuery))
     );
   },
+  pendingComponent: () => <PageSkeleton eyebrow rows={4} sections={2} />,
   component: TodayPage,
 });

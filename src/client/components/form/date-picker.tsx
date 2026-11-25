@@ -9,6 +9,7 @@ import { useState } from "react";
 import { enGB, mk } from "react-day-picker/locale";
 import { useTranslation } from "react-i18next";
 
+import { useIsDesktop } from "@/components/app/responsive-dialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,8 @@ import {
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
+
+import { DatePickerSheet } from "./date-picker-sheet";
 
 const FIRST_YEAR = 1950;
 const YEARS_AHEAD = 10;
@@ -135,6 +138,77 @@ export interface DatePickerProps {
   "aria-label"?: string;
 }
 
+/** Typed entry, the calendar and Today / Yesterday / Clear: the same in a popover or a sheet. */
+const PickerPanel = ({
+  autoFocusCalendar,
+  clearable,
+  onPick,
+  value,
+}: {
+  autoFocusCalendar: boolean;
+  clearable: boolean;
+  onPick: (iso: string) => void;
+  value: string;
+}) => {
+  const { t, i18n } = useTranslation();
+  const selected = isoToDate(value);
+  const today = todayIso();
+
+  return (
+    <>
+      <div className="border-divider border-b p-2">
+        <TypedDateInput onPick={onPick} />
+      </div>
+      <Calendar
+        autoFocus={autoFocusCalendar}
+        captionLayout="dropdown"
+        defaultMonth={selected ?? isoToDate(today)}
+        endMonth={new Date(Number(today.slice(0, 4)) + YEARS_AHEAD, 11)}
+        locale={i18n.language === "mk" ? mk : enGB}
+        mode="single"
+        onSelect={(date) => {
+          if (date !== undefined) {
+            onPick(dateToIso(date));
+          }
+        }}
+        selected={selected}
+        startMonth={new Date(FIRST_YEAR, 0)}
+        variant="popover"
+      />
+      <div className="border-divider flex items-center gap-1 border-t p-2">
+        <QuickPick
+          active={value === today}
+          label={t("date.today")}
+          onPick={() => {
+            onPick(today);
+          }}
+        />
+        <QuickPick
+          active={value === addDays(today, -1)}
+          label={t("date.yesterday")}
+          onPick={() => {
+            onPick(addDays(today, -1));
+          }}
+        />
+        {clearable && (
+          <Button
+            className="ml-auto"
+            disabled={value === ""}
+            onClick={() => {
+              onPick("");
+            }}
+            size="xs"
+            type="button"
+            variant="ghost"
+          >
+            {t("date.clear")}
+          </Button>
+        )}
+      </div>
+    </>
+  );
+};
+
 /** shadcn date picker: a button that opens a calendar with Today / Yesterday and typed entry. */
 export const DatePicker = ({
   value,
@@ -147,11 +221,19 @@ export const DatePicker = ({
   variant = "field",
   "aria-label": ariaLabel,
 }: DatePickerProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const label = useDateLabel();
+  const isDesktop = useIsDesktop();
   const [open, setOpen] = useState(false);
-  const selected = isoToDate(value);
-  const today = todayIso();
+  const empty = !isIsoDate(value);
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+
+    if (!next) {
+      onBlur?.();
+    }
+  };
 
   const pick = (iso: string) => {
     onChange(iso);
@@ -159,36 +241,57 @@ export const DatePicker = ({
     onBlur?.();
   };
 
-  const text =
-    selected === undefined ? (placeholder ?? t("date.pick")) : label(value);
+  const text = empty ? (placeholder ?? t("date.pick")) : label(value);
+
+  const triggerProps = {
+    "aria-invalid": invalid,
+    "aria-label": ariaLabel,
+    className: cn(variant === "field" && "w-full"),
+    "data-empty": empty,
+    size: variant === "chip" ? ("xs" as const) : ("default" as const),
+    type: "button" as const,
+    variant: "field" as const,
+    id,
+  };
+
+  const triggerContent = (
+    <>
+      <CalendarDays />
+      <span className="truncate tabular-nums">{text}</span>
+    </>
+  );
+
+  const panel = (
+    <PickerPanel
+      autoFocusCalendar={isDesktop}
+      clearable={clearable}
+      onPick={pick}
+      value={value}
+    />
+  );
+
+  if (!isDesktop) {
+    return (
+      <>
+        <Button
+          {...triggerProps}
+          onClick={() => {
+            setOpen(true);
+          }}
+        >
+          {triggerContent}
+        </Button>
+        <DatePickerSheet onOpenChange={handleOpenChange} open={open}>
+          {panel}
+        </DatePickerSheet>
+      </>
+    );
+  }
 
   return (
-    <Popover
-      onOpenChange={(next) => {
-        setOpen(next);
-
-        if (!next) {
-          onBlur?.();
-        }
-      }}
-      open={open}
-    >
-      <PopoverTrigger
-        render={
-          <Button
-            aria-invalid={invalid}
-            aria-label={ariaLabel}
-            className={cn(variant === "field" && "w-full")}
-            data-empty={selected === undefined}
-            id={id}
-            size={variant === "chip" ? "xs" : "default"}
-            type="button"
-            variant="field"
-          />
-        }
-      >
-        <CalendarDays />
-        <span className="truncate tabular-nums">{text}</span>
+    <Popover onOpenChange={handleOpenChange} open={open}>
+      <PopoverTrigger render={<Button {...triggerProps} />}>
+        {triggerContent}
       </PopoverTrigger>
       <PopoverContent
         align="start"
@@ -196,55 +299,7 @@ export const DatePicker = ({
         collisionPadding={8}
         variant="bare"
       >
-        <div className="border-divider border-b p-2">
-          <TypedDateInput onPick={pick} />
-        </div>
-        <Calendar
-          autoFocus
-          captionLayout="dropdown"
-          defaultMonth={selected ?? isoToDate(today)}
-          endMonth={new Date(Number(today.slice(0, 4)) + YEARS_AHEAD, 11)}
-          locale={i18n.language === "mk" ? mk : enGB}
-          mode="single"
-          onSelect={(date) => {
-            if (date !== undefined) {
-              pick(dateToIso(date));
-            }
-          }}
-          selected={selected}
-          startMonth={new Date(FIRST_YEAR, 0)}
-          variant="popover"
-        />
-        <div className="border-divider flex items-center gap-1 border-t p-2">
-          <QuickPick
-            active={value === today}
-            label={t("date.today")}
-            onPick={() => {
-              pick(today);
-            }}
-          />
-          <QuickPick
-            active={value === addDays(today, -1)}
-            label={t("date.yesterday")}
-            onPick={() => {
-              pick(addDays(today, -1));
-            }}
-          />
-          {clearable && (
-            <Button
-              className="ml-auto"
-              disabled={value === ""}
-              onClick={() => {
-                pick("");
-              }}
-              size="xs"
-              type="button"
-              variant="ghost"
-            >
-              {t("date.clear")}
-            </Button>
-          )}
-        </div>
+        {panel}
       </PopoverContent>
     </Popover>
   );

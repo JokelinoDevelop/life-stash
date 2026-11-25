@@ -18,8 +18,6 @@ export const reminderFormSchema = z
     intervalMonths: optionalInteger,
     kind: z.enum(REMINDER_KINDS),
     notes: optionalText(),
-    /** "" for none, otherwise "package:<id>" or "item:<id>". */
-    target: z.string(),
     title: requiredText(120),
   })
   .refine((value) => value.dueDate !== "" || value.dueOdometer.trim() !== "", {

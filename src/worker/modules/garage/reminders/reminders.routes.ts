@@ -27,12 +27,7 @@ import {
 } from "./dto/update-reminder.request";
 import type { UpdateReminderResponse } from "./dto/update-reminder.response";
 import { activeReminders } from "./evaluate";
-import {
-  assertReminderLinks,
-  findReminder,
-  recentlyCompleted,
-  suggestedItemsFor,
-} from "./reminders.service";
+import { findReminder, recentlyCompleted } from "./reminders.service";
 
 const REMINDER_PATH = "/:reminderId";
 
@@ -59,12 +54,10 @@ export const reminderRoutes = new Hono<AppEnv>()
         id: reminder.id,
         intervalKm: reminder.intervalKm,
         intervalMonths: reminder.intervalMonths,
-        itemId: reminder.itemId,
         kind: reminder.kind,
         kmLeft: evaluation.kmLeft,
         notes: reminder.notes,
         notifiedAt: reminder.notifiedAt,
-        packageId: reminder.packageId,
         status: evaluation.status,
         title: reminder.title,
       })),
@@ -98,13 +91,10 @@ export const reminderRoutes = new Hono<AppEnv>()
         id: reminder.id,
         intervalKm: reminder.intervalKm,
         intervalMonths: reminder.intervalMonths,
-        itemId: reminder.itemId,
         kind: reminder.kind,
         notes: reminder.notes,
-        packageId: reminder.packageId,
         title: reminder.title,
       },
-      suggestedItems: await suggestedItemsFor(c.var.db, reminder),
     };
 
     return c.json(body);
@@ -114,7 +104,6 @@ export const reminderRoutes = new Hono<AppEnv>()
     const { householdId } = c.var.auth;
     const car = await findCar(c.var.db, householdId, carId);
     assertWritableCar(car);
-    await assertReminderLinks(c.var.db, householdId, fields);
 
     const [row] = await c.var.db
       .insert(garageReminders)
@@ -144,8 +133,6 @@ export const reminderRoutes = new Hono<AppEnv>()
       if (reminder.completedAt !== null) {
         throw conflict("This reminder is already completed");
       }
-
-      await assertReminderLinks(c.var.db, householdId, fields);
 
       const targetsChanged =
         fields.dueDate !== reminder.dueDate ||

@@ -23,7 +23,6 @@ import { Route as AppFitnessIndexRouteImport } from './routes/_app/fitness/index
 import { Route as AppFitnessTrainingsRouteImport } from './routes/_app/fitness/trainings'
 import { Route as AppFitnessWeightRouteImport } from './routes/_app/fitness/weight'
 import { Route as AppGarageIndexRouteImport } from './routes/_app/garage/index'
-import { Route as AppGarageCatalogRouteImport } from './routes/_app/garage/catalog'
 import { Route as AppGarageHistoryRouteImport } from './routes/_app/garage/history'
 import { Route as AppGarageRemindersRouteImport } from './routes/_app/garage/reminders'
 import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
@@ -103,11 +102,6 @@ const AppGarageIndexRoute = AppGarageIndexRouteImport.update({
   path: '/garage/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppGarageCatalogRoute = AppGarageCatalogRouteImport.update({
-  id: '/garage/catalog',
-  path: '/garage/catalog',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppGarageHistoryRoute = AppGarageHistoryRouteImport.update({
   id: '/garage/history',
   path: '/garage/history',
@@ -167,7 +161,6 @@ export interface FileRoutesByFullPath {
   '/finances/transactions': typeof AppFinancesTransactionsRoute
   '/fitness/trainings': typeof AppFitnessTrainingsRoute
   '/fitness/weight': typeof AppFitnessWeightRoute
-  '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
@@ -191,7 +184,6 @@ export interface FileRoutesByTo {
   '/finances/transactions': typeof AppFinancesTransactionsRoute
   '/fitness/trainings': typeof AppFitnessTrainingsRoute
   '/fitness/weight': typeof AppFitnessWeightRoute
-  '/garage/catalog': typeof AppGarageCatalogRoute
   '/garage/history': typeof AppGarageHistoryRoute
   '/garage/reminders': typeof AppGarageRemindersRoute
   '/settings/finances': typeof AppSettingsFinancesRoute
@@ -218,7 +210,6 @@ export interface FileRoutesById {
   '/_app/finances/transactions': typeof AppFinancesTransactionsRoute
   '/_app/fitness/trainings': typeof AppFitnessTrainingsRoute
   '/_app/fitness/weight': typeof AppFitnessWeightRoute
-  '/_app/garage/catalog': typeof AppGarageCatalogRoute
   '/_app/garage/history': typeof AppGarageHistoryRoute
   '/_app/garage/reminders': typeof AppGarageRemindersRoute
   '/_app/settings/finances': typeof AppSettingsFinancesRoute
@@ -245,7 +236,6 @@ export interface FileRouteTypes {
     | '/finances/transactions'
     | '/fitness/trainings'
     | '/fitness/weight'
-    | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
@@ -269,7 +259,6 @@ export interface FileRouteTypes {
     | '/finances/transactions'
     | '/fitness/trainings'
     | '/fitness/weight'
-    | '/garage/catalog'
     | '/garage/history'
     | '/garage/reminders'
     | '/settings/finances'
@@ -295,7 +284,6 @@ export interface FileRouteTypes {
     | '/_app/finances/transactions'
     | '/_app/fitness/trainings'
     | '/_app/fitness/weight'
-    | '/_app/garage/catalog'
     | '/_app/garage/history'
     | '/_app/garage/reminders'
     | '/_app/settings/finances'
@@ -418,13 +406,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppGarageIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/garage/catalog': {
-      id: '/_app/garage/catalog'
-      path: '/garage/catalog'
-      fullPath: '/garage/catalog'
-      preLoaderRoute: typeof AppGarageCatalogRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/garage/history': {
       id: '/_app/garage/history'
       path: '/garage/history'
@@ -513,7 +494,6 @@ interface AppRouteChildren {
   AppFinancesTransactionsRoute: typeof AppFinancesTransactionsRoute
   AppFitnessTrainingsRoute: typeof AppFitnessTrainingsRoute
   AppFitnessWeightRoute: typeof AppFitnessWeightRoute
-  AppGarageCatalogRoute: typeof AppGarageCatalogRoute
   AppGarageHistoryRoute: typeof AppGarageHistoryRoute
   AppGarageRemindersRoute: typeof AppGarageRemindersRoute
   AppFinancesIndexRoute: typeof AppFinancesIndexRoute
@@ -532,7 +512,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppFinancesTransactionsRoute: AppFinancesTransactionsRoute,
   AppFitnessTrainingsRoute: AppFitnessTrainingsRoute,
   AppFitnessWeightRoute: AppFitnessWeightRoute,
-  AppGarageCatalogRoute: AppGarageCatalogRoute,
   AppGarageHistoryRoute: AppGarageHistoryRoute,
   AppGarageRemindersRoute: AppGarageRemindersRoute,
   AppFinancesIndexRoute: AppFinancesIndexRoute,

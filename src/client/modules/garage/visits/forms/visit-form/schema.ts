@@ -12,8 +12,6 @@ import {
 
 export const visitItemSchema = z.object({
   cost: optionalAmount,
-  /** Catalog item id, or "" for a custom label (the server links it to the catalog). */
-  itemId: z.string(),
   /** Stable React key for the row. */
   key: z.string(),
   label: requiredText(80),

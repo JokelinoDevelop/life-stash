@@ -1,3 +1,4 @@
+import { latestOdometer } from "@shared/domain/mileage";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { BellRing } from "lucide-react";
@@ -15,6 +16,7 @@ import { todayIso } from "@/lib/partial-date";
 
 import { CarCrumb } from "../cars/car-crumb";
 import { useInvalidateGarage } from "../cars/cars.queries";
+import { mileageQuery } from "../mileage/mileage.queries";
 import { reminderQuery } from "../reminders/reminders.queries";
 import type { ReminderDetail } from "../reminders/reminders.queries";
 import {
@@ -43,19 +45,18 @@ const NewVisitForm = ({
   const format = useFormat();
   const errorMessage = useErrorMessage();
   const invalidate = useInvalidateGarage();
-  const suggested = reminder?.suggestedItems ?? [];
+  const mileage = useQuery(mileageQuery(carId));
 
-  const items =
-    reminder !== null && suggested.length === 0
-      ? [{ itemId: "", label: reminder.reminder.title }]
-      : suggested;
+  const lastOdometerKm =
+    latestOdometer(mileage.data?.points ?? [])?.odometerKm ?? null;
 
   return (
     <VisitForm
       defaultValues={visitFormDefaults(
         { currency: format.currency, today: todayIso(), unit: format.unit },
-        items
+        reminder === null ? undefined : [reminder.reminder.title]
       )}
+      lastOdometerKm={lastOdometerKm}
       notice={
         reminder === null ? undefined : (
           <FormNotice icon={<BellRing />}>

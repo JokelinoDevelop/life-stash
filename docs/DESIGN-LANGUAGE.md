@@ -35,11 +35,11 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 
 ## Layout
 
-- **Desktop:** the sidebar sits on the canvas: the household name (a label), Search as a quiet row (⌘K), **Today** (with its count), then a small "Modules" label and one row per module (**Garage**, **Finances**, **Fitness**). Only the module you're in shows its pages (Garage: Service history, Service catalog; Finances: Transactions, Invoices, Clients; Fitness: Trainings, Weight), hanging off a thin guide line without icons; the others stay closed. Cars are not listed (they live on the Garage home and in ⌘K). Every row is 28px with the same 16px icon column; the current page is a quiet filled pill, hover a lighter one, module names in medium weight. At the bottom: **Settings**, then your name (menu: Log out, which asks to confirm) and a theme button (System → Light → Dark). On phones Settings is the bottom-bar tab and Log out is the last thing on the Settings page (never a header action). Badges follow one rule: a number means "needs action", muted, red only when overdue; a closed module shows its count on its row (Garage: cars with an overdue reminder; Finances: overdue invoices; Fitness: trainings still to do today).
+- **Desktop:** the sidebar sits on the canvas: the household name (a label), Search as a quiet row (⌘K), **Today** (with its count), then a small "Modules" label and one row per module (**Garage**, **Finances**, **Fitness**). Only the module you're in shows its pages (Garage: Service history; Finances: Transactions, Invoices, Clients; Fitness: Trainings, Weight), hanging off a thin guide line without icons; the others stay closed. Cars are not listed (they live on the Garage home and in ⌘K). Every row is 28px with the same 16px icon column; the current page is a quiet filled pill, hover a lighter one, module names in medium weight. At the bottom: **Settings**, then your name (menu: Log out, which asks to confirm) and a theme button (System → Light → Dark). On phones Settings is the bottom-bar tab and Log out is the last thing on the Settings page (never a header action). Badges follow one rule: a number means "needs action", muted, red only when overdue; a closed module shows its count on its row (Garage: cars with an overdue reminder; Finances: overdue invoices; Fitness: trainings still to do today).
 - Pages render inside one white bordered panel; below the 44px `PageHeader` bar (crumb › title, actions) the content uses the full panel width (no centred column); a side panel such as the car details keeps a fixed width beside a flexible main column. Module home pages are titled with the module name, not "Overview".
-- **Phones:** a Today / Garage / Finances / Fitness / Settings bottom bar (Today carries the count), floating above the home indicator (see "Phones (v0.5)"). `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (Service history, Service catalog) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
+- **Phones:** a Today / Garage / Finances / Fitness / Settings bottom bar (Today carries the count), floating above the home indicator (see "Phones (v0.5)"). `PageHeader` draws a top row (back or `mobileTop`, actions) above a large title. Pages the sidebar links to that the bottom bar has no room for (Service history) are listed under "Browse" at the end of the Garage home (`BrowseLinks`), and get a back arrow to Garage.
 - **Today** (`/`) lists what needs action across modules: recurring income to confirm, then Overdue / Next 30 days / Later, mixing reminders and unpaid invoices sorted by days left ("Later" shows 3 with "Show all"). Garage home shows only overdue and next-30-day reminders with a link to Today.
-- **Lists vs padded pages:** list pages (including the Service catalog) wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, full width).
+- **Lists vs padded pages:** list pages wrap content in `PageStack`. A `ListSection` there is a grey band heading with full-width rows on desktop (it carries `data-bleed`) and an inset box on phones; any other child gets a desktop margin. Form and settings pages use `PageContent` (padded, full width).
 - The Garage home and Today read `GET /api/garage/overview` (household name, reminders across cars, monthly spending, totals, km this year) — one request for the whole page.
 
 ## Building blocks (`src/client/components/app`)
@@ -65,8 +65,8 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `FormDialog` + `DialogForm` / `FormSection` / `FormNotice` | every create/edit form (see "Forms and dialogs") |
 | `AmountInput` (`components/form`) | the big amount at the top of every money dialog |
 | `FormDisclosure` (`components/form`) | "› More details": rare optional fields, open when editing a record that has them |
-| `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover, Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
-| `LoadingState` (`list` / `rows` / `block`), `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
+| `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover (phones: its own bottom sheet, nested in a form sheet), Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
+| `LoadingState` (`list` / `rows` / `block`), `PageSkeleton` / `BodySkeleton`, `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
 | `useConfirm()` (`components/app/confirm`) | imperative yes/no: `await confirm({ title, tone })` |
 | `useAppMutation` (`lib/mutation`) | every mutation: one toast, optional Undo / action, invalidation |
@@ -82,12 +82,12 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 - **Money dialogs share one order:** amount (`AmountInput`) → what it was for (category chips) → when (date chip) → the rest. Finances › Add transaction and Garage › Add expense both follow it.
 - **Common case first.** Rare options sit behind a link or `FormDisclosure`: the date field shows "Only know the month or year?" instead of the Exact / Month / Year toggle; the service form keeps shop, previous owner and notes under "More details".
 - The dialog opens on the first field. Closing with unsaved changes asks "Discard changes?". After a save: one toast, close, stay on the page (a new service offers "View" in the toast; a new car opens its page).
-- Edit dialogs load their own data and show `FormSkeleton` meanwhile, or `ErrorState` with retry.
+- Edit dialogs load their own data and show `FormSkeleton` meanwhile, or `ErrorState` with retry. Opening one waits up to 400 ms for that data (`prefetch*Dialog`, also started on touch / hover of a dialog link), so it usually opens at its final size.
 - Native `<input type="date">` is not used anywhere.
 
 ## In-between states
 
-- **Loading:** skeletons shaped like the content they replace (`LoadingState` list rows, `FormSkeleton` fields). They fade in after 150 ms (`animate-reveal`), so fast loads show nothing. Never a spinner for a whole page.
+- **Loading:** skeletons shaped like the content they replace: `PageSkeleton` (header bars at the real line heights, the page's panels from `LOADING_LAYOUTS`, then list rows) for routes, `FormSkeleton` (sections + pinned Save) for dialogs. They fade in after 150 ms (`animate-reveal`), so fast loads show nothing. Never a spinner for a whole page.
 - **Navigating:** the current page stays up; a 2px progress bar runs along the top of the panel after 150 ms. A route only swaps to the pending skeleton after 800 ms.
 - **Refetching:** keep the old data on screen (`placeholderData: keepPreviousData`) instead of returning to a skeleton.
 - **Saving:** the Save button keeps its label and width; a small spinner replaces the `⌘↵` hint and the button is disabled.
@@ -114,12 +114,12 @@ Subtle by default: motion explains a change the user just made; it never decorat
 - Paginate the flat, sorted list, then group the page (by year or month). A group heading's count and total describe the **whole** group, even when it continues on the next page.
 - Rows under a year or month heading use `format.shortDate` ("19.07"), so the meta line keeps room for the odometer and kind instead of repeating the year.
 - Summaries above a list stay compact: a strip (Expenses "This year by category") rather than a row per entry. Side lists cap at 8 with "Show all N".
-- The Service catalog is a filterable list: filter text + Active / Archived. Whole rows open the edit dialog; archive / delete live in that dialog's footer. Items show usage (times done, last done) as right-aligned columns on desktop and in the meta line on phones. N new item, P new package.
+- A service's "Work done" is a list of typed lines (what was done, optional cost); Enter in a line adds the next one. The total shows the lines' sum while left blank.
 
 ## Keyboard
 
 - ⌘K / Ctrl+K or `/` opens the command menu (scoped to the car you are on) (`CommandMenuProvider` in the app shell; `useCommandMenu().open()` from buttons).
-- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer (opens the reading dialog on Timeline), S service, E expense, R reminder. Garage: C add car. Service catalog: N add item, P add package. Show the key with `Kbd` on the page's primary button only.
+- Single-key shortcuts live in `lib/shortcuts.ts` and are bound with `useHotkey`, which ignores keys while typing, with modifiers, or while a dialog is open. Car page: L odometer (opens the reading dialog on Timeline), S service, E expense, R reminder. Garage: C add car. Show the key with `Kbd` on the page's primary button only.
 
 ## Phones (v0.5)
 

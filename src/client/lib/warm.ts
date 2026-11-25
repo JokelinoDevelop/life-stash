@@ -17,3 +17,24 @@ export const cached = <Options extends object>(options: Options) => ({
 export const warm = async (...loads: Promise<unknown>[]): Promise<void> => {
   await Promise.allSettled(loads);
 };
+
+const DIALOG_WAIT_MS = 400;
+
+/**
+ * For opening a dialog: wait for the data its form needs, so it opens at its
+ * final size instead of a skeleton that then grows. Gives up after 400 ms, so
+ * a slow network still opens it (with the skeleton). Pass
+ * `queryClient.query(cached(...))` calls.
+ */
+export const warmDialog = async (
+  ...loads: Promise<unknown>[]
+): Promise<void> => {
+  await Promise.race([
+    Promise.allSettled(loads),
+    // A timer has no promise API in the browser.
+    // oxlint-disable-next-line promise/avoid-new
+    new Promise((resolve) => {
+      setTimeout(resolve, DIALOG_WAIT_MS);
+    }),
+  ]);
+};

@@ -20,7 +20,6 @@ export const updateVisitRequest = z.object({
     .array(
       z.object({
         costMinor: moneyMinor.nullable(),
-        itemId: z.uuid().nullable(),
         label: shortText(80),
       })
     )

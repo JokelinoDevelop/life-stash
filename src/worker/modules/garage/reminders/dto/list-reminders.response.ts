@@ -8,8 +8,6 @@ export interface ListRemindersResponse {
     id: string;
     kind: ReminderKind;
     title: string;
-    packageId: string | null;
-    itemId: string | null;
     dueDate: string | null;
     dueOdometerKm: number | null;
     intervalMonths: number | null;
