@@ -14,7 +14,6 @@ import { totalsByCategory } from "../expenses/group-expenses";
 import { MileageStats } from "../mileage/mileage-stats";
 import { mileageQuery } from "../mileage/mileage.queries";
 import { SpendingSection } from "../spending/spending-section";
-import { ItemHistoryCard } from "../visits/item-history-card";
 import { DetailsTab } from "./details-tab";
 
 const MileageCharts = lazy(async () => {
@@ -79,7 +78,6 @@ export const DetailsStatsTab = ({
       </section>
       <Mileage carId={carId} />
       <Costs carId={carId} />
-      <ItemHistoryCard carId={carId} />
     </PageStack>
   );
 };

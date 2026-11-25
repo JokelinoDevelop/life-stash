@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 
 import { withoutFitnessDialog } from "./fitness-dialog-search";
 import type { FitnessDialogTarget } from "./fitness-dialog-search";
+import { prefetchFitnessDialog } from "./prefetch-fitness-dialog";
 
 /** The fitness dialog keys of the current URL. */
 export const useFitnessDialogSearch = () =>
@@ -19,8 +21,10 @@ export const useFitnessDialogSearch = () =>
 export const useFitnessDialog = () => {
   const navigate = useNavigate();
   const router = useRouter();
+  const client = useQueryClient();
 
   const open = async (target: FitnessDialogTarget): Promise<void> => {
+    await prefetchFitnessDialog(client, target);
     await navigate({
       search: (prev) => ({ ...withoutFitnessDialog(prev), ...target }),
       state: { entryDialog: true },

@@ -4,8 +4,10 @@ import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { ListRow, ListSection } from "@/components/app/list-section";
+import { LOADING_LAYOUTS } from "@/components/app/loading-layouts";
 import { PageStack } from "@/components/app/page-header";
-import { ErrorState, LoadingState } from "@/components/app/states";
+import { BodySkeleton } from "@/components/app/page-skeleton";
+import { ErrorState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
 
 import { FitnessDialogLink } from "../dialogs/fitness-dialog-link";
@@ -71,7 +73,7 @@ export const CalendarView = ({
   const dialog = useFitnessDialog();
 
   if (calendar.isPending || overview.isPending) {
-    return <LoadingState />;
+    return <BodySkeleton {...LOADING_LAYOUTS.fitness} />;
   }
 
   if (calendar.isError || overview.isError) {

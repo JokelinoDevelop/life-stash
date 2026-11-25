@@ -36,7 +36,7 @@ pnpm storage:setup
 The seed lives in `src/worker/db/seed/`:
 
 - `fixtures/` — the data, written as habits and plans ("oil service every 12 months, next due in 9 days"). Edit these to change what you see.
-- `seeders/` — one seeder per kind of record; `seeders.ts` lists them in order. Each gets a shared context with the household, today's date, a seeded random generator, and what earlier seeders created (catalog, cars).
+- `seeders/` — one seeder per kind of record; `seeders.ts` lists them in order. Each gets a shared context with the household, today's date, a seeded random generator, and what earlier seeders created (cars, finance ids).
 - `records/` — builders for rows that several seeders write (visits, expenses, recurring reminders).
 
 To seed a new feature, add its fixture fields, write a `Seeder` (`{ name, run(ctx) }` returning counts) and append it to `seeders.ts`.

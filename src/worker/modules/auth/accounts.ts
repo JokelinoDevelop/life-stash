@@ -6,7 +6,6 @@ import {
   users,
 } from "../../db/schema/core";
 import { seedDefaultCategories } from "../finances/categories/default-categories";
-import { seedGarageCatalog } from "./catalog-seed";
 import type { passkeyRow } from "./passkeys.service";
 import { issueRecoveryCodes } from "./recovery";
 
@@ -24,7 +23,7 @@ export interface NewAccount {
 
 /**
  * Creates a user with preferences and recovery codes. Without `householdId` it also creates their
- * household with the starter catalog and finance categories. Returns the plain recovery codes.
+ * household with the default finance categories. Returns the plain recovery codes.
  */
 export const createAccount = async (
   db: Db,
@@ -59,7 +58,6 @@ export const createAccount = async (
   }
 
   if (!joining) {
-    await seedGarageCatalog(db, householdId);
     await seedDefaultCategories(db, householdId);
   }
 

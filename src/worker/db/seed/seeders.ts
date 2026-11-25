@@ -1,6 +1,5 @@
 import type { Seeder } from "./seeder";
 import { carsSeeder } from "./seeders/cars";
-import { catalogSeeder } from "./seeders/catalog";
 import { extrasSeeder } from "./seeders/extras";
 import { financeDocumentsSeeder } from "./seeders/finance-documents";
 import { financeExtrasSeeder } from "./seeders/finance-extras";
@@ -22,7 +21,6 @@ import { visitsSeeder } from "./seeders/visits";
  * write a seeder in `seeders/` and list it here.
  */
 export const SEEDERS: readonly Seeder[] = [
-  catalogSeeder,
   carsSeeder,
   maintenanceSeeder,
   visitsSeeder,

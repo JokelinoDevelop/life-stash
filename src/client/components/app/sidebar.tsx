@@ -212,13 +212,6 @@ export const Sidebar = () => {
           >
             {t("nav.history")}
           </Link>
-          <Link
-            activeProps={{ className: activeSubLinkClass }}
-            className={subLinkClass}
-            to="/garage/catalog"
-          >
-            {t("nav.catalog")}
-          </Link>
         </ModuleGroup>
         <ModuleGroup
           badge={<FinancesBadge />}

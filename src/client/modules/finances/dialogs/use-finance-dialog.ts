@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 
 import { withoutFinanceDialog } from "./finance-dialog-search";
 import type { FinanceDialogTarget } from "./finance-dialog-search";
+import { prefetchFinanceDialog } from "./prefetch-finance-dialog";
 
 /** The finance dialog keys of the current URL. */
 export const useFinanceDialogSearch = () =>
@@ -20,8 +22,10 @@ export const useFinanceDialogSearch = () =>
 export const useFinanceDialog = () => {
   const navigate = useNavigate();
   const router = useRouter();
+  const client = useQueryClient();
 
   const open = async (target: FinanceDialogTarget): Promise<void> => {
+    await prefetchFinanceDialog(client, target);
     await navigate({
       search: (prev) => ({ ...withoutFinanceDialog(prev), ...target }),
       state: { entryDialog: true },

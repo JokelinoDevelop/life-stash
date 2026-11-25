@@ -5,10 +5,7 @@ import type { Db } from "../../core/db";
 import {
   garageCars,
   garageExpenses,
-  garageItems,
   garageOdometerReadings,
-  garagePackageItems,
-  garagePackages,
   garageReminders,
   garageServiceVisitItems,
   garageServiceVisits,
@@ -21,64 +18,41 @@ const money = (minor: number | null) =>
 
 /** Everything the household owns, as plain JSON (photos are referenced by key only). */
 export const exportHouseholdJson = async (db: Db, householdId: string) => {
-  const [cars, items, packages, visits, readings, reminders, expenses] =
-    await Promise.all([
-      db
-        .select()
-        .from(garageCars)
-        .where(eq(garageCars.householdId, householdId)),
-      db
-        .select()
-        .from(garageItems)
-        .where(eq(garageItems.householdId, householdId)),
-      db
-        .select()
-        .from(garagePackages)
-        .where(eq(garagePackages.householdId, householdId)),
-      db
-        .select()
-        .from(garageServiceVisits)
-        .where(eq(garageServiceVisits.householdId, householdId)),
-      db
-        .select()
-        .from(garageOdometerReadings)
-        .where(eq(garageOdometerReadings.householdId, householdId)),
-      db
-        .select()
-        .from(garageReminders)
-        .where(eq(garageReminders.householdId, householdId)),
-      db
-        .select()
-        .from(garageExpenses)
-        .where(eq(garageExpenses.householdId, householdId)),
-    ]);
+  const [cars, visits, readings, reminders, expenses] = await Promise.all([
+    db.select().from(garageCars).where(eq(garageCars.householdId, householdId)),
+    db
+      .select()
+      .from(garageServiceVisits)
+      .where(eq(garageServiceVisits.householdId, householdId)),
+    db
+      .select()
+      .from(garageOdometerReadings)
+      .where(eq(garageOdometerReadings.householdId, householdId)),
+    db
+      .select()
+      .from(garageReminders)
+      .where(eq(garageReminders.householdId, householdId)),
+    db
+      .select()
+      .from(garageExpenses)
+      .where(eq(garageExpenses.householdId, householdId)),
+  ]);
 
   const visitIds = visits.map((visit) => visit.id);
-  const packageIds = packages.map((pkg) => pkg.id);
 
-  const [visitItems, packageItems] = await Promise.all([
+  const visitItems =
     visitIds.length === 0
       ? []
-      : db
+      : await db
           .select()
           .from(garageServiceVisitItems)
-          .where(inArray(garageServiceVisitItems.visitId, visitIds)),
-    packageIds.length === 0
-      ? []
-      : db
-          .select()
-          .from(garagePackageItems)
-          .where(inArray(garagePackageItems.packageId, packageIds)),
-  ]);
+          .where(inArray(garageServiceVisitItems.visitId, visitIds));
 
   return {
     exportedAt: new Date().toISOString(),
     garage: {
       cars,
       expenses,
-      items,
-      packageItems,
-      packages,
       reminders,
       odometerReadings: readings,
       serviceVisitItems: visitItems,

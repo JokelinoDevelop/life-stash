@@ -9,7 +9,6 @@ import {
   garageServiceVisits,
 } from "../../../db/schema/garage";
 import type { CarRow } from "../cars/cars.service";
-import { assertItemsOwned, resolveItemIdsByName } from "../items/items.service";
 
 export type VisitRow = typeof garageServiceVisits.$inferSelect;
 
@@ -22,7 +21,6 @@ export interface VisitWithItems {
 }
 
 export interface VisitItemInput {
-  itemId: string | null;
   label: string;
   costMinor: number | null;
 }
@@ -155,28 +153,12 @@ export const photoCounts = async (
   return new Map(rows.map((row) => [row.ownerId, row.value]));
 };
 
-/** Validates linked catalog items and links custom labels to (possibly new) catalog items. */
-export const prepareVisitItems = async (
-  db: Db,
-  householdId: string,
+/** Trims labels and numbers the lines in the order they were entered. */
+export const prepareVisitItems = (
   items: VisitItemInput[]
-): Promise<(VisitItemInput & { itemId: string; position: number })[]> => {
-  const linkedIds = items.flatMap((item) =>
-    item.itemId === null ? [] : [item.itemId]
-  );
-
-  await assertItemsOwned(db, householdId, linkedIds);
-
-  const customLabels = items.flatMap((item) =>
-    item.itemId === null ? [item.label] : []
-  );
-
-  const resolved = await resolveItemIdsByName(db, householdId, customLabels);
-
-  return items.map((item, position) => ({
+): (VisitItemInput & { position: number })[] =>
+  items.map((item, position) => ({
     ...item,
-    itemId: item.itemId ?? resolved.get(item.label.trim().toLowerCase()) ?? "",
     label: item.label.trim(),
     position,
   }));
-};

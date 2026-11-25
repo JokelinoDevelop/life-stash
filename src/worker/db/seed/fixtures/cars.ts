@@ -1,8 +1,5 @@
+import { BIG_SERVICE, OIL_SERVICE } from "./jobs";
 import type { CarFixture } from "./types";
-
-/** Package names from the starter catalog. */
-const OIL_SERVICE = "Oil service";
-const BIG_SERVICE = "Big service";
 
 const GOLF_SHOP = "Auto Centar Kisela Voda";
 const CLIO_SHOP = "Renault Servis";
@@ -43,7 +40,7 @@ export const CAR_FIXTURES: CarFixture[] = [
         everyMonths: 12,
         labour: 1200,
         nextDueInDays: -9,
-        package: OIL_SERVICE,
+        ...OIL_SERVICE,
         shop: GOLF_SHOP,
       },
       {
@@ -51,7 +48,7 @@ export const CAR_FIXTURES: CarFixture[] = [
         everyMonths: 60,
         labour: 6500,
         nextDueInDays: 610,
-        package: BIG_SERVICE,
+        ...BIG_SERVICE,
         shop: GOLF_SHOP,
       },
     ],
@@ -148,7 +145,6 @@ export const CAR_FIXTURES: CarFixture[] = [
     reminders: [
       {
         dueInDays: 12,
-        item: "Tyres",
         kind: "other",
         title: "Swap to winter tyres",
       },
@@ -179,13 +175,14 @@ export const CAR_FIXTURES: CarFixture[] = [
         everyMonths: 12,
         labour: 1000,
         nextDueInDays: 140,
-        package: OIL_SERVICE,
+        ...OIL_SERVICE,
         shop: CLIO_SHOP,
       },
       {
         everyKm: 60_000,
         everyMonths: 48,
-        item: "Spark plugs",
+        items: ["Spark plugs"],
+        title: "Spark plugs",
         labour: 800,
         nextDueInDays: 25,
         shop: CLIO_SHOP,
@@ -279,7 +276,7 @@ export const CAR_FIXTURES: CarFixture[] = [
         everyMonths: 12,
         labour: 800,
         nextDueInDays: 90,
-        package: OIL_SERVICE,
+        ...OIL_SERVICE,
         shop: "Servis Bojan",
       },
     ],

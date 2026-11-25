@@ -5,7 +5,9 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { HouseholdName } from "@/components/app/household-name";
+import { LOADING_LAYOUTS } from "@/components/app/loading-layouts";
 import { PageHeader } from "@/components/app/page-header";
+import { PageSkeleton } from "@/components/app/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -142,5 +144,6 @@ export const Route = createFileRoute("/_app/finances/")({
       queryClient.query(cached(financeSettingsQuery))
     );
   },
+  pendingComponent: () => <PageSkeleton {...LOADING_LAYOUTS.finances} />,
   component: FinancesPage,
 });

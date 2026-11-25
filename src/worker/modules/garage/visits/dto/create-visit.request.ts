@@ -19,7 +19,6 @@ export const createVisitRequest = z.object({
     .array(
       z.object({
         costMinor: moneyMinor.nullable(),
-        itemId: z.uuid().nullable(),
         label: shortText(80),
       })
     )

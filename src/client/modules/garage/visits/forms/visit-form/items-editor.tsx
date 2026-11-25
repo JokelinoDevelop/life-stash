@@ -1,128 +1,205 @@
-import { useQuery } from "@tanstack/react-query";
 import { Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MotionList } from "@/components/app/list-section";
 import { FieldErrors } from "@/components/form/field-errors";
 import { Button } from "@/components/ui/button";
-
+import { Input } from "@/components/ui/input";
 import {
-  catalogItemsQuery,
-  catalogPackagesQuery,
-} from "../../../catalog/catalog.queries";
-import { ItemPicker } from "./item-picker";
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from "@/components/ui/input-group";
+
 import { newVisitItem } from "./mapper";
-import type { VisitFormItem } from "./schema";
 import type { VisitFormApi } from "./use-visit-form";
 
+/** One line: what was done, what it cost (optional) and remove. */
 const ItemRow = ({
+  currency,
+  focus,
   form,
   index,
-  currency,
+  onEnter,
+  onRemove,
 }: {
+  currency: string;
+  /** Focus the label once, right after the line was added. */
+  focus: boolean;
   form: VisitFormApi;
   index: number;
-  currency: string;
+  onEnter: () => void;
+  onRemove: () => void;
 }) => {
   const { t } = useTranslation("garageVisits");
   const { t: tc } = useTranslation();
+  const labelRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (focus) {
+      labelRef.current?.focus();
+    }
+  }, [focus]);
 
   return (
-    <li className="flex items-start gap-2 py-2">
-      <div className="grid flex-1 gap-2 sm:grid-cols-[1fr_10rem]">
-        <form.Subscribe
-          selector={(state) => state.values.items[index]?.itemId ?? ""}
-        >
-          {(itemId) =>
-            itemId === "" ? (
-              <form.AppField name={`items[${index}].label`}>
-                {(field) => <field.TextField label={t("form.customLabel")} />}
-              </form.AppField>
-            ) : (
-              <form.Subscribe
-                selector={(state) => state.values.items[index]?.label ?? ""}
-              >
-                {(label) => <p className="pt-1 font-medium sm:pt-8">{label}</p>}
-              </form.Subscribe>
-            )
-          }
-        </form.Subscribe>
-        <form.AppField name={`items[${index}].cost`}>
+    <li className="flex flex-col gap-1">
+      <div className="flex items-center gap-2">
+        <form.Field name={`items[${index}].label`}>
           {(field) => (
-            <field.TextField
-              inputMode="decimal"
-              label={t("form.itemCost")}
-              optional
-              suffix={currency}
+            <Input
+              aria-invalid={
+                field.state.meta.isTouched && !field.state.meta.isValid
+              }
+              aria-label={t("form.customLabel")}
+              autoCapitalize="sentences"
+              className="min-w-0 flex-1"
+              enterKeyHint="next"
+              name={field.name}
+              onBlur={field.handleBlur}
+              onChange={(event) => {
+                field.handleChange(event.target.value);
+              }}
+              onKeyDown={(event) => {
+                // Enter adds the next line instead of submitting.
+                if (
+                  event.key === "Enter" &&
+                  !event.metaKey &&
+                  !event.ctrlKey &&
+                  !event.nativeEvent.isComposing
+                ) {
+                  event.preventDefault();
+                  onEnter();
+                }
+              }}
+              placeholder={t("form.customLabel")}
+              ref={labelRef}
+              value={field.state.value}
             />
           )}
-        </form.AppField>
-      </div>
-      <div className="pt-6">
-        <form.Field mode="array" name="items">
+        </form.Field>
+        <form.Field name={`items[${index}].cost`}>
           {(field) => (
-            <Button
-              aria-label={tc("actions.remove")}
-              onClick={() => {
-                field.removeValue(index);
-              }}
-              size="icon"
-              type="button"
-              variant="ghost"
-            >
-              <X />
-            </Button>
+            <InputGroup className="w-28 shrink-0 sm:w-36">
+              <InputGroupInput
+                aria-invalid={
+                  field.state.meta.isTouched && !field.state.meta.isValid
+                }
+                aria-label={t("form.itemCost")}
+                inputMode="decimal"
+                name={field.name}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                }}
+                placeholder={t("form.itemCost")}
+                value={field.state.value}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupText>{currency}</InputGroupText>
+              </InputGroupAddon>
+            </InputGroup>
           )}
         </form.Field>
+        <Button
+          aria-label={tc("actions.remove")}
+          className="shrink-0"
+          onClick={onRemove}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          <X />
+        </Button>
       </div>
+      <form.Field name={`items[${index}].label`}>
+        {(field) => (
+          <FieldErrors
+            errors={field.state.meta.errors}
+            show={field.state.meta.isTouched}
+          />
+        )}
+      </form.Field>
+      <form.Field name={`items[${index}].cost`}>
+        {(field) => (
+          <FieldErrors
+            errors={field.state.meta.errors}
+            show={field.state.meta.isTouched}
+          />
+        )}
+      </form.Field>
     </li>
   );
 };
 
-/** The "work done" list: rows from packages, catalog items or custom labels. */
-export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
-  const { t } = useTranslation("garageVisits");
-  const items = useQuery(catalogItemsQuery(false));
-  const packages = useQuery(catalogPackagesQuery);
-
-  const names = new Map(
-    (items.data?.items ?? []).map((item) => [item.id, item.name])
+/** Moves focus to the label of line `index`, if it exists. */
+const focusLine = (list: HTMLElement | null, index: number): boolean => {
+  const input = list?.querySelector<HTMLInputElement>(
+    `input[name="items[${index}].label"]`
   );
 
-  const itemOptions = (items.data?.items ?? []).map((item) => ({
-    id: item.id,
-    label: item.name,
-  }));
+  input?.focus();
 
-  const packageOptions = (packages.data?.packages ?? []).map((pkg) => ({
-    hint: pkg.itemIds.flatMap((id) => names.get(id) ?? []).join(", "),
-    id: pkg.id,
-    label: pkg.name,
-  }));
+  return input !== null && input !== undefined;
+};
+
+const ItemLines = ({
+  focusKey,
+  form,
+  items,
+  onAdd,
+  onRemove,
+}: {
+  focusKey: string | null;
+  form: VisitFormApi;
+  items: { key: string }[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+}) => {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div ref={listRef}>
+      <form.Subscribe selector={(state) => state.values.currency}>
+        {(currency) => (
+          <MotionList className="flex flex-col gap-2">
+            {items.map((item, index) => (
+              <ItemRow
+                currency={currency}
+                focus={focusKey === item.key}
+                form={form}
+                index={index}
+                key={item.key}
+                onEnter={() => {
+                  if (!focusLine(listRef.current, index + 1)) {
+                    onAdd();
+                  }
+                }}
+                onRemove={() => {
+                  onRemove(index);
+                }}
+              />
+            ))}
+          </MotionList>
+        )}
+      </form.Subscribe>
+    </div>
+  );
+};
+
+/** The "work done" list: lines you type, each with an optional cost. Enter adds the next line. */
+export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
+  const { t } = useTranslation("garageVisits");
+  const [focusKey, setFocusKey] = useState<string | null>(null);
 
   return (
     <form.Field mode="array" name="items">
       {(field) => {
-        const present = new Set(field.state.value.map((item) => item.itemId));
-
-        const add = (entries: VisitFormItem[]) => {
-          for (const entry of entries) {
-            field.pushValue(entry);
-          }
-        };
-
-        const addPackage = (packageId: string) => {
-          const pkg = packages.data?.packages.find(
-            (candidate) => candidate.id === packageId
-          );
-
-          add(
-            (pkg?.itemIds ?? []).flatMap((id) =>
-              present.has(id)
-                ? []
-                : [newVisitItem({ itemId: id, label: names.get(id) ?? "" })]
-            )
-          );
+        const add = () => {
+          const item = newVisitItem("");
+          setFocusKey(item.key);
+          field.pushValue(item);
         };
 
         return (
@@ -130,20 +207,15 @@ export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
             <legend className="mb-1 text-sm font-medium">
               {t("form.items")}
             </legend>
-            <form.Subscribe selector={(state) => state.values.currency}>
-              {(currency) => (
-                <MotionList className="flex flex-col divide-y">
-                  {field.state.value.map((item, index) => (
-                    <ItemRow
-                      currency={currency}
-                      form={form}
-                      index={index}
-                      key={item.key}
-                    />
-                  ))}
-                </MotionList>
-              )}
-            </form.Subscribe>
+            <ItemLines
+              focusKey={focusKey}
+              form={form}
+              items={field.state.value}
+              onAdd={add}
+              onRemove={(index) => {
+                field.removeValue(index);
+              }}
+            />
             {field.state.value.length === 0 && (
               <p className="text-muted-foreground text-sm">
                 {t("form.noItemsYet")}
@@ -153,35 +225,10 @@ export const ItemsEditor = ({ form }: { form: VisitFormApi }) => {
               errors={field.state.meta.errors}
               show={field.state.meta.errors.length > 0}
             />
-            <div className="flex flex-wrap gap-2">
-              <ItemPicker
-                label={t("form.addFromPackage")}
-                onPick={(option) => {
-                  addPackage(option.id);
-                }}
-                options={packageOptions}
-              />
-              <ItemPicker
-                label={t("form.addItem")}
-                onPick={(option) => {
-                  add([
-                    newVisitItem({ itemId: option.id, label: option.label }),
-                  ]);
-                }}
-                options={itemOptions.filter(
-                  (option) => !present.has(option.id)
-                )}
-              />
-              <Button
-                onClick={() => {
-                  add([newVisitItem({ itemId: "", label: "" })]);
-                }}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
+            <div>
+              <Button onClick={add} size="sm" type="button" variant="outline">
                 <Plus />
-                {t("form.addCustom")}
+                {t("form.addLine")}
               </Button>
             </div>
           </fieldset>

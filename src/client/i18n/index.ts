@@ -7,7 +7,6 @@ import enCommon from "./en/common.json";
 import enFinances from "./en/finances.json";
 import enFitness from "./en/fitness.json";
 import enGarage from "./en/garage.json";
-import enGarageCatalog from "./en/garageCatalog.json";
 import enGarageExpenses from "./en/garageExpenses.json";
 import enGarageMileage from "./en/garageMileage.json";
 import enGarageReminders from "./en/garageReminders.json";
@@ -21,7 +20,6 @@ import mkCommon from "./mk/common.json";
 import mkFinances from "./mk/finances.json";
 import mkFitness from "./mk/fitness.json";
 import mkGarage from "./mk/garage.json";
-import mkGarageCatalog from "./mk/garageCatalog.json";
 import mkGarageExpenses from "./mk/garageExpenses.json";
 import mkGarageMileage from "./mk/garageMileage.json";
 import mkGarageReminders from "./mk/garageReminders.json";
@@ -38,7 +36,6 @@ export const resources = {
     finances: enFinances,
     fitness: enFitness,
     garage: enGarage,
-    garageCatalog: enGarageCatalog,
     garageExpenses: enGarageExpenses,
     garageMileage: enGarageMileage,
     garageReminders: enGarageReminders,
@@ -54,7 +51,6 @@ export const resources = {
     finances: mkFinances,
     fitness: mkFitness,
     garage: mkGarage,
-    garageCatalog: mkGarageCatalog,
     garageExpenses: mkGarageExpenses,
     garageMileage: mkGarageMileage,
     garageReminders: mkGarageReminders,

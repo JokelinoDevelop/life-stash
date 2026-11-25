@@ -6,7 +6,6 @@ const PAGES = [
   "/",
   "/garage",
   "/garage/history",
-  "/garage/catalog",
   "/finances",
   "/finances/transactions",
   "/finances/invoices",

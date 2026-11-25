@@ -23,14 +23,6 @@ All ids are random UUIDs (text). Timestamps are ISO-8601 UTC strings. Calendar d
 
 id, household_id, name, make, model, year, plate, vin, fuel_type, color, purchase_date, purchase_date_precision, purchase_odometer_km, purchase_price_minor, purchase_currency, notes, sold_date, archived_at, odometer_nudged_at, created_at, updated_at
 
-### `garage_items` — the editable item catalog
-
-id, household_id, name, archived_at, created_at
-
-### `garage_packages` / `garage_package_items` — bundles of items
-
-`garage_packages`: id, household_id, name, notes, created_at `garage_package_items`: package_id, item_id (pk: both)
-
 ### `garage_service_visits`
 
 id, household_id, car_id, date, date_precision (`day`/`month`/`year`), odometer_km?, total_minor?, currency, kind (`maintenance`/`repair`), by_previous_owner (bool), shop?, notes?, created_at, updated_at
@@ -39,7 +31,9 @@ A partial date is normalised: month precision → `YYYY-MM-01`, year → `YYYY-0
 
 ### `garage_service_visit_items` — jobs under one invoice
 
-id, visit_id, item_id? (catalog link), label (snapshot of the name), cost_minor?, notes?, position
+id, visit_id, label (what was done, typed freely), cost_minor?, notes?, position
+
+There is no item catalog: lines are plain text (the catalog and packages were removed in migration 0011).
 
 ### `garage_odometer_readings`
 
@@ -49,7 +43,7 @@ Service visits, expenses and the purchase odometer also count as readings when c
 
 ### `garage_reminders`
 
-id, household_id, car_id, kind (`service`/`insurance`/`registration`/`other`), title, package_id?, item_id?, due_date?, due_odometer_km?, interval_months?, interval_km?, notes?, notified_at?, completed_at?, completed_visit_id?, completed_expense_id?, previous_reminder_id?, created_at, updated_at
+id, household_id, car_id, kind (`service`/`insurance`/`registration`/`other`), title, due_date?, due_odometer_km?, interval_months?, interval_km?, notes?, notified_at?, completed_at?, completed_visit_id?, completed_expense_id?, previous_reminder_id?, created_at, updated_at
 
 Active reminders have `completed_at IS NULL`. At least one of `due_date` / `due_odometer_km` is required.
 

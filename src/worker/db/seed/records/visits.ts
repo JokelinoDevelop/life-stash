@@ -27,7 +27,7 @@ export interface VisitSpec {
   odometerKm: number | null;
   kind: VisitKind;
   currency: Currency;
-  /** Catalog item names, priced from `prices.ts` (MKD visits only). */
+  /** Line names, priced from `prices.ts` (MKD visits only). */
   items?: readonly string[];
   custom?: readonly CustomLine[];
   labour?: number;
@@ -44,27 +44,18 @@ export interface BuiltVisit {
 
 interface ResolvedLine {
   label: string;
-  itemId: string | null;
   cost: number | null;
   notes: string | null;
 }
 
-const catalogLine = (
-  ctx: SeedContext,
-  name: string,
-  currency: Currency
-): ResolvedLine => ({
+const pricedLine = (name: string, currency: Currency): ResolvedLine => ({
   cost: currency === "MKD" ? (PRICES_MKD.get(name) ?? null) : null,
-  itemId: ctx.catalog.itemId(name),
   label: name,
   notes: null,
 });
 
-const customLine = (ctx: SeedContext, line: CustomLine): ResolvedLine => ({
+const customLine = (line: CustomLine): ResolvedLine => ({
   cost: line.cost ?? null,
-  itemId: ctx.catalog.hasItem(line.label)
-    ? ctx.catalog.itemId(line.label)
-    : null,
   label: line.label,
   notes: line.notes ?? null,
 });
@@ -77,8 +68,8 @@ export const buildVisit = (ctx: SeedContext, spec: VisitSpec): BuiltVisit => {
   const visitId = crypto.randomUUID();
 
   const lines = [
-    ...(spec.items ?? []).map((name) => catalogLine(ctx, name, spec.currency)),
-    ...(spec.custom ?? []).map((line) => customLine(ctx, line)),
+    ...(spec.items ?? []).map((name) => pricedLine(name, spec.currency)),
+    ...(spec.custom ?? []).map((line) => customLine(line)),
   ];
 
   const total = sumCosts(lines.map((line) => line.cost)) + (spec.labour ?? 0);
@@ -87,7 +78,6 @@ export const buildVisit = (ctx: SeedContext, spec: VisitSpec): BuiltVisit => {
     items: lines.map((line, position) => ({
       costMinor: line.cost === null ? null : toMinor(line.cost),
       id: crypto.randomUUID(),
-      itemId: line.itemId,
       label: line.label,
       notes: line.notes,
       position,

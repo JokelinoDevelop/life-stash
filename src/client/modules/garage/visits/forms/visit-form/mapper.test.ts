@@ -7,12 +7,7 @@ describe("visit form mapper", () => {
     const values = {
       ...visitFormDefaults(
         { currency: "MKD", today: "2026-11-18", unit: "mi" },
-        [
-          {
-            itemId: "11111111-1111-4111-8111-111111111111",
-            label: "Engine oil",
-          },
-        ]
+        ["Engine oil"]
       ),
       date: { date: "", month: "3", precision: "month" as const, year: "2019" },
       odometer: "100 000",
@@ -21,7 +16,6 @@ describe("visit form mapper", () => {
 
     values.items.push({
       cost: "300",
-      itemId: "",
       key: "k",
       label: " Wiper fluid ",
     });
@@ -37,12 +31,18 @@ describe("visit form mapper", () => {
     expect(request.odometerKm).toBe(160_934);
     expect(request.totalMinor).toBe(250_050);
     expect(request.items).toStrictEqual([
-      {
-        costMinor: null,
-        itemId: "11111111-1111-4111-8111-111111111111",
-        label: "Engine oil",
-      },
-      { costMinor: 30_000, itemId: null, label: "Wiper fluid" },
+      { costMinor: null, label: "Engine oil" },
+      { costMinor: 30_000, label: "Wiper fluid" },
     ]);
+  });
+
+  it("starts a new visit with one empty line", () => {
+    const values = visitFormDefaults({
+      currency: "MKD",
+      today: "2026-11-18",
+      unit: "km",
+    });
+
+    expect(values.items.map((item) => item.label)).toStrictEqual([""]);
   });
 });

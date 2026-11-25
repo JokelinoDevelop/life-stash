@@ -18,7 +18,6 @@ export interface ListVisitsResponse {
     photoCount: number;
     items: {
       id: string;
-      itemId: string | null;
       label: string;
       costMinor: number | null;
     }[];

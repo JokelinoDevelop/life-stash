@@ -1,7 +1,9 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 
 import { withoutEntryDialog } from "./entry-dialog-search";
 import type { EntryDialogTarget } from "./entry-dialog-search";
+import { prefetchEntryDialog } from "./prefetch-entry-dialog";
 
 declare module "@tanstack/react-router" {
   interface HistoryState {
@@ -26,8 +28,11 @@ export const useEntryDialogSearch = () =>
 export const useEntryDialog = () => {
   const navigate = useNavigate();
   const router = useRouter();
+  const client = useQueryClient();
 
+  /** Waits briefly for the form's data, so the dialog opens at its final size. */
   const open = async (target: EntryDialogTarget): Promise<void> => {
+    await prefetchEntryDialog(client, target);
     await navigate({
       search: (prev) => ({ ...withoutEntryDialog(prev), ...target }),
       state: { entryDialog: true },

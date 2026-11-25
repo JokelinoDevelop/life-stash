@@ -23,7 +23,7 @@ import { WeightForm } from "./forms/weight-form/weight-form";
 type Close = () => Promise<void>;
 
 /** How far back the dialog looks for the last weight to prefill. */
-const PREFILL_DAYS = 60;
+export const PREFILL_DAYS = 60;
 
 const DeleteButton = ({
   entry,

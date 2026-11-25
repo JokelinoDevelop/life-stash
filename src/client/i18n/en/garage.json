@@ -121,7 +121,6 @@
   },
   "home": {
     "allClear": "All clear — nothing due soon.",
-    "catalog": "Service catalog",
     "summary": "{{overdue}} overdue · {{dueSoon}} due soon",
     "summaryClear": "Nothing due soon",
     "historyEmpty": "No service history yet.",
@@ -137,7 +136,6 @@
     "addCar": "Add car",
     "browse": "Browse",
     "historyDescription": "Every service across your cars",
-    "catalogDescription": "Parts, jobs and packages",
     "reminders": "Reminders",
     "chartLabel": "Spending per month. Tap or drag across the bars to read a month."
   },

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, ChevronRight, History } from "lucide-react";
+import { ChevronRight, History } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +18,7 @@ const BrowseRow = ({
   description: string;
   icon: ReactNode;
   label: string;
-  to: "/garage/catalog" | "/garage/history";
+  to: "/garage/history";
 }) => (
   <ListRow render={<Link to={to} />}>
     <span
@@ -51,12 +51,6 @@ export const BrowseLinks = () => {
           icon={<History />}
           label={t("nav.history")}
           to="/garage/history"
-        />
-        <BrowseRow
-          description={tg("home.catalogDescription")}
-          icon={<BookOpen />}
-          label={t("nav.catalog")}
-          to="/garage/catalog"
         />
       </ListSection>
     </div>

@@ -27,24 +27,21 @@ interface MapperContext {
   today: string;
 }
 
-export const newVisitItem = (item: {
-  itemId: string;
-  label: string;
-}): VisitFormItem => ({
+export const newVisitItem = (label: string): VisitFormItem => ({
   cost: "",
-  itemId: item.itemId,
   key: crypto.randomUUID(),
-  label: item.label,
+  label,
 });
 
+/** A new visit starts with the given lines, or one empty line to type into. */
 export const visitFormDefaults = (
   context: MapperContext,
-  items: { itemId: string; label: string }[] = []
+  labels: string[] = [""]
 ): VisitFormValues => ({
   byPreviousOwner: false,
   currency: context.currency,
   date: emptyPartialDate(context.today),
-  items: items.map(newVisitItem),
+  items: labels.map(newVisitItem),
   kind: "maintenance",
   notes: "",
   odometer: "",
@@ -64,7 +61,6 @@ export const visitToFormValues = (
   date: partialDateFromIso(visit.date, visit.datePrecision),
   items: visit.items.map((item) => ({
     cost: money(item.costMinor),
-    itemId: item.itemId ?? "",
     key: item.id,
     label: item.label,
   })),
@@ -98,7 +94,6 @@ export const visitFormToUpdateRequest = (
     datePrecision: date?.precision ?? "day",
     items: values.items.map((item) => ({
       costMinor: minorOrNull(item.cost),
-      itemId: item.itemId === "" ? null : item.itemId,
       label: item.label.trim(),
     })),
     kind: values.kind,

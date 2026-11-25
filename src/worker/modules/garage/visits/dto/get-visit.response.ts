@@ -19,7 +19,6 @@ export interface GetVisitResponse {
     createdAt: string;
     items: {
       id: string;
-      itemId: string | null;
       label: string;
       costMinor: number | null;
     }[];

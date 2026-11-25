@@ -18,8 +18,6 @@ export interface RecurringReminderSpec {
   car: SeededCar;
   kind: ReminderKind;
   title: string;
-  packageId?: string;
-  itemId?: string;
   intervalMonths: number;
   intervalKm?: number;
   notes?: string;
@@ -45,10 +43,8 @@ export const buildRecurringReminder = (
     householdId: ctx.householdId,
     intervalKm: spec.intervalKm ?? null,
     intervalMonths: spec.intervalMonths,
-    itemId: spec.itemId ?? null,
     kind: spec.kind,
     notes: spec.notes ?? null,
-    packageId: spec.packageId ?? null,
     title: spec.title,
   };
 
