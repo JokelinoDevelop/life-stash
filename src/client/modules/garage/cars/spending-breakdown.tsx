@@ -124,7 +124,7 @@ export const SpendingBreakdown = ({
             )}
             <span
               className={cn(
-                "w-16 text-right tabular-nums",
+                "min-w-16 shrink-0 text-right whitespace-nowrap tabular-nums",
                 dense ? "text-muted-foreground" : "font-medium"
               )}
             >

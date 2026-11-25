@@ -2,6 +2,7 @@ import { ChevronDown, Tag } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ResponsivePicker } from "@/components/form/responsive-picker";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -11,18 +12,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 import type { FinanceCategory } from "../../../categories/categories.queries";
 import { CategoryIcon } from "../../../categories/category-icon";
 import { useCategoryName } from "../../../categories/category-label";
 
-/** A chip that opens a searchable list of categories. */
+/** A chip that opens a searchable list of categories (a sheet on phones). */
 export const CategoryPicker = ({
   categories,
   invalid,
@@ -43,10 +39,11 @@ export const CategoryPicker = ({
   const { t } = useTranslation("finances");
   const nameOf = useCategoryName();
   const [open, setOpen] = useState(false);
+  const categoryLabel = t("form.category");
   const selected = categories.find((category) => category.id === value);
 
   return (
-    <Popover
+    <ResponsivePicker
       onOpenChange={(next) => {
         setOpen(next);
 
@@ -55,61 +52,59 @@ export const CategoryPicker = ({
         }
       }}
       open={open}
+      title={categoryLabel}
+      renderTrigger={(props) =>
+        trigger === "more" ? (
+          <Button {...props} size="xs" type="button" variant="chip">
+            {label ?? t("form.more")}
+          </Button>
+        ) : (
+          <Button
+            {...props}
+            aria-invalid={invalid}
+            aria-label={categoryLabel}
+            data-empty={selected === undefined}
+            id="categoryId"
+            size="xs"
+            type="button"
+            variant="field"
+          >
+            {selected === undefined ? (
+              <Tag />
+            ) : (
+              <CategoryIcon bare name={selected.icon} />
+            )}
+            <span className={cn(selected !== undefined && "text-foreground")}>
+              {selected === undefined
+                ? t("form.pickCategory")
+                : nameOf(selected)}
+            </span>
+            <ChevronDown className="opacity-60" />
+          </Button>
+        )
+      }
     >
-      <PopoverTrigger
-        render={
-          trigger === "more" ? (
-            <Button size="xs" type="button" variant="chip">
-              {label ?? t("form.more")}
-            </Button>
-          ) : (
-            <Button
-              aria-invalid={invalid}
-              aria-label={t("form.category")}
-              data-empty={selected === undefined}
-              id="categoryId"
-              size="xs"
-              type="button"
-              variant="field"
-            >
-              {selected === undefined ? (
-                <Tag />
-              ) : (
-                <CategoryIcon bare name={selected.icon} />
-              )}
-              <span className={cn(selected !== undefined && "text-foreground")}>
-                {selected === undefined
-                  ? t("form.pickCategory")
-                  : nameOf(selected)}
-              </span>
-              <ChevronDown className="opacity-60" />
-            </Button>
-          )
-        }
-      />
-      <PopoverContent align="start" variant="bare">
-        <Command className="w-60">
-          <CommandInput placeholder={t("form.category")} />
-          <CommandList>
-            <CommandEmpty>—</CommandEmpty>
-            <CommandGroup>
-              {categories.map((category) => (
-                <CommandItem
-                  key={category.id}
-                  onSelect={() => {
-                    onChange(category.id);
-                    setOpen(false);
-                  }}
-                  value={`${nameOf(category)} ${category.id}`}
-                >
-                  <CategoryIcon bare name={category.icon} />
-                  {nameOf(category)}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+      <Command>
+        <CommandInput placeholder={categoryLabel} />
+        <CommandList>
+          <CommandEmpty>—</CommandEmpty>
+          <CommandGroup>
+            {categories.map((category) => (
+              <CommandItem
+                key={category.id}
+                onSelect={() => {
+                  onChange(category.id);
+                  setOpen(false);
+                }}
+                value={`${nameOf(category)} ${category.id}`}
+              >
+                <CategoryIcon bare name={category.icon} />
+                {nameOf(category)}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsivePicker>
   );
 };

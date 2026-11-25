@@ -186,11 +186,7 @@ export const CarHistory = ({
   return (
     <ListSection
       action={
-        <ViewAll
-          carId={carId}
-          mobileLabel={t("overview.historyTitle")}
-          tab="timeline"
-        />
+        <ViewAll carId={carId} mobileLabel={t("overview.all")} tab="timeline" />
       }
       count={visits.length}
       title={
@@ -238,7 +234,8 @@ export const CarHistory = ({
               <span className="text-muted-foreground hidden w-24 shrink-0 text-right tabular-nums md:block">
                 {km}
               </span>
-              <span className="w-16 shrink-0 text-right font-medium tabular-nums">
+              {/* Sized by the amount (MKD 22,800 is wider than a fixed column); the title truncates instead. */}
+              <span className="min-w-16 shrink-0 text-right font-medium whitespace-nowrap tabular-nums">
                 {visit.effectiveTotalMinor === null
                   ? null
                   : format.money(visit.effectiveTotalMinor, visit.currency)}

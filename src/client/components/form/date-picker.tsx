@@ -22,7 +22,7 @@ import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
-import { DatePickerSheet } from "./date-picker-sheet";
+import { PickerSheet } from "./picker-sheet";
 
 const FIRST_YEAR = 1950;
 const YEARS_AHEAD = 10;
@@ -281,9 +281,13 @@ export const DatePicker = ({
         >
           {triggerContent}
         </Button>
-        <DatePickerSheet onOpenChange={handleOpenChange} open={open}>
+        <PickerSheet
+          onOpenChange={handleOpenChange}
+          open={open}
+          title={t("date.pick")}
+        >
           {panel}
-        </DatePickerSheet>
+        </PickerSheet>
       </>
     );
   }

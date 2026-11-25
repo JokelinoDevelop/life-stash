@@ -66,6 +66,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `AmountInput` (`components/form`) | the big amount at the top of every money dialog |
 | `FormDisclosure` (`components/form`) | "› More details": rare optional fields, open when editing a record that has them |
 | `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover (phones: its own bottom sheet, nested in a form sheet), Today / Yesterday, typed `19.11.2026`; `variant="chip"` inline |
+| `ResponsivePicker` (`components/form`) | searchable `Command` lists (category, client): a popover on desktop, a fixed-height bottom sheet on phones (a popover over a sheet can't take focus) |
 | `LoadingState` (`list` / `rows` / `block`), `PageSkeleton` / `BodySkeleton`, `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
 | `useConfirm()` (`components/app/confirm`) | imperative yes/no: `await confirm({ title, tone })` |

@@ -1,5 +1,5 @@
 import { ChevronRight, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -169,39 +169,75 @@ const DiscardConfirm = ({
 /**
  * Create/edit forms: a dialog on desktop (crumb › title, close) and a bottom
  * sheet on phones. The form brings its own scrolling body and footer.
- * Closing with unsaved changes (Esc, ×, outside click, Cancel, or a link via `requestLeave`)
- * asks first.
+ * Closing with unsaved changes (Esc, ×, outside click, swipe, Cancel, or a
+ * link via `requestLeave`) asks once. After Discard, or once it is leaving,
+ * further close events (a sheet fires its own as it animates out) are ignored,
+ * so the question never comes back and the dialog never closes twice.
  */
-export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
+export const FormDialog = ({
+  onOpenChange,
+  open,
+  ...props
+}: FormDialogProps) => {
   const isDesktop = useIsDesktop();
-  const dirty = useRef(false);
-
-  const pendingLeave = useRef<() => void>(() => {
-    onOpenChange(false);
-  });
-
   const [confirming, setConfirming] = useState(false);
 
-  const askBeforeLeaving = (leave: () => void) => {
-    if (dirty.current) {
-      pendingLeave.current = leave;
-      setConfirming(true);
-    } else {
-      leave();
-    }
-  };
+  // Refs, not state: close events arrive from several layers in one tap.
+  const dirty = useRef(false);
+  const leaving = useRef(false);
+  const onOpenChangeRef = useRef(onOpenChange);
+  const pendingLeave = useRef<(() => void) | null>(null);
 
-  const controls: FormDialogControls = {
-    requestClose: () => {
-      askBeforeLeaving(() => {
-        onOpenChange(false);
-      });
-    },
-    requestLeave: askBeforeLeaving,
-    setDirty: (next) => {
-      dirty.current = next;
-    },
-  };
+  useEffect(() => {
+    onOpenChangeRef.current = onOpenChange;
+  });
+
+  // Each time it opens, start fresh (the host may reuse this instance).
+  useEffect(() => {
+    if (open) {
+      leaving.current = false;
+      dirty.current = false;
+    }
+  }, [open]);
+
+  // Stable, so the footer's dirty report doesn't re-run on every render.
+  const controls = useMemo<FormDialogControls>(() => {
+    const leaveNow = (leave: () => void) => {
+      if (leaving.current) {
+        return;
+      }
+
+      leaving.current = true;
+      leave();
+    };
+
+    const askBeforeLeaving = (leave: () => void) => {
+      if (leaving.current) {
+        return;
+      }
+
+      if (dirty.current) {
+        pendingLeave.current = leave;
+        setConfirming(true);
+      } else {
+        leaveNow(leave);
+      }
+    };
+
+    return {
+      requestClose: () => {
+        askBeforeLeaving(() => {
+          onOpenChangeRef.current(false);
+        });
+      },
+      requestLeave: askBeforeLeaving,
+      setDirty: (next) => {
+        if (!leaving.current) {
+          dirty.current = next;
+        }
+      },
+    };
+  }, []);
 
   const handleOpenChange = (next: boolean) => {
     if (next) {
@@ -215,15 +251,18 @@ export const FormDialog = ({ onOpenChange, ...props }: FormDialogProps) => {
 
   return (
     <FormDialogContext value={controls}>
-      <Shell {...props} onOpenChange={handleOpenChange} />
+      <Shell {...props} onOpenChange={handleOpenChange} open={open} />
       <DiscardConfirm
         onDiscard={() => {
           setConfirming(false);
           dirty.current = false;
-          pendingLeave.current();
+          leaving.current = true;
+          pendingLeave.current?.();
+          pendingLeave.current = null;
         }}
         onKeep={() => {
           setConfirming(false);
+          pendingLeave.current = null;
         }}
         open={confirming}
       />

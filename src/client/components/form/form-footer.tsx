@@ -58,8 +58,9 @@ export const FormFooter = ({
           </span>
         )}
       </div>
+      {/* Changed back to the defaults counts as untouched: no discard question. */}
       <form.Subscribe
-        selector={(state) => state.isDirty && !state.isSubmitting}
+        selector={(state) => !state.isDefaultValue && !state.isSubmitting}
       >
         {(dirty) => <ReportDirty dirty={dirty} />}
       </form.Subscribe>
