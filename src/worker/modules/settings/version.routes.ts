@@ -6,7 +6,6 @@ import type { GetVersionResponse } from "./dto/get-version.response";
 /** Public: lets the release script confirm which build is live. */
 export const versionRoutes = new Hono<PublicEnv>().get("/", (c) => {
   const body: GetVersionResponse = {
-    commit: __APP_COMMIT__,
     version: __APP_VERSION__,
   };
 

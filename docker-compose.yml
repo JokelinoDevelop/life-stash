@@ -5,7 +5,8 @@ services:
     image: dxflrs/garage:v2.5.0
     restart: unless-stopped
     ports:
-      - "3900:3900"
+      # Loopback only: the dev keys in this repo are public, so never expose Garage to the network.
+      - "127.0.0.1:3900:3900"
     volumes:
       - ./dev/garage/garage.toml:/etc/garage.toml:ro
       - garage-meta:/var/lib/garage/meta
