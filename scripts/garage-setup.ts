@@ -5,7 +5,8 @@
  *   pnpm storage:up      start Garage
  *   pnpm storage:setup   this script
  *
- * The key below only exists in the throwaway dev container.
+ * The key below is public and only exists in the throwaway dev container, which
+ * docker-compose.yml binds to 127.0.0.1. Never reuse it for real storage.
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";

@@ -140,3 +140,7 @@ Photos are compressed in the browser (max 1600 px) before upload; 10 GB of free 
 ## Backups
 
 **Settings → Backup & export** downloads everything as JSON, or individual tables as CSV. D1 also keeps 7 days of point-in-time recovery on the free plan.
+
+## License
+
+[MIT](LICENSE)

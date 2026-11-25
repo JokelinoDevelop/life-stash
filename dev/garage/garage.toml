@@ -1,5 +1,6 @@
 # Local-only Garage (S3-compatible storage) for photos and attachments.
-# The secrets below are for a throwaway dev container; never reuse them.
+# The secrets below are public (this repo is open source) and only for a throwaway dev
+# container that docker-compose.yml binds to 127.0.0.1. Never reuse them anywhere else.
 metadata_dir = "/var/lib/garage/meta"
 data_dir = "/var/lib/garage/data"
 db_engine = "sqlite"
