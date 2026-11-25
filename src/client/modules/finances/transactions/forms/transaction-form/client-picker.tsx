@@ -2,6 +2,7 @@ import { ChevronDown, Users } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { ResponsivePicker } from "@/components/form/responsive-picker";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -11,11 +12,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 import { ClientMonogram } from "../../../clients/client-monogram";
 
@@ -24,7 +20,7 @@ export interface ClientOption {
   name: string;
 }
 
-/** Income: who paid. A chip that opens a searchable client list (with "No client"). */
+/** Income: who paid. A chip that opens a searchable client list (with "No client"); a sheet on phones. */
 export const ClientPicker = ({
   clients,
   onChange,
@@ -40,58 +36,59 @@ export const ClientPicker = ({
   const clientLabel = t("form2.client");
 
   return (
-    <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger
-        render={
-          <Button
-            aria-label={clientLabel}
-            data-empty={selected === undefined}
-            size="xs"
-            type="button"
-            variant="field"
-          />
-        }
-      >
-        {selected === undefined ? (
-          <Users />
-        ) : (
-          <ClientMonogram name={selected.name} size="xs" />
-        )}
-        <span>{selected?.name ?? clientLabel}</span>
-        <ChevronDown className="opacity-60" />
-      </PopoverTrigger>
-      <PopoverContent align="start" variant="bare">
-        <Command className="w-60">
-          <CommandInput placeholder={clientLabel} />
-          <CommandList>
-            <CommandEmpty>—</CommandEmpty>
-            <CommandGroup>
+    <ResponsivePicker
+      onOpenChange={setOpen}
+      open={open}
+      title={clientLabel}
+      renderTrigger={(props) => (
+        <Button
+          {...props}
+          aria-label={clientLabel}
+          data-empty={selected === undefined}
+          size="xs"
+          type="button"
+          variant="field"
+        >
+          {selected === undefined ? (
+            <Users />
+          ) : (
+            <ClientMonogram name={selected.name} size="xs" />
+          )}
+          <span>{selected?.name ?? clientLabel}</span>
+          <ChevronDown className="opacity-60" />
+        </Button>
+      )}
+    >
+      <Command>
+        <CommandInput placeholder={clientLabel} />
+        <CommandList>
+          <CommandEmpty>—</CommandEmpty>
+          <CommandGroup>
+            <CommandItem
+              onSelect={() => {
+                onChange("");
+                setOpen(false);
+              }}
+              value="—"
+            >
+              {t("form2.noClient")}
+            </CommandItem>
+            {clients.map((client) => (
               <CommandItem
+                key={client.id}
                 onSelect={() => {
-                  onChange("");
+                  onChange(client.id);
                   setOpen(false);
                 }}
-                value="—"
+                value={`${client.name} ${client.id}`}
               >
-                {t("form2.noClient")}
+                <ClientMonogram name={client.name} size="xs" />
+                {client.name}
               </CommandItem>
-              {clients.map((client) => (
-                <CommandItem
-                  key={client.id}
-                  onSelect={() => {
-                    onChange(client.id);
-                    setOpen(false);
-                  }}
-                  value={`${client.name} ${client.id}`}
-                >
-                  <ClientMonogram name={client.name} size="xs" />
-                  {client.name}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+            ))}
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </ResponsivePicker>
   );
 };

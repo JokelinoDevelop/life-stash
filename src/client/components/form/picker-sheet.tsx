@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { useTranslation } from "react-i18next";
 
 import {
   Drawer,
@@ -12,29 +11,29 @@ import {
 } from "@/components/ui/drawer";
 
 /**
- * Phones: the calendar opens in its own bottom sheet (nested when the field is
- * already in one), so it always fits the screen.
+ * Phones: a picker (calendar, searchable list) opens in its own bottom sheet,
+ * nested when the field is already in one, so it fits the screen and its
+ * search field can take focus (a popover over a sheet can't).
  */
-export const DatePickerSheet = ({
+export const PickerSheet = ({
   children,
   onOpenChange,
   open,
+  title,
 }: {
   children: ReactNode;
   onOpenChange: (open: boolean) => void;
   open: boolean;
+  title: string;
 }) => {
-  const { t } = useTranslation();
   const Root = useInsideDrawer() ? DrawerNested : Drawer;
 
   return (
     <Root onOpenChange={onOpenChange} open={open} repositionInputs={false}>
       <DrawerContent>
         <DrawerHeader align="start">
-          <DrawerTitle>{t("date.pick")}</DrawerTitle>
-          <DrawerDescription className="sr-only">
-            {t("date.pick")}
-          </DrawerDescription>
+          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription className="sr-only">{title}</DrawerDescription>
         </DrawerHeader>
         <div className="pb-safe-2 mx-auto w-full max-w-sm">{children}</div>
       </DrawerContent>
