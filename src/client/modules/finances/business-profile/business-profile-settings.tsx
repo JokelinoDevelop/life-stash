@@ -4,7 +4,7 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ResponsiveDialog } from "@/components/app/responsive-dialog";
+import { FormDialog } from "@/components/app/form-dialog";
 import { ErrorState, LoadingState } from "@/components/app/states";
 import {
   SettingsActionRow,
@@ -55,19 +55,23 @@ export const BusinessProfileSettings = () => {
             setEditing(true);
           }}
         />
-        <ResponsiveDialog
+        <FormDialog
           description={t("profile.description")}
           onOpenChange={setEditing}
           open={editing}
+          size="lg"
           title={t("profile.title")}
         >
           <BusinessProfileForm
+            onCancel={() => {
+              setEditing(false);
+            }}
             onSaved={() => {
               setEditing(false);
             }}
             profile={profile.data.profile}
           />
-        </ResponsiveDialog>
+        </FormDialog>
       </>
     );
   }

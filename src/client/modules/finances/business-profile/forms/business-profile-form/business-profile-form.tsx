@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { DialogForm, FormSection } from "@/components/form/dialog-form";
 import { useAppForm, withForm } from "@/components/form/form-hook";
 import { FieldGroup } from "@/components/ui/field";
 
@@ -58,12 +59,58 @@ const ProfileVatFields = withForm({
   },
 });
 
+/** Bank name, address and country, IBAN and SWIFT: where clients pay you. */
+const ProfileBankFields = withForm({
+  defaultValues: businessProfileToFormValues(null),
+  render: function ProfileBankFieldsRender({ form }) {
+    const { t } = useTranslation("finances");
+
+    return (
+      <FormSection>
+        <FieldGroup>
+          <form.AppField name="bankName">
+            {(field) => (
+              <field.TextField label={t("profile.bankName")} optional />
+            )}
+          </form.AppField>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <form.AppField name="bankAddress">
+              {(field) => (
+                <field.TextField label={t("profile.bankAddress")} optional />
+              )}
+            </form.AppField>
+            <form.AppField name="bankCountry">
+              {(field) => (
+                <field.TextField label={t("profile.bankCountry")} optional />
+              )}
+            </form.AppField>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+            <form.AppField name="iban">
+              {(field) => (
+                <field.TextField label={t("profile.iban")} optional />
+              )}
+            </form.AppField>
+            <form.AppField name="swift">
+              {(field) => (
+                <field.TextField label={t("profile.swift")} optional />
+              )}
+            </form.AppField>
+          </div>
+        </FieldGroup>
+      </FormSection>
+    );
+  },
+});
+
 /** Settings › Finances › Your details: who issues your invoices and where to pay. */
 export const BusinessProfileForm = ({
+  onCancel,
   onSaved,
   profile,
 }: {
-  /** After a successful save, e.g. to close the sheet. */
+  onCancel: () => void;
+  /** After a successful save, e.g. to close the dialog. */
   onSaved?: () => void;
   profile: BusinessProfile | null;
 }) => {
@@ -80,99 +127,81 @@ export const BusinessProfileForm = ({
   });
 
   return (
-    <form
-      className="flex flex-col gap-5"
-      onSubmit={(event) => {
-        event.preventDefault();
+    <DialogForm
+      footer={
+        <form.AppForm>
+          <form.FormFooter onCancel={onCancel} />
+        </form.AppForm>
+      }
+      onSubmit={() => {
         void form.handleSubmit();
       }}
     >
-      <form.Subscribe selector={(state) => state.values}>
-        {(values) => <ProfileHeaderPreview values={values} />}
-      </form.Subscribe>
-      <FieldGroup>
-        <form.AppField name="name">
-          {(field) => (
-            <field.TextField
-              autoComplete="organization"
-              description={t("profile.nameHint")}
-              label={t("profile.name")}
-            />
-          )}
-        </form.AppField>
-        <form.AppField name="address">
-          {(field) => (
-            <field.TextareaField
-              label={t("profile.address")}
-              optional
-              placeholder={t("profile.addressPlaceholder")}
-            />
-          )}
-        </form.AppField>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <form.AppField name="taxId">
-            {(field) => <field.TextField label={t("profile.taxId")} optional />}
-          </form.AppField>
-          <form.AppField name="companyId">
-            {(field) => (
-              <field.TextField label={t("profile.companyId")} optional />
-            )}
-          </form.AppField>
-          <form.AppField name="email">
+      <FormSection>
+        <form.Subscribe selector={(state) => state.values}>
+          {(values) => <ProfileHeaderPreview values={values} />}
+        </form.Subscribe>
+      </FormSection>
+      <FormSection>
+        <FieldGroup>
+          <form.AppField name="name">
             {(field) => (
               <field.TextField
-                autoComplete="email"
-                inputMode="email"
-                label={t("profile.email")}
-                optional
+                autoComplete="organization"
+                description={t("profile.nameHint")}
+                label={t("profile.name")}
               />
             )}
           </form.AppField>
-          <form.AppField name="phone">
+          <form.AppField name="address">
             {(field) => (
-              <field.TextField
-                autoComplete="tel"
-                inputMode="tel"
-                label={t("profile.phone")}
+              <field.TextareaField
+                label={t("profile.address")}
                 optional
+                placeholder={t("profile.addressPlaceholder")}
               />
             )}
           </form.AppField>
-        </div>
-      </FieldGroup>
-      <FieldGroup>
-        <form.AppField name="bankName">
-          {(field) => (
-            <field.TextField label={t("profile.bankName")} optional />
-          )}
-        </form.AppField>
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <form.AppField name="bankAddress">
-            {(field) => (
-              <field.TextField label={t("profile.bankAddress")} optional />
-            )}
-          </form.AppField>
-          <form.AppField name="bankCountry">
-            {(field) => (
-              <field.TextField label={t("profile.bankCountry")} optional />
-            )}
-          </form.AppField>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-          <form.AppField name="iban">
-            {(field) => <field.TextField label={t("profile.iban")} optional />}
-          </form.AppField>
-          <form.AppField name="swift">
-            {(field) => <field.TextField label={t("profile.swift")} optional />}
-          </form.AppField>
-        </div>
-      </FieldGroup>
-      <FieldGroup>
-        <ProfileVatFields form={form} />
-      </FieldGroup>
-      <form.AppForm>
-        <form.SubmitButton className="w-full md:w-auto md:self-end" />
-      </form.AppForm>
-    </form>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <form.AppField name="taxId">
+              {(field) => (
+                <field.TextField label={t("profile.taxId")} optional />
+              )}
+            </form.AppField>
+            <form.AppField name="companyId">
+              {(field) => (
+                <field.TextField label={t("profile.companyId")} optional />
+              )}
+            </form.AppField>
+            <form.AppField name="email">
+              {(field) => (
+                <field.TextField
+                  autoComplete="email"
+                  inputMode="email"
+                  label={t("profile.email")}
+                  optional
+                />
+              )}
+            </form.AppField>
+            <form.AppField name="phone">
+              {(field) => (
+                <field.TextField
+                  autoComplete="tel"
+                  inputMode="tel"
+                  label={t("profile.phone")}
+                  optional
+                />
+              )}
+            </form.AppField>
+          </div>
+        </FieldGroup>
+      </FormSection>
+      <ProfileBankFields form={form} />
+      <FormSection>
+        <FieldGroup>
+          <ProfileVatFields form={form} />
+        </FieldGroup>
+      </FormSection>
+    </DialogForm>
   );
 };
