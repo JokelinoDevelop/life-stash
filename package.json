@@ -16,6 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:layout": "playwright test",
+    "screenshots": "playwright test -c playwright.screenshots.config.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test",
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply lifestash --local",

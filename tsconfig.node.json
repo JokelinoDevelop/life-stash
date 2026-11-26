@@ -13,6 +13,7 @@
     "oxfmt.config.ts",
     "scripts",
     "playwright.config.ts",
+    "playwright.screenshots.config.ts",
     "e2e"
   ]
 }

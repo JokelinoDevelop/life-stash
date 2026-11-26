@@ -1,6 +1,22 @@
 # LifeStash
 
-A private, online-first PWA for keeping everyday records and reminders. **Garage** is the first module: cars, service history, mileage, upcoming maintenance with push notifications, other expenses and spending, all in one place on your PC and phone.
+A private, online-first PWA for keeping everyday records and reminders, on your PC and phone. **Garage**: cars, service history, mileage, upcoming maintenance with push notifications and car costs. **Finances**: income, spending and invoices. **Fitness**: trainings on a calendar and body weight. **Today** collects everything that needs action across them.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/today-desktop-dark.png"><img src="docs/screenshots/today-desktop-light.png" alt="Today: everything that needs action" width="100%"></picture>
+
+<p>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/car-desktop-dark.png"><img src="docs/screenshots/car-desktop-light.png" alt="A car in Garage" width="49%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/finances-desktop-dark.png"><img src="docs/screenshots/finances-desktop-light.png" alt="Finances overview" width="49%"></picture>
+</p>
+
+<p align="center">
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/today-phone-dark.png"><img src="docs/screenshots/today-phone-light.png" alt="Today on a phone" width="24%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/car-phone-dark.png"><img src="docs/screenshots/car-phone-light.png" alt="A car on a phone" width="24%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/finances-phone-dark.png"><img src="docs/screenshots/finances-phone-light.png" alt="Finances on a phone" width="24%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/fitness-phone-dark.png"><img src="docs/screenshots/fitness-phone-light.png" alt="Fitness on a phone" width="24%"></picture>
+</p>
+
+Screenshots show the seeded demo household; regenerate them with `pnpm screenshots` (see [Demo data](#demo-data)).
 
 Built with React + TanStack (Router, Query, Form) + shadcn/ui, a Hono API on a single Cloudflare Worker, Cloudflare D1, Backblaze B2 for receipt photos and Web Push for reminders. It runs on free tiers (no card needed at Cloudflare). See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/DATA-MODEL.md`](docs/DATA-MODEL.md).
 
@@ -32,6 +48,8 @@ pnpm storage:setup
 ### Demo data
 
 `pnpm db:seed` fills the local database with a demo household (four cars with years of services, fuel, renewals and reminders in every state) and prints its sign-in: `demo@lifestash.dev` / `lifestash-demo`. Dates are relative to today, so the data never goes stale. Re-running it replaces only the demo household; `pnpm db:seed --fresh` wipes the whole local database first.
+
+`pnpm screenshots` signs in as the demo account and saves the README screenshots (desktop and phone, light and dark) to `docs/screenshots/`. It reuses a running `pnpm dev` or starts one.
 
 The seed lives in `src/worker/db/seed/`:
 
