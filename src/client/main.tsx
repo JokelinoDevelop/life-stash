@@ -10,6 +10,7 @@ import { applyDensity, readDensity } from "./app/density";
 import { RouteError } from "./components/app/route-error";
 import { RoutePending } from "./components/app/route-pending";
 import { ApiClientError } from "./lib/api";
+import { dialogAwareScrollRestoration } from "./lib/dialog-scroll";
 import {
   listenForBrowserTransitions,
   pageTransitionTypes,
@@ -38,6 +39,8 @@ const queryClient = new QueryClient({
   },
 });
 
+const scroll = dialogAwareScrollRestoration();
+
 const router = createRouter({
   context: { queryClient },
   defaultErrorComponent: RouteError,
@@ -55,9 +58,12 @@ const router = createRouter({
   defaultViewTransition: supportsViewTransitionTypes() && {
     types: pageTransitionTypes,
   },
-  scrollRestoration: true,
+  // Opening or closing a URL dialog leaves the page where it is.
+  scrollRestoration: scroll.scrollRestoration,
   routeTree,
 });
+
+scroll.track(router);
 
 declare module "@tanstack/react-router" {
   interface Register {
