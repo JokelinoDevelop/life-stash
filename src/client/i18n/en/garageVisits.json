@@ -46,7 +46,9 @@
     "noTotal": "No cost recorded",
     "shop": "Shop",
     "deleteTitle": "Delete this service?",
-    "deleted": "Service deleted"
+    "deleted": "Service deleted",
+    "moreItems_one": "{{first}} + {{count}} more",
+    "moreItems_other": "{{first}} + {{count}} more"
   },
   "photos": {
     "title": "Receipts & photos",
@@ -56,6 +58,7 @@
     "deleted": "Photo deleted",
     "empty": "No photos yet.",
     "disabled": "Photo storage isn't configured yet.",
-    "failed": "Couldn't upload {{name}}."
+    "failed": "Couldn't upload {{name}}.",
+    "drop": "Drop receipts here or click to add"
   }
 }

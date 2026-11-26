@@ -28,6 +28,7 @@ const VisitPage = () => {
         actions={readOnly ? undefined : <VisitActions visit={visit} />}
         back={
           <BackLink
+            label={carData.car.name}
             params={{ carId }}
             search={{ tab: "timeline" }}
             to="/garage/cars/$carId"

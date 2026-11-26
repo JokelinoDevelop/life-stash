@@ -9,15 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useErrorMessage } from "@/lib/errors";
 import { useConfig } from "@/lib/session";
+import { cn } from "@/lib/utils";
 
 import { photosQuery, useDeletePhoto, useUploadPhotos } from "./photos.queries";
 import type { Photo, PhotoOwner } from "./photos.queries";
 
-const UploadButton = ({ owner }: { owner: PhotoOwner }) => {
+/** Upload control: an outline button, or (when there are no photos) a dashed drop zone. */
+const UploadButton = ({
+  owner,
+  zone = false,
+}: {
+  owner: PhotoOwner;
+  zone?: boolean;
+}) => {
   const { t } = useTranslation("garageVisits");
   const input = useRef<HTMLInputElement>(null);
   const upload = useUploadPhotos(owner);
   const errorMessage = useErrorMessage();
+  const [dragging, setDragging] = useState(false);
 
   const onFiles = async (files: File[]) => {
     try {
@@ -52,19 +61,64 @@ const UploadButton = ({ owner }: { owner: PhotoOwner }) => {
         ref={input}
         type="file"
       />
-      <Button
-        disabled={upload.isPending}
-        onClick={() => input.current?.click()}
-        type="button"
-        variant="outline"
-      >
-        {upload.isPending ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <ImagePlus />
-        )}
-        {upload.isPending ? t("photos.uploading") : t("photos.add")}
-      </Button>
+      {zone ? (
+        <button
+          className={cn(
+            "text-muted-foreground hover:bg-muted/50 focus-visible:ring-ring/50 flex w-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed px-4 py-6 text-center text-sm transition-colors outline-none focus-visible:ring-3 disabled:opacity-60",
+            dragging && "border-primary bg-muted/50"
+          )}
+          disabled={upload.isPending}
+          onClick={() => input.current?.click()}
+          onDragLeave={() => {
+            setDragging(false);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragging(false);
+
+            const files = [...event.dataTransfer.files].filter((file) =>
+              file.type.startsWith("image/")
+            );
+
+            if (files.length > 0) {
+              void onFiles(files);
+            }
+          }}
+          type="button"
+        >
+          {upload.isPending ? (
+            <Loader2 aria-hidden="true" className="size-5 animate-spin" />
+          ) : (
+            <ImagePlus aria-hidden="true" className="size-5" />
+          )}
+          {upload.isPending ? (
+            t("photos.uploading")
+          ) : (
+            <>
+              <span className="md:hidden">{t("photos.add")}</span>
+              <span className="hidden md:inline">{t("photos.drop")}</span>
+            </>
+          )}
+        </button>
+      ) : (
+        <Button
+          disabled={upload.isPending}
+          onClick={() => input.current?.click()}
+          type="button"
+          variant="outline"
+        >
+          {upload.isPending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            <ImagePlus />
+          )}
+          {upload.isPending ? t("photos.uploading") : t("photos.add")}
+        </Button>
+      )}
     </>
   );
 };
@@ -92,57 +146,68 @@ export const PhotoGallery = ({
   }
 
   const list = photos.data?.photos ?? [];
+  const canUpload = !readOnly && enabled;
+  const empty = photos.isSuccess && list.length === 0;
+  let emptyState: React.ReactNode = null;
+
+  if (empty) {
+    emptyState = canUpload ? (
+      <UploadButton owner={owner} zone />
+    ) : (
+      <p className="text-muted-foreground text-sm">{t("photos.empty")}</p>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-3">
-      {photos.isSuccess && list.length === 0 && (
-        <p className="text-muted-foreground text-sm">{t("photos.empty")}</p>
-      )}
-      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-        {list.map((photo) => (
-          <div className="relative" key={photo.id}>
-            <button
-              aria-label={t("photos.title")}
-              className="block aspect-square w-full overflow-hidden rounded-lg border"
-              onClick={() => {
-                setViewing(photo);
-              }}
-              type="button"
-            >
-              <img
-                alt=""
-                className="size-full object-cover"
-                loading="lazy"
-                src={photo.url}
-              />
-            </button>
-            {!readOnly && (
-              <div className="absolute top-1 right-1">
-                <ConfirmDialog
-                  onConfirm={async () => {
-                    try {
-                      await remove.mutateAsync(photo.id);
-                      toast.success(t("photos.deleted"));
-                    } catch (error) {
-                      toast.error(errorMessage(error));
-                    }
-                  }}
-                  trigger={
-                    <Button
-                      aria-label={t("photos.deleted")}
-                      size="icon-sm"
-                      variant="secondary"
-                    >
-                      <Trash2 />
-                    </Button>
-                  }
+      {emptyState}
+      {list.length > 0 && (
+        <div className="grid grid-cols-3 gap-2">
+          {list.map((photo) => (
+            <div className="relative" key={photo.id}>
+              <button
+                aria-label={t("photos.title")}
+                className="block aspect-square w-full overflow-hidden rounded-lg border"
+                onClick={() => {
+                  setViewing(photo);
+                }}
+                type="button"
+              >
+                <img
+                  alt=""
+                  className="size-full object-cover"
+                  loading="lazy"
+                  src={photo.url}
                 />
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-      {!readOnly && enabled && (
+              </button>
+              {!readOnly && (
+                <div className="absolute top-1 right-1">
+                  <ConfirmDialog
+                    onConfirm={async () => {
+                      try {
+                        await remove.mutateAsync(photo.id);
+                        toast.success(t("photos.deleted"));
+                      } catch (error) {
+                        toast.error(errorMessage(error));
+                      }
+                    }}
+                    trigger={
+                      <Button
+                        aria-label={t("photos.deleted")}
+                        size="icon-sm"
+                        variant="secondary"
+                      >
+                        <Trash2 />
+                      </Button>
+                    }
+                  />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+      {list.length > 0 && canUpload && (
         <div>
           <UploadButton owner={owner} />
         </div>
