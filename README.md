@@ -62,6 +62,7 @@ Useful scripts:
    ```bash
    pnpm wrangler d1 create lifestash
    ```
+   The id already in `wrangler.jsonc` belongs to the maintainer's Cloudflare account and won't work for you, so replace it. (A D1 id is not a secret: it only works with that account's login.)
 3. Apply migrations to the remote database:
    ```bash
    pnpm db:migrate:remote
@@ -70,7 +71,7 @@ Useful scripts:
    ```bash
    pnpm run deploy
    ```
-   The app is served at `https://lifestash.<your-subdomain>.workers.dev`. Open it and create your passkey. Sign-up closes automatically after the first account exists.
+   The app is served at `https://lifestash.<your-subdomain>.workers.dev`. Open it and create your passkey right away: until the first account exists, whoever opens the URL first can create it and becomes the admin. Sign-up closes automatically after that; invite others from **Settings → People**.
 
 ### Releasing updates
 
