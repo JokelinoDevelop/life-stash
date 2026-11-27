@@ -50,13 +50,12 @@
 }
 
 /* The phone tab bar: docked to the bottom edge above the home indicator,
-   frosted and nearly opaque, with a hairline on top. */
+   solid (nothing shows through), with a hairline and a soft lift on top. */
 @utility tabbar-dock {
   padding-bottom: env(safe-area-inset-bottom);
-  background: color-mix(in oklch, var(--card) 88%, transparent);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  background: var(--card);
   border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 16px -6px oklch(0.2 0.02 265 / 0.12);
 }
 
 /* The currency next to a figure (`Money`): smaller and lighter than the digits. */

@@ -27,6 +27,10 @@ const NO_QUICK_DATES: readonly string[] = [];
 
 const noReceipt = (): ReactNode => null;
 
+/** Phones: a row in the details box (label left, control right). */
+const ROW = "flex min-h-12 items-center gap-3 px-3.5";
+const ROW_LABEL = "text-muted-foreground w-14 shrink-0 text-sm";
+
 /** Desktop dialog body (3.1 / 3.2). */
 export const DesktopBody = withForm({
   defaultValues: TEMPLATE,
@@ -78,7 +82,7 @@ export const MobileBody = withForm({
 
     return (
       <>
-        <div className="py-6">
+        <div className="py-4">
           <AmountFields centered form={form} />
         </div>
         <p className="text-muted-foreground mb-2 text-xs font-medium">
@@ -93,20 +97,17 @@ export const MobileBody = withForm({
             />
           )}
         </form.Field>
+        {/* One box for the details, so the sheet stays short. */}
         <div className="divide-divider mt-4 flex flex-col divide-y rounded-lg border">
-          <div className="flex min-h-12 items-center gap-3 px-3.5">
-            <span className="text-muted-foreground w-14 shrink-0 text-sm">
-              {t("form.for")}
-            </span>
+          <div className={ROW}>
+            <span className={ROW_LABEL}>{t("form.for")}</span>
             <DescriptionField form={form} inline />
           </div>
-          <div className="flex min-h-12 items-center gap-3 px-3.5">
-            <span className="text-muted-foreground w-14 shrink-0 text-sm">
-              {t("form.date")}
-            </span>
+          <div className={ROW}>
+            <span className={ROW_LABEL}>{t("form.date")}</span>
             <form.Field name="date">
               {(field) => (
-                <span className="ml-auto flex items-center gap-2">
+                <span className="ml-auto flex items-center gap-1.5">
                   {[today, addDays(today, -1)].map((day) => (
                     <Button
                       aria-pressed={field.state.value === day}
@@ -129,29 +130,25 @@ export const MobileBody = withForm({
               )}
             </form.Field>
           </div>
+          <form.Subscribe selector={(state) => state.values.kind}>
+            {(kind) =>
+              kind === "income" && (
+                <div className={ROW}>
+                  <span className={ROW_LABEL}>{t("form2.client")}</span>
+                  <span className="ml-auto">
+                    <ClientField clients={clients} form={form} />
+                  </span>
+                </div>
+              )
+            }
+          </form.Subscribe>
+          {receipt !== null && (
+            <div className={ROW}>
+              <span className={ROW_LABEL}>{t("receipts.title")}</span>
+              <span className="ml-auto flex items-center gap-1">{receipt}</span>
+            </div>
+          )}
         </div>
-        <form.Subscribe selector={(state) => state.values.kind}>
-          {(kind) =>
-            kind === "income" && (
-              <div className="mt-2 flex min-h-12 items-center gap-3 rounded-lg border px-3.5">
-                <span className="text-muted-foreground w-14 shrink-0 text-sm">
-                  {t("form2.client")}
-                </span>
-                <span className="ml-auto">
-                  <ClientField clients={clients} form={form} />
-                </span>
-              </div>
-            )
-          }
-        </form.Subscribe>
-        {receipt !== null && (
-          <div className="mt-2 flex min-h-12 items-center gap-3 rounded-lg border px-3.5">
-            <span className="text-muted-foreground w-14 shrink-0 text-sm">
-              {t("receipts.title")}
-            </span>
-            <span className="ml-auto flex items-center gap-1">{receipt}</span>
-          </div>
-        )}
         <ClientHint form={form} />
         <div className="mt-3">
           <NoteField form={form} />

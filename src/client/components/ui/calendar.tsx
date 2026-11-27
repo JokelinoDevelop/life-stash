@@ -88,15 +88,18 @@ function Calendar({
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn(
-        "group/calendar bg-background p-3 [--cell-size:--spacing(8)] data-[variant=month]:bg-transparent data-[variant=month]:[--cell-size:--spacing(10)] data-[variant=popover]:[--cell-size:--spacing(9)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=drawer-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
+        "group/calendar bg-background p-3 [--cell-size:--spacing(8)] data-[variant=month]:bg-transparent data-[variant=month]:[--cell-size:--spacing(10)] data-[variant=popover]:[--cell-size:--spacing(11)] md:data-[variant=popover]:[--cell-size:--spacing(9)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=drawer-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
         String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
         String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
         className
       )}
       captionLayout={captionLayout}
       formatters={{
+        // Full month names in the calendar's language, the same in every picker.
         formatMonthDropdown: (date) =>
-          date.toLocaleString("default", { month: "short" }),
+          date.toLocaleString(props.locale?.code ?? "default", {
+            month: "long",
+          }),
         ...formatters,
       }}
       classNames={{

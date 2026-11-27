@@ -22,6 +22,8 @@ import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
+import { PickerSheet } from "./picker-sheet";
+
 const FIRST_YEAR = 1950;
 const YEARS_AHEAD = 10;
 
@@ -162,9 +164,12 @@ const PickerPanel = ({
 
   return (
     <>
-      <div className="border-divider border-b p-2">
-        <TypedDateInput onPick={onPick} />
-      </div>
+      {/* Typing a date is for keyboards; phones pick on the calendar. */}
+      {autoFocusCalendar && (
+        <div className="border-divider border-b p-2">
+          <TypedDateInput onPick={onPick} />
+        </div>
+      )}
       <Calendar
         autoFocus={autoFocusCalendar}
         captionLayout="dropdown"
@@ -285,42 +290,26 @@ export const DatePicker = ({
     />
   );
 
-  // Phones: the system date picker (wheels on iOS, a calendar on Android) through a
-  // transparent native input laid over the chip, so one tap opens it.
+  // Phones: the same calendar in its own bottom sheet (nested in a form sheet).
   if (!isDesktop) {
     return (
-      <span
-        className={cn("relative inline-flex", variant === "field" && "w-full")}
-      >
+      <>
         <Button
           {...triggerProps}
-          aria-hidden="true"
-          id={undefined}
-          nativeButton={false}
-          render={<span />}
-          tabIndex={-1}
+          onClick={() => {
+            setOpen(true);
+          }}
         >
           {triggerContent}
         </Button>
-        <input
-          aria-invalid={invalid}
-          aria-label={ariaLabel ?? text}
-          className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
-          id={id}
-          max={`${Number(todayIso().slice(0, 4)) + YEARS_AHEAD}-12-31`}
-          min={`${FIRST_YEAR}-01-01`}
-          onBlur={onBlur}
-          onChange={(event) => {
-            const next = event.target.value;
-
-            if (isIsoDate(next) || (clearable && next === "")) {
-              onChange(next);
-            }
-          }}
-          type="date"
-          value={empty ? "" : value}
-        />
-      </span>
+        <PickerSheet
+          onOpenChange={handleOpenChange}
+          open={open}
+          title={ariaLabel ?? t("date.pick")}
+        >
+          {panel}
+        </PickerSheet>
+      </>
     );
   }
 

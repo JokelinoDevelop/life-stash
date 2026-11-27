@@ -109,7 +109,7 @@ const CarPage = () => {
       >
         {/* Phones: a full-width tab bar pinned under the top row while the tab scrolls. */}
         <div
-          className="bg-background/95 sticky top-11 z-10 -mx-4 mt-2 mb-4 scrollbar-none overflow-x-auto backdrop-blur-md md:static md:mx-0 md:mt-4 md:mb-0 md:bg-transparent md:px-6 md:backdrop-blur-none"
+          className="bg-background sticky top-11 z-10 -mx-4 mt-2 mb-4 scrollbar-none overflow-x-auto md:static md:mx-0 md:mt-4 md:mb-0 md:bg-transparent md:px-6"
           ref={tabStrip}
         >
           <TabsList variant="bar">

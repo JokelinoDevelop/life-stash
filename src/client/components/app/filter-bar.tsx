@@ -50,7 +50,7 @@ export const FilterBar = ({
     className={cn(
       "md:border-divider -mx-4 flex flex-col gap-2.5 md:static md:mx-0 md:flex-row md:flex-wrap md:items-center md:gap-1.5 md:border-b md:bg-transparent md:px-5 md:py-2 md:backdrop-blur-none",
       sticky &&
-        "bg-background/90 border-divider sticky top-11 z-10 border-b pt-1 pb-2.5 backdrop-blur-md"
+        "bg-background border-divider sticky top-11 z-10 border-b pt-1 pb-2.5"
     )}
   >
     {status !== undefined && <div className="px-4 md:contents">{status}</div>}

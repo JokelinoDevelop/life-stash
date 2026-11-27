@@ -18,9 +18,9 @@ import type { FinanceCategory } from "../../../categories/categories.queries";
 import { CategoryIcon } from "../../../categories/category-icon";
 import { useCategoryName } from "../../../categories/category-label";
 
-/** Phones: one category as a tile (icon over name) in the Add transaction grid. */
+/** Phones: one category as a pill (small tinted icon, full name) in Add transaction. */
 export const CATEGORY_TILE =
-  "border-border bg-card aria-pressed:border-primary aria-pressed:bg-accent flex h-17 min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border text-xs font-medium transition-colors active:scale-[.98] aria-pressed:font-semibold";
+  "border-border bg-card aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-foreground text-subtle-foreground flex h-10 shrink-0 items-center gap-2 rounded-full border pr-3.5 pl-1.5 text-sm font-medium transition-colors active:scale-[.98]";
 
 /** A chip that opens a searchable list of categories (a sheet on phones). */
 export const CategoryPicker = ({
@@ -61,12 +61,10 @@ export const CategoryPicker = ({
         if (trigger === "tile") {
           return (
             <button {...props} className={CATEGORY_TILE} type="button">
-              <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-lg">
+              <span className="bg-muted text-muted-foreground flex size-7 items-center justify-center rounded-full">
                 <MoreHorizontal className="size-4" />
               </span>
-              <span className="max-w-full truncate px-1">
-                {label ?? t("form.more")}
-              </span>
+              {label ?? t("form.more")}
             </button>
           );
         }

@@ -66,7 +66,7 @@ const MobileHeader = ({
       {hasTopRow && (
         <div
           className={cn(
-            "bg-background/85 sticky top-0 z-20 -mx-4 flex min-h-11 items-center justify-between gap-2 border-b px-3 backdrop-blur-md transition-colors duration-200 md:hidden",
+            "bg-background sticky top-0 z-20 -mx-4 flex min-h-11 items-center justify-between gap-2 border-b px-3 transition-colors duration-200 md:hidden",
             hideMobileTitle ? "mb-5" : "mb-2",
             compact ? "border-divider" : "border-transparent"
           )}

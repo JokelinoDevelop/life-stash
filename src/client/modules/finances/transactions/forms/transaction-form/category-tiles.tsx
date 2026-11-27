@@ -6,11 +6,12 @@ import { CATEGORY_TILE, CategoryPicker } from "./category-picker";
 import { frequentCategories, noOptions } from "./frequent-categories";
 import { TRANSACTION_FORM_TEMPLATE as TEMPLATE } from "./mapper";
 
-const TILE_COUNT = 7;
+const TILE_COUNT = 8;
 
 /**
- * Phones: the kind's categories as a grid of tiles (tinted icon over the name), the most
- * used first and "More…" for the rest. A pick from "More…" takes the last tile.
+ * Phones: the kind's most used categories as one row of pills that scrolls sideways
+ * (tinted icon and the full name), then "More…" for the rest. A pick from "More…" comes
+ * first, so it stays in view.
  */
 export const CategoryTiles = withForm({
   defaultValues: TEMPLATE,
@@ -33,10 +34,10 @@ export const CategoryTiles = withForm({
           const tiles =
             picked === undefined || top.some((tile) => tile.id === picked.id)
               ? top
-              : [...top.slice(0, TILE_COUNT - 1), picked];
+              : [picked, ...top.slice(0, TILE_COUNT - 1)];
 
           return (
-            <div className="grid grid-cols-4 gap-2">
+            <div className="-mx-4 flex scrollbar-none gap-2 overflow-x-auto px-4">
               {tiles.map((category) => (
                 <button
                   aria-pressed={category.id === categoryId}
@@ -47,10 +48,11 @@ export const CategoryTiles = withForm({
                   }}
                   type="button"
                 >
-                  <CategoryIcon name={category.icon} />
-                  <span className="max-w-full truncate px-1">
-                    {nameOf(category)}
-                  </span>
+                  <CategoryIcon
+                    className="size-7 rounded-full max-md:size-7 max-md:rounded-full"
+                    name={category.icon}
+                  />
+                  {nameOf(category)}
                 </button>
               ))}
               <form.Field name="categoryId">

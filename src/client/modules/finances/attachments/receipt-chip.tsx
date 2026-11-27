@@ -50,9 +50,15 @@ export const ReceiptChip = ({
         variant="field"
       >
         <Paperclip />
-        {files.length === 0
-          ? t("receipts.add")
-          : t("receipts.files", { count: files.length })}
+        {files.length === 0 ? (
+          <>
+            {/* Phones: the row is already labelled "Receipt". */}
+            <span className="md:hidden">{t("receipts.attach")}</span>
+            <span className="hidden md:inline">{t("receipts.add")}</span>
+          </>
+        ) : (
+          t("receipts.files", { count: files.length })
+        )}
       </Button>
       {files.length > 0 && (
         <Button

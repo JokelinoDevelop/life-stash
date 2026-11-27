@@ -60,12 +60,12 @@ export const RangeDialog = ({
       <div className="flex flex-col gap-3">
         <Calendar
           captionLayout="dropdown"
-          className="mx-auto"
           defaultMonth={from ?? isoToDate(todayIso())}
           locale={i18n.language === "mk" ? mk : enGB}
           mode="range"
           onSelect={setPicked}
           selected={picked}
+          variant="popover"
         />
         <div className="flex justify-end gap-2">
           <Button

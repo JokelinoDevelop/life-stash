@@ -65,7 +65,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 | `FormDialog` + `DialogForm` / `FormSection` / `FormNotice` | every create/edit form (see "Forms and dialogs") |
 | `AmountInput` (`components/form`) | the big amount at the top of every money dialog |
 | `FormDisclosure` (`components/form`) | "› More details": rare optional fields, open when editing a record that has them |
-| `DatePicker` / `field.DateField` (`components/form`) | every date: shadcn calendar in a popover with Today / Yesterday and typed `19.11.2026` on desktop; phones open the system date picker (a transparent native input over the chip); `variant="chip"` inline, `quickDates` shows just the icon while a neighbouring Today / Yesterday chip is chosen |
+| `DatePicker` / `field.DateField` (`components/form`) | every date, one calendar everywhere (`Calendar variant="popover"`): a popover on desktop (with typed `19.11.2026`), its own bottom sheet on phones (44px days, nested in a form sheet); Today / Yesterday under it. `variant="chip"` inline (short `02.11` this year); `quickDates` shows just the icon while a neighbouring Today / Yesterday chip is chosen. Ranges (`RangeDialog`) use the same calendar |
 | `ResponsivePicker` (`components/form`) | searchable `Command` lists (category, client): a popover on desktop, a fixed-height bottom sheet on phones (a popover over a sheet can't take focus) |
 | `LoadingState` (`list` / `rows` / `block`), `PageSkeleton` / `BodySkeleton`, `FormSkeleton`, `ErrorState`, `EmptyState` | in-between states (see below) |
 | `CompleteReminderButton variant` | `button`, `circle` (phones) or `hover` ("Mark done" on desktop row hover) |
@@ -85,7 +85,7 @@ All of this is set at the theme level, so shadcn components stay unedited. When 
 - **Common case first.** Rare options sit behind a link or `FormDisclosure`: the date field shows "Only know the month or year?" instead of the Exact / Month / Year toggle; the service form keeps shop, previous owner and notes under "More details".
 - The dialog opens on the first field. Closing with unsaved changes asks "Discard changes?". After a save: one toast, close, stay on the page (a new service offers "View" in the toast; a new car opens its page).
 - Edit dialogs load their own data and show `FormSkeleton` meanwhile, or `ErrorState` with retry. Opening one waits up to 400 ms for that data (`prefetch*Dialog`, also started on touch / hover of a dialog link), so it usually opens at its final size.
-- Native `<input type="date">` is used on phones only (inside `DatePicker`), so the system picker opens; desktop keeps the calendar popover.
+- Native `<input type="date">` is not used anywhere: every date uses the app calendar, so it looks the same on every phone and in both themes.
 
 ## In-between states
 
@@ -133,10 +133,10 @@ Everything here applies below 48rem only; desktop renders exactly as before.
 - **Header actions:** one pattern: bare 44px icon buttons (search, +, …). No labelled buttons in the phone top row; Log out lives at the end of Settings.
 - **Rows:** the title always wins. Long status ("10 days ago · 1,232 km over") moves into the meta line in its status colour, so the trailing slot holds at most a short figure (an amount). Transactions and Timeline amounts use `Money`, so "−MKD" reads as a light prefix.
 - **Swipe actions:** reminder rows (Skip, Done), fitness sessions (Skip, Done), unpaid invoices (Mark paid), recurring income to confirm (Skip, Confirm), transactions (Delete). They reuse the same dialogs, mutations, confirmations and toasts as the tap path, which keeps working.
-- **Tab bar:** docked to the bottom edge (`tabbar-dock`: frosted, nearly opaque, a hairline on top, the home-indicator inset below): Today · Garage · Quick add (a round indigo button in the middle) · Finances · Fitness, each an icon over a 12px label; the current tab is in the accent colour and Today carries a count badge. Settings is not a tab (avatar on each module home). It keeps `view-transition-name: tabbar`, so it never animates with the page.
-- **Top row:** sticks for the whole page (the large title collapses into it); list filters (`FilterBar`) and the car tabs (`TabsList variant="bar"`: full-width equal tabs with a sliding underline) pin right under it.
+- **Tab bar:** docked to the bottom edge (`tabbar-dock`: solid card colour, a hairline and a soft lift on top, the home-indicator inset below): Today · Garage · Quick add (a round indigo button in the middle) · Finances · Fitness, each an icon over a 12px label; the current tab is in the accent colour and Today carries a count badge. Settings is not a tab (avatar on each module home). It keeps `view-transition-name: tabbar`, so it never animates with the page.
+- **Top row:** sticks for the whole page on a solid canvas (nothing shows through; the large title collapses into it); list filters (`FilterBar`) and the car tabs (`TabsList variant="bar"`: full-width equal tabs with a sliding underline) pin right under it.
 - **One target per row:** reminder rows on phones show the done circle only; Edit, Skip and Done are on the swipe and Delete is in the edit sheet. Long meta lines wrap (`ListRowText wrapMeta`) instead of ending in "…".
-- **Add transaction (phones):** a full-width Expense / Income switch, categories as a 4-column grid of tiles (tinted icon over the name, the most used first, "More…" for the rest), Today / Yesterday chips (36px) beside the date chip.
+- **Add transaction (phones):** a full-width Expense / Income switch, categories as one sideways-scrolling row of pills (tinted icon and the full name, the most used first, a pick from "More…" first), then one details box (For, Date with Today / Yesterday chips, Client, Receipt), so the sheet fits a 360 × 760 screen.
 - **Sheet footers with several actions** (an issued invoice): the main action full width, the rest in a "…" menu beside it.
 - **Sign-in screens** never auto-focus a field on phones (the keyboard would cover the screen on load).
 - **Keyboard (Android):** the page shrinks when the keyboard opens (`interactive-widget=resizes-content` in `index.html`), so sheets (80dvh) keep Save above it; the tab bar hides while a page field has focus; `scroll-padding-bottom` keeps scrolled-to fields clear of the tab bar.
