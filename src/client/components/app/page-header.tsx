@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { SettingsAvatar } from "./settings-avatar";
+
 /** Height of the phone top row (min-h-11), where the compact title appears. */
 const TOP_ROW = 44;
 
@@ -13,6 +15,7 @@ const TOP_ROW = 44;
  * and centred — the iOS large-title pattern.
  */
 const MobileHeader = ({
+  account,
   actions,
   back,
   description,
@@ -21,6 +24,7 @@ const MobileHeader = ({
   mobileTop,
   title,
 }: {
+  account: boolean;
   actions?: ReactNode;
   back?: ReactNode;
   description?: ReactNode;
@@ -33,7 +37,7 @@ const MobileHeader = ({
   const [compact, setCompact] = useState(false);
 
   const hasTopRow =
-    back !== undefined || mobileTop !== undefined || actions !== undefined;
+    account || [back, mobileTop, actions].some((slot) => slot !== undefined);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -57,11 +61,13 @@ const MobileHeader = ({
   }, []);
 
   return (
-    <header className="mb-5 flex flex-col gap-2 md:hidden">
+    // `contents`, so the top row sticks for the whole page, not just while the header is in view.
+    <header className="contents md:hidden">
       {hasTopRow && (
         <div
           className={cn(
-            "bg-background/85 sticky top-0 z-20 -mx-4 flex min-h-11 items-center justify-between gap-2 border-b px-3 backdrop-blur-md transition-colors duration-200",
+            "bg-background/85 sticky top-0 z-20 -mx-4 flex min-h-11 items-center justify-between gap-2 border-b px-3 backdrop-blur-md transition-colors duration-200 md:hidden",
+            hideMobileTitle ? "mb-5" : "mb-2",
             compact ? "border-divider" : "border-transparent"
           )}
         >
@@ -82,13 +88,16 @@ const MobileHeader = ({
           >
             {title}
           </p>
-          {actions !== undefined && (
-            <div className="flex shrink-0 items-center gap-1">{actions}</div>
+          {(actions !== undefined || account) && (
+            <div className="flex shrink-0 items-center gap-1">
+              {actions}
+              {account && <SettingsAvatar />}
+            </div>
           )}
         </div>
       )}
       {!hideMobileTitle && (
-        <div>
+        <div className="md:hidden">
           {eyebrow !== undefined && (
             <p className="text-muted-foreground mb-0.5 text-xs font-semibold tracking-wide uppercase">
               {eyebrow}
@@ -102,7 +111,7 @@ const MobileHeader = ({
           )}
         </div>
       )}
-      <div aria-hidden="true" ref={sentinel} />
+      <div aria-hidden="true" className="mb-5 md:hidden" ref={sentinel} />
     </header>
   );
 };
@@ -112,6 +121,7 @@ const MobileHeader = ({
  * Phones: a top row (back or `mobileTop`, actions) above a large title.
  */
 export const PageHeader = ({
+  account = false,
   actions,
   back,
   description,
@@ -121,6 +131,8 @@ export const PageHeader = ({
   mobileTop,
   title,
 }: {
+  /** Phones: your avatar in the top row, opening Settings (module homes; Settings has no tab). */
+  account?: boolean;
   actions?: ReactNode;
   back?: ReactNode;
   description?: ReactNode;
@@ -151,6 +163,7 @@ export const PageHeader = ({
       )}
     </header>
     <MobileHeader
+      account={account}
       actions={actions}
       back={back}
       description={description}

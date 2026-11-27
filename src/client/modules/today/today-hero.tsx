@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Fragment } from "react";
-import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 
 import { todayIso } from "@/lib/partial-date";
@@ -33,11 +32,14 @@ export const useTodayLabel = (): string => {
   return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
 };
 
+const tileClass =
+  "surface bg-card flex min-w-0 flex-col rounded-lg border px-2.5 py-2.5";
+
 /**
- * Phones: the line under Today's title — what is overdue (red), what is due
- * soon, and how much money is waiting on invoices.
+ * Phones: Today's summary as three tiles (overdue, due soon, money waiting) instead of a
+ * sentence that wraps; the money tile opens the unpaid invoices.
  */
-export const TodaySummaryLine = () => {
+export const TodayStatTiles = () => {
   const { t } = useTranslation("today");
   const household = useQuery(householdOverviewQuery);
   const finances = useQuery(overviewQuery());
@@ -53,49 +55,59 @@ export const TodaySummaryLine = () => {
     household.data.today
   );
 
-  const parts: { key: string; node: ReactNode }[] = [];
-
-  if (summary.overdue > 0) {
-    parts.push({
-      key: "overdue",
-      node: (
-        <span className="text-destructive font-medium">
-          {t("hero.overdue", { count: summary.overdue })}
-        </span>
-      ),
-    });
-  }
-
-  if (summary.dueSoon > 0) {
-    parts.push({
-      key: "soon",
-      node: t("hero.dueSoon", { count: summary.dueSoon }),
-    });
-  }
-
-  if (summary.waiting.length > 0) {
-    parts.push({
-      key: "waiting",
-      node: (
-        <span className="text-foreground font-medium">
-          {t("hero.waitingTotal", { amount: totals(summary.waiting) })}
-        </span>
-      ),
-    });
-  }
-
-  if (parts.length === 0) {
-    return <>{t("hero.clear")}</>;
+  if (
+    summary.overdue === 0 &&
+    summary.dueSoon === 0 &&
+    summary.waiting.length === 0
+  ) {
+    return null;
   }
 
   return (
-    <>
-      {parts.map((part, index) => (
-        <Fragment key={part.key}>
-          {index > 0 && " · "}
-          {part.node}
-        </Fragment>
-      ))}
-    </>
+    <div className="-mt-2 mb-6 grid grid-cols-[auto_auto_minmax(0,1fr)] gap-2 md:hidden">
+      <div className={tileClass}>
+        <span
+          className={
+            summary.overdue > 0
+              ? "text-destructive text-lg font-semibold tabular-nums"
+              : "text-lg font-semibold tabular-nums"
+          }
+        >
+          {summary.overdue}
+        </span>
+        <span className="text-muted-foreground text-xs">
+          {t("tiles.overdue")}
+        </span>
+      </div>
+      <div className={tileClass}>
+        <span className="text-lg font-semibold tabular-nums">
+          {summary.dueSoon}
+        </span>
+        <span className="text-muted-foreground text-xs">
+          {t("tiles.dueSoon")}
+        </span>
+      </div>
+      {summary.waiting.length > 0 ? (
+        <Link
+          className={`${tileClass} active:bg-accent`}
+          search={{ status: "unpaid" }}
+          to="/finances/invoices"
+        >
+          <span className="truncate text-lg font-semibold tabular-nums">
+            {totals(summary.waiting, { compact: true })}
+          </span>
+          <span className="text-muted-foreground text-xs">
+            {t("tiles.waiting")}
+          </span>
+        </Link>
+      ) : (
+        <div className={tileClass}>
+          <span className="text-lg font-semibold">—</span>
+          <span className="text-muted-foreground text-xs">
+            {t("tiles.waiting")}
+          </span>
+        </div>
+      )}
+    </div>
   );
 };

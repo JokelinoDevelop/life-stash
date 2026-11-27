@@ -134,6 +134,10 @@
     "older": "Older",
     "range": "{{start}}–{{end}} of {{total}}",
     "showAll": "Show all {{count}}",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "loadOlder": "Load older"
+  },
+  "filters": {
+    "clear": "Clear {{label}}"
   }
 }

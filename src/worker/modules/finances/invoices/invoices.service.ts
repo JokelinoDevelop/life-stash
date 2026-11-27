@@ -1,4 +1,5 @@
 import type { Receivables } from "@shared/domain/finances/invoices";
+import type { Currency } from "@shared/domain/money";
 
 import { domainError, notFound } from "../../../core/errors";
 import type { AttachmentsRepositoryPort } from "../attachments/attachments.repository";
@@ -23,6 +24,7 @@ import type {
   InvoiceInput,
   InvoiceList,
   InvoiceListRow,
+  InvoicePayment,
   InvoiceTransactionsPort,
   IssueRequest,
 } from "./invoice-types";
@@ -339,15 +341,13 @@ export class InvoicesService {
   /** Books the money: one income entry in "Invoices", linked to the invoice. */
   async markPaid(
     invoiceId: string,
-    payment: { paidDate: string; amountMinor: number }
+    payment: { paidDate: string; amountMinor: number; currency?: Currency }
   ): Promise<TransactionRow> {
     return await this.#payments.markPaid(await this.#find(invoiceId), payment);
   }
 
   /** Back to sent; removes the income entry. Returns the payment so Undo can re-book it. */
-  async markUnpaid(
-    invoiceId: string
-  ): Promise<{ paidDate: string; amountMinor: number }> {
+  async markUnpaid(invoiceId: string): Promise<InvoicePayment> {
     return await this.#payments.markUnpaid(await this.#find(invoiceId));
   }
 

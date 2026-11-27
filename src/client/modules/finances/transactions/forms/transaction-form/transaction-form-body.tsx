@@ -7,6 +7,7 @@ import { withForm } from "@/components/form/form-hook";
 import { Button } from "@/components/ui/button";
 import { todayIso } from "@/lib/partial-date";
 
+import { CategoryTiles } from "./category-tiles";
 import type { ClientOption } from "./client-picker";
 import { noOptions } from "./frequent-categories";
 import { TRANSACTION_FORM_TEMPLATE as TEMPLATE } from "./mapper";
@@ -22,6 +23,7 @@ import {
 } from "./transaction-fields";
 
 const NO_CLIENTS: readonly ClientOption[] = [];
+const NO_QUICK_DATES: readonly string[] = [];
 
 const noReceipt = (): ReactNode => null;
 
@@ -42,7 +44,7 @@ export const DesktopBody = withForm({
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
           <CategoryField form={form} optionsFor={optionsFor} />
           <ClientField clients={clients} form={form} />
-          <DateChip form={form} />
+          <DateChip form={form} quickDates={NO_QUICK_DATES} />
           {receipt}
         </div>
         <form.Field name="categoryId">
@@ -82,7 +84,7 @@ export const MobileBody = withForm({
         <p className="text-muted-foreground mb-2 text-xs font-medium">
           {t("form.category")}
         </p>
-        <FrequentChips form={form} optionsFor={optionsFor} withMore />
+        <CategoryTiles form={form} optionsFor={optionsFor} />
         <form.Field name="categoryId">
           {(field) => (
             <FieldErrors
@@ -102,25 +104,30 @@ export const MobileBody = withForm({
             <span className="text-muted-foreground w-14 shrink-0 text-sm">
               {t("form.date")}
             </span>
-            <span className="ml-auto flex items-center gap-1.5">
-              <DateChip form={form} />
-              <form.Field name="date">
-                {(field) =>
-                  field.state.value === addDays(today, -1) ? null : (
+            <form.Field name="date">
+              {(field) => (
+                <span className="ml-auto flex items-center gap-2">
+                  {[today, addDays(today, -1)].map((day) => (
                     <Button
+                      aria-pressed={field.state.value === day}
+                      key={day}
                       onClick={() => {
-                        field.handleChange(addDays(today, -1));
+                        field.handleChange(day);
                       }}
-                      size="xs"
+                      size="chip"
                       type="button"
-                      variant="outline"
+                      variant="chip"
                     >
-                      {tc("date.yesterday")}
+                      {day === today ? tc("date.today") : tc("date.yesterday")}
                     </Button>
-                  )
-                }
-              </form.Field>
-            </span>
+                  ))}
+                  <DateChip
+                    form={form}
+                    quickDates={[today, addDays(today, -1)]}
+                  />
+                </span>
+              )}
+            </form.Field>
           </div>
         </div>
         <form.Subscribe selector={(state) => state.values.kind}>

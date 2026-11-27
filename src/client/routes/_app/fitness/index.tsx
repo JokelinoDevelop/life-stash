@@ -115,6 +115,7 @@ const FitnessPage = () => {
             </Button>
           </>
         }
+        account
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />

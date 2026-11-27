@@ -125,10 +125,10 @@ export const useMarkPaid = (onView: () => void) => {
   return useAppMutation({
     action: () => ({ label: tc("actions.view"), onClick: onView }),
     invalidate,
-    mutationFn: async ({ amountMinor, id, paidDate }: Payment) =>
+    mutationFn: async ({ amountMinor, currency, id, paidDate }: Payment) =>
       await unwrap(
         invoiceApi(id)["mark-paid"].$post({
-          json: { amountMinor, paidDate },
+          json: { amountMinor, currency, paidDate },
           param: { invoiceId: id },
         })
       ),

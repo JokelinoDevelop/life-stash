@@ -23,7 +23,7 @@ export const RangeChip = ({
       onClick={() => {
         onChange({ from: null, to: null });
       }}
-      size="compact"
+      size="chip"
       variant="chip"
     >
       <CalendarDays />

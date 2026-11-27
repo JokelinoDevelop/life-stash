@@ -37,6 +37,8 @@ import { completionEntry } from "./completion-entry";
 import type { ActiveReminder } from "./reminders.queries";
 import { SkipReminderDialog } from "./skip-reminder-dialog";
 
+const EDIT = "actions.edit";
+
 const useIntervalText = (reminder: ActiveReminder): string | null => {
   const { t } = useTranslation("garageReminders");
   const format = useFormat();
@@ -71,11 +73,7 @@ const ReminderMenu = ({
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button
-            aria-label={tc("actions.edit")}
-            size="icon-compact"
-            variant="ghost"
-          />
+          <Button aria-label={tc(EDIT)} size="icon-compact" variant="ghost" />
         }
       >
         <MoreHorizontal />
@@ -89,7 +87,7 @@ const ReminderMenu = ({
           }
         >
           <Pencil />
-          {tc("actions.edit")}
+          {tc(EDIT)}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onSkip}>
           <CheckCheck />
@@ -122,8 +120,9 @@ const ReminderMenu = ({
 };
 
 /**
- * Phone swipe actions for a reminder row — Skip (asks when, like the menu) and
- * Done (opens the entry that completes it) — plus the Skip dialog to render.
+ * Phone swipe actions for a reminder row — Edit (Delete lives in its sheet), Skip
+ * (asks when, like the menu) and Done (opens the entry that completes it) — plus
+ * the Skip dialog to render.
  */
 interface ReminderSwipe {
   actions: SwipeAction[];
@@ -146,6 +145,18 @@ export const useReminderSwipe = (
 
   return {
     actions: [
+      {
+        icon: <Pencil />,
+        label: tc(EDIT),
+        onSelect: () => {
+          void entryDialog.open({
+            car: carId,
+            dialog: "reminder",
+            id: reminder.id,
+          });
+        },
+        tone: "neutral",
+      },
       {
         icon: <SkipForward />,
         label: t("tab.skipShort"),
@@ -216,18 +227,22 @@ export const ReminderRow = ({
           </>
         }
         title={reminder.title}
+        wrapMeta
       />
       {!readOnly && (
         <span className="hidden md:flex">
           <CompleteReminderButton carId={carId} reminder={reminder} />
         </span>
       )}
+      {/* Phones: no ⋯ — Edit, Skip and Done are on the swipe, one target per row. */}
       {!readOnly && (
-        <ReminderMenu
-          carId={carId}
-          onSkip={swipe.handleSkip}
-          reminder={reminder}
-        />
+        <span className="hidden md:flex">
+          <ReminderMenu
+            carId={carId}
+            onSkip={swipe.handleSkip}
+            reminder={reminder}
+          />
+        </span>
       )}
       {/* Phones: the done circle, like the car Overview (swipe works too). */}
       {!readOnly && (

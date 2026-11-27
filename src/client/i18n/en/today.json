@@ -18,5 +18,10 @@
     "title": "You're all caught up",
     "message": "Nothing is overdue or due in the next 30 days, and no invoice is waiting. New reminders show up here when they come due.",
     "compact": "Nothing needs you in the next 30 days."
+  },
+  "tiles": {
+    "overdue": "overdue",
+    "dueSoon": "due soon",
+    "waiting": "waiting on invoices"
   }
 }

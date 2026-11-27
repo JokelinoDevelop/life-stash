@@ -1,12 +1,7 @@
 import { CalendarDays, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+import { FilterBar, FilterSelect } from "@/components/app/filter-bar";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 import type { ClientListItem } from "../clients/clients.queries";
@@ -37,71 +32,71 @@ export const InvoicesToolbar = ({
   );
 
   return (
-    <div className="md:border-divider -mx-4 flex scrollbar-none items-center gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:border-b md:px-5 md:py-2">
-      <ToggleGroup
-        aria-label={t("invoices.filter.label")}
-        className="shrink-0"
-        onValueChange={([value]) => {
-          if (value === "unpaid" || value === "paid") {
-            onChange({ status: value });
-          } else if (value === ALL) {
-            onChange({ status: null });
-          }
-        }}
-        size="segmented"
-        spacing={0.5}
-        value={[search.status ?? ALL]}
-        variant="segmented"
-      >
-        <ToggleGroupItem value={ALL}>
-          {t("invoices.filter.all")}
-        </ToggleGroupItem>
-        <ToggleGroupItem value="unpaid">
-          {t("invoices.filter.unpaid")}
-        </ToggleGroupItem>
-        <ToggleGroupItem value="paid">
-          {t("invoices.filter.paid")}
-        </ToggleGroupItem>
-      </ToggleGroup>
-      <Select
+    <FilterBar
+      status={
+        <ToggleGroup
+          aria-label={t("invoices.filter.label")}
+          className="w-full shrink-0 md:w-fit"
+          onValueChange={([value]) => {
+            if (value === "unpaid" || value === "paid") {
+              onChange({ status: value });
+            } else if (value === ALL) {
+              onChange({ status: null });
+            }
+          }}
+          size="segmented-block"
+          spacing={0.5}
+          value={[search.status ?? ALL]}
+          variant="segmented"
+        >
+          <ToggleGroupItem value={ALL}>
+            {t("invoices.filter.all")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="unpaid">
+            {t("invoices.filter.unpaid")}
+          </ToggleGroupItem>
+          <ToggleGroupItem value="paid">
+            {t("invoices.filter.paid")}
+          </ToggleGroupItem>
+        </ToggleGroup>
+      }
+    >
+      <FilterSelect
+        display={client?.name ?? t("invoices.allClients")}
+        emptyValue={ALL}
+        groups={[
+          { options: [{ label: t("invoices.allClients"), value: ALL }] },
+          {
+            options: clients.map((row) => ({ label: row.name, value: row.id })),
+          },
+        ]}
+        icon={<Users />}
+        label={t("invoices.form.client")}
         onValueChange={(value) => {
           onChange({ client: value === ALL ? null : value });
         }}
         value={search.client ?? ALL}
-      >
-        <SelectTrigger aria-label={t("invoices.form.client")} size="chip">
-          <Users />
-          {client?.name ?? t("invoices.allClients")}
-        </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false}>
-          <SelectItem value={ALL}>{t("invoices.allClients")}</SelectItem>
-          {clients.map((row) => (
-            <SelectItem key={row.id} value={row.id}>
-              {row.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select
+      />
+      <FilterSelect
+        display={String(year)}
+        emptyValue={String(currentYear)}
+        groups={[
+          {
+            options: years.map((option) => ({
+              label: String(option),
+              value: String(option),
+            })),
+          },
+        ]}
+        icon={<CalendarDays />}
+        label={t("transactions.year")}
         onValueChange={(value) => {
           const picked = Number(value);
 
           onChange({ year: picked === currentYear ? null : picked });
         }}
         value={String(year)}
-      >
-        <SelectTrigger aria-label={t("transactions.year")} size="chip">
-          <CalendarDays />
-          {year}
-        </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false}>
-          {years.map((option) => (
-            <SelectItem key={option} value={String(option)}>
-              {option}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+      />
+    </FilterBar>
   );
 };

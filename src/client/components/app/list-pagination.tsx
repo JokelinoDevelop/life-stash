@@ -1,10 +1,12 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import type { PageSlice } from "@/lib/paginate";
+
+import { useIsDesktop } from "./responsive-dialog";
 
 /** "‹ Newer   13–24 of 84   Older ›" under a newest-first list. */
 export const ListPagination = ({
@@ -64,17 +66,76 @@ export const ListPagination = ({
   );
 };
 
+/** Phones: long lists grow as you scroll (`paginate(…, growing)`); desktop turns pages. */
+export const useGrowingList = (): boolean => !useIsDesktop();
+
+/**
+ * Phones: the end of a growing list. Coming into view loads the next page (the button is
+ * the same action for keyboards, screen readers, or if the observer never fires).
+ */
+const LoadOlder = ({
+  loading,
+  onLoad,
+}: {
+  loading: boolean;
+  onLoad: () => void;
+}) => {
+  const { t } = useTranslation();
+  const sentinel = useRef<HTMLDivElement>(null);
+  const load = useEffectEvent(onLoad);
+
+  useEffect(() => {
+    const element = sentinel.current;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting === true) {
+          load();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+
+    if (element !== null && !loading) {
+      observer.observe(element);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loading]);
+
+  return (
+    <div className="flex justify-center" ref={sentinel}>
+      <Button
+        disabled={loading}
+        onClick={onLoad}
+        size="compact"
+        type="button"
+        variant="ghost"
+      >
+        {loading && <Loader2 className="animate-spin" />}
+        {t("pagination.loadOlder")}
+      </Button>
+    </div>
+  );
+};
+
 /**
  * A paginated block inside a `PageStack`: the page's list sections, then the
  * pager. Turning the page scrolls back to the top of the list if it is above
- * the viewport, so you never land mid-page.
+ * the viewport, so you never land mid-page. Phones: the list grows as you
+ * scroll instead (pass a `growing` slice), with no pager.
  */
 export const PagedList = ({
   children,
+  loading = false,
   onPageChange,
   slice,
 }: {
   children: ReactNode;
+  /** Phones: the next page is on its way (server-paged lists). */
+  loading?: boolean;
   onPageChange: (page: number) => void;
   slice: Pick<
     PageSlice<unknown>,
@@ -82,6 +143,7 @@ export const PagedList = ({
   >;
 }) => {
   const top = useRef<HTMLDivElement>(null);
+  const growing = useGrowingList();
 
   const turn = (page: number) => {
     onPageChange(page);
@@ -91,6 +153,22 @@ export const PagedList = ({
       anchor.scrollIntoView({ block: "start" });
     }
   };
+
+  if (growing) {
+    return (
+      <div className="flex flex-col gap-6" data-bleed="">
+        {children}
+        {slice.page < slice.pageCount && (
+          <LoadOlder
+            loading={loading}
+            onLoad={() => {
+              onPageChange(slice.page + 1);
+            }}
+          />
+        )}
+      </div>
+    );
+  }
 
   return (
     <div

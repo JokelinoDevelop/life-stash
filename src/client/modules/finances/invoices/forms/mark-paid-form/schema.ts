@@ -1,3 +1,4 @@
+import { CURRENCIES } from "@shared/domain/money";
 import { z } from "zod";
 
 import { isoDateField, parseAmount, requiredAmount } from "@/lib/form-schemas";
@@ -7,6 +8,7 @@ export const markPaidFormSchema = z.object({
     (value) => (parseAmount(value) ?? 0) > 0,
     "validation.required"
   ),
+  currency: z.enum(CURRENCIES),
   paidDate: isoDateField,
 });
 

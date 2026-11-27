@@ -220,6 +220,39 @@ describe("invoices controller", () => {
     ).resolves.toStrictEqual({ transactions: [] });
   });
 
+  it("books the payment in the currency it was received in", async () => {
+    const { invoiceId } = await setup();
+    await request(alice, "POST", `/invoices/${invoiceId}/mark-paid`, {
+      amountMinor: 52_000,
+      currency: "USD",
+      paidDate: "2020-02-03",
+    });
+
+    const paid = await read(
+      await request(alice, "GET", `/invoices/${invoiceId}`),
+      z.object({
+        invoice: z.object({
+          currency: z.string(),
+          transaction: z.object({
+            amountMinor: z.number(),
+            currency: z.string(),
+          }),
+        }),
+      })
+    );
+
+    const unpaid = await read(
+      await request(alice, "POST", `/invoices/${invoiceId}/mark-unpaid`),
+      z.object({ amountMinor: z.number(), currency: z.string() })
+    );
+
+    expect(paid.invoice).toStrictEqual({
+      currency: "EUR",
+      transaction: { amountMinor: 52_000, currency: "USD" },
+    });
+    expect(unpaid).toStrictEqual({ amountMinor: 52_000, currency: "USD" });
+  });
+
   it("books one entry when Mark paid is sent twice at once", async () => {
     const { invoiceId } = await setup();
     const payment = { amountMinor: 480_000, paidDate: "2020-02-03" };

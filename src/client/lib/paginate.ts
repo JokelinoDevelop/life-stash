@@ -12,15 +12,34 @@ export interface PageSlice<T> {
   total: number;
 }
 
-/** One page of `items`. Out-of-range pages (e.g. after a delete) show the nearest page. */
+/**
+ * One page of `items`. Out-of-range pages (e.g. after a delete) show the nearest page.
+ * `growing` (phones): every row up to the end of that page, for a list that loads more
+ * as you scroll instead of turning pages.
+ */
 export const paginate = <T>(
   items: readonly T[],
   page: number,
-  pageSize: number = LIST_PAGE_SIZE
+  pageSize: number = LIST_PAGE_SIZE,
+  growing = false
 ): PageSlice<T> => {
   const total = items.length;
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
   const current = Math.min(Math.max(1, Math.trunc(page)), pageCount);
+
+  if (growing) {
+    const shown = items.slice(0, current * pageSize);
+
+    return {
+      end: shown.length,
+      items: shown,
+      page: current,
+      start: total === 0 ? 0 : 1,
+      pageCount,
+      total,
+    };
+  }
+
   const offset = (current - 1) * pageSize;
   const slice = items.slice(offset, offset + pageSize);
 

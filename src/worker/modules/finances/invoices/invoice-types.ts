@@ -56,4 +56,11 @@ export type InvoiceTransactionsPort = Pick<
 >;
 
 /** Issue now (with a typed number, or the next one when null) or keep it a draft. */
+/** A booked payment: what reached the bank, in the currency it arrived in. */
+export interface InvoicePayment {
+  paidDate: string;
+  amountMinor: number;
+  currency: Currency;
+}
+
 export type IssueRequest = { number: string | null } | null;

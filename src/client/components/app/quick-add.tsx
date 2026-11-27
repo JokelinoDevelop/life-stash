@@ -194,7 +194,7 @@ export const QuickAdd = () => {
     >
       <button
         aria-label={t("nav.quickAdd")}
-        className="tabbar-glass text-foreground flex size-14 shrink-0 items-center justify-center rounded-full transition-transform active:scale-95"
+        className="bg-primary text-primary-foreground shadow-primary/30 flex size-12 shrink-0 items-center justify-center rounded-full shadow-lg transition-transform active:scale-95"
         onClick={() => {
           setOpen(true);
         }}

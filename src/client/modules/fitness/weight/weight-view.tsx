@@ -5,7 +5,7 @@ import { Scale } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PagedList } from "@/components/app/list-pagination";
+import { PagedList, useGrowingList } from "@/components/app/list-pagination";
 import {
   ListRow,
   ListRowText,
@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useFormat } from "@/lib/format";
-import { paginate } from "@/lib/paginate";
+import { LIST_PAGE_SIZE, paginate } from "@/lib/paginate";
 
 import { FitnessDialogLink } from "../dialogs/fitness-dialog-link";
 import { weightQuery } from "../fitness.queries";
@@ -73,6 +73,7 @@ export const WeightView = ({
   const { t } = useTranslation("fitness");
   const format = useFormat();
   const weight = useWeightFormat();
+  const growing = useGrowingList();
   const entries = useQuery(weightQuery(addDays(today, -range), today));
 
   if (entries.isPending) {
@@ -111,7 +112,7 @@ export const WeightView = ({
     );
   }
 
-  const slice = paginate(rows.toReversed(), page);
+  const slice = paginate(rows.toReversed(), page, LIST_PAGE_SIZE, growing);
 
   return (
     <PageStack>

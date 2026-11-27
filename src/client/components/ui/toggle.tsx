@@ -21,6 +21,9 @@ const toggleVariants = cva(
           "h-9 min-w-9 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
         sm: "h-8 min-w-8 px-2.5 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5",
         segmented: "h-8 min-w-8 rounded-sm px-2 text-xs md:h-6 md:min-w-6",
+        // Status tabs that fill a phone row (44px with the group's padding); `segmented` on desktop.
+        "segmented-block":
+          "h-10 min-w-8 flex-1 rounded-[7px] px-2 text-sm md:h-6 md:min-w-6 md:flex-none md:rounded-sm md:text-xs",
         lg: "h-10 min-w-10 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2",
       },
     },

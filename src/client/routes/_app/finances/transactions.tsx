@@ -42,6 +42,8 @@ const TransactionsPage = () => {
     (patch: SearchPatch) => {
       void navigate({
         replace: true,
+        // Turning (or, on phones, growing) the list keeps your place.
+        resetScroll: patch.page === undefined,
         search: (prev) => applySearchPatch(prev, patch),
       });
     },

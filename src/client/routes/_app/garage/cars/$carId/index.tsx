@@ -107,11 +107,12 @@ const CarPage = () => {
         }}
         value={tab}
       >
+        {/* Phones: a full-width tab bar pinned under the top row while the tab scrolls. */}
         <div
-          className="-mx-4 mt-4 mb-4 scroll-px-4 scrollbar-none overflow-x-auto px-4 md:mx-0 md:mb-0 md:px-6"
+          className="bg-background/95 sticky top-11 z-10 -mx-4 mt-2 mb-4 scrollbar-none overflow-x-auto backdrop-blur-md md:static md:mx-0 md:mt-4 md:mb-0 md:bg-transparent md:px-6 md:backdrop-blur-none"
           ref={tabStrip}
         >
-          <TabsList variant="pill">
+          <TabsList variant="bar">
             {CAR_TABS.map((value) => (
               <TabsTrigger key={value} value={value}>
                 {t(`car.tabs.${value}`)}

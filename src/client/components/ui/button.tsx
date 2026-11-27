@@ -37,6 +37,8 @@ const buttonVariants = cva(
         compact:
           "h-11 gap-1.5 px-3 has-[>svg]:px-2.5 md:h-7 md:px-2.5 md:has-[>svg]:px-2",
         "icon-compact": "size-11 md:size-7",
+        // A filter chip on phones (36px, sits in a scrolling row); `xs` on desktop.
+        chip: "h-9 gap-1.5 px-3 text-sm md:h-6 md:gap-1 md:px-2 md:text-xs [&_svg:not([class*='size-'])]:size-3.5 md:[&_svg:not([class*='size-'])]:size-3",
         // A full-width 48px button on phones and a default one on desktop (sign-in screens).
         block: "h-12 w-full gap-1.5 px-4 text-base md:h-9 md:px-2.5 md:text-sm",
         // A form's primary action: one full-width 48px button on phones, `compact` on desktop.

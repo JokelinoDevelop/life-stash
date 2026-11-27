@@ -6,11 +6,11 @@ import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { BackLink } from "@/components/app/back-link";
-import { PagedList } from "@/components/app/list-pagination";
+import { PagedList, useGrowingList } from "@/components/app/list-pagination";
 import { ListSection } from "@/components/app/list-section";
 import { PageHeader, PageStack } from "@/components/app/page-header";
 import { EmptyState, LoadingState } from "@/components/app/states";
-import { paginate } from "@/lib/paginate";
+import { LIST_PAGE_SIZE, paginate } from "@/lib/paginate";
 import { cached, warm } from "@/lib/warm";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { groupByYear } from "@/modules/garage/visits/group-by-year";
@@ -42,7 +42,8 @@ const HistoryPage = () => {
     .toSorted((a, b) => b.visit.date.localeCompare(a.visit.date))
     .map((entry) => ({ ...entry, date: entry.visit.date }));
 
-  const slice = paginate(entries, search.page ?? 1);
+  const growing = useGrowingList();
+  const slice = paginate(entries, search.page ?? 1, LIST_PAGE_SIZE, growing);
 
   const perYear = new Map(
     groupByYear(entries).map(([year, group]) => [year, group.length])

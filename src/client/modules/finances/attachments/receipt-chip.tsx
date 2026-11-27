@@ -45,7 +45,7 @@ export const ReceiptChip = ({
       <Button
         data-empty={files.length === 0}
         onClick={() => input.current?.click()}
-        size="xs"
+        size="chip"
         type="button"
         variant="field"
       >

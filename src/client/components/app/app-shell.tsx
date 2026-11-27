@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import type { LinkProps } from "@tanstack/react-router";
-import { CarFront, Dumbbell, Settings, Sun, Wallet } from "lucide-react";
+import { CarFront, Dumbbell, Sun, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { lazy, Suspense, useRef } from "react";
 import type { ReactNode } from "react";
@@ -39,41 +39,42 @@ const FitnessDialogHost = lazy(async () => {
   return { default: module.FitnessDialogHost };
 });
 
-const SETTINGS = "/settings";
-const SETTINGS_LABEL = "nav.settings";
-
-/**
- * One tab: an icon (the label is for screen readers and the tooltip-less
- * touch UI reads it aloud); the current section sits on a tinted pill.
- */
+/** One tab: icon over its label; the current section is in the accent colour. */
 const Tab = ({
   activeOptions,
   badge,
+  description,
   icon: Icon,
   label,
   to,
 }: {
   activeOptions?: { exact?: boolean; includeSearch?: boolean };
   badge?: ReactNode;
+  /** Read after the label ("Today, 9 items need attention"); the badge itself is decoration. */
+  description?: string;
   icon: LucideIcon;
   label: string;
   to: LinkProps["to"];
 }) => (
   <Link
     activeOptions={activeOptions}
-    aria-label={label}
-    className="text-muted-foreground data-[status=active]:bg-primary/12 data-[status=active]:text-primary relative flex h-12 w-12 items-center justify-center rounded-full transition-colors active:opacity-70 min-[380px]:w-13"
+    className="text-muted-foreground data-[status=active]:text-primary relative flex h-13 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors active:opacity-70"
     to={to}
   >
-    <Icon className="size-6 [stroke-width:1.75] in-data-[status=active]:[stroke-width:2.25]" />
-    {badge}
+    <span className="relative">
+      <Icon className="size-6 [stroke-width:1.75] in-data-[status=active]:[stroke-width:2.25]" />
+      {badge}
+    </span>
+    {label}
+    {description !== undefined && (
+      <span className="sr-only">, {description}</span>
+    )}
   </Link>
 );
 
 /**
- * Phones (Linear-style): an icon-only capsule of the five sections with Quick
- * add as its own round button beside it. The page fades and blurs into the
- * canvas near the bottom edge, so rows never show through the bar.
+ * Phones: a bar docked to the bottom edge with the four sections, labelled, and
+ * Quick add in the middle. Settings opens from the avatar on each section's home.
  */
 const MobileNav = () => {
   const { t } = useTranslation();
@@ -82,37 +83,42 @@ const MobileNav = () => {
   return (
     <nav
       aria-label={t("appName")}
-      className="tabbar-edge pointer-events-none fixed inset-x-0 bottom-0 z-40 [view-transition-name:tabbar] md:hidden"
+      className="tabbar-dock fixed inset-x-0 bottom-0 z-40 [view-transition-name:tabbar] md:hidden"
       data-tabbar
     >
-      <div className="tabbar-float pointer-events-auto absolute inset-x-0 z-10 flex items-center justify-center gap-3 px-4">
-        <div className="tabbar-glass flex h-14 items-center gap-0.5 rounded-full px-1">
-          <Tab
-            activeOptions={{ exact: true, includeSearch: false }}
-            badge={
-              today.count > 0 && (
-                <span
-                  className={cn(
-                    "ring-card absolute top-2.5 right-4 size-2 rounded-full ring-2",
-                    today.overdue ? "bg-destructive" : "bg-primary"
-                  )}
-                >
-                  <span className="sr-only">
-                    {t("nav.needsAttention", { count: today.count })}
-                  </span>
-                </span>
-              )
-            }
-            icon={Sun}
-            label={t("nav.today")}
-            to="/"
-          />
-          <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
-          <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
-          <Tab icon={Dumbbell} label={t("nav.fitness")} to="/fitness" />
-          <Tab icon={Settings} label={t(SETTINGS_LABEL)} to={SETTINGS} />
+      <div className="mx-auto grid max-w-md grid-cols-5 items-center px-1">
+        <Tab
+          activeOptions={{ exact: true, includeSearch: false }}
+          badge={
+            today.count > 0 && (
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "ring-card absolute -top-1.5 -right-3 flex h-4.5 min-w-4.5 items-center justify-center rounded-full px-1 text-xs leading-none font-semibold tabular-nums ring-2",
+                  today.overdue
+                    ? "bg-destructive text-white"
+                    : "bg-primary text-primary-foreground"
+                )}
+              >
+                {today.count}
+              </span>
+            )
+          }
+          description={
+            today.count > 0
+              ? t("nav.needsAttention", { count: today.count })
+              : undefined
+          }
+          icon={Sun}
+          label={t("nav.today")}
+          to="/"
+        />
+        <Tab icon={CarFront} label={t("nav.garage")} to="/garage" />
+        <div className="flex justify-center">
+          <QuickAdd />
         </div>
-        <QuickAdd />
+        <Tab icon={Wallet} label={t("nav.finances")} to="/finances" />
+        <Tab icon={Dumbbell} label={t("nav.fitness")} to="/fitness" />
       </div>
     </nav>
   );
@@ -128,7 +134,7 @@ export const AppShell = () => {
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col md:py-2 md:pr-2">
           <main
-            className="bg-background md:bg-card pt-safe-2 pb-safe-28 relative flex-1 px-4 md:min-h-[calc(100dvh-var(--spacing)*4)] md:rounded-lg md:border md:p-0"
+            className="bg-background md:bg-card pt-safe-2 pb-safe-24 relative flex-1 px-4 md:min-h-[calc(100dvh-var(--spacing)*4)] md:rounded-lg md:border md:p-0"
             ref={main}
           >
             <RouteProgress />

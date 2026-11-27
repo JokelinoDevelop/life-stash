@@ -7,7 +7,7 @@ import { ReceiptText, SearchX } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PagedList } from "@/components/app/list-pagination";
+import { PagedList, useGrowingList } from "@/components/app/list-pagination";
 import { ListRows } from "@/components/app/list-section";
 import { EmptyState, ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
@@ -76,6 +76,37 @@ const Empty = ({
   );
 };
 
+/** The rows on screen: one page on desktop; every loaded page so far on phones. */
+const shownRows = (
+  pages: readonly TransactionPage[],
+  current: number,
+  growing: boolean
+) =>
+  growing
+    ? pages
+        .slice(0, Math.min(current, pages.length))
+        .flatMap((loadedPage) => loadedPage.transactions)
+    : (pages[current - 1]?.transactions ?? []);
+
+/** The pager's numbers; a growing list (phones) always starts at the first row. */
+const sliceOf = ({
+  current,
+  growing,
+  pageCount,
+  shown,
+  total,
+}: {
+  current: number;
+  growing: boolean;
+  pageCount: number;
+  shown: number;
+  total: number;
+}) => {
+  const start = growing ? 1 : (current - 1) * TRANSACTIONS_PAGE_SIZE + 1;
+
+  return { end: start + shown - 1, page: current, pageCount, start, total };
+};
+
 /** Loading, error, empty, or one page of month groups with the pager. */
 const LedgerContent = ({
   list,
@@ -96,6 +127,8 @@ const LedgerContent = ({
   const pageCount = Math.max(1, Math.ceil(total / TRANSACTIONS_PAGE_SIZE));
   const current = Math.min(Math.max(1, page), pageCount);
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = list;
+  const growing = useGrowingList();
+  const waiting = current > pages.length;
 
   // Pages load on demand: a deep link or "Older" fetches up to the one shown.
   useEffect(() => {
@@ -104,7 +137,8 @@ const LedgerContent = ({
     }
   }, [current, fetchNextPage, hasNextPage, isFetchingNextPage, pages.length]);
 
-  if (list.isPending || current > pages.length) {
+  // Phones keep the loaded rows on screen while the next page arrives below them.
+  if (list.isPending || (waiting && !growing)) {
     return <LoadingState rows={6} sections={2} />;
   }
 
@@ -119,24 +153,24 @@ const LedgerContent = ({
     );
   }
 
-  const rows = pages[current - 1]?.transactions ?? [];
+  const rows = shownRows(pages, current, growing);
 
   if (rows.length === 0) {
     return <Empty filtered={hasActiveFilters(search)} onClear={onClear} />;
   }
 
-  const start = (current - 1) * TRANSACTIONS_PAGE_SIZE + 1;
-
   return (
     <PagedList
+      loading={isFetchingNextPage || waiting}
       onPageChange={onPageChange}
-      slice={{
-        end: start + rows.length - 1,
-        page: current,
+      // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
+      slice={sliceOf({
+        current: growing ? Math.min(current, pages.length) : current,
+        growing,
         pageCount,
-        start,
+        shown: rows.length,
         total,
-      }}
+      })}
     >
       {groupByMonth(rows, first?.months ?? []).map((group) => (
         <section

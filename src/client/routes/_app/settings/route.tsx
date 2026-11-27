@@ -3,7 +3,7 @@ import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { HouseholdName } from "@/components/app/household-name";
+import { BackLink } from "@/components/app/back-link";
 import { PageContent, PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
 import { authStatusQuery, preferencesQuery } from "@/lib/session";
@@ -44,11 +44,8 @@ const SettingsLayout = () => {
 
   return (
     <>
-      {/* Phones: the same top row as the other tabs, so the title doesn't jump. */}
-      <PageHeader
-        mobileTop={<HouseholdName className="-ml-1" />}
-        title={t("title")}
-      />
+      {/* Phones: Settings opens from the avatar on a module home; back returns there. */}
+      <PageHeader mobileTop={<BackLink to="/" />} title={t("title")} />
       <nav
         aria-label={t("title")}
         className="md:border-divider mb-4 flex gap-1 md:mb-0 md:border-b md:px-5 md:py-2"

@@ -24,7 +24,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         loading: <Loader2Icon className="size-4 animate-spin" />,
       }}
       // Phones: above the floating tab bar (desktop: the corner).
-      mobileOffset={{ bottom: "calc(6rem + env(safe-area-inset-bottom))" }}
+      mobileOffset={{ bottom: "calc(4.75rem + env(safe-area-inset-bottom))" }}
       style={
         {
           "--normal-bg": "var(--popover)",

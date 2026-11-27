@@ -128,9 +128,12 @@ export const NoteField = withForm({
   },
 });
 
+const NO_DATES: readonly string[] = [];
+
 export const DateChip = withForm({
   defaultValues: TEMPLATE,
-  render: function DateChipRender({ form }) {
+  props: { quickDates: NO_DATES },
+  render: function DateChipRender({ form, quickDates }) {
     const { t } = useTranslation("finances");
 
     return (
@@ -140,6 +143,7 @@ export const DateChip = withForm({
             aria-label={t("form.date")}
             onBlur={field.handleBlur}
             onChange={field.handleChange}
+            quickDates={quickDates}
             value={field.state.value}
             variant="chip"
           />

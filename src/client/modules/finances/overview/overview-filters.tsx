@@ -3,16 +3,8 @@ import { CalendarDays, Tag, Users, X } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterBar, FilterSelect } from "@/components/app/filter-bar";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectSeparator,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { todayIso } from "@/lib/partial-date";
 
 import { categoriesQuery } from "../categories/categories.queries";
@@ -67,7 +59,29 @@ const PeriodFilter = ({
 
   return (
     <>
-      <Select
+      <FilterSelect
+        display={periodLabel(search)}
+        emptyValue={ALL}
+        groups={[
+          {
+            options: [
+              { label: t("overview.period.all"), value: ALL },
+              { label: t("overview.period.last12"), value: LAST_12_MONTHS },
+            ],
+          },
+          {
+            options: options.map((year) => ({
+              label:
+                year === currentYear
+                  ? t("overview.period.thisYear", { year })
+                  : String(year),
+              value: String(year),
+            })),
+          },
+          { options: [{ label: t("overview.period.custom"), value: CUSTOM }] },
+        ]}
+        icon={<CalendarDays />}
+        label={t("overview.period.label")}
         onValueChange={(next) => {
           if (next === CUSTOM) {
             setCustomOpen(true);
@@ -80,28 +94,7 @@ const PeriodFilter = ({
           }
         }}
         value={value}
-      >
-        <SelectTrigger aria-label={t("overview.period.label")} size="chip">
-          <CalendarDays />
-          {periodLabel(search)}
-        </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false}>
-          <SelectItem value={ALL}>{t("overview.period.all")}</SelectItem>
-          <SelectItem value={LAST_12_MONTHS}>
-            {t("overview.period.last12")}
-          </SelectItem>
-          <SelectSeparator />
-          {options.map((year) => (
-            <SelectItem key={year} value={String(year)}>
-              {year === currentYear
-                ? t("overview.period.thisYear", { year })
-                : year}
-            </SelectItem>
-          ))}
-          <SelectSeparator />
-          <SelectItem value={CUSTOM}>{t("overview.period.custom")}</SelectItem>
-        </SelectContent>
-      </Select>
+      />
       {customOpen && (
         <RangeDialog
           initial={custom ? period : null}
@@ -130,38 +123,31 @@ const CategoryFilter = ({
   const selected = categories.find((category) => category.id === value);
 
   return (
-    <Select
+    <FilterSelect
+      display={
+        selected === undefined
+          ? t("transactions.allCategories")
+          : nameOf(selected)
+      }
+      emptyValue={ANY}
+      groups={[
+        { options: [{ label: t("transactions.anyCategory"), value: ANY }] },
+        ...(["expense", "income"] as const).map((kind) => ({
+          label: t(`kind.${kind}`),
+          options: categories.flatMap((category) =>
+            category.kind === kind
+              ? [{ label: nameOf(category), value: category.id }]
+              : []
+          ),
+        })),
+      ]}
+      icon={<Tag />}
+      label={t("form.category")}
       onValueChange={(next) => {
-        onChange({
-          category: next === ANY ? null : next,
-        });
+        onChange({ category: next === ANY ? null : next });
       }}
       value={value ?? ANY}
-    >
-      <SelectTrigger aria-label={t("form.category")} size="chip">
-        <Tag />
-        {selected === undefined
-          ? t("transactions.allCategories")
-          : nameOf(selected)}
-      </SelectTrigger>
-      <SelectContent align="start" alignItemWithTrigger={false}>
-        <SelectItem value={ANY}>{t("transactions.anyCategory")}</SelectItem>
-        {(["expense", "income"] as const).map((kind) => (
-          <SelectGroup key={kind}>
-            <SelectLabel>{t(`kind.${kind}`)}</SelectLabel>
-            {categories.flatMap((category) =>
-              category.kind === kind
-                ? [
-                    <SelectItem key={category.id} value={category.id}>
-                      {nameOf(category)}
-                    </SelectItem>,
-                  ]
-                : []
-            )}
-          </SelectGroup>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   );
 };
 
@@ -178,27 +164,25 @@ const ClientFilter = ({
   const selected = clients.find((client) => client.id === value);
 
   return (
-    <Select
+    <FilterSelect
+      display={selected?.name ?? t("invoices.allClients")}
+      emptyValue={ANY}
+      groups={[
+        { options: [{ label: t("invoices.allClients"), value: ANY }] },
+        {
+          options: clients.map((client) => ({
+            label: client.name,
+            value: client.id,
+          })),
+        },
+      ]}
+      icon={<Users />}
+      label={t("form2.client")}
       onValueChange={(next) => {
-        onChange({
-          client: next === ANY ? null : next,
-        });
+        onChange({ client: next === ANY ? null : next });
       }}
       value={value ?? ANY}
-    >
-      <SelectTrigger aria-label={t("form2.client")} size="chip">
-        <Users />
-        {selected?.name ?? t("invoices.allClients")}
-      </SelectTrigger>
-      <SelectContent align="start" alignItemWithTrigger={false}>
-        <SelectItem value={ANY}>{t("invoices.allClients")}</SelectItem>
-        {clients.map((client) => (
-          <SelectItem key={client.id} value={client.id}>
-            {client.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   );
 };
 
@@ -220,7 +204,7 @@ export const OverviewFilters = ({
   const clients = useQuery(clientsQuery(Number(todayIso().slice(0, 4))));
 
   return (
-    <div className="md:border-divider -mx-4 flex scrollbar-none items-center gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:border-b md:px-5 md:py-2">
+    <FilterBar sticky={false}>
       <PeriodFilter onChange={onChange} search={search} years={years} />
       <CategoryFilter
         categories={categories.data?.categories ?? []}
@@ -237,13 +221,13 @@ export const OverviewFilters = ({
           onClick={() => {
             onChange({ ...NO_PERIOD, category: null, client: null });
           }}
-          size="compact"
+          size="chip"
           variant="ghost"
         >
           <X />
           {t("overview.clearFilters")}
         </Button>
       )}
-    </div>
+    </FilterBar>
   );
 };

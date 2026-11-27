@@ -33,7 +33,7 @@ const CategoryChips = ({
           onClick={() => {
             onChange(category);
           }}
-          size="xs"
+          size="chip"
           type="button"
           variant="chip"
         >

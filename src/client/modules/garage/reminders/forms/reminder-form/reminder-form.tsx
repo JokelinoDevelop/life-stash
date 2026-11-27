@@ -1,4 +1,5 @@
 import { REMINDER_KINDS } from "@shared/domain/garage-kinds";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { DialogForm, FormSection } from "@/components/form/dialog-form";
@@ -90,10 +91,13 @@ const RecurringCard = ({ form }: { form: ReminderFormApi }) => {
 
 export const ReminderForm = ({
   defaultValues,
+  footerStart,
   onCancel,
   onSubmit,
 }: {
   defaultValues: ReminderFormValues;
+  /** Left of the footer (Delete, when editing). */
+  footerStart?: ReactNode;
   onCancel: () => void;
   onSubmit: (values: ReminderFormValues) => Promise<void>;
 }) => {
@@ -104,7 +108,7 @@ export const ReminderForm = ({
     <DialogForm
       footer={
         <form.AppForm>
-          <form.FormFooter onCancel={onCancel} />
+          <form.FormFooter onCancel={onCancel} start={footerStart} />
         </form.AppForm>
       }
       onSubmit={() => {

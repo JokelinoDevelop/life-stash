@@ -178,14 +178,22 @@ export const ListRow = ({
 export const ListRowText = ({
   meta,
   title,
+  wrapMeta = false,
 }: {
   meta?: React.ReactNode;
   title: React.ReactNode;
+  /** Phones: let a long meta line wrap instead of ending in "…". */
+  wrapMeta?: boolean;
 }) => (
   <div className="flex min-w-0 flex-1 flex-col md:flex-row md:items-baseline md:gap-2">
     <span className="truncate font-medium">{title}</span>
     {meta !== undefined && meta !== null && (
-      <span className="text-muted-foreground truncate text-xs md:text-sm">
+      <span
+        className={cn(
+          "text-muted-foreground text-xs md:truncate md:text-sm",
+          !wrapMeta && "truncate"
+        )}
+      >
         {meta}
       </span>
     )}

@@ -1,9 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 
+import { useConfirm } from "@/components/app/confirm/confirm-context";
 import { FormDialog } from "@/components/app/form-dialog";
 import { ErrorState, FormSkeleton } from "@/components/app/states";
+import { Button } from "@/components/ui/button";
 import { api, unwrap } from "@/lib/api";
 import { useErrorMessage } from "@/lib/errors";
 import { useFormat } from "@/lib/format";
@@ -20,6 +23,57 @@ import { ReminderForm } from "./forms/reminder-form/reminder-form";
 import { reminderQuery } from "./reminders.queries";
 
 type Close = () => Promise<void>;
+
+/** Delete from the edit sheet (on phones the row has no ⋯ menu). */
+const DeleteReminder = ({
+  onClose,
+  reminderId,
+}: {
+  onClose: Close;
+  reminderId: string;
+}) => {
+  const { t } = useTranslation("garageReminders");
+  const { t: tc } = useTranslation();
+  const confirm = useConfirm();
+  const errorMessage = useErrorMessage();
+  const invalidate = useInvalidateGarage();
+
+  return (
+    <Button
+      aria-label={tc("actions.delete")}
+      onClick={async () => {
+        const ok = await confirm({
+          confirmLabel: tc("actions.delete"),
+          description: tc("confirmDelete.description"),
+          title: tc("confirmDelete.title"),
+          tone: "destructive",
+        });
+
+        if (!ok) {
+          return;
+        }
+
+        try {
+          await unwrap(
+            api.garage.reminders[":reminderId"].$delete({
+              param: { reminderId },
+            })
+          );
+          await invalidate();
+          toast.success(t("tab.deleted"));
+          await onClose();
+        } catch (error) {
+          toast.error(errorMessage(error));
+        }
+      }}
+      size="icon-compact"
+      type="button"
+      variant="ghost"
+    >
+      <Trash2 />
+    </Button>
+  );
+};
 
 const NewReminder = ({ carId, onClose }: { carId: string; onClose: Close }) => {
   const { t } = useTranslation("garageReminders");
@@ -83,6 +137,7 @@ const EditReminder = ({
   return (
     <ReminderForm
       defaultValues={reminderToFormValues(reminder.data, unit)}
+      footerStart={<DeleteReminder onClose={onClose} reminderId={reminderId} />}
       onCancel={() => {
         void onClose();
       }}

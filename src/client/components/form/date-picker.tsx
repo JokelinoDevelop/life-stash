@@ -22,8 +22,6 @@ import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 
-import { PickerSheet } from "./picker-sheet";
-
 const FIRST_YEAR = 1950;
 const YEARS_AHEAD = 10;
 
@@ -46,11 +44,12 @@ const dateToIso = (date: Date): string => {
 };
 
 /** "Today", "Yesterday" or the formatted date. */
+/** Today / Yesterday, else the date; `short` drops this year's year ("02.11") for chips. */
 const useDateLabel = () => {
   const { t } = useTranslation();
   const format = useFormat();
 
-  return (iso: string): string => {
+  return (iso: string, short = false): string => {
     const today = todayIso();
 
     if (iso === today) {
@@ -61,7 +60,9 @@ const useDateLabel = () => {
       return t("date.yesterday");
     }
 
-    return format.date(iso);
+    return short && iso.slice(0, 4) === today.slice(0, 4)
+      ? format.shortDate(iso)
+      : format.date(iso);
   };
 };
 
@@ -135,6 +136,11 @@ export interface DatePickerProps {
   placeholder?: string;
   /** `field`: full-width like an input. `chip`: a small inline button. */
   variant?: "field" | "chip";
+  /**
+   * Dates that chips beside the picker already offer (Today, Yesterday): while one of
+   * them is chosen the picker shows just its calendar icon, so the label isn't repeated.
+   */
+  quickDates?: readonly string[];
   "aria-label"?: string;
 }
 
@@ -219,6 +225,7 @@ export const DatePicker = ({
   clearable = false,
   placeholder,
   variant = "field",
+  quickDates,
   "aria-label": ariaLabel,
 }: DatePickerProps) => {
   const { t } = useTranslation();
@@ -241,23 +248,31 @@ export const DatePicker = ({
     onBlur?.();
   };
 
-  const text = empty ? (placeholder ?? t("date.pick")) : label(value);
+  const text = empty
+    ? (placeholder ?? t("date.pick"))
+    : label(value, variant === "chip");
 
   const triggerProps = {
     "aria-invalid": invalid,
     "aria-label": ariaLabel,
     className: cn(variant === "field" && "w-full"),
     "data-empty": empty,
-    size: variant === "chip" ? ("xs" as const) : ("default" as const),
+    size: variant === "chip" ? ("chip" as const) : ("default" as const),
     type: "button" as const,
     variant: "field" as const,
     id,
   };
 
+  const iconOnly = quickDates?.includes(value) === true;
+
   const triggerContent = (
     <>
       <CalendarDays />
-      <span className="truncate tabular-nums">{text}</span>
+      {iconOnly ? (
+        <span className="sr-only">{text}</span>
+      ) : (
+        <span className="truncate tabular-nums">{text}</span>
+      )}
     </>
   );
 
@@ -270,25 +285,42 @@ export const DatePicker = ({
     />
   );
 
+  // Phones: the system date picker (wheels on iOS, a calendar on Android) through a
+  // transparent native input laid over the chip, so one tap opens it.
   if (!isDesktop) {
     return (
-      <>
+      <span
+        className={cn("relative inline-flex", variant === "field" && "w-full")}
+      >
         <Button
           {...triggerProps}
-          onClick={() => {
-            setOpen(true);
-          }}
+          aria-hidden="true"
+          id={undefined}
+          nativeButton={false}
+          render={<span />}
+          tabIndex={-1}
         >
           {triggerContent}
         </Button>
-        <PickerSheet
-          onOpenChange={handleOpenChange}
-          open={open}
-          title={t("date.pick")}
-        >
-          {panel}
-        </PickerSheet>
-      </>
+        <input
+          aria-invalid={invalid}
+          aria-label={ariaLabel ?? text}
+          className="absolute inset-0 size-full cursor-pointer appearance-none opacity-0"
+          id={id}
+          max={`${Number(todayIso().slice(0, 4)) + YEARS_AHEAD}-12-31`}
+          min={`${FIRST_YEAR}-01-01`}
+          onBlur={onBlur}
+          onChange={(event) => {
+            const next = event.target.value;
+
+            if (isIsoDate(next) || (clearable && next === "")) {
+              onChange(next);
+            }
+          }}
+          type="date"
+          value={empty ? "" : value}
+        />
+      </span>
     );
   }
 

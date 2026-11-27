@@ -134,6 +134,10 @@
     "older": "Постари",
     "range": "{{start}}–{{end}} од {{total}}",
     "showAll": "Прикажи ги сите {{count}}",
-    "showLess": "Прикажи помалку"
+    "showLess": "Прикажи помалку",
+    "loadOlder": "Вчитај постари"
+  },
+  "filters": {
+    "clear": "Исчисти: {{label}}"
   }
 }

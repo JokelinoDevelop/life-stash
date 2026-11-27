@@ -107,6 +107,7 @@ const FinancesPage = () => {
           </>
         }
         description={status}
+        account
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />

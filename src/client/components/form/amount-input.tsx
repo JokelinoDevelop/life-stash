@@ -20,6 +20,8 @@ interface AmountInputProps {
   invalid: boolean;
   errors: unknown[];
   centered?: boolean;
+  /** Overrides the "Amount" label, e.g. "Amount received". */
+  label?: string;
   onAmountChange: (value: string) => void;
   onAmountBlur: () => void;
   onCurrencyChange: (value: Currency) => void;
@@ -36,6 +38,7 @@ export const AmountInput = ({
   errors,
   income,
   invalid,
+  label,
   onAmountBlur,
   onAmountChange,
   onCurrencyChange,
@@ -78,7 +81,7 @@ export const AmountInput = ({
         )}
         htmlFor="amount"
       >
-        {t("fields.amount")}
+        {label ?? t("fields.amount")}
       </label>
       <div
         className={cn(

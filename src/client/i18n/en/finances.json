@@ -349,6 +349,7 @@
     "markPaidDialog": {
       "title": "Mark as paid",
       "received": "Amount received",
+      "invoiced": "Invoiced {{amount}}",
       "today": "Paid today",
       "yesterday": "Yesterday",
       "adds": "This adds an income transaction",

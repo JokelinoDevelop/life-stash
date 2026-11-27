@@ -1,7 +1,7 @@
 import { Gauge, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { PagedList } from "@/components/app/list-pagination";
+import { PagedList, useGrowingList } from "@/components/app/list-pagination";
 import {
   ListRow,
   ListRowText,
@@ -12,7 +12,7 @@ import { TINT_TILE } from "@/components/app/tint";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useFormat } from "@/lib/format";
-import { paginate } from "@/lib/paginate";
+import { LIST_PAGE_SIZE, paginate } from "@/lib/paginate";
 import { cn } from "@/lib/utils";
 
 import { useTabPage } from "../cars/use-tab-page";
@@ -196,7 +196,8 @@ export const TimelineList = ({
   readOnly: boolean;
 }) => {
   const { page, setPage } = useTabPage();
-  const slice = paginate(entries, page);
+  const growing = useGrowingList();
+  const slice = paginate(entries, page, LIST_PAGE_SIZE, growing);
 
   const perYear = new Map(
     groupByYear(entries).map(([year, items]) => [year, items.length])

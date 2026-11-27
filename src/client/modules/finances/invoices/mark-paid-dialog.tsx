@@ -6,12 +6,11 @@ import { useTranslation } from "react-i18next";
 
 import { FormDialog } from "@/components/app/form-dialog";
 import { ErrorState, FormSkeleton } from "@/components/app/states";
+import { AmountInput } from "@/components/form/amount-input";
 import { DatePicker } from "@/components/form/date-picker";
 import { DialogForm, FormSection } from "@/components/form/dialog-form";
-import { FieldErrors } from "@/components/form/field-errors";
 import { useAppForm } from "@/components/form/form-hook";
 import { Button } from "@/components/ui/button";
-import { useCurrencySymbol } from "@/lib/currency-symbol";
 import { parseAmount } from "@/lib/form-schemas";
 import { useFormat } from "@/lib/format";
 import { todayIso } from "@/lib/partial-date";
@@ -21,6 +20,7 @@ import { useLedgerMoney } from "../money";
 import {
   markPaidFormDefaults,
   markPaidFormToRequest,
+  receivedAmountFor,
 } from "./forms/mark-paid-form/mapper";
 import { markPaidFormSchema } from "./forms/mark-paid-form/schema";
 import type { MarkPaidFormValues } from "./forms/mark-paid-form/schema";
@@ -57,7 +57,7 @@ const LedgerPreview = ({
         <dd className="text-success-foreground font-medium tabular-nums">
           {ledger.signed(
             toMinor(parseAmount(values.amount) ?? 0),
-            invoice.currency,
+            values.currency,
             "income"
           )}
         </dd>
@@ -101,7 +101,7 @@ const PaidDateChips = ({
         onClick={() => {
           onChange(today);
         }}
-        size="xs"
+        size="chip"
         type="button"
         variant="chip"
       >
@@ -112,7 +112,7 @@ const PaidDateChips = ({
         onClick={() => {
           onChange(yesterday);
         }}
-        size="xs"
+        size="chip"
         type="button"
         variant="chip"
       >
@@ -121,6 +121,7 @@ const PaidDateChips = ({
       <DatePicker
         aria-label={t("invoices.markPaidDialog.date")}
         onChange={onChange}
+        quickDates={[today, yesterday]}
         value={value}
         variant="chip"
       />
@@ -136,8 +137,8 @@ const MarkPaidForm = ({
   onClose: Close;
 }) => {
   const { t } = useTranslation("finances");
-  const symbol = useCurrencySymbol()(invoice.currency);
   const forLabel = useInvoiceFor();
+  const ledger = useLedgerMoney();
   const viewLedger = useViewLedger();
   const markPaid = useMarkPaid(viewLedger);
   const today = todayIso();
@@ -147,7 +148,6 @@ const MarkPaidForm = ({
     onSubmit: async ({ value }) => {
       await markPaid.mutateAsync({
         ...markPaidFormToRequest(value),
-        currency: invoice.currency,
         id: invoice.id,
         label: invoice.number ?? "",
       });
@@ -174,47 +174,52 @@ const MarkPaidForm = ({
     >
       <FormSection>
         <form.Field name="amount">
-          {(field) => {
-            const invalid =
-              field.state.meta.isTouched && !field.state.meta.isValid;
-
-            return (
-              <div className="flex flex-col">
-                <label
-                  className="text-muted-foreground text-xs font-medium"
-                  htmlFor="amount"
-                >
-                  {t("invoices.markPaidDialog.received")}
-                </label>
-                <div className="mt-0.5 flex items-baseline gap-1.5">
-                  <span
-                    aria-hidden="true"
-                    className="text-muted-foreground text-3xl font-semibold"
-                  >
-                    {symbol}
-                  </span>
-                  <input
-                    aria-invalid={invalid}
-                    className="min-w-0 flex-1 border-0 bg-transparent p-0 text-3xl font-semibold tracking-tight tabular-nums outline-none"
-                    id="amount"
-                    inputMode="decimal"
-                    onBlur={field.handleBlur}
-                    onChange={(event) => {
-                      field.handleChange(event.target.value);
+          {(field) => (
+            <div className="flex flex-col">
+              <form.Subscribe selector={(state) => state.values.currency}>
+                {(currency) => (
+                  <AmountInput
+                    amount={field.state.value}
+                    currency={currency}
+                    errors={field.state.meta.errors}
+                    income={false}
+                    invalid={
+                      field.state.meta.isTouched && !field.state.meta.isValid
+                    }
+                    label={t("invoices.markPaidDialog.received")}
+                    onAmountBlur={field.handleBlur}
+                    onAmountChange={field.handleChange}
+                    onCurrencyChange={(value) => {
+                      form.setFieldValue("currency", value);
+                      field.handleChange(
+                        receivedAmountFor(invoice, value, field.state.value)
+                      );
+                      document
+                        .querySelector<HTMLInputElement>("#amount")
+                        ?.focus();
                     }}
-                    value={field.state.value}
                   />
-                </div>
-                <FieldErrors
-                  errors={field.state.meta.errors.slice(0, 1)}
-                  show={invalid}
-                />
-                <p className="text-muted-foreground mt-1 text-sm">
-                  {invoice.clientName} · {forLabel(invoice)}
-                </p>
-              </div>
-            );
-          }}
+                )}
+              </form.Subscribe>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {invoice.clientName} · {forLabel(invoice)}
+              </p>
+              <form.Subscribe selector={(state) => state.values.currency}>
+                {(currency) =>
+                  currency !== invoice.currency && (
+                    <p className="text-muted-foreground text-sm tabular-nums">
+                      {t("invoices.markPaidDialog.invoiced", {
+                        amount: ledger.money(
+                          invoice.amountMinor,
+                          invoice.currency
+                        ),
+                      })}
+                    </p>
+                  )
+                }
+              </form.Subscribe>
+            </div>
+          )}
         </form.Field>
         <form.Field name="paidDate">
           {(field) => (

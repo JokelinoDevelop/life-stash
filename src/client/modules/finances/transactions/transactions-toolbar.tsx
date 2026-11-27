@@ -2,19 +2,12 @@ import { CalendarDays, Search, Tag, Users } from "lucide-react";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { FilterBar, FilterSelect } from "@/components/app/filter-bar";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
 
@@ -40,7 +33,7 @@ const KindFilter = ({
   return (
     <ToggleGroup
       aria-label={t("kind.label")}
-      className="shrink-0"
+      className="w-full shrink-0 md:w-fit"
       onValueChange={([value]) => {
         if (value === "income" || value === "expense") {
           onChange({ kind: value });
@@ -48,7 +41,7 @@ const KindFilter = ({
           onChange({ kind: null });
         }
       }}
-      size="segmented"
+      size="segmented-block"
       spacing={0.5}
       value={[kind ?? "all"]}
       variant="segmented"
@@ -87,32 +80,30 @@ const CategoryFilter = ({
   }
 
   return (
-    <Select
+    <FilterSelect
+      display={
+        selected === undefined
+          ? t("transactions.allCategories")
+          : nameOf(selected)
+      }
+      emptyValue={ANY}
+      groups={[
+        { options: [{ label: t("transactions.anyCategory"), value: ANY }] },
+        ...kinds.map((kind) => ({
+          label: t(`kind.${kind}`),
+          options: (byKind.get(kind) ?? []).map((category) => ({
+            label: nameOf(category),
+            value: category.id,
+          })),
+        })),
+      ]}
+      icon={<Tag />}
+      label={t("form.category")}
       onValueChange={(value) => {
         onChange({ category: value === ANY ? null : value });
       }}
       value={search.category ?? ANY}
-    >
-      <SelectTrigger aria-label={t("form.category")} size="chip">
-        <Tag />
-        {selected === undefined
-          ? t("transactions.allCategories")
-          : nameOf(selected)}
-      </SelectTrigger>
-      <SelectContent align="start" alignItemWithTrigger={false}>
-        <SelectItem value={ANY}>{t("transactions.anyCategory")}</SelectItem>
-        {kinds.map((kind) => (
-          <SelectGroup key={kind}>
-            <SelectLabel>{t(`kind.${kind}`)}</SelectLabel>
-            {(byKind.get(kind) ?? []).map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {nameOf(category)}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   );
 };
 
@@ -134,7 +125,20 @@ const YearFilter = ({
   );
 
   return (
-    <Select
+    <FilterSelect
+      display={value === ALL_YEARS ? t("transactions.allYears") : value}
+      emptyValue={String(currentYear)}
+      groups={[
+        {
+          options: years.map((option) => ({
+            label: String(option),
+            value: String(option),
+          })),
+        },
+        { options: [{ label: t("transactions.allYears"), value: ALL_YEARS }] },
+      ]}
+      icon={<CalendarDays />}
+      label={t("transactions.year")}
       onValueChange={(next) => {
         if (next === ALL_YEARS) {
           onChange({ year: ALL_YEARS });
@@ -147,20 +151,7 @@ const YearFilter = ({
         onChange({ year: picked === currentYear ? null : picked });
       }}
       value={value}
-    >
-      <SelectTrigger aria-label={t("transactions.year")} size="chip">
-        <CalendarDays />
-        {value === ALL_YEARS ? t("transactions.allYears") : value}
-      </SelectTrigger>
-      <SelectContent align="start" alignItemWithTrigger={false}>
-        {years.map((option) => (
-          <SelectItem key={option} value={String(option)}>
-            {option}
-          </SelectItem>
-        ))}
-        <SelectItem value={ALL_YEARS}>{t("transactions.allYears")}</SelectItem>
-      </SelectContent>
-    </Select>
+    />
   );
 };
 
@@ -240,25 +231,25 @@ const ClientFilter = ({
   const selected = clients.find((client) => client.id === value);
 
   return (
-    <Select
+    <FilterSelect
+      display={selected?.name ?? t("form2.client")}
+      emptyValue={ANY}
+      groups={[
+        { options: [{ label: t("invoices.allClients"), value: ANY }] },
+        {
+          options: clients.map((client) => ({
+            label: client.name,
+            value: client.id,
+          })),
+        },
+      ]}
+      icon={<Users />}
+      label={t("form2.client")}
       onValueChange={(next) => {
         onChange({ client: next === ANY ? null : next });
       }}
       value={value ?? ANY}
-    >
-      <SelectTrigger aria-label={t("form2.client")} size="chip">
-        <Users />
-        {selected?.name ?? t("form2.client")}
-      </SelectTrigger>
-      <SelectContent align="start" alignItemWithTrigger={false}>
-        <SelectItem value={ANY}>{t("invoices.allClients")}</SelectItem>
-        {clients.map((client) => (
-          <SelectItem key={client.id} value={client.id}>
-            {client.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    />
   );
 };
 
@@ -279,8 +270,16 @@ export const TransactionsToolbar = ({
   const range = rangeOf(search);
 
   return (
-    <div className="md:border-divider -mx-4 flex scrollbar-none items-center gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:border-b md:px-5 md:py-2">
-      <KindFilter kind={search.kind} onChange={onChange} />
+    <FilterBar
+      status={<KindFilter kind={search.kind} onChange={onChange} />}
+      trailing={
+        <SearchBox
+          className="hidden md:ml-auto md:flex"
+          onChange={onChange}
+          q={search.q}
+        />
+      }
+    >
       <CategoryFilter
         categories={categories}
         onChange={onChange}
@@ -300,8 +299,6 @@ export const TransactionsToolbar = ({
       ) : (
         <RangeChip onChange={onChange} range={range} />
       )}
-      <span className="hidden flex-1 md:block" />
-      <SearchBox className="hidden md:flex" onChange={onChange} q={search.q} />
-    </div>
+    </FilterBar>
   );
 };

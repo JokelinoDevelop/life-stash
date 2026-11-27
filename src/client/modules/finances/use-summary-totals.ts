@@ -1,6 +1,8 @@
 import { NO_RATES } from "@shared/domain/exchange";
+import { toMajor } from "@shared/domain/money";
 import type { MoneyTotal } from "@shared/domain/money";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { useFormat } from "@/lib/format";
 
@@ -15,9 +17,28 @@ import { financeSettingsQuery } from "./settings/finance-settings.queries";
  */
 export const useSummaryTotals = () => {
   const format = useFormat();
+  const { i18n } = useTranslation();
   const rates = useQuery(financeSettingsQuery).data?.exchangeRates ?? NO_RATES;
 
-  return (values: readonly MoneyTotal[]): string => {
+  /** "MKD 1.04M": three significant digits, for a tile with no room for the full figure. */
+  const short = (total: MoneyTotal): string =>
+    new Intl.NumberFormat(i18n.language === "mk" ? "mk-MK" : "en-GB", {
+      currency: total.currency,
+      maximumSignificantDigits: 3,
+      notation: "compact",
+      style: "currency",
+    }).format(toMajor(total.amountMinor));
+
+  return (
+    values: readonly MoneyTotal[],
+    options: { compact?: boolean } = {}
+  ): string => {
+    const [only] = values;
+
+    if (options.compact === true && values.length === 1 && only !== undefined) {
+      return short(only);
+    }
+
     if (values.length <= 1) {
       return format.totals(values);
     }
@@ -25,7 +46,10 @@ export const useSummaryTotals = () => {
     const figure = headline(values, format.currency, rates);
 
     if (figure.converted && figure.primary !== null) {
-      return `≈ ${format.money(figure.primary.amountMinor, figure.primary.currency)}`;
+      // A compact figure is already rounded, so it drops the "≈".
+      return options.compact === true
+        ? short(figure.primary)
+        : `≈ ${format.money(figure.primary.amountMinor, figure.primary.currency)}`;
     }
 
     return format.totals(

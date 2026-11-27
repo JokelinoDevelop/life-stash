@@ -183,6 +183,7 @@ const GarageHome = () => {
       <PageHeader
         actions={<HeaderActions />}
         description={summary}
+        account
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />

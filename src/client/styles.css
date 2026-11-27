@@ -49,49 +49,14 @@
   );
 }
 
-/* The phone tab bar floats above the home indicator. */
-@utility tabbar-float {
-  bottom: max(0.75rem, env(safe-area-inset-bottom));
-}
-
-/* Its capsules (tabs, Quick add): frosted and nearly opaque, so the little
-   that reaches them under the edge fade reads as tone, not as text. */
-@utility tabbar-glass {
-  background: color-mix(in oklch, var(--card) 82%, transparent);
+/* The phone tab bar: docked to the bottom edge above the home indicator,
+   frosted and nearly opaque, with a hairline on top. */
+@utility tabbar-dock {
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in oklch, var(--card) 88%, transparent);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
-    0 0 0 1px color-mix(in oklch, var(--foreground) 7%, transparent),
-    0 6px 24px -8px oklch(0.2 0.02 265 / 0.25);
-}
-
-/* The bottom edge of the phone screen: the page blurs progressively and fades
-   into the canvas as it nears the tab bar (the bar never shows rows through
-   it). Two masked blur layers give a soft ramp instead of a hard line. */
-@utility tabbar-edge {
-  height: calc(6.5rem + env(safe-area-inset-bottom));
-  background: linear-gradient(
-    to top,
-    var(--background) 30%,
-    color-mix(in oklch, var(--background) 70%, transparent) 60%,
-    transparent
-  );
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-  &::before {
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
-    mask-image: linear-gradient(to top, black 50%, transparent);
-  }
-  &::after {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    mask-image: linear-gradient(to top, black 40%, transparent 75%);
-  }
+  border-top: 1px solid var(--border);
 }
 
 /* The currency next to a figure (`Money`): smaller and lighter than the digits. */
@@ -656,15 +621,20 @@
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
   }
-  /* Form fields are 44px touch targets on phones (desktop keeps 36px). */
+  /* Form fields are 44px touch targets on phones (desktop keeps 36px); a chip-sized date
+     picker keeps its chip height next to the other chips. */
   [data-slot="input"],
   [data-slot="input-group"],
   [data-slot="select-trigger"][data-size="default"],
-  [data-slot="button"][data-variant="field"] {
+  [data-slot="button"][data-variant="field"]:not(
+      [data-size="xs"],
+      [data-size="chip"]
+    ) {
     height: 2.75rem;
   }
-  /* Pill tabs on the grey canvas: the active tab is a raised white chip. */
-  [data-slot="tabs-indicator"] {
+  /* Pill tabs on the grey canvas: the active tab is a raised white chip
+     (bar tabs draw an underline instead). */
+  [data-slot="tabs-indicator"]:not([data-variant="bar"]) {
     background: var(--card);
     box-shadow: 0 1px 2px oklch(0.2 0.02 265 / 0.08);
   }
@@ -674,7 +644,7 @@
    error) stops above the floating tab bar, not underneath it. */
 @media (max-width: 47.999rem) {
   html:has([data-tabbar]) {
-    scroll-padding-bottom: calc(7rem + env(safe-area-inset-bottom));
+    scroll-padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 }
 

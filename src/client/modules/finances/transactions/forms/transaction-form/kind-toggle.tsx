@@ -19,13 +19,13 @@ export const KindToggle = ({
   return (
     <ToggleGroup
       aria-label={t("kind.label")}
-      className={cn(centered && "mx-auto")}
+      className={cn(centered && "w-full md:mx-auto md:w-fit")}
       onValueChange={([next]) => {
         if (next !== undefined) {
           onChange(next);
         }
       }}
-      size="segmented"
+      size={centered ? "segmented-block" : "segmented"}
       spacing={0.5}
       value={[kind]}
       variant="segmented"

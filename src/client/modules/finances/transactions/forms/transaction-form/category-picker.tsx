@@ -1,4 +1,4 @@
-import { ChevronDown, Tag } from "lucide-react";
+import { ChevronDown, MoreHorizontal, Tag } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +18,10 @@ import type { FinanceCategory } from "../../../categories/categories.queries";
 import { CategoryIcon } from "../../../categories/category-icon";
 import { useCategoryName } from "../../../categories/category-label";
 
+/** Phones: one category as a tile (icon over name) in the Add transaction grid. */
+export const CATEGORY_TILE =
+  "border-border bg-card aria-pressed:border-primary aria-pressed:bg-accent flex h-17 min-w-0 flex-col items-center justify-center gap-1.5 rounded-xl border text-xs font-medium transition-colors active:scale-[.98] aria-pressed:font-semibold";
+
 /** A chip that opens a searchable list of categories (a sheet on phones). */
 export const CategoryPicker = ({
   categories,
@@ -33,7 +37,7 @@ export const CategoryPicker = ({
   label?: string;
   onBlur: () => void;
   onChange: (categoryId: string) => void;
-  trigger?: "chip" | "more";
+  trigger?: "chip" | "more" | "tile";
   value: string;
 }) => {
   const { t } = useTranslation("finances");
@@ -53,12 +57,29 @@ export const CategoryPicker = ({
       }}
       open={open}
       title={categoryLabel}
-      renderTrigger={(props) =>
-        trigger === "more" ? (
-          <Button {...props} size="xs" type="button" variant="chip">
-            {label ?? t("form.more")}
-          </Button>
-        ) : (
+      renderTrigger={(props) => {
+        if (trigger === "tile") {
+          return (
+            <button {...props} className={CATEGORY_TILE} type="button">
+              <span className="bg-muted text-muted-foreground flex size-8 items-center justify-center rounded-lg">
+                <MoreHorizontal className="size-4" />
+              </span>
+              <span className="max-w-full truncate px-1">
+                {label ?? t("form.more")}
+              </span>
+            </button>
+          );
+        }
+
+        if (trigger === "more") {
+          return (
+            <Button {...props} size="xs" type="button" variant="chip">
+              {label ?? t("form.more")}
+            </Button>
+          );
+        }
+
+        return (
           <Button
             {...props}
             aria-invalid={invalid}
@@ -81,8 +102,8 @@ export const CategoryPicker = ({
             </span>
             <ChevronDown className="opacity-60" />
           </Button>
-        )
-      }
+        );
+      }}
     >
       <Command>
         <CommandInput placeholder={categoryLabel} />

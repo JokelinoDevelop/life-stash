@@ -12,7 +12,7 @@ import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import { fitnessOverviewQuery } from "@/modules/fitness/fitness.queries";
 import { carsQuery } from "@/modules/garage/cars/cars.queries";
 import { householdOverviewQuery } from "@/modules/garage/household/household.queries";
-import { TodaySummaryLine, useTodayLabel } from "@/modules/today/today-hero";
+import { TodayStatTiles, useTodayLabel } from "@/modules/today/today-hero";
 import { TodayView } from "@/modules/today/today-view";
 
 const TodayPage = () => {
@@ -35,11 +35,12 @@ const TodayPage = () => {
             <Search />
           </Button>
         }
-        description={<TodaySummaryLine />}
         eyebrow={date}
+        account
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />
+      <TodayStatTiles />
       <TodayView />
     </>
   );

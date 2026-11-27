@@ -67,6 +67,8 @@ const WeightPage = () => {
       <WeightView
         onPageChange={(page) => {
           void navigate({
+            replace: true,
+            resetScroll: false,
             search: ({ page: _page, ...prev }) =>
               page > 1 ? { ...prev, page } : prev,
           });
