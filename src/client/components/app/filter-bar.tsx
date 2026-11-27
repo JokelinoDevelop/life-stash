@@ -151,7 +151,11 @@ export const FilterSelect = ({
           {icon}
           {display}
         </SelectTrigger>
-        <SelectContent align="start" alignItemWithTrigger={false}>
+        <SelectContent
+          align="start"
+          alignItemWithTrigger={false}
+          width="content"
+        >
           {groups.map((group, index) => (
             <Fragment key={group.label ?? group.options[0]?.value ?? "empty"}>
               {index > 0 && group.label === undefined && <SelectSeparator />}
