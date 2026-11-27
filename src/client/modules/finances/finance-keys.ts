@@ -1,3 +1,4 @@
+import type { OverviewFilter } from "./overview/overview-search";
 import type { TransactionFilter } from "./transactions/transaction-filter";
 
 /** Query keys for Finances. Every finance mutation invalidates `financeKeys.all`. */
@@ -20,8 +21,9 @@ export const financeKeys = {
   projects: (clientId: string | null) =>
     ["finances", "projects", clientId] as const,
   recurring: ["finances", "recurring"] as const,
-  overview: (year: number) => ["finances", "overview", year] as const,
-  /** Every year's overview (prefix of `overview`). */
+  overview: (filter: OverviewFilter) =>
+    ["finances", "overview", filter] as const,
+  /** Every filtered overview (prefix of `overview`). */
   overviewAll: ["finances", "overview"] as const,
   settings: ["finances", "settings"] as const,
   transaction: (transactionId: string) =>

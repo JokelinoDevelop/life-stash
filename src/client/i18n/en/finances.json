@@ -43,7 +43,8 @@
       "filteredTitle": "Nothing matches",
       "filteredMessage": "Try another category, year or search.",
       "clear": "Clear filters"
-    }
+    },
+    "clearRange": "Show the whole year instead of this range"
   },
   "form": {
     "amount": "Amount",
@@ -139,14 +140,11 @@
   },
   "overview": {
     "title": "Overview",
-    "year": "Year",
     "newInvoice": "Add invoice",
     "earned": "Earned",
     "spent": "Spent",
     "net": "Net",
     "waiting": "Waiting for payment",
-    "vsLastYear": "{{change}} vs {{year}}",
-    "noLastYear": "Nothing in {{year}}",
     "inOther": "+ {{amount}} in {{currency}}",
     "perMonth": "{{amount}} a month on average",
     "overdueOf_one": "{{amount}} overdue · {{count}} invoice",
@@ -178,14 +176,13 @@
     "status_other": "{{amount}} waiting · {{count}} invoices overdue",
     "statusNoOverdue": "{{amount}} waiting for payment",
     "statusClear": "Nothing waiting for payment",
-    "netIn": "Net in {{year}}",
-    "earnedChange": "{{change}} earned vs {{year}}",
+    "netIn": "Net · {{period}}",
     "quick": {
       "expense": "Expense",
       "income": "Income",
       "invoice": "Invoice"
     },
-    "noSpending": "No spending in {{year}} yet.",
+    "noSpending": "No spending in this period.",
     "chartLabel": "Money in and out per month. Tap or drag across the bars to read a month.",
     "empty": {
       "title": "Start tracking your money",
@@ -193,7 +190,36 @@
       "addClient": "Add client"
     },
     "including": "incl. {{amount}}",
-    "monthReadout": "{{month}} · in {{income}} · out {{expense}}"
+    "monthReadout": "{{month}} · in {{income}} · out {{expense}}",
+    "vsBefore": "{{change}} vs {{period}}",
+    "noBefore": "Nothing in {{period}}",
+    "previousPeriod": "the period before",
+    "since": "since {{date}}",
+    "chartLabelDesktop": "Money in and out over the period. Select a bar to see its transactions.",
+    "trendOf": "Trend of {{name}} over the period",
+    "clearFilters": "Clear",
+    "period": {
+      "label": "Period",
+      "all": "All time",
+      "last12": "Last 12 months",
+      "thisYear": "This year ({{year}})",
+      "custom": "Custom range…",
+      "customTitle": "Custom range",
+      "customHint": "Pick the first and the last day.",
+      "apply": "Apply"
+    },
+    "highlights": {
+      "title": "Highlights",
+      "description_one": "over {{count}} month",
+      "description_other": "over {{count}} months",
+      "avgIn": "Earned a month",
+      "avgOut": "{{amount}} spent",
+      "kept": "Kept of income",
+      "keptHint": "{{amount}} a month",
+      "best": "Best month",
+      "worst": "Worst month",
+      "needMonths": "Needs two months or more"
+    }
   },
   "invoices": {
     "title": "Invoices",

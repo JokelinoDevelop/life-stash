@@ -10,8 +10,10 @@ export const overviewController = new Hono<AppEnv>().get(
   "/",
   validate("query", financeOverviewQuery),
   async (c) => {
-    const year = c.req.valid("query").year ?? new Date().getUTCFullYear();
-    const overview = await c.var.container.finances.overview.get(year);
+    const overview = await c.var.container.finances.overview.get(
+      c.req.valid("query")
+    );
+
     const body: FinanceOverviewResponse = toFinanceOverviewResponse(overview);
 
     return c.json(body);

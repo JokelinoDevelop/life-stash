@@ -43,7 +43,8 @@
       "filteredTitle": "Нема совпаѓања",
       "filteredMessage": "Пробајте друга категорија, година или пребарување.",
       "clear": "Исчисти филтри"
-    }
+    },
+    "clearRange": "Прикажи ја целата година наместо овој период"
   },
   "form": {
     "amount": "Износ",
@@ -139,14 +140,11 @@
   },
   "overview": {
     "title": "Преглед",
-    "year": "Година",
     "newInvoice": "Додај фактура",
     "earned": "Заработено",
     "spent": "Потрошено",
     "net": "Нето",
     "waiting": "Се чека плаќање",
-    "vsLastYear": "{{change}} во однос на {{year}}",
-    "noLastYear": "Ништо во {{year}}",
     "inOther": "+ {{amount}} во {{currency}}",
     "perMonth": "{{amount}} месечно во просек",
     "overdueOf_one": "{{amount}} задоцнето · {{count}} фактура",
@@ -178,14 +176,13 @@
     "status_other": "{{amount}} се чека · {{count}} фактури доцнат",
     "statusNoOverdue": "{{amount}} се чека плаќање",
     "statusClear": "Ништо не се чека",
-    "netIn": "Нето во {{year}}",
-    "earnedChange": "{{change}} заработено во однос на {{year}}",
+    "netIn": "Нето · {{period}}",
     "quick": {
       "expense": "Трошок",
       "income": "Приход",
       "invoice": "Фактура"
     },
-    "noSpending": "Сè уште нема трошоци во {{year}}.",
+    "noSpending": "Нема трошоци во овој период.",
     "chartLabel": "Приходи и расходи по месец. Допри или повлечи преку столбовите за да видиш месец.",
     "empty": {
       "title": "Почнете да ги следите парите",
@@ -193,7 +190,36 @@
       "addClient": "Додај клиент"
     },
     "including": "вкл. {{amount}}",
-    "monthReadout": "{{month}} · влез {{income}} · излез {{expense}}"
+    "monthReadout": "{{month}} · влез {{income}} · излез {{expense}}",
+    "vsBefore": "{{change}} во однос на {{period}}",
+    "noBefore": "Ништо во {{period}}",
+    "previousPeriod": "претходниот период",
+    "since": "од {{date}}",
+    "chartLabelDesktop": "Приходи и трошоци во периодот. Изберете столб за да ги видите трансакциите.",
+    "trendOf": "Тренд на {{name}} во периодот",
+    "clearFilters": "Исчисти",
+    "period": {
+      "label": "Период",
+      "all": "Цело време",
+      "last12": "Последни 12 месеци",
+      "thisYear": "Оваа година ({{year}})",
+      "custom": "Сопствен период…",
+      "customTitle": "Сопствен период",
+      "customHint": "Изберете го првиот и последниот ден.",
+      "apply": "Примени"
+    },
+    "highlights": {
+      "title": "Најважно",
+      "description_one": "за {{count}} месец",
+      "description_other": "за {{count}} месеци",
+      "avgIn": "Заработено месечно",
+      "avgOut": "{{amount}} потрошено",
+      "kept": "Зачувано од приходот",
+      "keptHint": "{{amount}} месечно",
+      "best": "Најдобар месец",
+      "worst": "Најлош месец",
+      "needMonths": "Потребни се барем два месеци"
+    }
   },
   "invoices": {
     "title": "Фактури",

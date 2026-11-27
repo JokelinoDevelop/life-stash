@@ -158,3 +158,31 @@ export const spendingByMonth = (
       CURRENCIES.indexOf(a.currency) - CURRENCIES.indexOf(b.currency)
   );
 };
+
+export interface DatedCost {
+  date: string;
+  currency: Currency;
+  amountMinor: number;
+}
+
+/**
+ * Every cost I paid, one line per visit or expense (previous-owner work and visits without
+ * a known cost excluded), for reports over any date range.
+ */
+export const spendingEntries = (
+  visits: readonly ReportVisit[],
+  expenses: readonly ReportExpense[]
+): DatedCost[] => [
+  ...visits.flatMap((visit) => {
+    const amount = visit.byPreviousOwner ? null : effectiveVisitTotal(visit);
+
+    return amount === null
+      ? []
+      : [{ amountMinor: amount, currency: visit.currency, date: visit.date }];
+  }),
+  ...expenses.map((expense) => ({
+    amountMinor: expense.amountMinor,
+    currency: expense.currency,
+    date: expense.date,
+  })),
+];

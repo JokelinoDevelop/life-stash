@@ -7,7 +7,6 @@ import { HouseholdName } from "@/components/app/household-name";
 import { PageHeader } from "@/components/app/page-header";
 import { PageSkeleton } from "@/components/app/page-skeleton";
 import { Button } from "@/components/ui/button";
-import { todayIso } from "@/lib/partial-date";
 import { cached, warm } from "@/lib/warm";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import { fitnessOverviewQuery } from "@/modules/fitness/fitness.queries";
@@ -48,12 +47,10 @@ const TodayPage = () => {
 
 export const Route = createFileRoute("/_app/")({
   loader: async ({ context: { queryClient } }) => {
-    const year = Number(todayIso().slice(0, 4));
-
     await warm(
       queryClient.query(cached(householdOverviewQuery)),
       queryClient.query(cached(carsQuery(false))),
-      queryClient.query(cached(overviewQuery(year))),
+      queryClient.query(cached(overviewQuery())),
       queryClient.query(cached(fitnessOverviewQuery))
     );
   },

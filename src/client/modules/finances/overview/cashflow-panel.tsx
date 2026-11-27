@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 import { useMonthLabel } from "../transactions/month-band";
 import { subtractTotals } from "./money-split";
+import type { OverviewSearch } from "./overview-search";
 import type { FinanceOverview } from "./overview.queries";
 
 const CashflowChart = lazy(async () => await import("./cashflow-chart"));
@@ -20,7 +21,13 @@ const isCurrency = (
 ): value is Currency => options.some((option) => option === value);
 
 /** "Income vs spending": the chart (per currency, never mixed) and this month so far. */
-export const CashflowPanel = ({ overview }: { overview: FinanceOverview }) => {
+export const CashflowPanel = ({
+  overview,
+  search,
+}: {
+  overview: FinanceOverview;
+  search: OverviewSearch;
+}) => {
   const { t } = useTranslation("finances");
   const format = useFormat();
   const month = useMonthLabel();
@@ -38,7 +45,9 @@ export const CashflowPanel = ({ overview }: { overview: FinanceOverview }) => {
     overview.monthSoFar.expense
   );
 
-  const showMonth = overview.today.startsWith(`${overview.year}-`);
+  const showMonth =
+    overview.today >= overview.range.from &&
+    overview.today <= overview.range.to;
 
   return (
     <Panel
@@ -66,7 +75,11 @@ export const CashflowPanel = ({ overview }: { overview: FinanceOverview }) => {
       title={t("overview.incomeVsSpending")}
     >
       <Suspense fallback={<LoadingState variant="block" />}>
-        <CashflowChart currency={currency} overview={overview} />
+        <CashflowChart
+          currency={currency}
+          overview={overview}
+          search={search}
+        />
       </Suspense>
       {showMonth && (
         <p className="text-muted-foreground border-divider mt-3 flex flex-wrap gap-x-3 border-t pt-3 text-xs tabular-nums">

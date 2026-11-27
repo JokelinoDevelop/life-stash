@@ -13,7 +13,6 @@ import { Money } from "@/components/app/money";
 import { PageStack } from "@/components/app/page-header";
 import { ErrorState, LoadingState } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { todayIso } from "@/lib/partial-date";
 import { cn } from "@/lib/utils";
 import { FinanceDialogLink } from "@/modules/finances/dialogs/finance-dialog-link";
 import { InvoiceStatusIcon } from "@/modules/finances/invoices/invoice-status-icon";
@@ -227,10 +226,9 @@ const TodayLists = ({
 
 /** Everything that needs you, across Garage, Finances and Fitness. */
 export const TodayView = () => {
-  const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
   const cars = useQuery(carsQuery(false));
-  const finances = useQuery(overviewQuery(year));
+  const finances = useQuery(overviewQuery());
   // Fitness is personal and optional here: a failure just leaves its rows out.
   const fitness = useQuery(fitnessOverviewQuery);
 
@@ -276,9 +274,8 @@ export interface TodayCount {
 }
 
 export const useTodayCount = (): TodayCount => {
-  const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
-  const finances = useQuery(overviewQuery(year));
+  const finances = useQuery(overviewQuery());
   const fitness = useQuery(fitnessOverviewQuery);
   const reminders = household.data?.reminders ?? [];
   const waiting = finances.data?.waiting ?? [];

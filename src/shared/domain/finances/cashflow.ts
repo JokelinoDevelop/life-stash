@@ -1,6 +1,8 @@
 import type { Currency } from "../money";
 import { CURRENCIES } from "../money";
 import type { TransactionKind } from "./kinds";
+import { bucketKey, bucketKeys } from "./period";
+import type { DateRange, Granularity } from "./period";
 
 export interface CashflowEntry {
   kind: TransactionKind;
@@ -9,9 +11,9 @@ export interface CashflowEntry {
   currency: Currency;
 }
 
-export interface MonthCashflow {
-  /** 1–12. */
-  month: number;
+export interface BucketCashflow {
+  /** `2026-03`, `2026-Q1` or `2026` (see `bucketKey`). */
+  key: string;
   incomeMinor: number;
   expenseMinor: number;
   netMinor: number;
@@ -19,69 +21,159 @@ export interface MonthCashflow {
 
 export interface CurrencyCashflow {
   currency: Currency;
-  months: MonthCashflow[];
+  buckets: BucketCashflow[];
   incomeMinor: number;
   expenseMinor: number;
   netMinor: number;
 }
 
-const MONTHS = 12;
-
-const emptyMonths = (): MonthCashflow[] =>
-  Array.from({ length: MONTHS }, (_, index) => ({
-    expenseMinor: 0,
-    incomeMinor: 0,
-    month: index + 1,
-    netMinor: 0,
-  }));
-
 /**
- * Income, spending and net per month of `year`, one series per currency (never converted).
- * Every series has all 12 months so charts line up; currencies with no entries are left out.
+ * Income, spending and net per bucket of `range`, one series per currency (never converted).
+ * Every series has every bucket so charts line up; currencies with no entries are left out.
  */
-export const monthlyCashflow = (
+export const cashflowByBucket = (
   entries: readonly CashflowEntry[],
-  year: number
+  range: DateRange,
+  granularity: Granularity
 ): CurrencyCashflow[] => {
-  const prefix = `${year}-`;
-  const byCurrency = new Map<Currency, MonthCashflow[]>();
+  const keys = bucketKeys(range, granularity);
+  const index = new Map(keys.map((key, position) => [key, position]));
+  const byCurrency = new Map<Currency, BucketCashflow[]>();
 
-  for (const entry of entries.filter((item) => item.date.startsWith(prefix))) {
-    const months = byCurrency.get(entry.currency) ?? emptyMonths();
-    byCurrency.set(entry.currency, months);
-    const bucket = months[Number(entry.date.slice(5, 7)) - 1];
+  const inRange = entries.filter(
+    (entry) => entry.date >= range.from && entry.date <= range.to
+  );
 
-    if (bucket === undefined) {
-      continue;
-    }
+  for (const entry of inRange) {
+    const buckets =
+      byCurrency.get(entry.currency) ??
+      keys.map((bucket) => ({
+        expenseMinor: 0,
+        incomeMinor: 0,
+        key: bucket,
+        netMinor: 0,
+      }));
 
-    if (entry.kind === "income") {
-      bucket.incomeMinor += entry.amountMinor;
-      bucket.netMinor += entry.amountMinor;
-    } else {
-      bucket.expenseMinor += entry.amountMinor;
-      bucket.netMinor -= entry.amountMinor;
+    byCurrency.set(entry.currency, buckets);
+
+    const position = index.get(bucketKey(entry.date, granularity));
+    const bucket = position === undefined ? undefined : buckets[position];
+
+    const signed =
+      entry.kind === "income" ? entry.amountMinor : -entry.amountMinor;
+
+    if (bucket !== undefined) {
+      bucket.incomeMinor += entry.kind === "income" ? entry.amountMinor : 0;
+      bucket.expenseMinor += entry.kind === "income" ? 0 : entry.amountMinor;
+      bucket.netMinor += signed;
     }
   }
 
   return CURRENCIES.flatMap((currency) => {
-    const months = byCurrency.get(currency);
+    const buckets = byCurrency.get(currency);
 
-    if (months === undefined) {
+    if (buckets === undefined) {
       return [];
     }
 
-    const incomeMinor = months.reduce((sum, m) => sum + m.incomeMinor, 0);
-    const expenseMinor = months.reduce((sum, m) => sum + m.expenseMinor, 0);
+    const incomeMinor = buckets.reduce((sum, b) => sum + b.incomeMinor, 0);
+    const expenseMinor = buckets.reduce((sum, b) => sum + b.expenseMinor, 0);
 
     return [
       {
+        buckets,
         currency,
         expenseMinor,
         incomeMinor,
-        months,
         netMinor: incomeMinor - expenseMinor,
       },
     ];
   });
+};
+
+export interface MonthPoint {
+  /** `YYYY-MM`. */
+  key: string;
+  netMinor: number;
+}
+
+export interface CashflowHighlights {
+  currency: Currency;
+  /** Months averaged over. */
+  months: number;
+  avgIncomeMinor: number;
+  avgExpenseMinor: number;
+  avgNetMinor: number;
+  /** Share of income kept (net ÷ income), rounded; null without income. */
+  savingsRatePercent: number | null;
+  /** Month with the highest net; null with fewer than two months. */
+  best: MonthPoint | null;
+  /** Month with the lowest net; null with fewer than two months. */
+  worst: MonthPoint | null;
+}
+
+const PERCENT = 100;
+
+/**
+ * Monthly averages, savings rate and best / worst month per currency, from a monthly
+ * series (`cashflowByBucket(…, "month")`) that covers only months that have started.
+ */
+export const cashflowHighlights = (
+  monthly: readonly CurrencyCashflow[]
+): CashflowHighlights[] =>
+  monthly.map((series) => {
+    const months = Math.max(1, series.buckets.length);
+    const enough = series.buckets.length >= 2;
+    let best: BucketCashflow | null = null;
+    let worst: BucketCashflow | null = null;
+
+    for (const bucket of series.buckets) {
+      if (best === null || bucket.netMinor > best.netMinor) {
+        best = bucket;
+      }
+
+      if (worst === null || bucket.netMinor < worst.netMinor) {
+        worst = bucket;
+      }
+    }
+
+    const point = (bucket: BucketCashflow | null): MonthPoint | null =>
+      enough && bucket !== null
+        ? { key: bucket.key, netMinor: bucket.netMinor }
+        : null;
+
+    // oxlint-disable-next-line sonarjs/shorthand-property-grouping -- conflicts with sort-keys
+    return {
+      avgExpenseMinor: Math.round(series.expenseMinor / months),
+      avgIncomeMinor: Math.round(series.incomeMinor / months),
+      avgNetMinor: Math.round(series.netMinor / months),
+      best: point(best),
+      currency: series.currency,
+      months,
+      savingsRatePercent:
+        series.incomeMinor <= 0
+          ? null
+          : Math.round((series.netMinor / series.incomeMinor) * PERCENT),
+      worst: point(worst),
+    };
+  });
+
+/** Amounts per bucket key (aligned with `keys`), for one category's trend line. */
+export const totalsByBucket = (
+  entries: readonly { date: string; amountMinor: number }[],
+  keys: readonly string[],
+  granularity: Granularity
+): number[] => {
+  const index = new Map(keys.map((key, position) => [key, position]));
+  const totals = keys.map(() => 0);
+
+  for (const entry of entries) {
+    const position = index.get(bucketKey(entry.date, granularity));
+
+    if (position !== undefined) {
+      totals[position] = (totals[position] ?? 0) + entry.amountMinor;
+    }
+  }
+
+  return totals;
 };

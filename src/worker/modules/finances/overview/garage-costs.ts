@@ -1,11 +1,11 @@
-import { sumByCurrency } from "@shared/domain/money";
-import type { MoneyTotal } from "@shared/domain/money";
+import { spendingEntries } from "@shared/domain/spending-report";
+import type { DatedCost } from "@shared/domain/spending-report";
 
 import type { Db } from "../../../core/db";
-import { householdSpending } from "../../garage/spending/spending.service";
+import { loadSources } from "../../garage/spending/spending.service";
 
 /**
- * Read-only bridge to Garage's spending service (service → service). Car costs are shown on the
+ * Read-only bridge to Garage's spending sources (service → service). Car costs are shown on the
  * Finances overview but never copied into the ledger, so nothing is counted twice.
  */
 export class GarageCostsReader {
@@ -17,22 +17,16 @@ export class GarageCostsReader {
     this.#householdId = householdId;
   }
 
-  async forYear(year: number): Promise<MoneyTotal[]> {
-    const cars = await householdSpending(this.#db, this.#householdId);
-    const costs: MoneyTotal[] = [];
+  /** Every car cost of the household with its date, for any range the overview asks for. */
+  async entries(): Promise<DatedCost[]> {
+    const { visits, expenses } = await loadSources(
+      this.#db,
+      this.#householdId,
+      null
+    );
 
-    for (const entry of cars.flatMap((car) => car.years)) {
-      if (entry.year === year) {
-        costs.push({
-          amountMinor:
-            entry.maintenanceMinor + entry.repairMinor + entry.otherMinor,
-          currency: entry.currency,
-        });
-      }
-    }
-
-    return sumByCurrency(costs);
+    return spendingEntries(visits, expenses);
   }
 }
 
-export type GarageCostsPort = Pick<GarageCostsReader, "forYear">;
+export type GarageCostsPort = Pick<GarageCostsReader, "entries">;

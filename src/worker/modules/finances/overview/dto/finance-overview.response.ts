@@ -1,19 +1,35 @@
-import type { CurrencyCashflow } from "@shared/domain/finances/cashflow";
+import type {
+  CashflowHighlights,
+  CurrencyCashflow,
+} from "@shared/domain/finances/cashflow";
 import type { InvoiceStatus } from "@shared/domain/finances/invoices";
 import type { TransactionKind } from "@shared/domain/finances/kinds";
+import type { Granularity } from "@shared/domain/finances/period";
 import type { Currency, MoneyTotal } from "@shared/domain/money";
 
 import type { FinanceOverview } from "../overview.service";
 import { CAR_COSTS } from "../overview.service";
 
 export interface FinanceOverviewResponse {
-  year: number;
   today: string;
   hasData: boolean;
+  /** What the figures cover; for all time, first entry → today (or the last future entry). */
+  range: { from: string; to: string };
+  allTime: boolean;
+  granularity: Granularity;
+  /** Keys of the cashflow buckets and category trends: `2026-03`, `2026-Q1` or `2026`. */
+  buckets: string[];
+  /** Years with entries, newest first. */
+  years: number[];
   earned: MoneyTotal[];
-  earnedLastYear: MoneyTotal[];
   spent: MoneyTotal[];
-  monthsElapsed: number;
+  /** The same-length period before `range`; null for all time. */
+  previous: {
+    range: { from: string; to: string };
+    earned: MoneyTotal[];
+    spent: MoneyTotal[];
+  } | null;
+  highlights: CashflowHighlights[];
   receivables: {
     unpaid: MoneyTotal[];
     overdue: MoneyTotal[];
@@ -53,6 +69,8 @@ export interface FinanceOverviewResponse {
     currency: Currency;
     amountMinor: number;
     sharePercent: number;
+    /** Amount per bucket, aligned with `buckets`. */
+    trend: number[];
   }[];
   recent: {
     id: string;
@@ -74,6 +92,8 @@ export interface FinanceOverviewResponse {
 export const toFinanceOverviewResponse = (
   overview: FinanceOverview
 ): FinanceOverviewResponse => ({
+  allTime: overview.allTime,
+  buckets: overview.buckets,
   cashflow: overview.cashflow,
   categories: overview.categories.map((share) => ({
     amountMinor: share.amountMinor,
@@ -83,12 +103,22 @@ export const toFinanceOverviewResponse = (
     name: share.name,
     sharePercent: share.sharePercent,
     systemKey: share.systemKey,
+    trend: share.trend,
   })),
   earned: overview.earned,
-  earnedLastYear: overview.earnedLastYear,
+  granularity: overview.granularity,
   hasData: overview.hasData,
+  highlights: overview.highlights,
   monthSoFar: overview.monthSoFar,
-  monthsElapsed: overview.monthsElapsed,
+  previous:
+    overview.previous === null
+      ? null
+      : {
+          earned: overview.previous.earned,
+          range: overview.previous.range,
+          spent: overview.previous.spent,
+        },
+  range: overview.range,
   receivables: {
     overdue: overview.receivables.overdue,
     overdueCount: overview.receivables.overdueCount,
@@ -134,5 +164,5 @@ export const toFinanceOverviewResponse = (
     periodStart: invoice.periodStart,
     status: invoice.displayStatus,
   })),
-  year: overview.year,
+  years: overview.years,
 });

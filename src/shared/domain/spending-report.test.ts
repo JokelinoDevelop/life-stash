@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { spendingByMonth, spendingByYear } from "./spending-report";
+import {
+  spendingByMonth,
+  spendingByYear,
+  spendingEntries,
+} from "./spending-report";
 
 describe(spendingByYear, () => {
   it("splits maintenance, repairs and other costs per year and currency", () => {
@@ -125,6 +129,42 @@ describe(spendingByMonth, () => {
     expect(result).toStrictEqual([
       { amountMinor: 63_000, currency: "EUR", month: "2026-06" },
       { amountMinor: 300, currency: "MKD", month: "2026-11" },
+    ]);
+  });
+});
+
+describe(spendingEntries, () => {
+  it("lists dated costs, skipping previous owners", () => {
+    const visit = {
+      byPreviousOwner: false,
+      currency: "EUR" as const,
+      itemCostsMinor: [],
+      kind: "repair" as const,
+    };
+
+    expect(
+      spendingEntries(
+        [
+          { ...visit, date: "2026-06-14", totalMinor: 500 },
+          {
+            ...visit,
+            byPreviousOwner: true,
+            date: "2020-01-01",
+            totalMinor: 9,
+          },
+        ],
+        [
+          {
+            amountMinor: 300,
+            category: "parking",
+            currency: "MKD",
+            date: "2026-11-05",
+          },
+        ]
+      )
+    ).toStrictEqual([
+      { amountMinor: 500, currency: "EUR", date: "2026-06-14" },
+      { amountMinor: 300, currency: "MKD", date: "2026-11-05" },
     ]);
   });
 });

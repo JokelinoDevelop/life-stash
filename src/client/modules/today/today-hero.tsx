@@ -39,9 +39,8 @@ export const useTodayLabel = (): string => {
  */
 export const TodaySummaryLine = () => {
   const { t } = useTranslation("today");
-  const year = Number(todayIso().slice(0, 4));
   const household = useQuery(householdOverviewQuery);
-  const finances = useQuery(overviewQuery(year));
+  const finances = useQuery(overviewQuery());
   const totals = useSummaryTotals();
 
   if (household.data === undefined || finances.data === undefined) {

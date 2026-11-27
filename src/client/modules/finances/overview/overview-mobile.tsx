@@ -1,5 +1,3 @@
-import { NO_RATES } from "@shared/domain/exchange";
-import { useQuery } from "@tanstack/react-query";
 import { ArrowDownLeft, ArrowUpRight, FileText } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -8,10 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useFormat } from "@/lib/format";
 
 import { useFinanceDialog } from "../dialogs/use-finance-dialog";
-import { financeSettingsQuery } from "../settings/finance-settings.queries";
-import { headline, percentChange, subtractTotals } from "./money-split";
 import { NetBars } from "./net-bars";
+import type { OverviewSearch } from "./overview-search";
 import type { FinanceOverview } from "./overview.queries";
+import { usePeriodLabel } from "./period-labels";
+import { usePeriodFigures } from "./use-period-figures";
 
 /**
  * Phone: one-tap Expense / Income / Invoice as small chips under the hero
@@ -57,55 +56,32 @@ const QuickActions = () => {
   );
 };
 
-/** Phone: the "Net this year" card, then quick actions with monthly bars (5.1). */
+/** Phone: the net card for the period, then quick actions with bars per month (5.1). */
 export const OverviewMobileTop = ({
   overview,
+  search,
 }: {
   overview: FinanceOverview;
+  search: OverviewSearch;
 }) => {
   const { t } = useTranslation("finances");
   const format = useFormat();
+  const periodLabel = usePeriodLabel();
+  const { comparison, earned, net, spent } = usePeriodFigures(overview);
+  const currency = net.primary?.currency ?? format.currency;
 
-  const rates = useQuery(financeSettingsQuery).data?.exchangeRates ?? NO_RATES;
-  const main = format.currency;
-
-  const net = headline(
-    subtractTotals(overview.earned, overview.spent),
-    main,
-    rates
-  );
-
-  const earned = headline(overview.earned, main, rates);
-  const spent = headline(overview.spent, main, rates);
-  const lastYear = headline(overview.earnedLastYear, main, rates).primary;
-  const currency = net.primary?.currency ?? main;
-
-  const change =
-    earned.primary === null ||
-    lastYear === null ||
-    lastYear.currency !== earned.primary.currency
-      ? null
-      : percentChange(earned.primary.amountMinor, lastYear.amountMinor);
-
-  const months =
-    overview.cashflow.find((series) => series.currency === currency)?.months ??
+  const buckets =
+    overview.cashflow.find((series) => series.currency === currency)?.buckets ??
     [];
 
   return (
     <div className="flex flex-col gap-4 md:hidden">
       <section className="surface bg-card flex flex-col gap-1 rounded-lg border p-4">
-        <div className="text-muted-foreground flex items-baseline justify-between text-xs">
-          <span className="font-medium">
-            {t("overview.netIn", { year: overview.year })}
+        <div className="text-muted-foreground flex items-baseline justify-between gap-3 text-xs">
+          <span className="truncate font-medium">
+            {t("overview.netIn", { period: periodLabel(search) })}
           </span>
-          {change !== null && (
-            <span className="tabular-nums">
-              {t("overview.earnedChange", {
-                change: `${change > 0 ? "+" : ""}${change}%`,
-                year: overview.year - 1,
-              })}
-            </span>
-          )}
+          <span className="truncate tabular-nums">{comparison}</span>
         </div>
         <span className="mt-0.5 text-4xl font-semibold tracking-tight">
           {net.primary === null ? (
@@ -128,12 +104,14 @@ export const OverviewMobileTop = ({
             ? "—"
             : format.money(spent.primary.amountMinor, spent.primary.currency)}
         </span>
-        <NetBars
-          currency={currency}
-          months={months}
-          today={overview.today}
-          year={overview.year}
-        />
+        {buckets.length > 0 && (
+          <NetBars
+            buckets={buckets}
+            currency={currency}
+            granularity={overview.granularity}
+            today={overview.today}
+          />
+        )}
       </section>
       <QuickActions />
     </div>

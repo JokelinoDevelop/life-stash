@@ -20,7 +20,8 @@ import { cn } from "@/lib/utils";
 
 import type { FinanceCategory } from "../categories/categories.queries";
 import { useCategoryName } from "../categories/category-label";
-import { ALL_YEARS } from "./transactions-search";
+import { RangeChip } from "./range-chip";
+import { ALL_YEARS, rangeOf } from "./transactions-search";
 import type { SearchPatch, TransactionsSearch } from "./transactions-search";
 
 const ANY = "any";
@@ -261,7 +262,7 @@ const ClientFilter = ({
   );
 };
 
-/** Kind, category, client, year and search; one row on desktop, scrolling chips on phones. */
+/** Kind, category, client, year (or a date range) and search; one row on desktop, scrolling chips on phones. */
 export const TransactionsToolbar = ({
   categories,
   clients,
@@ -274,21 +275,33 @@ export const TransactionsToolbar = ({
   currentYear: number;
   onChange: (patch: SearchPatch) => void;
   search: TransactionsSearch;
-}) => (
-  <div className="md:border-divider -mx-4 flex scrollbar-none items-center gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:border-b md:px-5 md:py-2">
-    <KindFilter kind={search.kind} onChange={onChange} />
-    <CategoryFilter
-      categories={categories}
-      onChange={onChange}
-      search={search}
-    />
-    <ClientFilter clients={clients} onChange={onChange} value={search.client} />
-    <YearFilter
-      currentYear={currentYear}
-      onChange={onChange}
-      year={search.year}
-    />
-    <span className="hidden flex-1 md:block" />
-    <SearchBox className="hidden md:flex" onChange={onChange} q={search.q} />
-  </div>
-);
+}) => {
+  const range = rangeOf(search);
+
+  return (
+    <div className="md:border-divider -mx-4 flex scrollbar-none items-center gap-1.5 overflow-x-auto px-4 pb-1 md:mx-0 md:flex-wrap md:overflow-visible md:border-b md:px-5 md:py-2">
+      <KindFilter kind={search.kind} onChange={onChange} />
+      <CategoryFilter
+        categories={categories}
+        onChange={onChange}
+        search={search}
+      />
+      <ClientFilter
+        clients={clients}
+        onChange={onChange}
+        value={search.client}
+      />
+      {range === null ? (
+        <YearFilter
+          currentYear={currentYear}
+          onChange={onChange}
+          year={search.year}
+        />
+      ) : (
+        <RangeChip onChange={onChange} range={range} />
+      )}
+      <span className="hidden flex-1 md:block" />
+      <SearchBox className="hidden md:flex" onChange={onChange} q={search.q} />
+    </div>
+  );
+};

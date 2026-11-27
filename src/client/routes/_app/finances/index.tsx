@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { z } from "zod";
 
 import { HouseholdName } from "@/components/app/household-name";
 import { LOADING_LAYOUTS } from "@/components/app/loading-layouts";
@@ -10,29 +10,28 @@ import { PageHeader } from "@/components/app/page-header";
 import { PageSkeleton } from "@/components/app/page-skeleton";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useHotkey } from "@/hooks/use-hotkey";
 import { todayIso } from "@/lib/partial-date";
 import { FINANCE_SHORTCUTS } from "@/lib/shortcuts";
 import { cached, warm } from "@/lib/warm";
 import { useFinanceDialog } from "@/modules/finances/dialogs/use-finance-dialog";
+import {
+  applyOverviewPatch,
+  filterOf,
+  overviewSearchSchema,
+} from "@/modules/finances/overview/overview-search";
+import type { OverviewPatch } from "@/modules/finances/overview/overview-search";
 import { OverviewView } from "@/modules/finances/overview/overview-view";
 import { overviewQuery } from "@/modules/finances/overview/overview.queries";
 import { financeSettingsQuery } from "@/modules/finances/settings/finance-settings.queries";
 import { useSummaryTotals } from "@/modules/finances/use-summary-totals";
-
-const searchSchema = z.object({
-  year: z.coerce.number().int().min(1990).max(2200).optional().catch(undefined),
-});
 
 const FinancesPage = () => {
   const { t } = useTranslation("finances");
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const dialog = useFinanceDialog();
-  const currentYear = Number(todayIso().slice(0, 4));
-  const year = search.year ?? currentYear;
-  const overview = useQuery(overviewQuery(year));
+  const overview = useQuery(overviewQuery(filterOf(search, todayIso())));
   const receivables = overview.data?.receivables;
 
   const logTransaction = () => {
@@ -42,6 +41,16 @@ const FinancesPage = () => {
   const newInvoice = () => {
     void dialog.open({ dialog: "invoice" });
   };
+
+  const onSearchChange = useCallback(
+    (patch: OverviewPatch) => {
+      void navigate({
+        replace: true,
+        search: (prev) => applyOverviewPatch(prev, patch),
+      });
+    },
+    [navigate]
+  );
 
   useHotkey(FINANCE_SHORTCUTS.logTransaction, logTransaction);
   useHotkey(FINANCE_SHORTCUTS.newInvoice, newInvoice);
@@ -69,33 +78,6 @@ const FinancesPage = () => {
       <PageHeader
         actions={
           <>
-            <ToggleGroup
-              aria-label={t("overview.year")}
-              className="hidden md:flex"
-              onValueChange={([value]) => {
-                const picked = Number(value);
-
-                if (picked > 0) {
-                  void navigate({
-                    replace: true,
-                    search: {
-                      year: picked === currentYear ? undefined : picked,
-                    },
-                  });
-                }
-              }}
-              size="segmented"
-              spacing={0.5}
-              value={[String(year)]}
-              variant="segmented"
-            >
-              <ToggleGroupItem value={String(currentYear - 1)}>
-                {currentYear - 1}
-              </ToggleGroupItem>
-              <ToggleGroupItem value={String(currentYear)}>
-                {currentYear}
-              </ToggleGroupItem>
-            </ToggleGroup>
             <Button
               className="hidden md:inline-flex"
               onClick={newInvoice}
@@ -128,19 +110,17 @@ const FinancesPage = () => {
         mobileTop={<HouseholdName className="-ml-1" />}
         title={t("title")}
       />
-      <OverviewView year={year} />
+      <OverviewView onSearchChange={onSearchChange} search={search} />
     </>
   );
 };
 
 export const Route = createFileRoute("/_app/finances/")({
-  validateSearch: searchSchema,
-  loaderDeps: ({ search }) => ({ year: search.year }),
+  validateSearch: overviewSearchSchema,
+  loaderDeps: ({ search }) => search,
   loader: async ({ context: { queryClient }, deps }) => {
-    const year = deps.year ?? Number(todayIso().slice(0, 4));
-
     await warm(
-      queryClient.query(cached(overviewQuery(year))),
+      queryClient.query(cached(overviewQuery(filterOf(deps, todayIso())))),
       queryClient.query(cached(financeSettingsQuery))
     );
   },

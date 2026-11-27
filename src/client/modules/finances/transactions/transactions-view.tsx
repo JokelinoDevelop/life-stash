@@ -179,8 +179,10 @@ export const TransactionsView = ({
     onSearchChange({
       category: null,
       client: null,
+      from: null,
       kind: null,
       q: null,
+      to: null,
       year: null,
     });
   };
