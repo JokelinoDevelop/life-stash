@@ -33,7 +33,6 @@ export const invoicePdfLabels = (
     period: t("period"),
     purchaseOrder: t("purchaseOrder"),
     quantity: t("quantity"),
-    referenceLabel: t("referenceLabel"),
     shipping: t("shipping"),
     subtotal: t("subtotal"),
     swift: t("swift"),

@@ -671,7 +671,6 @@
     "vatAt": "Tax ({{rate}})",
     "payment": "Bank account details",
     "note": "Note",
-    "referenceLabel": "Reference",
     "taxId": "Tax ID",
     "companyId": "Company ID",
     "bank": "Bank name",

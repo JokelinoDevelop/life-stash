@@ -85,8 +85,6 @@ export interface InvoicePdfLabels {
   tax: string;
   invoiceTotal: string;
   payment: string;
-  /** "Reference" (a row label beside the number). */
-  referenceLabel: string;
   /** "Note" above the note printed under the lines. */
   note: string;
   taxId: string;

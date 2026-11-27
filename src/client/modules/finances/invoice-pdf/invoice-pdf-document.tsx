@@ -246,7 +246,7 @@ const oneLine = (address: string | undefined): string | undefined =>
     .filter(present)
     .join(", ");
 
-/** Who is paid, then where: bank details with the number as the reference; then the note. */
+/** Who is paid, then where: the bank details; then the note. */
 const PaymentAndNote = ({ data, labels }: Omit<SectionProps, "format">) => {
   const { issuer } = data;
 
@@ -261,7 +261,6 @@ const PaymentAndNote = ({ data, labels }: Omit<SectionProps, "format">) => {
     { label: labels.bankAddress, value: issuer?.bankAddress },
     { label: labels.country, value: issuer?.bankCountry },
     { label: labels.swift, value: issuer?.swift },
-    { label: labels.referenceLabel, value: data.number },
   ]);
 
   const hasBank = present(issuer?.iban) || present(issuer?.bankName);
