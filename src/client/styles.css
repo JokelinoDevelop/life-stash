@@ -50,9 +50,10 @@
 }
 
 /* The phone tab bar: docked to the bottom edge above the home indicator,
-   solid (nothing shows through), with a hairline and a soft lift on top. */
+   solid (nothing shows through), with a hairline and a soft lift on top.
+   At least 12px below the labels: Android and browsers often report no inset. */
 @utility tabbar-dock {
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
   background: var(--card);
   border-top: 1px solid var(--border);
   box-shadow: 0 -4px 16px -6px oklch(0.2 0.02 265 / 0.12);
