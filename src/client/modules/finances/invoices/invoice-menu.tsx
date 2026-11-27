@@ -5,9 +5,11 @@ import {
   Eye,
   MoreHorizontal,
   Pencil,
+  RefreshCw,
   RotateCcw,
   Send,
   Trash2,
+  Undo2,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -26,8 +28,8 @@ import type { InvoiceListItem } from "./invoices.queries";
 import { useInvoiceActions } from "./use-invoice-actions";
 
 /**
- * ⋯ on an invoice row. Drafts: edit, issue, duplicate, delete. Issued: view, duplicate,
- * mark unpaid (paid) or void (sent).
+ * ⋯ on an invoice row. Drafts: edit, issue, duplicate, delete. Issued: view, PDF (download,
+ * regenerate), duplicate, mark unpaid (paid), void (sent) or un-void (void).
  */
 export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
   const { t } = useTranslation("finances");
@@ -78,6 +80,26 @@ export const InvoiceMenu = ({ invoice }: { invoice: InvoiceListItem }) => {
           >
             <Download />
             {t("invoices.downloadPdf")}
+          </DropdownMenuItem>
+        )}
+        {actions.canRegeneratePdf(invoice) && (
+          <DropdownMenuItem
+            onClick={() => {
+              void actions.regeneratePdf(invoice);
+            }}
+          >
+            <RefreshCw />
+            {t("invoices.regeneratePdf")}
+          </DropdownMenuItem>
+        )}
+        {invoice.status === "void" && (
+          <DropdownMenuItem
+            onClick={() => {
+              void actions.unvoid(invoice);
+            }}
+          >
+            <Undo2 />
+            {t("invoices.unvoid")}
           </DropdownMenuItem>
         )}
         {invoice.status === "paid" && (

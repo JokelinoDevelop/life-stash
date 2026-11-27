@@ -44,6 +44,7 @@ export const FINANCE_ERROR_CODES = [
   "finances.invoice_issued",
   "finances.invoice_not_issued",
   "finances.invoice_not_paid",
+  "finances.invoice_not_void",
   "finances.invoice_number_invalid",
   "finances.invoice_number_taken",
   "finances.invoice_void",

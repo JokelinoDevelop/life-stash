@@ -48,13 +48,15 @@ export const assertPhotoOwner = async (
 
 /**
  * A generated PDF is the file an issued invoice was sent as, so it can't be removed: only an
- * issued invoice may get one, and only one.
+ * issued invoice may get one, and only one. `replace` allows a redrawn one in its place and
+ * returns the earlier file(s), to remove once the new row is in.
  */
 export const assertGeneratedPdfAllowed = async (
   db: Db,
   householdId: string,
-  invoiceId: string
-): Promise<void> => {
+  invoiceId: string,
+  options?: { replace: boolean }
+): Promise<{ id: string; objectKey: string }[]> => {
   const [invoice] = await db
     .select({ status: financeInvoices.status })
     .from(financeInvoices)
@@ -75,8 +77,8 @@ export const assertGeneratedPdfAllowed = async (
     throw conflict("Only issued invoices get a generated PDF");
   }
 
-  const [existing] = await db
-    .select({ id: photos.id })
+  const existing = await db
+    .select({ id: photos.id, objectKey: photos.objectKey })
     .from(photos)
     .where(
       and(
@@ -85,12 +87,13 @@ export const assertGeneratedPdfAllowed = async (
         eq(photos.ownerId, invoiceId),
         eq(photos.generated, true)
       )
-    )
-    .limit(1);
+    );
 
-  if (existing) {
+  if (existing.length > 0 && options?.replace !== true) {
     throw conflict("This invoice already has its generated PDF");
   }
+
+  return existing;
 };
 
 const removeRows = async (
@@ -207,5 +210,14 @@ export const deletePhoto = async (
     throw notFound();
   }
 
+  await removeRows(env, db, rows);
+};
+
+/** Removes generated PDFs a redrawn one replaced (storage objects and rows). */
+export const removeReplacedPdfs = async (
+  env: Bindings,
+  db: Db,
+  rows: { id: string; objectKey: string }[]
+): Promise<void> => {
   await removeRows(env, db, rows);
 };

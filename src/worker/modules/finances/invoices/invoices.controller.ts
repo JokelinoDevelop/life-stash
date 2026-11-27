@@ -28,6 +28,8 @@ import { nextInvoiceNumberQuery } from "./dto/next-invoice-number.request";
 import type { NextInvoiceNumberResponse } from "./dto/next-invoice-number.response";
 import { restoreInvoiceParams } from "./dto/restore-invoice.request";
 import type { RestoreInvoiceResponse } from "./dto/restore-invoice.response";
+import { unvoidInvoiceParams } from "./dto/unvoid-invoice.request";
+import type { UnvoidInvoiceResponse } from "./dto/unvoid-invoice.response";
 import {
   updateInvoiceParams,
   updateInvoiceRequest,
@@ -158,6 +160,18 @@ export const invoicesController = new Hono<AppEnv>()
         c.req.valid("param").invoiceId
       );
       const body: VoidInvoiceResponse = { ok: true };
+
+      return c.json(body);
+    }
+  )
+  .post(
+    `${INVOICE_PATH}/unvoid`,
+    validate("param", unvoidInvoiceParams),
+    async (c) => {
+      await c.var.container.finances.invoices.unvoid(
+        c.req.valid("param").invoiceId
+      );
+      const body: UnvoidInvoiceResponse = { ok: true };
 
       return c.json(body);
     }

@@ -47,6 +47,7 @@ const FINANCE_MESSAGES = {
   "finances.invoice_issued": "errors.invoiceIssued",
   "finances.invoice_not_issued": "errors.invoiceNotIssued",
   "finances.invoice_not_paid": "errors.invoiceNotPaid",
+  "finances.invoice_not_void": "errors.invoiceNotVoid",
   "finances.invoice_number_invalid": "errors.invoiceNumberInvalid",
   "finances.invoice_number_taken": "errors.invoiceNumberTaken",
   "finances.invoice_void": "errors.invoiceVoid",

@@ -59,7 +59,8 @@ const documentQuery = (invoiceId: string) => ({
 
 /**
  * Draws an issued invoice from its frozen data and keeps the file: uploaded as the invoice's
- * generated attachment when storage is set up. Optionally saves it to the device too.
+ * generated attachment when storage is set up. Optionally saves it to the device too, or
+ * (`replace`, "Regenerate PDF") swaps it in for the stored one. Resolves whether it worked.
  */
 export const useStoreInvoicePdf = () => {
   const { t } = useTranslation("finances");
@@ -69,8 +70,8 @@ export const useStoreInvoicePdf = () => {
 
   return async (
     invoice: { id: string; number: string },
-    options: { download: boolean }
-  ): Promise<void> => {
+    options: { download: boolean; replace?: boolean }
+  ): Promise<boolean> => {
     try {
       const { document } = await queryClient.query(documentQuery(invoice.id));
       const data = toPdfData(document);
@@ -81,16 +82,29 @@ export const useStoreInvoicePdf = () => {
       }
 
       if (storage) {
-        await uploadGeneratedPdf(invoice.id, blob, pdfFileName(data));
+        await uploadGeneratedPdf(
+          invoice.id,
+          blob,
+          pdfFileName(data),
+          options.replace === true
+        );
         await queryClient.invalidateQueries({ queryKey: financeKeys.all });
       }
+
+      return true;
     } catch (error) {
       console.error("Invoice PDF failed", error);
 
       // A renderer that didn't load already asked for a reload.
       if (!(error instanceof RendererUnavailableError)) {
-        toast.error(t("invoices.editor.pdfFailed", { number: invoice.number }));
+        toast.error(
+          options.replace === true
+            ? t("invoices.regenerateFailed", { number: invoice.number })
+            : t("invoices.editor.pdfFailed", { number: invoice.number })
+        );
       }
+
+      return false;
     }
   };
 };

@@ -18,6 +18,7 @@ import { uploadUrlRequest } from "./dto/upload-url.request";
 import type { UploadUrlResponse } from "./dto/upload-url.response";
 import {
   assertGeneratedPdfAllowed,
+  removeReplacedPdfs,
   assertPhotoOwner,
   deletePhoto,
 } from "./photos.service";
@@ -120,19 +121,31 @@ export const photoRoutes = new Hono<AppEnv>()
 
     await assertPhotoOwner(c.var.db, householdId, input);
 
-    if (input.generated === true) {
-      await assertGeneratedPdfAllowed(c.var.db, householdId, input.ownerId);
-    }
+    const { replace = false, ...values } = input;
+
+    const replaced =
+      input.generated === true
+        ? await assertGeneratedPdfAllowed(
+            c.var.db,
+            householdId,
+            input.ownerId,
+            {
+              replace,
+            }
+          )
+        : [];
 
     const [row] = await c.var.db
       .insert(photos)
       .values({
-        ...input,
+        ...values,
         fileName: input.fileName ?? null,
         generated: input.generated ?? false,
         householdId,
       })
       .returning({ id: photos.id });
+
+    await removeReplacedPdfs(c.env, c.var.db, replaced);
 
     const body: CreatePhotoResponse = { id: row?.id ?? "" };
 

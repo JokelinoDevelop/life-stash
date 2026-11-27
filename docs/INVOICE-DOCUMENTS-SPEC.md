@@ -123,6 +123,7 @@ Add `generated` (bool) for app-made invoice PDFs.
 | POST | `/finances/invoices/:id/issue` | `{ number? }` → assigns the number, freezes snapshots, status `sent`. Replaces `mark-sent` |
 | GET | `/finances/invoices/:id/document` | The frozen data the PDF is rendered from (snapshots, lines, totals, language) |
 | POST | `/finances/invoices/:id/void` | Sent invoices only |
+| POST | `/finances/invoices/:id/unvoid` | Void invoices only: back to sent, same number (`finances.invoice_not_void` otherwise) |
 | DELETE | `/finances/invoices/:id` | Drafts only (`finances.invoice_issued` otherwise) |
 | GET | `/finances/invoices/next-number?year=` | Now from `number_seq` |
 
@@ -133,7 +134,7 @@ New error codes: `finances.invoice_issued`, `finances.invoice_number_invalid`, `
 - **Settings › Finances › Your details** (new section): business name, address, tax ID, company ID, email, phone, bank, IBAN, SWIFT, VAT registered + default rate, footer note. A small preview of the invoice header.
 - **Client dialog (3.6)**: + address, tax ID, invoice language.
 - **Invoice editor (3.3, `size="full"` on desktop)**: form on the left, live A4 preview on the right (scaled to fit). Client, issue date, due date, work period, line items (add row, reorder, remove; qty, unit, unit price, VAT if registered), notes. "Record an invoice made elsewhere" switches to today's amount + file flow. Footer: **Save draft** · **Issue & download** `⌘↵` (confirm shows the number it will get). Phones: full-height sheet, "Preview" opens the PDF.
-- **Invoice detail (3.4)**: issued invoices show **Download PDF**, **Duplicate**, **Void** (confirm); drafts show Edit and Delete.
+- **Invoice detail (3.4)**: issued invoices show **Download PDF**, **Regenerate PDF** (itemised, with storage; confirm), **Duplicate**, **Void** (confirm) or **Un-void** (void; confirm); drafts show Edit and Delete.
 - **Invoices list (2.1)**: drafts show "Draft" instead of a number; voided invoices struck through in their own group.
 - **⌘K**: "Download invoice 2026-012" on matching invoices.
 
@@ -159,7 +160,7 @@ New error codes: `finances.invoice_issued`, `finances.invoice_number_invalid`, `
 - **Void / paid on drafts**: a draft can't be voided or marked paid (`finances.invoice_not_issued`, a new code); delete it instead.
 - **VAT**: when not VAT registered, the server stores 0% on every line, whatever was sent. Issuing prices the lines again with the registration it freezes, so the amount due always matches what the PDF shows. Without VAT registration the PDF shows only "Amount due" (no subtotal, VAT column or VAT total).
 - **Saving lines**: the invoice row and its lines are written in one D1 batch, a few lines per statement (D1 binds at most 100 values per statement), so the amount and the lines never disagree.
-- **Generated PDF**: the stored file (`photos.generated`) can't be removed from the Files list; it goes only with the invoice. The server accepts it only for an issued invoice that doesn't have one yet. The seeded issued invoice has no stored file, so its Download draws it again. "Download PDF" opens the stored file, or draws it again from the frozen data when storage isn't set up (or for invoices issued before the PDF existed).
+- **Generated PDF**: the stored file (`photos.generated`) can't be removed from the Files list; it goes only with the invoice. The server accepts it only for an issued invoice that doesn't have one yet, or with `replace: true` ("Regenerate PDF": drawn again from the frozen data), which swaps it in and removes the earlier file. The seeded issued invoice has no stored file, so its Download draws it again. "Download PDF" opens the stored file, or draws it again from the frozen data when storage isn't set up (or for invoices issued before the PDF existed).
 - **Issuing from the list** (row "Issue" or ⌘K): an itemised draft also gets its PDF drawn and stored (no download).
 - **PDF**: no page numbers (react-pdf's dynamic `render` text didn't draw reliably); the column header repeats when lines run onto another page. The react-pdf chunk (~1.2 MB) is excluded from the PWA precache.
 - **Dialog size**: the editor is `size="full"` (desktop) / full-height sheet (phones) while itemised; recorded invoices and issued ones use the normal large dialog. The live preview shows from the `lg` breakpoint; narrower screens get the "Preview" button, which opens the PDF in a tab.

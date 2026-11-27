@@ -426,6 +426,24 @@ describe(InvoicesService, () => {
     });
   });
 
+  it("un-voids back to sent, keeping the number", async () => {
+    const { repo, service } = setup();
+    const { id } = await service.create(INPUT, { number: null });
+
+    await expect(codeOf(service.unvoid(id))).resolves.toBe(
+      "finances.invoice_not_void"
+    );
+
+    await service.markVoid(id);
+    await service.unvoid(id);
+
+    expect(repo.rows[0]).toMatchObject({
+      number: "2026-001",
+      status: "sent",
+      voidedAt: null,
+    });
+  });
+
   it("deletes drafts but won't void or mark them paid", async () => {
     const { repo, service } = setup();
     const { id } = await service.create(INPUT, null);

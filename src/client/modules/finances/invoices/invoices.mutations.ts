@@ -95,6 +95,19 @@ export const useVoidInvoice = () => {
   });
 };
 
+/** Back from void to sent. */
+export const useUnvoidInvoice = () => {
+  const { t } = useTranslation("finances");
+
+  return useAppMutation({
+    invalidate,
+    mutationFn: async ({ id }: InvoiceRef) =>
+      await unwrap(invoiceApi(id).unvoid.$post({ param: { invoiceId: id } })),
+    success: false,
+    successFor: (_data, { label }) => t("invoices.unvoided", { number: label }),
+  });
+};
+
 /** Deletes a draft; Undo restores it. */
 export const useDeleteInvoice = () => {
   const { t } = useTranslation("finances");

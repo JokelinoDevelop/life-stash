@@ -1,4 +1,11 @@
-import { Ban, Copy, Download, MoreHorizontal, Undo2 } from "lucide-react";
+import {
+  Ban,
+  Copy,
+  Download,
+  MoreHorizontal,
+  RefreshCw,
+  Undo2,
+} from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -80,7 +87,76 @@ const PhoneFooter = ({
   );
 };
 
-/** Footer actions by status: void / mark paid (sent), mark unpaid (paid), duplicate (all). */
+type PlacedAction = FooterAction & { show: boolean; place: "start" | "end" };
+
+/** The shown actions, split by where the desktop footer puts them. */
+const byPlace = (actions: PlacedAction[]) => {
+  const start: FooterAction[] = [];
+  const end: FooterAction[] = [];
+
+  for (const action of actions) {
+    if (action.show) {
+      (action.place === "start" ? start : end).push(action);
+    }
+  }
+
+  return { end, start };
+};
+
+/** On desktop only the PDF buttons carry an icon. */
+const WITH_ICON = new Set(["download", "regenerate"]);
+
+const FooterButton = ({
+  action,
+  variant,
+}: {
+  action: FooterAction;
+  variant: "default" | "ghost" | "outline";
+}) => {
+  const handleClick = () => {
+    action.onSelect();
+  };
+
+  return (
+    <Button onClick={handleClick} size="compact" variant={variant}>
+      {WITH_ICON.has(action.id) && action.icon}
+      {action.label}
+    </Button>
+  );
+};
+
+/** Desktop: quiet actions on the left; the PDF, Duplicate and the main action on the right. */
+const DesktopFooter = ({
+  end,
+  primary,
+  start,
+}: {
+  end: FooterAction[];
+  primary: FooterAction[];
+  start: FooterAction[];
+}) => (
+  <div className="border-divider pb-safe-2.5 flex shrink-0 flex-wrap items-center gap-2 border-t px-3 pt-2.5">
+    {start.map((action) => (
+      <FooterButton action={action} key={action.id} variant="ghost" />
+    ))}
+    <span className="flex-1" />
+    {end.map((action) => (
+      <FooterButton action={action} key={action.id} variant="outline" />
+    ))}
+    {primary.map((action, index) => (
+      <FooterButton
+        action={action}
+        key={action.id}
+        variant={index === primary.length - 1 ? "default" : "outline"}
+      />
+    ))}
+  </div>
+);
+
+/**
+ * Footer actions by status: void / mark paid (sent), mark unpaid (paid), un-void (void),
+ * duplicate (all); itemised: download and regenerate the PDF.
+ */
 export const ViewFooter = ({
   invoice,
   onClose,
@@ -95,116 +171,97 @@ export const ViewFooter = ({
   const isDesktop = useIsDesktop();
   const unpaid = invoice.status === "sent" || invoice.status === "overdue";
 
-  const markVoid = async () => {
-    if (await actions.markVoid(invoice)) {
-      await onClose();
-    }
+  const duplicate: FooterAction = {
+    icon: <Copy />,
+    id: "duplicate",
+    label: t("invoices.duplicate"),
+    onSelect: () => {
+      void dialog.open({ dialog: "invoice", duplicate: invoice.id });
+    },
   };
 
-  const downloadPdf = () => {
-    void download(invoice);
+  const markPaid: FooterAction = {
+    id: "paid",
+    label: t("invoices.markPaid"),
+    onSelect: () => {
+      void dialog.open({ dialog: "mark-paid", id: invoice.id });
+    },
   };
 
-  const markUnpaid = () => {
-    void actions.markUnpaid(invoice);
-  };
+  // `start`: quiet buttons on the left on desktop; `end`: beside Duplicate.
+  const extras: (FooterAction & { show: boolean; place: "start" | "end" })[] = [
+    {
+      icon: <Ban />,
+      id: "void",
+      label: t("invoices.void"),
+      onSelect: () => {
+        void (async () => {
+          if (await actions.markVoid(invoice)) {
+            await onClose();
+          }
+        })();
+      },
+      place: "start",
+      show: unpaid,
+    },
+    {
+      icon: <Undo2 />,
+      id: "unvoid",
+      label: t("invoices.unvoid"),
+      onSelect: () => {
+        void actions.unvoid(invoice);
+      },
+      place: "start",
+      show: invoice.status === "void",
+    },
+    {
+      icon: <RefreshCw />,
+      id: "regenerate",
+      label: t("invoices.regeneratePdf"),
+      onSelect: () => {
+        void actions.regeneratePdf(invoice);
+      },
+      place: "start",
+      show: actions.canRegeneratePdf(invoice),
+    },
+    {
+      icon: <Download />,
+      id: "download",
+      label: t("invoices.downloadPdf"),
+      onSelect: () => {
+        void download(invoice);
+      },
+      place: "end",
+      show: invoice.itemised,
+    },
+    {
+      icon: <Undo2 />,
+      id: "unpaid",
+      label: t("invoices.unpaidConfirm"),
+      onSelect: () => {
+        void actions.markUnpaid(invoice);
+      },
+      place: "end",
+      show: invoice.status === "paid",
+    },
+  ];
 
-  const duplicate = () => {
-    void dialog.open({ dialog: "invoice", duplicate: invoice.id });
-  };
-
-  const markPaid = () => {
-    void dialog.open({ dialog: "mark-paid", id: invoice.id });
-  };
+  const { end, start } = byPlace(extras);
 
   if (!isDesktop) {
-    const duplicateAction: FooterAction = {
-      icon: <Copy />,
-      id: "duplicate",
-      label: t("invoices.duplicate"),
-      onSelect: duplicate,
-    };
-
-    const secondary: FooterAction[] = [];
-
-    if (invoice.itemised) {
-      secondary.push({
-        icon: <Download />,
-        id: "download",
-        label: t("invoices.downloadPdf"),
-        onSelect: downloadPdf,
-      });
-    }
-
-    if (unpaid) {
-      secondary.push(duplicateAction, {
-        icon: <Ban />,
-        id: "void",
-        label: t("invoices.void"),
-        onSelect: () => {
-          void markVoid();
-        },
-      });
-    }
-
-    if (invoice.status === "paid") {
-      secondary.push({
-        icon: <Undo2 />,
-        id: "unpaid",
-        label: t("invoices.unpaidConfirm"),
-        onSelect: markUnpaid,
-      });
-    }
-
     return (
       <PhoneFooter
-        primary={
-          unpaid
-            ? { id: "paid", label: t("invoices.markPaid"), onSelect: markPaid }
-            : duplicateAction
-        }
-        secondary={secondary}
+        primary={unpaid ? markPaid : duplicate}
+        secondary={unpaid ? [...start, ...end, duplicate] : [...start, ...end]}
       />
     );
   }
 
   return (
-    <div className="border-divider pb-safe-2.5 flex shrink-0 flex-wrap items-center gap-2 border-t px-3 pt-2.5">
-      {unpaid && (
-        <Button
-          onClick={() => {
-            void markVoid();
-          }}
-          size="compact"
-          variant="ghost"
-        >
-          {t("invoices.void")}
-        </Button>
-      )}
-      <span className="flex-1" />
-      {invoice.itemised && (
-        <Button onClick={downloadPdf} size="compact" variant="outline">
-          <Download />
-          {t("invoices.downloadPdf")}
-        </Button>
-      )}
-      {invoice.status === "paid" && (
-        <Button onClick={markUnpaid} size="compact" variant="outline">
-          {t("invoices.unpaidConfirm")}
-        </Button>
-      )}
-      <Button
-        onClick={duplicate}
-        size="compact"
-        variant={unpaid ? "outline" : "default"}
-      >
-        {t("invoices.duplicate")}
-      </Button>
-      {unpaid && (
-        <Button onClick={markPaid} size="compact">
-          {t("invoices.markPaid")}
-        </Button>
-      )}
-    </div>
+    <DesktopFooter
+      end={end}
+      primary={unpaid ? [duplicate, markPaid] : [duplicate]}
+      start={start}
+    />
   );
 };

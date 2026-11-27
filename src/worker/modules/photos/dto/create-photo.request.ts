@@ -11,6 +11,8 @@ export const createPhotoRequest = z
     fileName: z.string().trim().min(1).max(200).nullable().optional(),
     /** An invoice PDF the app generated when issuing (kept as sent). */
     generated: z.boolean().optional(),
+    /** With `generated`: replaces the invoice's earlier generated PDF (redrawn). */
+    replace: z.boolean().optional(),
     objectKey: z.string().min(1).max(300),
     ownerId: z.uuid(),
     ownerType: z.enum([
@@ -32,6 +34,10 @@ export const createPhotoRequest = z
       (input.ownerType === "finance_invoice" && input.contentType === PDF),
     { message: "Only invoice PDFs can be generated", path: ["generated"] }
   )
+  .refine((input) => input.replace !== true || input.generated === true, {
+    message: "Only a generated PDF can replace another",
+    path: ["replace"],
+  })
   .refine((input) => input.ownerType !== "car" || input.contentType !== PDF, {
     message: "A car's photo must be an image",
     path: ["contentType"],

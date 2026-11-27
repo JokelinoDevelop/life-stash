@@ -3,8 +3,10 @@ import type { InvoiceStatus } from "@shared/domain/finances/invoices";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 
 import { useConfirm } from "@/components/app/confirm/confirm-context";
+import { useConfig } from "@/lib/session";
 
 import { useLedgerMoney } from "../money";
 import { useStoreInvoicePdf } from "./invoice-document";
@@ -13,6 +15,7 @@ import {
   useDeleteInvoice,
   useIssueInvoice,
   useMarkUnpaid,
+  useUnvoidInvoice,
   useVoidInvoice,
 } from "./invoices.mutations";
 import { nextInvoiceNumberQuery } from "./invoices.queries";
@@ -65,6 +68,8 @@ export const useInvoiceActions = () => {
   const issued = useIssueInvoice();
   const unpaid = useMarkUnpaid();
   const voided = useVoidInvoice();
+  const unvoided = useUnvoidInvoice();
+  const storage = useConfig().data?.photosEnabled === true;
   const removed = useDeleteInvoice();
   const storePdf = useStoreInvoicePdf();
 
@@ -112,6 +117,46 @@ export const useInvoiceActions = () => {
       }
 
       return ok;
+    },
+    unvoid: async (invoice: InvoiceRef): Promise<boolean> => {
+      const ok = await confirm({
+        confirmLabel: t("invoices.unvoid"),
+        description: t("invoices.unvoidDescription"),
+        title: t("invoices.unvoidTitle", { number: label(invoice) }),
+      });
+
+      if (ok) {
+        await unvoided.mutateAsync({ id: invoice.id, label: label(invoice) });
+      }
+
+      return ok;
+    },
+    /** Issued itemised invoices keep a PDF in storage; it can be redrawn from the frozen data. */
+    canRegeneratePdf: (invoice: InvoiceRef): boolean =>
+      storage && invoice.itemised && invoice.status !== "draft",
+    /** Draws the PDF again from the frozen data and replaces the stored file. */
+    regeneratePdf: async (invoice: InvoiceRef): Promise<boolean> => {
+      const number = label(invoice);
+
+      const ok = await confirm({
+        confirmLabel: t("invoices.regeneratePdf"),
+        description: t("invoices.regenerateDescription"),
+        title: t("invoices.regenerateTitle", { number }),
+      });
+
+      if (
+        ok &&
+        (await storePdf(
+          { id: invoice.id, number },
+          { download: false, replace: true }
+        ))
+      ) {
+        toast.success(t("invoices.pdfRegenerated", { number }));
+
+        return true;
+      }
+
+      return false;
     },
     /** Deletes a draft (issued invoices are voided instead). */
     remove: async (invoice: InvoiceRef): Promise<boolean> => {

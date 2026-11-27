@@ -418,6 +418,29 @@ describe("invoices controller", () => {
     ).resolves.toMatchObject({ number: "2020-002" });
   });
 
+  it("un-voids a void invoice back to sent, once", async () => {
+    const { invoiceId } = await setup();
+
+    const notVoid = await request(
+      alice,
+      "POST",
+      `/invoices/${invoiceId}/unvoid`
+    );
+
+    await request(alice, "POST", `/invoices/${invoiceId}/void`);
+
+    const unvoided = await request(
+      alice,
+      "POST",
+      `/invoices/${invoiceId}/unvoid`
+    );
+
+    await expect(read(notVoid, errorBody)).resolves.toMatchObject({
+      error: { code: "finances.invoice_not_void" },
+    });
+    expect(unvoided.status).toBe(200);
+  });
+
   it("deletes drafts and refuses to void them", async () => {
     const { clientId } = await setup();
 
@@ -446,12 +469,13 @@ describe("invoices controller", () => {
     const statuses = await Promise.all([
       request(bob, "POST", `/invoices/${draftId}/issue`, { number: null }),
       request(bob, "POST", `/invoices/${invoiceId}/void`),
+      request(bob, "POST", `/invoices/${invoiceId}/unvoid`),
       request(bob, "PATCH", `/invoices/${draftId}`, { notes: "x" }),
       request(bob, "DELETE", `/invoices/${draftId}`),
     ]);
 
     expect(statuses.map((response) => response.status)).toStrictEqual([
-      404, 404, 404, 404,
+      404, 404, 404, 404, 404,
     ]);
   });
 
@@ -545,42 +569,48 @@ describe("invoices controller", () => {
     });
   });
 
+  /** Stores a generated PDF for an invoice, as "issue" or "Regenerate PDF" (`replace`) does. */
+  const storeGenerated = async (
+    session: Session,
+    invoiceId: string,
+    replaceExisting = false
+  ) =>
+    await app.request(
+      `${ORIGIN}/api/photos`,
+      {
+        body: JSON.stringify({
+          contentType: "application/pdf",
+          fileName: "Invoice-2020-001.pdf",
+          generated: true,
+          objectKey: `${session.householdId}/finance_invoice/${invoiceId}/${crypto.randomUUID()}.pdf`,
+          ownerId: invoiceId,
+          ownerType: "finance_invoice",
+          replace: replaceExisting,
+          sizeBytes: 1000,
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie: session.cookie,
+          origin: ORIGIN,
+        },
+        method: "POST",
+      },
+      env
+    );
+
   it("keeps documents and generated PDFs inside the household", async () => {
     const { clientId } = await setup();
     const { id } = await read(await createItemised(alice, clientId), idBody);
 
-    const storeGenerated = async (session: Session, householdId: string) =>
-      await app.request(
-        `${ORIGIN}/api/photos`,
-        {
-          body: JSON.stringify({
-            contentType: "application/pdf",
-            fileName: "Invoice-2020-001.pdf",
-            generated: true,
-            objectKey: `${householdId}/finance_invoice/${id}/${crypto.randomUUID()}.pdf`,
-            ownerId: id,
-            ownerType: "finance_invoice",
-            sizeBytes: 1000,
-          }),
-          headers: {
-            "content-type": "application/json",
-            cookie: session.cookie,
-            origin: ORIGIN,
-          },
-          method: "POST",
-        },
-        env
-      );
-
     const bobDocument = await request(bob, "GET", `/invoices/${id}/document`);
-    const onDraft = await storeGenerated(alice, alice.householdId);
+    const onDraft = await storeGenerated(alice, id);
 
     await request(alice, "PUT", "/business-profile", PROFILE);
     await request(alice, "POST", `/invoices/${id}/issue`, { number: null });
 
-    const bobStores = await storeGenerated(bob, bob.householdId);
-    const stored = await storeGenerated(alice, alice.householdId);
-    const second = await storeGenerated(alice, alice.householdId);
+    const bobStores = await storeGenerated(bob, id);
+    const stored = await storeGenerated(alice, id);
+    const second = await storeGenerated(alice, id);
     const { id: photoId } = await read(stored, idBody);
 
     const removed = await app.request(
@@ -598,5 +628,27 @@ describe("invoices controller", () => {
     expect(
       [onDraft, stored, second, removed].map((r) => r.status)
     ).toStrictEqual([409, 201, 409, 409]);
+  });
+
+  it("regenerates an issued invoice's PDF in place of the stored one", async () => {
+    const { clientId } = await setup();
+    const { id } = await read(await createItemised(alice, clientId), idBody);
+    await request(alice, "PUT", "/business-profile", PROFILE);
+    await request(alice, "POST", `/invoices/${id}/issue`, { number: null });
+    await storeGenerated(alice, id);
+
+    const bobReplaces = await storeGenerated(bob, id, true);
+    const redrawn = await storeGenerated(alice, id, true);
+    const { id: redrawnId } = await read(redrawn, idBody);
+
+    const generated = await env.DB.prepare(
+      "SELECT id FROM photos WHERE owner_id = ? AND generated = 1"
+    )
+      .bind(id)
+      .all<{ id: string }>();
+
+    expect(bobReplaces.status).toBe(404);
+    expect(redrawn.status).toBe(201);
+    expect(generated.results.map((row) => row.id)).toStrictEqual([redrawnId]);
   });
 });

@@ -28,6 +28,7 @@ import type {
   InvoiceTransactionsPort,
   IssueRequest,
 } from "./invoice-types";
+import { unvoidPatch, voidPatch } from "./invoice-void";
 import type {
   InvoicePatch,
   InvoicesRepositoryPort,
@@ -56,8 +57,8 @@ export type { InvoiceDocumentData } from "./invoice-reads";
 export type { InvoiceStatusFilter } from "./invoice-selection";
 
 /**
- * Invoices: drafts (recorded or itemised), issuing with a per-year number, void, paid /
- * unpaid. Reading lives in `InvoiceReads`, numbering in `InvoiceIssuing`.
+ * Invoices: drafts (recorded or itemised), issuing with a per-year number, void / un-void,
+ * paid / unpaid. Reading lives in `InvoiceReads`, numbering in `InvoiceIssuing`.
  */
 export class InvoicesService {
   readonly #repo: InvoicesRepositoryPort;
@@ -316,26 +317,19 @@ export class InvoicesService {
     return issued.number;
   }
 
-  /** Cancels a sent invoice: it stays listed (struck through) and its number stays used. */
+  /** Cancels a sent invoice (see `voidPatch`); voiding twice is a no-op. */
   async markVoid(invoiceId: string): Promise<void> {
-    const invoice = await this.#find(invoiceId);
+    const patch = voidPatch(await this.#find(invoiceId), this.#clock.now());
 
-    if (invoice.status === "paid") {
-      throw domainError(ALREADY_PAID);
+    if (patch !== null) {
+      await this.#repo.update(invoiceId, patch);
     }
+  }
 
-    if (invoice.status === "draft") {
-      throw domainError("finances.invoice_not_issued");
-    }
-
-    if (invoice.status === "void") {
-      return;
-    }
-
-    await this.#repo.update(invoiceId, {
-      status: "void",
-      voidedAt: this.#clock.now().toISOString(),
-    });
+  /** Back to sent (see `unvoidPatch`). */
+  async unvoid(invoiceId: string): Promise<void> {
+    const patch = unvoidPatch(await this.#find(invoiceId));
+    await this.#repo.update(invoiceId, patch);
   }
 
   /** Books the money: one income entry in "Invoices", linked to the invoice. */

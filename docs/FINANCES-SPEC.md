@@ -104,6 +104,7 @@ Each endpoint has its own `dto/<endpoint>.request.ts` and `.response.ts`. Contro
 | POST / PATCH / DELETE | `/finances/invoices[/:id]` |  |
 | POST | `/finances/invoices/:id/issue` | F4: `{ number }` → numbers and freezes a draft, status `sent` (replaced `mark-sent`) |
 | POST | `/finances/invoices/:id/void` | Sent invoices only |
+| POST | `/finances/invoices/:id/unvoid` | Void invoices only: back to sent |
 | GET | `/finances/invoices/:id/document` | F4: the frozen data the PDF is drawn from |
 | GET / PUT | `/finances/business-profile` | F4: your details for invoices |
 | POST | `/finances/invoices/:id/mark-paid` | `{ paidDate, amountMinor }` → creates the income transaction |

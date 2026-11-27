@@ -74,11 +74,15 @@ const uploadOne = async (owner: AttachmentOwner, file: File): Promise<void> => {
   );
 };
 
-/** Keeps the PDF the app drew when issuing an invoice, marked `generated` (not removable). */
+/**
+ * Keeps the PDF the app drew when issuing an invoice, marked `generated` (not removable).
+ * `replace` swaps in a redrawn one for the stored file.
+ */
 export const uploadGeneratedPdf = async (
   invoiceId: string,
   blob: Blob,
-  fileName: string
+  fileName: string,
+  replace = false
 ): Promise<void> => {
   const owner = { ownerId: invoiceId, ownerType: "finance_invoice" } as const;
   const contentType = PDF;
@@ -107,6 +111,7 @@ export const uploadGeneratedPdf = async (
         fileName,
         generated: true,
         objectKey,
+        replace,
         sizeBytes: blob.size,
       },
     })
