@@ -2,6 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 import type { AppEnv } from "../../core/app-env";
+import { inlineContentDisposition } from "../../core/content-disposition";
 import { ApiError, badRequest } from "../../core/errors";
 import { photoStorageFor } from "../../core/photo-storage";
 import type { PhotoStorage } from "../../core/photo-storage";
@@ -69,7 +70,9 @@ const viewParams = (row: { contentType: string; fileName: string | null }) => {
 
   return {
     ...served,
-    "response-content-disposition": `inline; filename*=UTF-8''${encodeURIComponent(row.fileName ?? "document.pdf")}`,
+    "response-content-disposition": inlineContentDisposition(
+      row.fileName ?? "document.pdf"
+    ),
   };
 };
 
