@@ -101,6 +101,9 @@ export const styles = StyleSheet.create({
   page: {
     color: INK,
     fontFamily: "Inter",
+    // Tabular figures: aligned amounts, and Inter's "7." kerning otherwise hides the dot
+    // in dates like 27.11.2026.
+    fontFeatureSettings: ["tnum"],
     fontSize: 8.5,
     lineHeight: 1.4,
     paddingBottom: 60,
